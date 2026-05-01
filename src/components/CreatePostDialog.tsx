@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -29,9 +29,11 @@ interface CreatePostDialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   hideTrigger?: boolean;
+  presetMediaUrl?: string | null;
+  presetTitle?: string;
 }
 
-export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigger }: CreatePostDialogProps = {}) => {
+export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigger, presetMediaUrl, presetTitle }: CreatePostDialogProps = {}) => {
   const { toast } = useToast();
   const phpAlbums = useUserAlbums();
   const albums = phpAlbums || mockAlbums;
