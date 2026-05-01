@@ -381,7 +381,7 @@ export const GreetingSection = () => {
       <PeopleYouMayKnow />
 
       {/* Compose dialog */}
-      <CreatePostDialog open={createPostOpen} onOpenChange={setCreatePostOpen} />
+      <CreatePostDialog open={createPostOpen} onOpenChange={setCreatePostOpen} hideTrigger />
 
       {/* Service Unavailable Dialog */}
       <Dialog />
