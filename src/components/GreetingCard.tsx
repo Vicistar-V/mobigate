@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, MoreHorizontal, ChevronLeft, ImagePlus, BadgeCheck } from "lucide-react";
+import { Search, MoreHorizontal, ChevronLeft, ImagePlus, BadgeCheck, Images, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { CreatePostDialog } from "./CreatePostDialog";
 import { PeopleYouMayKnow } from "./PeopleYouMayKnow";
