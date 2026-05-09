@@ -394,7 +394,9 @@ const Index = () => {
             
             {/* Feed Posts with Filter */}
             <div className="space-y-0">
-              <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} />
+              <div id="recommended-elibrary" className="scroll-mt-[var(--header-height,80px)]">
+                <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} />
+              </div>
               <div className="space-y-6 mt-6">
                 {displayedPosts.map((post, index) => (
                 <div key={index}>
