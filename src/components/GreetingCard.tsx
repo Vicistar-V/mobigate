@@ -145,33 +145,28 @@ export const GreetingSection = () => {
         </a>
 
         {/* Identity Row — overlapping avatar */}
-        <div className="px-3 pb-3 -mt-14 relative">
-          <div className="flex items-end gap-3">
-            {/* Avatar with online dot — bigger */}
+        <div className="px-3 pb-3 -mt-10 relative">
+          <div className="flex items-end gap-2.5">
+            {/* Avatar with online dot */}
             <div className="relative shrink-0">
-              <Avatar className="h-28 w-28 border-4 border-card shadow-lg">
+              <Avatar className="h-20 w-20 border-4 border-card shadow-md">
                 <AvatarImage src={profile.avatar} alt={profile.fullName} />
                 <AvatarFallback>{profile.username.substring(0, 2)}</AvatarFallback>
               </Avatar>
               <span
-                className="absolute bottom-1.5 right-1.5 h-4 w-4 rounded-full bg-green-500 ring-2 ring-card"
+                className="absolute bottom-1 right-1 h-3.5 w-3.5 rounded-full bg-green-500 ring-2 ring-card"
                 aria-label="Online"
               />
             </div>
 
-            {/* Greeting + live date/time — side-by-side, larger */}
-            <div className="flex-1 min-w-0 pb-2 flex items-center justify-between gap-2 flex-wrap">
-              <p className="text-base sm:text-lg font-bold text-destructive leading-tight whitespace-nowrap">
+            {/* Greeting + live date/time — single row */}
+            <div className="flex-1 min-w-0 pb-1.5 flex items-baseline justify-between gap-2">
+              <p className="text-[13px] font-bold text-destructive leading-tight whitespace-nowrap">
                 {profile.greeting}
               </p>
-              <div className="text-right leading-tight">
-                <p className="text-sm font-semibold text-foreground tabular-nums whitespace-nowrap">
-                  {liveTime}
-                </p>
-                <p className="text-[11px] text-muted-foreground whitespace-nowrap">
-                  {liveDate}
-                </p>
-              </div>
+              <p className="text-[11px] text-muted-foreground tabular-nums whitespace-nowrap leading-tight truncate">
+                {liveDate} · {liveTime}
+              </p>
             </div>
           </div>
 
