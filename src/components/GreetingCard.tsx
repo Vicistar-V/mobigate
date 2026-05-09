@@ -333,48 +333,160 @@ export const GreetingSection = () => {
             </Button>
           </div>
 
-          {/* Post & Share Row */}
-          <div className="mt-3 flex items-center gap-2">
-            {/* Featured thumb (latest post) — prefills compose */}
-            <button
-              type="button"
-              onClick={() =>
-                featuredPostThumb
-                  ? openComposerWithImage(featuredPostThumb, myRecentPosts[0]?.title)
-                  : openComposerBlank()
-              }
-              className="h-12 w-14 rounded-md overflow-hidden border-2 border-green-500/70 shrink-0 bg-muted active:scale-95 transition-transform touch-manipulation"
-              aria-label="Post using recent image"
-            >
-              {featuredPostThumb ? (
-                <img
-                  src={featuredPostThumb}
-                  alt="Recent"
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <ImagePlus className="h-5 w-5 m-auto text-muted-foreground" />
-              )}
-            </button>
+          {/* ============ POSTING AREA ============ */}
+          <div className="mt-3">
+            {/* Section tabs */}
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1 pb-1">
+              {(["Stories", "Vibes & Flexing", "Breaking News"] as const).map((t) => {
+                const active = activeFeedTab === t;
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setActiveFeedTab(t)}
+                    className={`shrink-0 h-9 px-3 rounded-md text-[13px] font-bold border-2 transition-colors touch-manipulation ${
+                      active
+                        ? "bg-green-600 text-white border-green-600 shadow-sm"
+                        : "bg-card text-foreground border-border hover:border-green-500/60"
+                    }`}
+                  >
+                    {t}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="h-px bg-green-500/40 mt-1 mb-3" />
 
-            {/* Compose trigger — blank composer */}
-            <button
-              type="button"
-              onClick={openComposerBlank}
-              className="flex-1 h-12 rounded-md border-2 border-green-500/70 bg-card text-left px-3 text-[14px] text-muted-foreground hover:bg-muted/40 transition-colors touch-manipulation truncate"
-            >
-              Post & Share something now
-            </button>
+            {/* Featured "Post & Share" card */}
+            {myRecentPosts[0] && (
+              <div className="rounded-lg border-2 border-green-500/70 overflow-hidden bg-card">
+                <div className="grid grid-cols-[40%_1fr]">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      openComposerWithImage(myRecentPosts[0].imageUrl, myRecentPosts[0].title)
+                    }
+                    className="relative bg-muted active:scale-[0.98] transition-transform touch-manipulation"
+                    aria-label="Use this image to post"
+                  >
+                    <img
+                      src={myRecentPosts[0].imageUrl}
+                      alt={myRecentPosts[0].title}
+                      className="w-full h-full object-cover aspect-[4/5]"
+                      loading="lazy"
+                    />
+                    <span className="absolute bottom-1.5 right-1.5 h-6 w-6 rounded-full bg-foreground/80 text-background flex items-center justify-center shadow">
+                      <Plus className="h-3.5 w-3.5" />
+                    </span>
+                  </button>
+                  <div className="flex flex-col">
+                    <div className="bg-primary text-primary-foreground px-2.5 py-2 flex items-center justify-between gap-2">
+                      <button
+                        type="button"
+                        onClick={openComposerBlank}
+                        className="flex-1 text-left text-[13px] font-bold leading-tight truncate active:opacity-90"
+                      >
+                        Post &amp; Share something now
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => galleryInputRef.current?.click()}
+                        className="h-7 w-9 rounded-sm bg-card text-primary flex items-center justify-center shrink-0 active:scale-95"
+                        aria-label="Pick image from gallery"
+                      >
+                        <Images className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openComposerWithImage(myRecentPosts[0].imageUrl, myRecentPosts[0].title)
+                      }
+                      className="bg-lime-200/70 text-foreground p-2.5 text-left flex-1 active:opacity-90 touch-manipulation"
+                    >
+                      <p className="text-[12px] font-bold leading-snug">
+                        Your Post or Content Description or Storyline here.
+                      </p>
+                      <p className="text-[11.5px] leading-snug mt-1">
+                        However, the storyline may not just exceed certain word-counts or be made to be unnecessary
+                        <span className="font-extrabold italic">…More</span>
+                      </p>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
-            {/* Gallery icon — picks custom image from device */}
-            <button
-              type="button"
-              onClick={() => galleryInputRef.current?.click()}
-              className="h-12 w-12 rounded-md border-2 border-green-500/70 bg-card flex items-center justify-center shrink-0 active:scale-95 transition-transform touch-manipulation"
-              aria-label="Pick image from gallery"
+            {/* Public post — secondary */}
+            {myRecentPosts[1] && (
+              <div className="mt-2 rounded-lg border-2 border-green-500/70 overflow-hidden bg-card">
+                <div className="grid grid-cols-[40%_1fr]">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      openComposerWithImage(myRecentPosts[1].imageUrl, myRecentPosts[1].title)
+                    }
+                    className="bg-muted active:scale-[0.98] transition-transform touch-manipulation border-r-2 border-destructive/40"
+                    aria-label="Use this image to post"
+                  >
+                    <img
+                      src={myRecentPosts[1].imageUrl}
+                      alt={myRecentPosts[1].title}
+                      className="w-full h-full object-cover aspect-[4/5]"
+                      loading="lazy"
+                    />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={openComposerBlank}
+                    className="bg-purple-200/60 text-foreground p-2.5 text-left active:opacity-90 touch-manipulation"
+                  >
+                    <p className="text-[12px] font-bold leading-snug">
+                      Public Post or Content Description or Storyline here.
+                    </p>
+                    <p className="text-[11.5px] leading-snug mt-1">
+                      However, the storyline may not just exceed certain word-counts or be made to be unnecessarily bulky or voluminous in any case, or
+                      <span className="font-extrabold italic">…More</span>
+                    </p>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Thumbnails strip */}
+            {myRecentPosts.length > 2 && (
+              <div className="mt-2 grid grid-cols-4 gap-2 rounded-lg border border-border p-1.5">
+                {myRecentPosts.slice(2, 6).map((post) => (
+                  <button
+                    key={post.id}
+                    type="button"
+                    onClick={() => openComposerWithImage(post.imageUrl, post.title)}
+                    className="aspect-square rounded-md overflow-hidden border border-foreground/30 bg-muted active:scale-95 transition-transform touch-manipulation"
+                    aria-label={`Post using ${post.title}`}
+                  >
+                    <img
+                      src={post.imageUrl}
+                      alt={post.title}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Footer link */}
+            <Link
+              to="/wall"
+              className="mt-2 flex items-center gap-2 px-1 py-1.5 text-primary active:opacity-80 touch-manipulation"
             >
-              <ImagePlus className="h-6 w-6 text-green-600" />
-            </button>
+              <ChevronLeft className="h-4 w-4 shrink-0" />
+              <span className="italic font-semibold underline underline-offset-2 text-[13px]">
+                Enjoy more exciting stories
+              </span>
+            </Link>
+
+            {/* Hidden gallery input */}
             <input
               ref={galleryInputRef}
               type="file"
@@ -383,28 +495,6 @@ export const GreetingSection = () => {
               onChange={handleGalleryFileChange}
             />
           </div>
-
-          {/* Recent post thumbnails (4 across) — tap to prefill compose */}
-          {myRecentPosts.length > 0 && (
-            <div className="mt-2 grid grid-cols-4 gap-2">
-              {myRecentPosts.map((post) => (
-                <button
-                  key={post.id}
-                  type="button"
-                  onClick={() => openComposerWithImage(post.imageUrl, post.title)}
-                  className="aspect-square rounded-md overflow-hidden border-2 border-green-500/70 bg-muted active:scale-95 transition-transform touch-manipulation"
-                  aria-label={`Post using ${post.title}`}
-                >
-                  <img
-                    src={post.imageUrl}
-                    alt={post.title}
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                  />
-                </button>
-              ))}
-            </div>
-          )}
         </div>
       </Card>
 
