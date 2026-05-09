@@ -208,6 +208,42 @@ const Profile = () => {
   useEffect(() => {
     localStorage.setItem("bannerImageHistory", JSON.stringify(bannerImageHistory));
   }, [bannerImageHistory]);
+
+  // Banner click action + auto-rotation (UI template settings)
+  const [bannerRotateIdx, setBannerRotateIdx] = useState(0);
+  const [bannerSettingsTick, setBannerSettingsTick] = useState(0);
+  const bannerClickAction = (typeof window !== "undefined"
+    ? (localStorage.getItem("bannerClickAction") as "viewer" | "url" | null)
+    : null) || "viewer";
+  const bannerLinkedUrl = (typeof window !== "undefined" && localStorage.getItem("bannerLinkedUrl")) || "";
+  const bannerRotateSeconds = parseInt(
+    (typeof window !== "undefined" && localStorage.getItem("bannerRotateSeconds")) || "0",
+    10,
+  );
+  // Re-read settings when the edit dialog closes
+  useEffect(() => {
+    if (!editingBanner) setBannerSettingsTick((t) => t + 1);
+  }, [editingBanner]);
+  // Cycle through banner history
+  useEffect(() => {
+    if (!bannerRotateSeconds || bannerImageHistory.length < 2) return;
+    const id = setInterval(() => {
+      setBannerRotateIdx((i) => (i + 1) % bannerImageHistory.length);
+    }, bannerRotateSeconds * 1000);
+    return () => clearInterval(id);
+  }, [bannerRotateSeconds, bannerImageHistory.length, bannerSettingsTick]);
+  const bannerDisplayImage =
+    bannerRotateSeconds && bannerImageHistory.length > 1
+      ? bannerImageHistory[bannerRotateIdx % bannerImageHistory.length]
+      : bannerImage;
+  const handleBannerClick = () => {
+    if (bannerClickAction === "url" && bannerLinkedUrl) {
+      window.open(bannerLinkedUrl, "_blank", "noopener,noreferrer");
+      return;
+    }
+    openBannerGallery();
+  };
+
   
   // Get posts for this specific user and manage as state
   const phpPosts = useUserPosts();
