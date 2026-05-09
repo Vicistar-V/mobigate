@@ -127,77 +127,50 @@ export const GreetingSection = () => {
     <div className="space-y-3">
       {/* ============ HERO BLOCK ============ */}
       <Card className="overflow-hidden border-2 border-primary/30 shadow-sm">
-        {/* Top Advert Banner */}
+        {/* Top Advert Banner — full image */}
         <a
           href={heroAd.ctaUrl}
-          className="block relative bg-gradient-to-r from-sky-100 via-sky-50 to-orange-400 active:opacity-95 transition-opacity touch-manipulation"
+          className="block relative active:opacity-95 transition-opacity touch-manipulation"
         >
-          <div className="grid grid-cols-[1fr_1.1fr] min-h-[120px]">
-            {/* Left: brand + scenery */}
-            <div
-              className="relative bg-cover bg-center"
-              style={{ backgroundImage: `url(${heroAd.image})` }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-sky-50/85 via-sky-50/40 to-transparent" />
-              <div className="relative p-2.5">
-                <div className="text-[15px] font-bold text-primary leading-tight">
-                  {heroAd.advertiser}
-                </div>
-                <div className="text-[9px] text-destructive font-medium leading-tight mt-0.5">
-                  {heroAd.tagline}
-                </div>
-              </div>
-            </div>
-            {/* Right: orange copy panel */}
-            <div className="bg-orange-500 text-white p-2.5 flex flex-col justify-between">
-              <div>
-                <div className="text-[13px] font-bold leading-tight">
-                  {heroAd.advertiser}
-                </div>
-                <p className="text-[11px] leading-snug mt-1 font-medium">
-                  {heroAd.headline}.{" "}
-                  <span className="font-normal">{heroAd.body}</span>
-                </p>
-              </div>
-              <div className="flex items-center gap-1.5 text-[9px] font-medium mt-1.5 text-orange-50">
-                {heroAd.bullets.map((b, i) => (
-                  <span key={b} className="flex items-center gap-1">
-                    {i > 0 && <span className="opacity-60">|</span>}
-                    {b}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
+          <img
+            src={heroAdBanner}
+            alt={`${heroAd.advertiser} — ${heroAd.headline}`}
+            className="w-full h-[150px] sm:h-[180px] object-cover"
+          />
           {/* Sponsored chip */}
-          <span className="absolute top-1.5 right-1.5 bg-black/40 text-white text-[8px] font-semibold px-1.5 py-0.5 rounded-sm uppercase tracking-wider">
+          <span className="absolute top-1.5 right-1.5 bg-black/50 text-white text-[9px] font-semibold px-2 py-0.5 rounded-sm uppercase tracking-wider">
             Sponsored
           </span>
         </a>
 
         {/* Identity Row — overlapping avatar */}
-        <div className="px-3 pb-3 -mt-10 relative">
+        <div className="px-3 pb-3 -mt-14 relative">
           <div className="flex items-end gap-3">
-            {/* Avatar with online dot */}
+            {/* Avatar with online dot — bigger */}
             <div className="relative shrink-0">
-              <Avatar className="h-20 w-20 border-4 border-card shadow-md">
+              <Avatar className="h-28 w-28 border-4 border-card shadow-lg">
                 <AvatarImage src={profile.avatar} alt={profile.fullName} />
                 <AvatarFallback>{profile.username.substring(0, 2)}</AvatarFallback>
               </Avatar>
               <span
-                className="absolute bottom-1 right-1 h-3.5 w-3.5 rounded-full bg-green-500 ring-2 ring-card"
+                className="absolute bottom-1.5 right-1.5 h-4 w-4 rounded-full bg-green-500 ring-2 ring-card"
                 aria-label="Online"
               />
             </div>
 
-            {/* Greeting + timestamp aligned to bottom of avatar */}
-            <div className="flex-1 min-w-0 pb-1">
-              <p className="text-[13px] font-semibold text-destructive leading-tight">
+            {/* Greeting + live date/time — side-by-side, larger */}
+            <div className="flex-1 min-w-0 pb-2 flex items-center justify-between gap-2 flex-wrap">
+              <p className="text-base sm:text-lg font-bold text-destructive leading-tight whitespace-nowrap">
                 {profile.greeting}
               </p>
-              <p className="text-[11px] text-muted-foreground leading-tight mt-0.5 truncate">
-                {profile.timestamp}
-              </p>
+              <div className="text-right leading-tight">
+                <p className="text-sm font-semibold text-foreground tabular-nums whitespace-nowrap">
+                  {liveTime}
+                </p>
+                <p className="text-[11px] text-muted-foreground whitespace-nowrap">
+                  {liveDate}
+                </p>
+              </div>
             </div>
           </div>
 
