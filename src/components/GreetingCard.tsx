@@ -357,9 +357,28 @@ export const GreetingSection = () => {
             </div>
             <div className="h-px bg-green-500/40 mt-1 mb-3" />
 
-            {/* Featured "Post & Share" card */}
+            {/* Standalone "Post & Share something now" bar */}
+            <div className="bg-primary text-primary-foreground rounded-md px-3 py-2.5 flex items-center justify-between gap-2 shadow-sm">
+              <button
+                type="button"
+                onClick={openComposerBlank}
+                className="flex-1 text-left text-[14px] font-bold leading-tight truncate active:opacity-90 touch-manipulation"
+              >
+                Post &amp; Share something now
+              </button>
+              <button
+                type="button"
+                onClick={() => galleryInputRef.current?.click()}
+                className="h-8 w-10 rounded-sm bg-card text-primary flex items-center justify-center shrink-0 active:scale-95"
+                aria-label="Pick image from gallery"
+              >
+                <Images className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Featured post card */}
             {myRecentPosts[0] && (
-              <div className="rounded-lg border-2 border-green-500/70 overflow-hidden bg-card">
+              <div className="mt-3 rounded-lg border-2 border-green-500/70 overflow-hidden bg-card">
                 <div className="grid grid-cols-[40%_1fr]">
                   <button
                     type="button"
@@ -379,40 +398,21 @@ export const GreetingSection = () => {
                       <Plus className="h-3.5 w-3.5" />
                     </span>
                   </button>
-                  <div className="flex flex-col">
-                    <div className="bg-primary text-primary-foreground px-2.5 py-2 flex items-center justify-between gap-2">
-                      <button
-                        type="button"
-                        onClick={openComposerBlank}
-                        className="flex-1 text-left text-[13px] font-bold leading-tight truncate active:opacity-90"
-                      >
-                        Post &amp; Share something now
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => galleryInputRef.current?.click()}
-                        className="h-7 w-9 rounded-sm bg-card text-primary flex items-center justify-center shrink-0 active:scale-95"
-                        aria-label="Pick image from gallery"
-                      >
-                        <Images className="h-4 w-4" />
-                      </button>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        openComposerWithImage(myRecentPosts[0].imageUrl, myRecentPosts[0].title)
-                      }
-                      className="bg-lime-200/70 text-foreground p-2.5 text-left flex-1 active:opacity-90 touch-manipulation"
-                    >
-                      <p className="text-[12px] font-bold leading-snug">
-                        Your Post or Content Description or Storyline here.
-                      </p>
-                      <p className="text-[11.5px] leading-snug mt-1">
-                        However, the storyline may not just exceed certain word-counts or be made to be unnecessary
-                        <span className="font-extrabold italic">…More</span>
-                      </p>
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      openComposerWithImage(myRecentPosts[0].imageUrl, myRecentPosts[0].title)
+                    }
+                    className="bg-lime-200/70 text-foreground p-2.5 text-left flex-1 active:opacity-90 touch-manipulation"
+                  >
+                    <p className="text-[12px] font-bold leading-snug">
+                      Your Post or Content Description or Storyline here.
+                    </p>
+                    <p className="text-[11.5px] leading-snug mt-1">
+                      However, the storyline may not just exceed certain word-counts or be made to be unnecessary
+                      <span className="font-extrabold italic">…More</span>
+                    </p>
+                  </button>
                 </div>
               </div>
             )}
@@ -475,16 +475,21 @@ export const GreetingSection = () => {
               </div>
             )}
 
-            {/* Footer link */}
-            <Link
-              to="/wall"
+            {/* Scroll-to-elibrary link */}
+            <button
+              type="button"
+              onClick={() =>
+                document
+                  .getElementById("recommended-elibrary")
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" })
+              }
               className="mt-2 flex items-center gap-2 px-1 py-1.5 text-primary active:opacity-80 touch-manipulation"
             >
-              <ChevronLeft className="h-4 w-4 shrink-0" />
+              <ChevronLeft className="h-4 w-4 shrink-0 rotate-[-90deg]" />
               <span className="italic font-semibold underline underline-offset-2 text-[13px]">
                 Enjoy more exciting stories
               </span>
-            </Link>
+            </button>
 
             {/* Hidden gallery input */}
             <input
