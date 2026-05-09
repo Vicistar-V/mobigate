@@ -394,7 +394,7 @@ const Index = () => {
             
             {/* Feed Posts with Filter */}
             <div className="space-y-0">
-              <div id="recommended-elibrary" className="scroll-mt-[var(--header-height,80px)]">
+              <div id="recommended-elibrary" style={{ scrollMarginTop: 96 }}>
                 <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} />
               </div>
               <div className="space-y-6 mt-6">
