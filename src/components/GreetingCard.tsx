@@ -25,11 +25,11 @@ export const GreetingSection = () => {
   const phpFeedPosts = useFeedPosts();
   const allPosts = phpFeedPosts || fallbackFeedPosts;
 
-  // Last 4 posts of the current user (fallback to latest 4 overall)
+  // Last 6 posts of the current user (fallback to fill from latest overall) — top 2 + 4 thumbs
   const myRecentPosts = (() => {
-    const mine = allPosts.filter((p) => p.userId === currentUserId).slice(0, 4);
-    if (mine.length >= 4) return mine;
-    return [...mine, ...allPosts.filter((p) => p.userId !== currentUserId)].slice(0, 4);
+    const mine = allPosts.filter((p) => p.userId === currentUserId).slice(0, 6);
+    if (mine.length >= 6) return mine;
+    return [...mine, ...allPosts.filter((p) => p.userId !== currentUserId)].slice(0, 6);
   })();
   const featuredPostThumb = myRecentPosts[0]?.imageUrl;
 
@@ -417,22 +417,22 @@ export const GreetingSection = () => {
               </div>
             )}
 
-            {/* Public post — small image left, lavender text right */}
+            {/* Public post — image (red border) left, lavender text right */}
             {myRecentPosts[1] && (
-              <div className="mt-2 rounded-lg border-2 border-green-500/70 overflow-hidden bg-purple-200/60">
-                <div className="grid grid-cols-[28%_1fr]">
+              <div className="mt-2 rounded-lg overflow-hidden bg-purple-200/60 p-1.5">
+                <div className="grid grid-cols-[40%_1fr] gap-2 items-stretch">
                   <button
                     type="button"
                     onClick={() =>
                       openComposerWithImage(myRecentPosts[1].imageUrl, myRecentPosts[1].title)
                     }
-                    className="bg-muted active:scale-[0.98] transition-transform touch-manipulation border-r-2 border-destructive/60"
+                    className="bg-muted active:scale-[0.98] transition-transform touch-manipulation rounded-md overflow-hidden border-2 border-red-500"
                     aria-label="Use this image to post"
                   >
                     <img
                       src={myRecentPosts[1].imageUrl}
                       alt={myRecentPosts[1].title}
-                      className="w-full h-full object-cover aspect-square"
+                      className="w-full h-full object-cover aspect-[4/5]"
                       loading="lazy"
                     />
                   </button>
