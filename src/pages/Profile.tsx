@@ -573,11 +573,11 @@ const Profile = () => {
         <Card className="mb-6 overflow-hidden">
           {/* Profile Banner */}
           <div className="relative h-48 bg-muted group">
-            <img 
-              src={bannerImage} 
+            <img
+              src={bannerDisplayImage}
               alt="Profile Banner"
               className="w-full h-full object-cover cursor-pointer"
-              onClick={openBannerGallery}
+              onClick={handleBannerClick}
             />
             <button
               className="absolute bottom-3 right-3 z-20 bg-black/40 hover:bg-black/60 text-white backdrop-blur-sm md:opacity-0 md:group-hover:opacity-100 transition-opacity text-xs px-2 py-1 rounded flex items-center gap-1"
@@ -590,7 +590,7 @@ const Profile = () => {
               Change
             </button>
           </div>
-          
+
           <div className="px-6 pb-6">
             {/* Profile Image and Name Row */}
             <div className="relative">
