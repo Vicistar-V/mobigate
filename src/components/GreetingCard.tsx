@@ -379,23 +379,13 @@ export const GreetingSection = () => {
                   {/* Right column: stacked button + storyline */}
                   <div className="flex flex-col gap-2 min-w-0">
                     {/* Post & Share button */}
-                    <div className="bg-primary text-primary-foreground rounded-md px-2.5 py-2 flex items-center justify-between gap-2 shadow-sm">
-                      <button
-                        type="button"
-                        onClick={openComposerBlank}
-                        className="flex-1 text-left text-[12.5px] font-bold leading-tight truncate active:opacity-90 touch-manipulation"
-                      >
-                        Post &amp; Share something now
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => galleryInputRef.current?.click()}
-                        className="h-7 w-9 rounded-sm bg-card text-primary flex items-center justify-center shrink-0 active:scale-95"
-                        aria-label="Pick image from gallery"
-                      >
-                        <Images className="h-4 w-4" />
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={openComposerBlank}
+                      className="bg-primary text-primary-foreground rounded-md px-2.5 py-2 text-center text-[12.5px] font-bold leading-tight truncate active:opacity-90 touch-manipulation shadow-sm"
+                    >
+                      Post &amp; Share something now
+                    </button>
                     {/* Storyline card */}
                     <button
                       type="button"
