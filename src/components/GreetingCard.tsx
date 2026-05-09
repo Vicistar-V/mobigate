@@ -13,10 +13,11 @@ import { Link } from "react-router-dom";
 import { CreatePostDialog } from "./CreatePostDialog";
 import { PeopleYouMayKnow } from "./PeopleYouMayKnow";
 import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { UserTagBadges } from "./UserTagBadges";
 import { useUserProfile, useCurrentUserId, useFeedPosts } from "@/hooks/useWindowData";
 import { feedPosts as fallbackFeedPosts } from "@/data/posts";
+import heroAdBanner from "@/assets/hero-ad-banner.jpg";
 
 export const GreetingSection = () => {
   const profile = useUserProfile();
@@ -34,8 +35,51 @@ export const GreetingSection = () => {
 
   const [friendsMenuView, setFriendsMenuView] = useState<"main" | "requests">("main");
   const [createPostOpen, setCreatePostOpen] = useState(false);
+  const [presetMediaUrl, setPresetMediaUrl] = useState<string | null>(null);
+  const [presetTitle, setPresetTitle] = useState<string>("");
+  const galleryInputRef = useRef<HTMLInputElement>(null);
   const { showDialog, Dialog } = useServiceUnavailableDialog();
   const restrictedServices = ["/mobi-shop", "/mobi-circle", "/biz-catalogue"];
+
+  // Live ticking clock
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const liveDate = now.toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+  const liveTime = now.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  const openComposerWithImage = (url: string, title?: string) => {
+    setPresetMediaUrl(url);
+    setPresetTitle(title || "");
+    setCreatePostOpen(true);
+  };
+
+  const openComposerBlank = () => {
+    setPresetMediaUrl(null);
+    setPresetTitle("");
+    setCreatePostOpen(true);
+  };
+
+  const handleGalleryFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      openComposerWithImage(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    if (galleryInputRef.current) galleryInputRef.current.value = "";
+  };
 
   const handleLinkClick = (e: React.MouseEvent, href: string, action?: string) => {
     if (action === "openChat") {
