@@ -334,12 +334,16 @@ export const GreetingSection = () => {
 
           {/* Post & Share Row */}
           <div className="mt-3 flex items-center gap-2">
-            {/* Featured thumb (latest post) */}
+            {/* Featured thumb (latest post) — prefills compose */}
             <button
               type="button"
-              onClick={() => setCreatePostOpen(true)}
+              onClick={() =>
+                featuredPostThumb
+                  ? openComposerWithImage(featuredPostThumb, myRecentPosts[0]?.title)
+                  : openComposerBlank()
+              }
               className="h-12 w-14 rounded-md overflow-hidden border-2 border-green-500/70 shrink-0 bg-muted active:scale-95 transition-transform touch-manipulation"
-              aria-label="Open recent post"
+              aria-label="Post using recent image"
             >
               {featuredPostThumb ? (
                 <img
@@ -352,34 +356,43 @@ export const GreetingSection = () => {
               )}
             </button>
 
-            {/* Compose trigger */}
+            {/* Compose trigger — blank composer */}
             <button
               type="button"
-              onClick={() => setCreatePostOpen(true)}
+              onClick={openComposerBlank}
               className="flex-1 h-12 rounded-md border-2 border-green-500/70 bg-card text-left px-3 text-[14px] text-muted-foreground hover:bg-muted/40 transition-colors touch-manipulation truncate"
             >
               Post & Share something now
             </button>
 
-            {/* Gallery icon */}
+            {/* Gallery icon — picks custom image from device */}
             <button
               type="button"
-              onClick={() => setCreatePostOpen(true)}
+              onClick={() => galleryInputRef.current?.click()}
               className="h-12 w-12 rounded-md border-2 border-green-500/70 bg-card flex items-center justify-center shrink-0 active:scale-95 transition-transform touch-manipulation"
-              aria-label="Add media"
+              aria-label="Pick image from gallery"
             >
               <ImagePlus className="h-6 w-6 text-green-600" />
             </button>
+            <input
+              ref={galleryInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleGalleryFileChange}
+            />
           </div>
 
-          {/* Recent post thumbnails (4 across) */}
+          {/* Recent post thumbnails (4 across) — tap to prefill compose */}
           {myRecentPosts.length > 0 && (
             <div className="mt-2 grid grid-cols-4 gap-2">
               {myRecentPosts.map((post) => (
-                <Link
+                <button
                   key={post.id}
-                  to={`/profile/${currentUserId}#contents`}
+                  type="button"
+                  onClick={() => openComposerWithImage(post.imageUrl, post.title)}
                   className="aspect-square rounded-md overflow-hidden border-2 border-green-500/70 bg-muted active:scale-95 transition-transform touch-manipulation"
+                  aria-label={`Post using ${post.title}`}
                 >
                   <img
                     src={post.imageUrl}
@@ -387,7 +400,7 @@ export const GreetingSection = () => {
                     className="h-full w-full object-cover"
                     loading="lazy"
                   />
-                </Link>
+                </button>
               ))}
             </div>
           )}
@@ -398,7 +411,13 @@ export const GreetingSection = () => {
       <PeopleYouMayKnow />
 
       {/* Compose dialog */}
-      <CreatePostDialog open={createPostOpen} onOpenChange={setCreatePostOpen} hideTrigger />
+      <CreatePostDialog
+        open={createPostOpen}
+        onOpenChange={setCreatePostOpen}
+        hideTrigger
+        presetMediaUrl={presetMediaUrl}
+        presetTitle={presetTitle}
+      />
 
       {/* Service Unavailable Dialog */}
       <Dialog />
