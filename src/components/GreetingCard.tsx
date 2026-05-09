@@ -149,22 +149,22 @@ export const GreetingSection = () => {
           <div className="flex items-end gap-2.5">
             {/* Avatar with online dot */}
             <div className="relative shrink-0">
-              <Avatar className="h-20 w-20 border-4 border-card shadow-md">
+              <Avatar className="h-14 w-14 border-[3px] border-card shadow-md">
                 <AvatarImage src={profile.avatar} alt={profile.fullName} />
                 <AvatarFallback>{profile.username.substring(0, 2)}</AvatarFallback>
               </Avatar>
               <span
-                className="absolute bottom-1 right-1 h-3.5 w-3.5 rounded-full bg-green-500 ring-2 ring-card"
+                className="absolute bottom-0.5 right-0.5 h-3 w-3 rounded-full bg-green-500 ring-2 ring-card"
                 aria-label="Online"
               />
             </div>
 
             {/* Greeting + live date/time — single row */}
-            <div className="flex-1 min-w-0 pb-1.5 flex items-baseline justify-between gap-2">
-              <p className="text-[13px] font-bold text-destructive leading-tight whitespace-nowrap">
+            <div className="flex-1 min-w-0 pb-1 flex items-baseline justify-between gap-1.5">
+              <p className="text-[11px] font-bold text-destructive leading-tight whitespace-nowrap">
                 {profile.greeting}
               </p>
-              <p className="text-[11px] text-muted-foreground tabular-nums whitespace-nowrap leading-tight truncate">
+              <p className="text-[10px] text-muted-foreground tabular-nums whitespace-nowrap leading-tight truncate">
                 {liveDate} · {liveTime}
               </p>
             </div>
@@ -473,11 +473,15 @@ export const GreetingSection = () => {
             {/* Scroll-to-elibrary link */}
             <button
               type="button"
-              onClick={() =>
-                document
-                  .getElementById("recommended-elibrary")
-                  ?.scrollIntoView({ behavior: "smooth", block: "start" })
-              }
+              onClick={() => {
+                const el =
+                  document.getElementById("feed-stories") ||
+                  document.getElementById("recommended-elibrary");
+                if (el) {
+                  const y = el.getBoundingClientRect().top + window.pageYOffset - 80;
+                  window.scrollTo({ top: y, behavior: "smooth" });
+                }
+              }}
               className="mt-2 flex items-center gap-2 px-1 py-1.5 text-primary active:opacity-80 touch-manipulation"
             >
               <ChevronLeft className="h-4 w-4 shrink-0 rotate-[-90deg]" />
