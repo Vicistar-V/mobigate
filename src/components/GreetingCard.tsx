@@ -25,11 +25,11 @@ export const GreetingSection = () => {
   const phpFeedPosts = useFeedPosts();
   const allPosts = phpFeedPosts || fallbackFeedPosts;
 
-  // Last 4 posts of the current user (fallback to latest 4 overall)
+  // Last 6 posts of the current user (fallback to fill from latest overall) — top 2 + 4 thumbs
   const myRecentPosts = (() => {
-    const mine = allPosts.filter((p) => p.userId === currentUserId).slice(0, 4);
-    if (mine.length >= 4) return mine;
-    return [...mine, ...allPosts.filter((p) => p.userId !== currentUserId)].slice(0, 4);
+    const mine = allPosts.filter((p) => p.userId === currentUserId).slice(0, 6);
+    if (mine.length >= 6) return mine;
+    return [...mine, ...allPosts.filter((p) => p.userId !== currentUserId)].slice(0, 6);
   })();
   const featuredPostThumb = myRecentPosts[0]?.imageUrl;
 
