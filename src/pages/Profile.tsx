@@ -208,6 +208,42 @@ const Profile = () => {
   useEffect(() => {
     localStorage.setItem("bannerImageHistory", JSON.stringify(bannerImageHistory));
   }, [bannerImageHistory]);
+
+  // Banner click action + auto-rotation (UI template settings)
+  const [bannerRotateIdx, setBannerRotateIdx] = useState(0);
+  const [bannerSettingsTick, setBannerSettingsTick] = useState(0);
+  const bannerClickAction = (typeof window !== "undefined"
+    ? (localStorage.getItem("bannerClickAction") as "viewer" | "url" | null)
+    : null) || "viewer";
+  const bannerLinkedUrl = (typeof window !== "undefined" && localStorage.getItem("bannerLinkedUrl")) || "";
+  const bannerRotateSeconds = parseInt(
+    (typeof window !== "undefined" && localStorage.getItem("bannerRotateSeconds")) || "0",
+    10,
+  );
+  // Re-read settings when the edit dialog closes
+  useEffect(() => {
+    if (!editingBanner) setBannerSettingsTick((t) => t + 1);
+  }, [editingBanner]);
+  // Cycle through banner history
+  useEffect(() => {
+    if (!bannerRotateSeconds || bannerImageHistory.length < 2) return;
+    const id = setInterval(() => {
+      setBannerRotateIdx((i) => (i + 1) % bannerImageHistory.length);
+    }, bannerRotateSeconds * 1000);
+    return () => clearInterval(id);
+  }, [bannerRotateSeconds, bannerImageHistory.length, bannerSettingsTick]);
+  const bannerDisplayImage =
+    bannerRotateSeconds && bannerImageHistory.length > 1
+      ? bannerImageHistory[bannerRotateIdx % bannerImageHistory.length]
+      : bannerImage;
+  const handleBannerClick = () => {
+    if (bannerClickAction === "url" && bannerLinkedUrl) {
+      window.open(bannerLinkedUrl, "_blank", "noopener,noreferrer");
+      return;
+    }
+    openBannerGallery();
+  };
+
   
   // Get posts for this specific user and manage as state
   const phpPosts = useUserPosts();
@@ -573,11 +609,11 @@ const Profile = () => {
         <Card className="mb-6 overflow-hidden">
           {/* Profile Banner */}
           <div className="relative h-48 bg-muted group">
-            <img 
-              src={bannerImage} 
+            <img
+              src={bannerDisplayImage}
               alt="Profile Banner"
               className="w-full h-full object-cover cursor-pointer"
-              onClick={openBannerGallery}
+              onClick={handleBannerClick}
             />
             <button
               className="absolute bottom-3 right-3 z-20 bg-black/40 hover:bg-black/60 text-white backdrop-blur-sm md:opacity-0 md:group-hover:opacity-100 transition-opacity text-xs px-2 py-1 rounded flex items-center gap-1"
@@ -590,7 +626,7 @@ const Profile = () => {
               Change
             </button>
           </div>
-          
+
           <div className="px-6 pb-6">
             {/* Profile Image and Name Row */}
             <div className="relative">
