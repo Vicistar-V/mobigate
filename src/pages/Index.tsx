@@ -397,7 +397,7 @@ const Index = () => {
               <div id="recommended-elibrary" style={{ scrollMarginTop: 96 }}>
                 <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} />
               </div>
-              <div id="feed-stories" style={{ scrollMarginTop: 96 }} className="space-y-6 mt-6">
+              <div className="space-y-6 mt-6">
                 {displayedPosts.map((post, index) => (
                 <div key={index}>
                   <FeedPost {...post as any} />
