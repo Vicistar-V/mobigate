@@ -31,6 +31,9 @@ export const MediaUploadDialog = ({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [monetization, setMonetization] = useState<MediaMonetizationValue>(
+    defaultMonetizationValue()
+  );
   const { toast } = useToast();
 
   const handleDragOver = (e: React.DragEvent) => {
