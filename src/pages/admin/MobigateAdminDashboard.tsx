@@ -32,6 +32,7 @@ import { AdminExchangeRateTab } from "@/components/admin/AdminExchangeRateTab";
 import { AdminAuthGate } from "@/components/admin/AdminAuthGate";
 import { CampaignFeeDistributionSettings } from "@/components/admin/settings/CampaignFeeDistributionSettings";
 import { WithdrawalSettingsCard } from "@/components/mobigate/WithdrawalSettingsCard";
+import { MediaAccessFeeSettingsCard } from "@/components/mobigate/MediaAccessFeeSettingsCard";
 import { QuizSettingsCard } from "@/components/mobigate/QuizSettingsCard";
 // VoucherDiscountSettingsCard moved to ManageMerchantsPage
 // MobigateQuizManagement moved to /mobigate-admin/quiz
