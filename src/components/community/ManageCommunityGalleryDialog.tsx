@@ -59,6 +59,13 @@ import {
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ContentFeeNotice } from "@/components/media/ContentFeeNotice";
+import {
+  getContentPostingFee,
+  getMediaAccessFeeDefault,
+  getMediaAccessFeeMax,
+  getMediaAccessFeeMin,
+} from "@/data/platformSettingsData";
 import {
   mockGalleryAlbums,
   mockGalleryItems,
