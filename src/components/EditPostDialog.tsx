@@ -45,6 +45,9 @@ export const EditPostDialog = ({
   const [imageUrl, setImageUrl] = useState(post.imageUrl || "");
   const [newMediaFile, setNewMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+  const [monetization, setMonetization] = useState<MediaMonetizationValue>(
+    defaultMonetizationValue()
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
