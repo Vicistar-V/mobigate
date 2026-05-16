@@ -52,10 +52,8 @@ export const ManageELibraryDialog = ({ open, onClose }: ManageELibraryDialogProp
       title: "Upload Content",
       description: "Add new videos, photos, articles, and more",
       action: () => {
-        toast({
-          title: "Upload Content",
-          description: "Content upload feature coming soon!",
-        });
+        onClose();
+        setTimeout(() => setCreateOpen(true), 150);
       }
     },
     {
