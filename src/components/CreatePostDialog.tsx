@@ -235,6 +235,9 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
             </Select>
           </div>
 
+          {/* Content posting fee notice based on selected media type */}
+          <ContentFeeNotice mediaType={type} />
+
           <div className="space-y-2">
             <Label>Media File</Label>
             
