@@ -910,10 +910,53 @@ export function ManageCommunityGalleryDialog({
                 </SelectContent>
               </Select>
             </div>
+            {uploadedFile && (
+              <div className="space-y-3 pt-2 border-t">
+                <ContentFeeNotice
+                  mediaType={uploadedFile.type.startsWith("video/") ? "Video" : "Photo"}
+                  compact
+                />
+                <div className="space-y-1.5">
+                  <Label htmlFor="gallery-access-fee" className="text-sm">
+                    Access Fee (M{getMediaAccessFeeMin()} – M{getMediaAccessFeeMax()})
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-muted-foreground">M</span>
+                    <Input
+                      id="gallery-access-fee"
+                      type="number"
+                      min={0}
+                      max={getMediaAccessFeeMax()}
+                      value={uploadAccessFee}
+                      onChange={(e) => setUploadAccessFee(Number(e.target.value))}
+                      onBlur={() => {
+                        let v = uploadAccessFee;
+                        if (!Number.isFinite(v) || v < 0) v = 0;
+                        if (v > 0 && v < getMediaAccessFeeMin()) v = getMediaAccessFeeMin();
+                        if (v > getMediaAccessFeeMax()) v = getMediaAccessFeeMax();
+                        setUploadAccessFee(v);
+                      }}
+                      className="h-9"
+                    />
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">Mobi</span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-snug">
+                    Visitors pay this to view the content. Set 0 to keep it free.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setShowUploadMedia(false)}>Cancel</Button>
-            <Button onClick={handleUploadMedia} disabled={!uploadedFile}>Upload</Button>
+            <Button onClick={handleUploadMedia} disabled={!uploadedFile}>
+              Upload • Pay M
+              {uploadedFile
+                ? getContentPostingFee(
+                    uploadedFile.type.startsWith("video/") ? "Video" : "Photo"
+                  ).toLocaleString()
+                : "0"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
