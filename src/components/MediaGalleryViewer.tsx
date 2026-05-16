@@ -7,21 +7,6 @@ import { useToast } from "@/hooks/use-toast";
 import { CommentDialog } from "@/components/CommentDialog";
 import { useSwipeable } from "react-swipeable";
 import { MediaOwnerMenu } from "@/components/media/MediaOwnerMenu";
-import {
-  getContentPostingFee,
-  getMediaAccessFeeDefault,
-  getMediaAccessFeeMax,
-  getMediaAccessFeeMin,
-} from "@/data/platformSettingsData";
-import {
-  Dialog as FeeDialog,
-  DialogContent as FeeDialogContent,
-  DialogHeader as FeeDialogHeader,
-  DialogTitle as FeeDialogTitle,
-  DialogDescription as FeeDialogDescription,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 export interface MediaItem {
   id?: string;
