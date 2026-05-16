@@ -35,6 +35,25 @@ const MOBI_WALLET = {
   monthlyOut: 78400,
 };
 
+// Sundry Wallet: holds Mobi earned from Quiz wins, Services, Active Engagements,
+// Royalties, Referrals, and other sundry income. ONLY this wallet's balance can
+// be liquidated to Local Currency (at the prevailing Selling Rate).
+// Mobi from Voucher Recharges sits in MOBI_WALLET and is NOT liquidatable —
+// it can only be spent on the platform/network. This guards against arbitrage.
+const SUNDRY_WALLET = {
+  balance: 86420.00,
+  currency: "Mobi",
+  symbol: "M",
+  monthlyIn: 42500,
+  monthlyOut: 12000,
+};
+
+// Dual exchange rates — Buying Rate (Local → Mobi via Voucher Recharge) is always
+// MORE FAVOURABLE than Selling Rate (Mobi → Local via Liquidation), preserving
+// platform margin and discouraging discount-arbitrage round-trips.
+// Base: 1 Mobi = 1 NGN (Buying), 1 Mobi = 0.96 NGN (Selling)  →  4% spread.
+const SELLING_RATE_NGN_PER_MOBI = 0.96;
+
 interface WalletTransaction {
   id: string;
   type: "credit" | "debit";
