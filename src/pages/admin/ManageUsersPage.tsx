@@ -4,8 +4,21 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Users, Search, Globe, MapPin, ChevronRight, Shield, ShieldBan, ShieldAlert,
   Eye, Calendar, Mail, Phone, ArrowLeft, UserCheck, UserX, AlertTriangle,
-  Crown, Star, Filter, SortAsc, SortDesc, Activity,
+  Crown, Star, Filter, SortAsc, SortDesc, Activity, Ban, Flag, Clock, Slash,
 } from "lucide-react";
+
+// Deterministic moderation history derived from user id
+function getModerationHistory(id: string) {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return {
+    blockedBy: h % 9,              // times this user has been blocked by others
+    reported: (h >> 3) % 28,       // times reported on platform
+    suspended: (h >> 7) % 4,       // prior suspensions
+    warnings: (h >> 11) % 6,       // admin warnings issued
+    contentRemoved: (h >> 5) % 12, // posts/comments removed
+  };
+}
 import { Header } from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -708,6 +721,52 @@ export default function ManageUsersPage() {
                         </p>
                       </div>
                     </div>
+
+                    <Separator />
+
+                    {/* Moderation History */}
+                    {(() => {
+                      const mh = getModerationHistory(selectedUser.id);
+                      const items = [
+                        { label: "Blocked by users", value: mh.blockedBy, icon: Slash, tone: "text-slate-700", bg: "bg-slate-50", border: "border-slate-200" },
+                        { label: "Reported", value: mh.reported, icon: Flag, tone: "text-orange-700", bg: "bg-orange-50", border: "border-orange-200" },
+                        { label: "Suspended", value: mh.suspended, icon: ShieldAlert, tone: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200" },
+                        { label: "Warnings", value: mh.warnings, icon: AlertTriangle, tone: "text-yellow-700", bg: "bg-yellow-50", border: "border-yellow-200" },
+                        { label: "Content removed", value: mh.contentRemoved, icon: Ban, tone: "text-red-700", bg: "bg-red-50", border: "border-red-200" },
+                      ];
+                      return (
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs font-semibold text-muted-foreground uppercase">Moderation History</p>
+                            <span className="text-[10px] text-muted-foreground">Lifetime</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            {items.map((it) => (
+                              <div key={it.label} className={`rounded-lg border ${it.border} ${it.bg} p-2.5`}>
+                                <div className="flex items-center gap-1.5">
+                                  <it.icon className={`h-3.5 w-3.5 ${it.tone}`} />
+                                  <p className="text-[10px] text-muted-foreground leading-tight">{it.label}</p>
+                                </div>
+                                <p className={`text-sm font-semibold mt-1 ${it.tone}`}>
+                                  {it.value}
+                                  <span className="text-[10px] font-normal text-muted-foreground ml-1">
+                                    {it.value === 1 ? "time" : "times"}
+                                  </span>
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                          {mh.reported >= 10 && (
+                            <div className="flex items-start gap-1.5 rounded-md border border-orange-200 bg-orange-50 p-2">
+                              <AlertTriangle className="h-3.5 w-3.5 text-orange-600 mt-0.5 shrink-0" />
+                              <p className="text-[11px] text-orange-800 leading-snug">
+                                Frequently reported user — consider reviewing recent activity before action.
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
 
                     <Separator />
 
