@@ -105,15 +105,15 @@ export function AdminExchangeRateTab() {
 
 
   const filteredRates = useMemo(() => {
-    if (!searchQuery.trim()) return rates;
+    if (!searchQuery.trim()) return ratesWithSell;
     const q = searchQuery.toLowerCase();
-    return rates.filter(
+    return ratesWithSell.filter(
       r =>
         r.code.toLowerCase().includes(q) ||
         r.name.toLowerCase().includes(q) ||
         r.country.toLowerCase().includes(q)
     );
-  }, [rates, searchQuery]);
+  }, [ratesWithSell, searchQuery]);
 
   const totalCurrencies = rates.length;
   const baseRate = rates.find(r => r.isBase);
