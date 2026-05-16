@@ -360,28 +360,41 @@ export const GreetingSection = () => {
             <div className="h-px bg-green-500/40 mt-1 mb-3" />
 
             {/* Featured post card — image left, [Post & Share button] + [storyline] stacked right */}
-            {myRecentPosts[0] && (
+            {featuredPost && (
               <div className="rounded-lg overflow-hidden">
                 <div className="grid grid-cols-[40%_1fr] gap-2 items-stretch">
-                  {/* Left: image with green border */}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      openComposerWithImage(myRecentPosts[0].imageUrl, myRecentPosts[0].title)
-                    }
-                    className="relative bg-muted rounded-lg overflow-hidden border-2 border-green-500/80 active:scale-[0.98] transition-transform touch-manipulation"
-                    aria-label="Use this image to post"
-                  >
-                    <img
-                      src={myRecentPosts[0].imageUrl}
-                      alt={myRecentPosts[0].title}
-                      className="w-full h-full object-cover aspect-[4/5]"
-                      loading="lazy"
-                    />
-                    <span className="absolute bottom-1.5 right-1.5 h-6 w-6 rounded-full bg-foreground/80 text-background flex items-center justify-center shadow">
-                      <Plus className="h-3.5 w-3.5" />
-                    </span>
-                  </button>
+                  {/* Left: featured big image — tap to open in bigger viewer; "+" opens composer */}
+                  <div className="relative bg-muted rounded-lg overflow-hidden border-[3px] border-green-500/80 shadow-sm">
+                    <button
+                      type="button"
+                      onClick={() => setViewerOpen(true)}
+                      className="block w-full h-full active:scale-[0.98] transition-transform touch-manipulation"
+                      aria-label="Open this media in a bigger window"
+                    >
+                      <img
+                        key={featuredPost.id || safeFeaturedIdx}
+                        src={featuredPost.imageUrl}
+                        alt={featuredPost.title}
+                        className="w-full h-full object-cover aspect-[4/5] transition-opacity duration-300"
+                        loading="lazy"
+                      />
+                      <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded-md bg-black/55 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
+                        <Maximize2 className="h-3 w-3" />
+                        Tap to enlarge
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openComposerWithImage(featuredPost.imageUrl, featuredPost.title);
+                      }}
+                      className="absolute bottom-1.5 right-1.5 h-7 w-7 rounded-full bg-foreground/80 text-background flex items-center justify-center shadow active:scale-95"
+                      aria-label="Use this image to create a new post"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
 
                   {/* Right column: stacked button + storyline */}
                   <div className="flex flex-col gap-2 min-w-0">
@@ -397,7 +410,7 @@ export const GreetingSection = () => {
                     <button
                       type="button"
                       onClick={() =>
-                        openComposerWithImage(myRecentPosts[0].imageUrl, myRecentPosts[0].title)
+                        openComposerWithImage(featuredPost.imageUrl, featuredPost.title)
                       }
                       className="flex-1 bg-lime-200/70 text-foreground p-2.5 text-left rounded-md active:opacity-90 touch-manipulation"
                     >
@@ -450,25 +463,49 @@ export const GreetingSection = () => {
               </div>
             )}
 
-            {/* Thumbnails strip */}
-            {myRecentPosts.length > 2 && (
-              <div className="mt-2 grid grid-cols-4 gap-2 rounded-lg border border-border p-1.5">
-                {myRecentPosts.slice(2, 6).map((post) => (
-                  <button
-                    key={post.id}
-                    type="button"
-                    onClick={() => openComposerWithImage(post.imageUrl, post.title)}
-                    className="aspect-square rounded-md overflow-hidden border border-foreground/30 bg-muted active:scale-95 transition-transform touch-manipulation"
-                    aria-label={`Post using ${post.title}`}
+            {/* RTL auto-scrolling thumbnail strip — click to load into the big featured panel above */}
+            {myRecentPosts.length > 1 && (
+              <div className="mt-2 rounded-lg border border-border bg-card/50 p-1.5 overflow-hidden">
+                <div className="group/strip relative">
+                  <div
+                    className="flex gap-2 w-max animate-marquee-rtl group-hover/strip:[animation-play-state:paused]"
+                    style={{ animationDuration: `${Math.max(18, myRecentPosts.length * 3)}s` }}
                   >
-                    <img
-                      src={post.imageUrl}
-                      alt={post.title}
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
-                  </button>
-                ))}
+                    {[...myRecentPosts, ...myRecentPosts].map((post, i) => {
+                      const realIdx = i % myRecentPosts.length;
+                      const isActive = realIdx === safeFeaturedIdx;
+                      return (
+                        <button
+                          key={`thumb-${i}-${post.id ?? realIdx}`}
+                          type="button"
+                          onClick={() => setFeaturedIdx(realIdx)}
+                          className={`relative shrink-0 h-16 w-16 rounded-md overflow-hidden bg-muted active:scale-95 transition-all touch-manipulation ${
+                            isActive
+                              ? "ring-2 ring-green-500 border-2 border-green-500 shadow-md scale-[1.04]"
+                              : "border border-foreground/30 opacity-90 hover:opacity-100"
+                          }`}
+                          aria-label={`Show ${post.title} in big view`}
+                          aria-pressed={isActive}
+                        >
+                          <img
+                            src={post.imageUrl}
+                            alt={post.title}
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                          />
+                          {isActive && (
+                            <span className="absolute inset-x-0 bottom-0 bg-green-600 text-white text-[9px] font-bold text-center py-0.5">
+                              Showing
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <p className="mt-1 text-[11px] text-muted-foreground text-center italic">
+                  Auto-scrolls right → left · tap any thumbnail to feature it above · tap the big image to open larger
+                </p>
               </div>
             )}
 
