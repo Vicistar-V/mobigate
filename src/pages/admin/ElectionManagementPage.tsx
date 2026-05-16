@@ -123,7 +123,8 @@ export default function ElectionManagementPage() {
           <TabsContent value="impeachment" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
             <AdminImpeachmentTab />
           </TabsContent>
-          <TabsContent value="settings" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+          <TabsContent value="settings" className="mt-0 focus-visible:outline-none focus-visible:ring-0 space-y-6">
+            <CommunityNominationFeeSettings communityName="this community" />
             <ElectionSettingsSection />
           </TabsContent>
         </div>
