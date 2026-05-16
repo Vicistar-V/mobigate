@@ -26,13 +26,19 @@ export const GreetingSection = () => {
   const phpFeedPosts = useFeedPosts();
   const allPosts = phpFeedPosts || fallbackFeedPosts;
 
-  // Last 6 posts of the current user (fallback to fill from latest overall) — top 2 + 4 thumbs
+  // Last posts of the current user (fallback to fill from latest overall) — featured + RTL strip
   const myRecentPosts = (() => {
-    const mine = allPosts.filter((p) => p.userId === currentUserId).slice(0, 6);
-    if (mine.length >= 6) return mine;
-    return [...mine, ...allPosts.filter((p) => p.userId !== currentUserId)].slice(0, 6);
+    const mine = allPosts.filter((p) => p.userId === currentUserId).slice(0, 12);
+    if (mine.length >= 12) return mine;
+    return [...mine, ...allPosts.filter((p) => p.userId !== currentUserId)].slice(0, 12);
   })();
   const featuredPostThumb = myRecentPosts[0]?.imageUrl;
+
+  // Featured selection driven by the RTL thumb strip
+  const [featuredIdx, setFeaturedIdx] = useState(0);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const safeFeaturedIdx = Math.min(featuredIdx, Math.max(0, myRecentPosts.length - 1));
+  const featuredPost = myRecentPosts[safeFeaturedIdx] || myRecentPosts[0];
 
   const [friendsMenuView, setFriendsMenuView] = useState<"main" | "requests">("main");
   const [createPostOpen, setCreatePostOpen] = useState(false);
