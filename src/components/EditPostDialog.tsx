@@ -19,6 +19,11 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Post } from "@/data/posts";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
+import {
+  MediaMonetizationFields,
+  defaultMonetizationValue,
+  type MediaMonetizationValue,
+} from "@/components/media/MediaMonetizationFields";
 
 interface EditPostDialogProps {
   post: Post;
