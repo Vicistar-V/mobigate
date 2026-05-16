@@ -274,7 +274,11 @@ export function ManageCommunityGalleryDialog({
     setItemForm({ title: "", caption: "", description: "", albumId: "", privacy: "public" });
     setUploadedFile(null);
     setFilePreview("");
-    toast({ title: "Media Uploaded", description: "New media has been added to the gallery." });
+    const fee = getContentPostingFee(isVideo ? "Video" : "Photo");
+    toast({
+      title: `Media uploaded • M${fee.toLocaleString()} debited`,
+      description: `New media added to the gallery. Access fee set to M${uploadAccessFee}. Content fee debited from your Mobi Wallet (non-refundable).`,
+    });
   };
 
   const handleEditItem = () => {
