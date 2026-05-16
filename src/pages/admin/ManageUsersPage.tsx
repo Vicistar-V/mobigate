@@ -207,6 +207,15 @@ const roleConfig: Record<UserRole, { label: string; icon: React.ElementType }> =
   mobigate_admin: { label: "Mobigate Admin", icon: Shield },
 };
 
+// Authorising admins for status changes (UI template — deterministic by user id)
+const AUTHORISING_ADMINS = ["Amaka Eze", "Tunde Bakare", "Ngozi Okafor", "Chinedu Obi"];
+const getAuthorisingAdmin = (userId: string, status: UserStatus): string => {
+  let h = 0;
+  const seed = `${userId}-${status}`;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return AUTHORISING_ADMINS[h % AUTHORISING_ADMINS.length];
+};
+
 export default function ManageUsersPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
