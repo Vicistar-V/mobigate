@@ -16,6 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerBody } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Trash2 } from "lucide-react";
+import { AdminAuthorizationDialog, AdminAction } from "@/components/admin/AdminAuthorizationDialog";
 import { getNigerianStatesForFilter, getCitiesForLGA } from "@/data/nigerianLocationsData";
 
 // Country definitions with flags
