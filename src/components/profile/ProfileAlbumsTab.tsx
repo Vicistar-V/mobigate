@@ -301,6 +301,10 @@ export const ProfileAlbumsTab = ({
                           album={album}
                           onClick={() => handleAlbumClick(album)}
                           variant="carousel"
+                          isOwner={isOwner}
+                          onEdit={() => setRenameTarget(album)}
+                          onDelete={() => handleAlbumDelete(album)}
+                          onChangeCover={() => handleAlbumChangeCover(album)}
                         />
                         
                         {shouldShowAd && (
@@ -335,6 +339,10 @@ export const ProfileAlbumsTab = ({
                         album={album}
                         onClick={() => handleAlbumClick(album)}
                         variant="grid"
+                        isOwner={isOwner}
+                        onEdit={() => setRenameTarget(album)}
+                        onDelete={() => handleAlbumDelete(album)}
+                        onChangeCover={() => handleAlbumChangeCover(album)}
                       />
                       
                       {shouldShowAd && (
