@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Eye, MessageSquare, Heart, Share2, UserPlus } from "lucide-react";
+import { Eye, MessageSquare, Heart, Share2, UserPlus, Pencil } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
