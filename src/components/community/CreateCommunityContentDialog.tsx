@@ -13,6 +13,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import {
+  MediaMonetizationFields,
+  defaultMonetizationValue,
+  type MediaMonetizationValue,
+} from "@/components/media/MediaMonetizationFields";
 
 interface CreateCommunityContentDialogProps {
   open: boolean;
@@ -36,6 +41,9 @@ export function CreateCommunityContentDialog({
   const [description, setDescription] = useState("");
   const [contentType, setContentType] = useState("photo");
   const [mediaPreview, setMediaPreview] = useState<string>("");
+  const [monetization, setMonetization] = useState<MediaMonetizationValue>(
+    defaultMonetizationValue()
+  );
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -62,6 +70,7 @@ export function CreateCommunityContentDialog({
     setDescription("");
     setContentType("photo");
     setMediaPreview("");
+    setMonetization(defaultMonetizationValue());
   };
 
   const handleSubmit = () => {
@@ -202,12 +211,13 @@ export function CreateCommunityContentDialog({
               )}
             </div>
 
-            {/* Pricing Note */}
-            <div className="p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
-              <p className="text-xs text-amber-600 dark:text-amber-400">
-                💰 This content will be monetized. Set your pricing in the next step after publishing.
-              </p>
-            </div>
+            {/* Monetization & Audience */}
+            <MediaMonetizationFields
+              value={monetization}
+              onChange={setMonetization}
+              hideAudio={contentType === "video"}
+              compact
+            />
           </div>
         </ScrollArea>
 

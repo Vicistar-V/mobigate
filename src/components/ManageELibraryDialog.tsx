@@ -19,6 +19,8 @@ import {
   ArrowRight
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { CreatePostDialog } from "./CreatePostDialog";
 
 interface ManageELibraryDialogProps {
   open: boolean;
@@ -27,6 +29,7 @@ interface ManageELibraryDialogProps {
 
 export const ManageELibraryDialog = ({ open, onClose }: ManageELibraryDialogProps) => {
   const { toast } = useToast();
+  const [createOpen, setCreateOpen] = useState(false);
 
   const handleViewELibrary = () => {
     onClose();
@@ -49,10 +52,8 @@ export const ManageELibraryDialog = ({ open, onClose }: ManageELibraryDialogProp
       title: "Upload Content",
       description: "Add new videos, photos, articles, and more",
       action: () => {
-        toast({
-          title: "Upload Content",
-          description: "Content upload feature coming soon!",
-        });
+        onClose();
+        setTimeout(() => setCreateOpen(true), 150);
       }
     },
     {
@@ -168,6 +169,11 @@ export const ManageELibraryDialog = ({ open, onClose }: ManageELibraryDialogProp
           })}
         </div>
       </SheetContent>
+      <CreatePostDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        hideTrigger
+      />
     </Sheet>
   );
 };

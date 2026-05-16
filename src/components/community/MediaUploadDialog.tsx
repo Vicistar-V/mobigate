@@ -9,6 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Upload, X, Image, Video, FileCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  MediaMonetizationFields,
+  defaultMonetizationValue,
+  type MediaMonetizationValue,
+} from "@/components/media/MediaMonetizationFields";
 
 interface MediaUploadDialogProps {
   open: boolean;
@@ -26,6 +31,9 @@ export const MediaUploadDialog = ({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [monetization, setMonetization] = useState<MediaMonetizationValue>(
+    defaultMonetizationValue()
+  );
   const { toast } = useToast();
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -204,6 +212,16 @@ export const MediaUploadDialog = ({
                 ))}
               </div>
             </div>
+          )}
+
+          {/* Monetization, Audience, Copyright, Audio */}
+          {selectedFiles.length > 0 && (
+            <MediaMonetizationFields
+              value={monetization}
+              onChange={setMonetization}
+              hideAudio={selectedFiles.every((f) => f.type.startsWith("video/"))}
+              compact
+            />
           )}
 
           {/* Upload Progress */}

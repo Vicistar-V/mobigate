@@ -19,6 +19,11 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Post } from "@/data/posts";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
+import {
+  MediaMonetizationFields,
+  defaultMonetizationValue,
+  type MediaMonetizationValue,
+} from "@/components/media/MediaMonetizationFields";
 
 interface EditPostDialogProps {
   post: Post;
@@ -40,6 +45,9 @@ export const EditPostDialog = ({
   const [imageUrl, setImageUrl] = useState(post.imageUrl || "");
   const [newMediaFile, setNewMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+  const [monetization, setMonetization] = useState<MediaMonetizationValue>(
+    defaultMonetizationValue()
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -204,6 +212,12 @@ export const EditPostDialog = ({
               Supported formats: Images, Videos, Audio, PDF (Max 20MB)
             </p>
           </div>
+
+          <MediaMonetizationFields
+            value={monetization}
+            onChange={setMonetization}
+            hideAudio={type === "Video"}
+          />
         </div>
 
         <div className="flex justify-end gap-2">
