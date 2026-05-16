@@ -19,6 +19,8 @@ import {
   ArrowRight
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { CreatePostDialog } from "./CreatePostDialog";
 
 interface ManageELibraryDialogProps {
   open: boolean;
