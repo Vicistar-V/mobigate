@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, Rocket, ImagePlus, X, Settings, Eye } from "lucide-react";
-import { format } from "date-fns";
+import { format, startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { CampaignSettingsDialog } from "./CampaignSettingsDialog";
@@ -54,6 +54,7 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
   const [startDateOpen, setStartDateOpen] = useState(false);
   const [endDateOpen, setEndDateOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const today = startOfDay(new Date());
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -266,7 +267,7 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
               {/* Campaign Period */}
               <div className="space-y-2">
                 <Label className="text-sm font-semibold">Campaign Period *</Label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {/* Start Date */}
                   <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
                     <PopoverTrigger asChild>
@@ -286,7 +287,7 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
                         mode="single"
                         selected={startDate}
                         onSelect={handleStartDateSelect}
-                        disabled={(date) => date < new Date()}
+                        disabled={(date) => startOfDay(date) < today}
                         initialFocus
                         className="p-3 pointer-events-auto"
                       />
@@ -312,7 +313,7 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
                         mode="single"
                         selected={endDate}
                         onSelect={handleEndDateSelect}
-                        disabled={(date) => date < (startDate || new Date())}
+                        disabled={(date) => startOfDay(date) < startOfDay(startDate || today)}
                         initialFocus
                         className="p-3 pointer-events-auto"
                       />

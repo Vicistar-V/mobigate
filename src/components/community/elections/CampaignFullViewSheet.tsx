@@ -19,6 +19,7 @@ import {
 import { EnhancedCampaign } from "@/types/campaignSystem";
 import { calculateDaysRemaining, getAudienceLabel } from "@/lib/campaignFeeDistribution";
 import { format } from "date-fns";
+import { toast } from "@/hooks/use-toast";
 
 interface CampaignFullViewSheetProps {
   open: boolean;
@@ -37,6 +38,56 @@ export function CampaignFullViewSheet({
   if (!campaign) return null;
 
   const daysRemaining = calculateDaysRemaining(campaign.endDate);
+
+  const copyCampaignLink = async (campaignUrl: string) => {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(campaignUrl);
+      return;
+    }
+
+    const textArea = document.createElement("textarea");
+    textArea.value = campaignUrl;
+    textArea.setAttribute("readonly", "");
+    textArea.style.position = "fixed";
+    textArea.style.left = "-9999px";
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textArea);
+  };
+
+  const handleShareCampaign = async () => {
+    const campaignUrl = `${window.location.origin}${window.location.pathname}?campaign=${encodeURIComponent(campaign.id)}`;
+    const shareData = {
+      title: `${campaign.candidateName} for ${campaign.office}`,
+      text: `${campaign.candidateName} is campaigning for ${campaign.office} in ${campaign.communityName}. ${campaign.tagline}`,
+      url: campaignUrl,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        toast({ title: "Campaign Shared", description: "The election campaign has been shared successfully." });
+        return;
+      }
+
+      await copyCampaignLink(campaignUrl);
+      toast({ title: "Campaign Link Copied", description: "Share link copied to clipboard." });
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+
+      try {
+        await copyCampaignLink(campaignUrl);
+        toast({ title: "Campaign Link Copied", description: "Share link copied to clipboard." });
+      } catch {
+        toast({
+          title: "Unable to Share",
+          description: "Please try again or copy the campaign link manually.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -193,9 +244,7 @@ export function CampaignFullViewSheet({
             <Button 
               variant="outline" 
               className="flex-1"
-              onClick={() => {
-                // Share functionality
-              }}
+              onClick={handleShareCampaign}
             >
               <Share2 className="h-4 w-4 mr-2" />
               Share
