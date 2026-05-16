@@ -230,6 +230,7 @@ export default function ManageUsersPage() {
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest" | "name">("newest");
   const [selectedUser, setSelectedUser] = useState<PlatformUser | null>(null);
   const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
+  const [authAction, setAuthAction] = useState<AdminAction | null>(null);
 
   const isNigeria = selectedCountry === "ng";
 
