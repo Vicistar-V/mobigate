@@ -207,6 +207,15 @@ const roleConfig: Record<UserRole, { label: string; icon: React.ElementType }> =
   mobigate_admin: { label: "Mobigate Admin", icon: Shield },
 };
 
+// Authorising admins for status changes (UI template — deterministic by user id)
+const AUTHORISING_ADMINS = ["Amaka Eze", "Tunde Bakare", "Ngozi Okafor", "Chinedu Obi"];
+const getAuthorisingAdmin = (userId: string, status: UserStatus): string => {
+  let h = 0;
+  const seed = `${userId}-${status}`;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return AUTHORISING_ADMINS[h % AUTHORISING_ADMINS.length];
+};
+
 export default function ManageUsersPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -356,48 +365,41 @@ export default function ManageUsersPage() {
           </Badge>
         </div>
 
-        {/* Country Selector Cards - Horizontal scroll */}
+        {/* Country Selector — single dropdown to save space */}
         <div className="mb-4">
-          <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+          <p className="text-xs font-medium text-muted-foreground mb-1.5 flex items-center gap-1">
             <Globe className="h-3 w-3" /> Filter by Country
           </p>
-          <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory">
-            {/* All Countries card */}
-            <button
-              onClick={() => { setSelectedCountry("all"); setSelectedState("all"); setSelectedCity("all"); }}
-              className={`snap-start shrink-0 flex flex-col items-center gap-1 rounded-xl border p-3 min-w-[80px] transition-all ${
-                selectedCountry === "all"
-                  ? "border-primary bg-primary/10 ring-1 ring-primary"
-                  : "border-border bg-card hover:bg-muted/50"
-              }`}
-            >
-              <span className="text-xl">🌍</span>
-              <span className="text-[10px] font-medium leading-tight text-center">All</span>
-              <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 font-bold">
-                {totalUsers}
-              </Badge>
-            </button>
-
-            {countries.map((country) => (
-              <button
-                key={country.id}
-                onClick={() => { setSelectedCountry(country.id); setSelectedState("all"); setSelectedCity("all"); }}
-                className={`snap-start shrink-0 flex flex-col items-center gap-1 rounded-xl border p-3 min-w-[80px] transition-all ${
-                  selectedCountry === country.id
-                    ? "border-primary bg-primary/10 ring-1 ring-primary"
-                    : "border-border bg-card hover:bg-muted/50"
-                }`}
-              >
-                <span className="text-xl">{country.flag}</span>
-                <span className="text-[10px] font-medium leading-tight text-center truncate max-w-[60px]">
-                  {country.name}
+          <Select
+            value={selectedCountry}
+            onValueChange={(v) => {
+              setSelectedCountry(v);
+              setSelectedState("all");
+              setSelectedCity("all");
+            }}
+          >
+            <SelectTrigger className="h-10 text-sm font-semibold touch-manipulation">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="z-50 bg-popover max-h-[60vh]">
+              <SelectItem value="all">
+                <span className="inline-flex items-center gap-2">
+                  <span className="text-base">🌍</span>
+                  <span>All Countries</span>
+                  <span className="text-muted-foreground">· {totalUsers}</span>
                 </span>
-                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 font-bold">
-                  {countryCounts[country.id] || 0}
-                </Badge>
-              </button>
-            ))}
-          </div>
+              </SelectItem>
+              {countries.map((country) => (
+                <SelectItem key={country.id} value={country.id}>
+                  <span className="inline-flex items-center gap-2">
+                    <span className="text-base">{country.flag}</span>
+                    <span>{country.name}</span>
+                    <span className="text-muted-foreground">· {countryCounts[country.id] || 0}</span>
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Status Summary Row */}
@@ -602,12 +604,25 @@ export default function ManageUsersPage() {
                           {selectedUser.isVerified && <UserCheck className="h-4 w-4 text-blue-500" />}
                         </div>
                         <p className="text-sm text-muted-foreground">@{selectedUser.username}</p>
-                        <Badge
-                          variant="outline"
-                          className={`text-[10px] mt-1 ${statusConfig[selectedUser.status].color} ${statusConfig[selectedUser.status].bg} ${statusConfig[selectedUser.status].border}`}
-                        >
-                          {statusConfig[selectedUser.status].label}
-                        </Badge>
+                        <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] ${statusConfig[selectedUser.status].color} ${statusConfig[selectedUser.status].bg} ${statusConfig[selectedUser.status].border}`}
+                          >
+                            {statusConfig[selectedUser.status].label}
+                          </Badge>
+                          {selectedUser.status !== "active" && (
+                            <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
+                              <Shield className="h-3 w-3" />
+                              <span>
+                                Authorisation:{" "}
+                                <span className="font-semibold text-foreground">
+                                  Admin {getAuthorisingAdmin(selectedUser.id, selectedUser.status)}
+                                </span>
+                              </span>
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
 
