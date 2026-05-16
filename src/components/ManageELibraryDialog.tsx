@@ -169,6 +169,11 @@ export const ManageELibraryDialog = ({ open, onClose }: ManageELibraryDialogProp
           })}
         </div>
       </SheetContent>
+      <CreatePostDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        hideTrigger
+      />
     </Sheet>
   );
 };
