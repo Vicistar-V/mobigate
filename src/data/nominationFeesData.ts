@@ -285,27 +285,46 @@ export const mobigateNominationConfig = {
 };
 
 /**
- * Calculate total nomination cost including service charge
+ * Calculate total nomination cost.
+ *
+ * NOTE: "Service Charge" and "Processing Fee" are the SAME single charge — a
+ * unified Service Charge / Processing Fee computed as a single percentage of
+ * the nomination fee. It is debited from BOTH the Community Wallet AND the
+ * Candidate's Wallet (each pays the charge once).
  */
 export function calculateTotalNominationCost(officeId: string): {
   nominationFee: number;
-  processingFee: number;
+  /** Unified Service Charge / Processing Fee (single value). */
   serviceCharge: number;
+  /** Kept for backwards-compatible callers — equals serviceCharge. */
+  processingFee: number;
   totalDebited: number;
+  /** What the candidate's wallet is debited: nomination fee + service charge. */
+  candidateDebited: number;
+  /** What the community wallet is debited: service charge only. */
+  communityDebited: number;
+  /** Net community receives: nomination fee − community-side service charge. */
   communityReceives: number;
+  /** Mobigate receives both sides of the service charge. */
   mobigateReceives: number;
-} | null {
+} {
   const fee = getNominationFee(officeId);
-  if (!fee) return null;
-  
-  const serviceCharge = fee.feeInMobi * (mobigateNominationConfig.serviceChargePercent / 100);
-  
+  const base = fee?.feeInMobi ?? 0;
+
+  const serviceCharge = base * (mobigateNominationConfig.serviceChargePercent / 100);
+
+  const candidateDebited = base + serviceCharge;
+  const communityDebited = serviceCharge;
+
   return {
-    nominationFee: fee.feeInMobi,
-    processingFee: fee.processingFee,
+    nominationFee: base,
     serviceCharge,
-    totalDebited: fee.feeInMobi + fee.processingFee + serviceCharge,
-    communityReceives: fee.feeInMobi + fee.processingFee,
-    mobigateReceives: serviceCharge,
+    processingFee: serviceCharge, // alias — same charge
+    totalDebited: candidateDebited + communityDebited,
+    candidateDebited,
+    communityDebited,
+    communityReceives: base - communityDebited,
+    mobigateReceives: serviceCharge * 2, // collected from both wallets
   };
 }
+
