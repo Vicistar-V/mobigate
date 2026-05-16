@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, MoreHorizontal, ChevronLeft, ImagePlus, BadgeCheck, Images, Plus } from "lucide-react";
+import { Search, MoreHorizontal, ChevronLeft, ImagePlus, BadgeCheck, Images, Plus, Maximize2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { CreatePostDialog } from "./CreatePostDialog";
 import { PeopleYouMayKnow } from "./PeopleYouMayKnow";
@@ -18,6 +18,7 @@ import { UserTagBadges } from "./UserTagBadges";
 import { useUserProfile, useCurrentUserId, useFeedPosts } from "@/hooks/useWindowData";
 import { feedPosts as fallbackFeedPosts } from "@/data/posts";
 import heroAdBanner from "@/assets/hero-ad-banner.jpg";
+import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 
 export const GreetingSection = () => {
   const profile = useUserProfile();
@@ -25,13 +26,19 @@ export const GreetingSection = () => {
   const phpFeedPosts = useFeedPosts();
   const allPosts = phpFeedPosts || fallbackFeedPosts;
 
-  // Last 6 posts of the current user (fallback to fill from latest overall) — top 2 + 4 thumbs
+  // Last posts of the current user (fallback to fill from latest overall) — featured + RTL strip
   const myRecentPosts = (() => {
-    const mine = allPosts.filter((p) => p.userId === currentUserId).slice(0, 6);
-    if (mine.length >= 6) return mine;
-    return [...mine, ...allPosts.filter((p) => p.userId !== currentUserId)].slice(0, 6);
+    const mine = allPosts.filter((p) => p.userId === currentUserId).slice(0, 12);
+    if (mine.length >= 12) return mine;
+    return [...mine, ...allPosts.filter((p) => p.userId !== currentUserId)].slice(0, 12);
   })();
   const featuredPostThumb = myRecentPosts[0]?.imageUrl;
+
+  // Featured selection driven by the RTL thumb strip
+  const [featuredIdx, setFeaturedIdx] = useState(0);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const safeFeaturedIdx = Math.min(featuredIdx, Math.max(0, myRecentPosts.length - 1));
+  const featuredPost = myRecentPosts[safeFeaturedIdx] || myRecentPosts[0];
 
   const [friendsMenuView, setFriendsMenuView] = useState<"main" | "requests">("main");
   const [createPostOpen, setCreatePostOpen] = useState(false);
@@ -127,7 +134,7 @@ export const GreetingSection = () => {
   return (
     <div className="space-y-3">
       {/* ============ HERO BLOCK ============ */}
-      <Card className="overflow-hidden border-2 border-primary/30 shadow-sm">
+      <Card className="overflow-hidden rounded-3xl border-[5px] border-primary/80 shadow-[0_6px_20px_-8px_hsl(var(--primary)/0.45)] ring-1 ring-primary/25">
         {/* Top Advert Banner — full image */}
         <a
           href={heroAd.ctaUrl}
@@ -353,28 +360,41 @@ export const GreetingSection = () => {
             <div className="h-px bg-green-500/40 mt-1 mb-3" />
 
             {/* Featured post card — image left, [Post & Share button] + [storyline] stacked right */}
-            {myRecentPosts[0] && (
+            {featuredPost && (
               <div className="rounded-lg overflow-hidden">
                 <div className="grid grid-cols-[40%_1fr] gap-2 items-stretch">
-                  {/* Left: image with green border */}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      openComposerWithImage(myRecentPosts[0].imageUrl, myRecentPosts[0].title)
-                    }
-                    className="relative bg-muted rounded-lg overflow-hidden border-2 border-green-500/80 active:scale-[0.98] transition-transform touch-manipulation"
-                    aria-label="Use this image to post"
-                  >
-                    <img
-                      src={myRecentPosts[0].imageUrl}
-                      alt={myRecentPosts[0].title}
-                      className="w-full h-full object-cover aspect-[4/5]"
-                      loading="lazy"
-                    />
-                    <span className="absolute bottom-1.5 right-1.5 h-6 w-6 rounded-full bg-foreground/80 text-background flex items-center justify-center shadow">
-                      <Plus className="h-3.5 w-3.5" />
-                    </span>
-                  </button>
+                  {/* Left: featured big image — tap to open in bigger viewer; "+" opens composer */}
+                  <div className="relative bg-muted rounded-lg overflow-hidden border-[3px] border-green-500/80 shadow-sm">
+                    <button
+                      type="button"
+                      onClick={() => setViewerOpen(true)}
+                      className="block w-full h-full active:scale-[0.98] transition-transform touch-manipulation"
+                      aria-label="Open this media in a bigger window"
+                    >
+                      <img
+                        key={featuredPost.id || safeFeaturedIdx}
+                        src={featuredPost.imageUrl}
+                        alt={featuredPost.title}
+                        className="w-full h-full object-cover aspect-[4/5] transition-opacity duration-300"
+                        loading="lazy"
+                      />
+                      <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded-md bg-black/55 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
+                        <Maximize2 className="h-3 w-3" />
+                        Tap to enlarge
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openComposerWithImage(featuredPost.imageUrl, featuredPost.title);
+                      }}
+                      className="absolute bottom-1.5 right-1.5 h-7 w-7 rounded-full bg-foreground/80 text-background flex items-center justify-center shadow active:scale-95"
+                      aria-label="Use this image to create a new post"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
 
                   {/* Right column: stacked button + storyline */}
                   <div className="flex flex-col gap-2 min-w-0">
@@ -382,7 +402,7 @@ export const GreetingSection = () => {
                     <button
                       type="button"
                       onClick={openComposerBlank}
-                      className="bg-primary text-primary-foreground rounded-md px-2.5 py-2 text-center text-[12.5px] font-bold leading-tight truncate active:opacity-90 touch-manipulation shadow-sm"
+                      className="bg-primary text-primary-foreground rounded-md px-2.5 py-2.5 text-center text-[15px] font-bold leading-tight truncate active:opacity-90 touch-manipulation shadow-sm"
                     >
                       Post &amp; Share something now
                     </button>
@@ -390,14 +410,14 @@ export const GreetingSection = () => {
                     <button
                       type="button"
                       onClick={() =>
-                        openComposerWithImage(myRecentPosts[0].imageUrl, myRecentPosts[0].title)
+                        openComposerWithImage(featuredPost.imageUrl, featuredPost.title)
                       }
                       className="flex-1 bg-lime-200/70 text-foreground p-2.5 text-left rounded-md active:opacity-90 touch-manipulation"
                     >
-                      <p className="text-[12px] font-bold leading-snug">
+                      <p className="text-[15px] font-bold leading-snug">
                         Your Post or Content Description or Storyline here.
                       </p>
-                      <p className="text-[11.5px] leading-snug mt-1">
+                      <p className="text-[14px] leading-snug mt-1">
                         However, the storyline may not just exceed certain word-counts or be made to be unnecessary
                         <span className="font-extrabold italic">…More</span>
                       </p>
@@ -431,10 +451,10 @@ export const GreetingSection = () => {
                     onClick={openComposerBlank}
                     className="text-foreground p-2.5 text-left active:opacity-90 touch-manipulation"
                   >
-                    <p className="text-[12px] font-bold leading-snug">
+                    <p className="text-[15px] font-bold leading-snug">
                       Public Post or Content Description or Storyline here.
                     </p>
-                    <p className="text-[11.5px] leading-snug mt-1">
+                    <p className="text-[14px] leading-snug mt-1">
                       However, the storyline may not just exceed certain word-counts or be made to be unnecessarily bulky or voluminous in any case, or
                       <span className="font-extrabold italic">…More</span>
                     </p>
@@ -443,25 +463,49 @@ export const GreetingSection = () => {
               </div>
             )}
 
-            {/* Thumbnails strip */}
-            {myRecentPosts.length > 2 && (
-              <div className="mt-2 grid grid-cols-4 gap-2 rounded-lg border border-border p-1.5">
-                {myRecentPosts.slice(2, 6).map((post) => (
-                  <button
-                    key={post.id}
-                    type="button"
-                    onClick={() => openComposerWithImage(post.imageUrl, post.title)}
-                    className="aspect-square rounded-md overflow-hidden border border-foreground/30 bg-muted active:scale-95 transition-transform touch-manipulation"
-                    aria-label={`Post using ${post.title}`}
+            {/* RTL auto-scrolling thumbnail strip — click to load into the big featured panel above */}
+            {myRecentPosts.length > 1 && (
+              <div className="mt-2 rounded-lg border border-border bg-card/50 p-1.5 overflow-hidden">
+                <div className="group/strip relative">
+                  <div
+                    className="flex gap-2 w-max animate-marquee-rtl group-hover/strip:[animation-play-state:paused]"
+                    style={{ animationDuration: `${Math.max(18, myRecentPosts.length * 3)}s` }}
                   >
-                    <img
-                      src={post.imageUrl}
-                      alt={post.title}
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
-                  </button>
-                ))}
+                    {[...myRecentPosts, ...myRecentPosts].map((post, i) => {
+                      const realIdx = i % myRecentPosts.length;
+                      const isActive = realIdx === safeFeaturedIdx;
+                      return (
+                        <button
+                          key={`thumb-${i}-${post.id ?? realIdx}`}
+                          type="button"
+                          onClick={() => setFeaturedIdx(realIdx)}
+                          className={`relative shrink-0 h-16 w-16 rounded-md overflow-hidden bg-muted active:scale-95 transition-all touch-manipulation ${
+                            isActive
+                              ? "ring-2 ring-green-500 border-2 border-green-500 shadow-md scale-[1.04]"
+                              : "border border-foreground/30 opacity-90 hover:opacity-100"
+                          }`}
+                          aria-label={`Show ${post.title} in big view`}
+                          aria-pressed={isActive}
+                        >
+                          <img
+                            src={post.imageUrl}
+                            alt={post.title}
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                          />
+                          {isActive && (
+                            <span className="absolute inset-x-0 bottom-0 bg-green-600 text-white text-[9px] font-bold text-center py-0.5">
+                              Showing
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <p className="mt-1 text-[11px] text-muted-foreground text-center italic">
+                  Auto-scrolls right → left · tap any thumbnail to feature it above · tap the big image to open larger
+                </p>
               </div>
             )}
 
@@ -504,6 +548,20 @@ export const GreetingSection = () => {
         hideTrigger
         presetMediaUrl={presetMediaUrl}
         presetTitle={presetTitle}
+      />
+
+      {/* Bigger-window viewer for the featured media */}
+      <MediaGalleryViewer
+        open={viewerOpen}
+        onOpenChange={setViewerOpen}
+        items={myRecentPosts.map((p, i): MediaItem => ({
+          id: p.id || `featured-${i}`,
+          url: p.imageUrl,
+          type: (p as any).type?.toLowerCase() === "video" ? "video" : (p as any).type?.toLowerCase() === "audio" ? "audio" : "photo",
+          title: p.title,
+          author: (p as any).author,
+        }))}
+        initialIndex={safeFeaturedIdx}
       />
 
       {/* Service Unavailable Dialog */}
