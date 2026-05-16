@@ -245,40 +245,44 @@ export function DeclarationOfInterestSheet({
                   <p className="text-xs text-muted-foreground">({formatLocalAmount(costBreakdown.nominationFee, "NGN")})</p>
                 </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Processing Fee</span>
-                <div className="text-right">
-                  <span className="font-medium">{formatMobiAmount(costBreakdown.processingFee)}</span>
-                  <p className="text-xs text-muted-foreground">({formatLocalAmount(costBreakdown.processingFee, "NGN")})</p>
-                </div>
-              </div>
               <div className="flex justify-between text-amber-600">
-                <span>Service Charge ({mobigateNominationConfig.serviceChargePercent}%)</span>
+                <span className="leading-tight">
+                  Service Charge / Processing Fee ({mobigateNominationConfig.serviceChargePercent}%)
+                </span>
                 <div className="text-right">
                   <span className="font-medium">{formatMobiAmount(costBreakdown.serviceCharge)}</span>
-                  <p className="text-xs text-amber-600/70">({formatLocalAmount(costBreakdown.serviceCharge, "NGN")})</p>
+                  <p className="text-[10px] text-amber-600/70">({formatLocalAmount(costBreakdown.serviceCharge, "NGN")}) ×2 wallets</p>
                 </div>
               </div>
               <Separator />
               <div className="flex justify-between font-bold">
-                <span>Total Debited</span>
+                <span>Candidate Pays</span>
                 <div className="text-right">
                   <span className="text-primary">
-                    {formatMobiAmount(costBreakdown.totalDebited)}
+                    {formatMobiAmount(costBreakdown.candidateDebited)}
                   </span>
-                  <p className="text-xs font-normal text-muted-foreground">({formatLocalAmount(costBreakdown.totalDebited, "NGN")})</p>
+                  <p className="text-xs font-normal text-muted-foreground">({formatLocalAmount(costBreakdown.candidateDebited, "NGN")})</p>
                 </div>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-muted-foreground">Community Wallet Debited</span>
+                <span className="font-semibold text-foreground">
+                  {formatMobiAmount(costBreakdown.communityDebited)}{" "}
+                  <span className="text-muted-foreground font-normal">
+                    ({formatLocalAmount(costBreakdown.communityDebited, "NGN")})
+                  </span>
+                </span>
               </div>
             </div>
 
             {/* Fee Distribution Info */}
             <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t">
               <p className="flex justify-between">
-                <span>→ Community Account:</span>
+                <span>→ Community Account (net):</span>
                 <span className="font-medium">{formatMobiAmount(costBreakdown.communityReceives)} ({formatLocalAmount(costBreakdown.communityReceives, "NGN")})</span>
               </p>
               <p className="flex justify-between">
-                <span>→ Mobigate Platform:</span>
+                <span>→ Mobigate Platform (both wallets):</span>
                 <span className="font-medium">{formatMobiAmount(costBreakdown.mobigateReceives)} ({formatLocalAmount(costBreakdown.mobigateReceives, "NGN")})</span>
               </p>
             </div>
