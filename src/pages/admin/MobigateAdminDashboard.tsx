@@ -186,7 +186,13 @@ export default function MobigateAdminDashboard() {
               <div className="space-y-4 pb-6">
                 {/* Stats Grid */}
                 <div className="grid grid-cols-2 gap-3">
-                  <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
+                  <Card
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => navigate("/mobigate-admin/communities")}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate("/mobigate-admin/communities"); } }}
+                    className="bg-gradient-to-br from-primary/10 to-primary/5 cursor-pointer transition-all hover:shadow-md hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
+                  >
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 mb-2">
                         <Building2 className="h-4 w-4 text-primary" />
@@ -199,7 +205,13 @@ export default function MobigateAdminDashboard() {
                     </CardContent>
                   </Card>
 
-                  <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5">
+                  <Card
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => navigate("/mobigate-admin/users")}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate("/mobigate-admin/users"); } }}
+                    className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 cursor-pointer transition-all hover:shadow-md hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
+                  >
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 mb-2">
                         <Users className="h-4 w-4 text-blue-500" />
@@ -212,7 +224,13 @@ export default function MobigateAdminDashboard() {
                     </CardContent>
                   </Card>
 
-                  <Card className="bg-gradient-to-br from-amber-500/10 to-amber-500/5">
+                  <Card
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setActiveTab("revenue")}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActiveTab("revenue"); } }}
+                    className="bg-gradient-to-br from-amber-500/10 to-amber-500/5 cursor-pointer transition-all hover:shadow-md hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
+                  >
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 mb-2">
                         <Activity className="h-4 w-4 text-amber-500" />
@@ -223,7 +241,13 @@ export default function MobigateAdminDashboard() {
                     </CardContent>
                   </Card>
 
-                  <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5">
+                  <Card
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setActiveTab("revenue")}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setActiveTab("revenue"); } }}
+                    className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 cursor-pointer transition-all hover:shadow-md hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
+                  >
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 mb-2">
                         <Wallet className="h-4 w-4 text-emerald-500" />
