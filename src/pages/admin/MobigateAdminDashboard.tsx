@@ -726,6 +726,9 @@ export default function MobigateAdminDashboard() {
                 {/* Withdrawal Settings */}
                 <WithdrawalSettingsCard />
 
+                {/* Media Access Fee Settings */}
+                <MediaAccessFeeSettingsCard />
+
                 {/* Quiz Settings */}
                 <QuizSettingsCard />
               </div>
