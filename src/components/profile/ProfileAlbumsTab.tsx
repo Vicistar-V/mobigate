@@ -12,12 +12,16 @@ import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { albumsCarouselAdSlots } from "@/data/profileAds";
 import { getRandomAdSlot } from "@/lib/adUtils";
 import { useUserAlbums } from "@/hooks/useWindowData";
+import { RenameAlbumDialog } from "@/components/RenameAlbumDialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProfileAlbumsTabProps {
   userId: string;
   profileImageHistory: string[];
   bannerImageHistory: string[];
   userPosts: Post[];
+  /** When true, show owner Edit/Delete controls on each album. Defaults to true. */
+  isOwner?: boolean;
 }
 
 export const ProfileAlbumsTab = ({
@@ -25,13 +29,17 @@ export const ProfileAlbumsTab = ({
   profileImageHistory,
   bannerImageHistory,
   userPosts,
+  isOwner = true,
 }: ProfileAlbumsTabProps) => {
   const phpAlbums = useUserAlbums();
-  
+  const { toast } = useToast();
+
   const [selectedAlbum, setSelectedAlbum] = useState<(Album & { isSystem?: boolean }) | null>(null);
   const [albumDialogOpen, setAlbumDialogOpen] = useState(false);
   const [albumsView, setAlbumsView] = useState<"normal" | "large">("normal");
   const [visibleAlbumCount, setVisibleAlbumCount] = useState(15);
+  const [albumOverrides, setAlbumOverrides] = useState<Record<string, { name?: string; deleted?: boolean }>>({});
+  const [renameTarget, setRenameTarget] = useState<(Album & { isSystem?: boolean }) | null>(null);
 
   // Create system albums
   const profilePicturesAlbum: Album & { isSystem: boolean } = useMemo(
