@@ -263,7 +263,7 @@ function CommunityFeePolicyCard() {
   );
 }
 
-
+export function NominationFeeSettingsSection() {
   const { toast } = useToast();
   const [fees, setFees] = useState<NominationFeeStructure[]>(nominationFeeStructures);
   const [editingOffice, setEditingOffice] = useState<NominationFeeStructure | null>(null);
