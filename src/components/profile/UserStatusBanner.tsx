@@ -85,8 +85,8 @@ export const UserStatusBanner = ({ className = "" }: { className?: string }) => 
 
   const galleryItems: MediaItem[] = settings.history.map((url, index) => ({
     id: `banner-${index}`,
-    src: url,
-    type: "image",
+    url,
+    type: "photo",
     title: index === 0 ? "Current Banner" : `Banner ${settings.history.length - index}`,
     author: "You",
   }));
