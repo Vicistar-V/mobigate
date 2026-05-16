@@ -331,6 +331,67 @@ export function AdminExchangeRateTab() {
           </div>
         </div>
 
+        {/* Selling Spread (Buy/Sell margin) — global, lockable */}
+        <div className="rounded-xl border-2 border-fuchsia-500/30 bg-gradient-to-br from-fuchsia-500/10 to-purple-500/5 p-3.5 space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <TrendingDown className="h-4 w-4 text-fuchsia-600 shrink-0" />
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-foreground">Selling Spread</p>
+                <p className="text-[10px] text-muted-foreground leading-tight">
+                  % discount applied below Buying Rate when users Liquidate Mobi → Local
+                </p>
+              </div>
+            </div>
+            <Button
+              size="icon"
+              variant={spreadLocked ? "outline" : "default"}
+              className="h-9 w-9 shrink-0 touch-manipulation active:scale-95"
+              onClick={() => {
+                if (!spreadLocked) {
+                  // Saving: apply draft
+                  const v = parseFloat(spreadDraft);
+                  if (isNaN(v) || v < 0 || v > 25) {
+                    toast({ title: "Invalid Spread", description: "Enter 0–25%.", variant: "destructive" });
+                    return;
+                  }
+                  setSellingSpreadPct(v);
+                  toast({ title: "Selling Spread Updated", description: `Now ${v}% across all ${totalCurrencies} currencies.` });
+                }
+                setSpreadLocked(!spreadLocked);
+              }}
+              aria-label={spreadLocked ? "Unlock spread" : "Save & lock spread"}
+            >
+              {spreadLocked
+                ? <span className="text-xs">🔒</span>
+                : <Check className="h-4 w-4" />}
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              value={spreadLocked ? sellingSpreadPct : spreadDraft}
+              onChange={(e) => setSpreadDraft(e.target.value)}
+              disabled={spreadLocked}
+              step="0.1"
+              min="0"
+              max="25"
+              className="h-10 text-base font-bold tabular-nums text-right"
+            />
+            <span className="text-sm font-semibold text-muted-foreground shrink-0">%</span>
+          </div>
+          <div className="flex items-center justify-between text-[11px] pt-1 border-t border-fuchsia-500/15">
+            <span className="text-muted-foreground">Buy Rate (Recharge)</span>
+            <span className="font-mono font-semibold text-emerald-700 dark:text-emerald-400">₦{formatRate(baseRate?.ratePerMobi || 1)} / Mobi</span>
+          </div>
+          <div className="flex items-center justify-between text-[11px]">
+            <span className="text-muted-foreground">Sell Rate (Liquidate)</span>
+            <span className="font-mono font-semibold text-fuchsia-700 dark:text-fuchsia-400">
+              ₦{formatRate((baseRate?.ratePerMobi || 1) * (1 - sellingSpreadPct / 100))} / Mobi
+            </span>
+          </div>
+        </div>
+
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
