@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, Rocket, ImagePlus, X, Settings, Eye } from "lucide-react";
-import { format } from "date-fns";
+import { format, startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { CampaignSettingsDialog } from "./CampaignSettingsDialog";
@@ -54,6 +54,7 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
   const [startDateOpen, setStartDateOpen] = useState(false);
   const [endDateOpen, setEndDateOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const today = startOfDay(new Date());
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
