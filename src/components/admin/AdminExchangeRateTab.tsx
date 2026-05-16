@@ -87,7 +87,22 @@ export function AdminExchangeRateTab() {
   const [editingCode, setEditingCode] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [cascadeChanges, setCascadeChanges] = useState(true);
+  // Global Selling Spread (% applied below Buying Rate). Default 4%.
+  const [sellingSpreadPct, setSellingSpreadPct] = useState<number>(4);
+  const [spreadLocked, setSpreadLocked] = useState(true);
+  const [spreadDraft, setSpreadDraft] = useState("4");
   const { toast } = useToast();
+
+  // Recompute Selling Rates whenever Buying Rate or Spread changes
+  const ratesWithSell = useMemo(() => {
+    const factor = 1 - sellingSpreadPct / 100;
+    return rates.map(r => ({
+      ...r,
+      sellingRatePerMobi: +(r.ratePerMobi * factor).toPrecision(6),
+      previousSellingRate: +(r.previousRate * factor).toPrecision(6),
+    }));
+  }, [rates, sellingSpreadPct]);
+
 
   const filteredRates = useMemo(() => {
     if (!searchQuery.trim()) return rates;
