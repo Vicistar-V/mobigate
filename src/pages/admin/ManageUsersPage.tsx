@@ -595,12 +595,25 @@ export default function ManageUsersPage() {
                           {selectedUser.isVerified && <UserCheck className="h-4 w-4 text-blue-500" />}
                         </div>
                         <p className="text-sm text-muted-foreground">@{selectedUser.username}</p>
-                        <Badge
-                          variant="outline"
-                          className={`text-[10px] mt-1 ${statusConfig[selectedUser.status].color} ${statusConfig[selectedUser.status].bg} ${statusConfig[selectedUser.status].border}`}
-                        >
-                          {statusConfig[selectedUser.status].label}
-                        </Badge>
+                        <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] ${statusConfig[selectedUser.status].color} ${statusConfig[selectedUser.status].bg} ${statusConfig[selectedUser.status].border}`}
+                          >
+                            {statusConfig[selectedUser.status].label}
+                          </Badge>
+                          {selectedUser.status !== "active" && (
+                            <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
+                              <Shield className="h-3 w-3" />
+                              <span>
+                                Authorisation:{" "}
+                                <span className="font-semibold text-foreground">
+                                  Admin {getAuthorisingAdmin(selectedUser.id, selectedUser.status)}
+                                </span>
+                              </span>
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
 
