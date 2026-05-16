@@ -214,6 +214,16 @@ export const MediaUploadDialog = ({
             </div>
           )}
 
+          {/* Monetization, Audience, Copyright, Audio */}
+          {selectedFiles.length > 0 && (
+            <MediaMonetizationFields
+              value={monetization}
+              onChange={setMonetization}
+              hideAudio={selectedFiles.every((f) => f.type.startsWith("video/"))}
+              compact
+            />
+          )}
+
           {/* Upload Progress */}
           {uploading && (
             <div className="space-y-2">
