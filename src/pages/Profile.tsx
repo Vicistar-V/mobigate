@@ -860,8 +860,11 @@ const Profile = () => {
               <div className="space-y-6 mt-6">
                 {displayedPosts.map((post, index) => (
                 <div key={post.id || index}>
-                  <FeedPost 
+                  <FeedPost
                     {...post}
+                    isOwner={true}
+                    onEdit={() => handleEditPost(post)}
+                    onDelete={() => post.id && handleDeletePost(post.id)}
                   />
                   {/* Insert premium ad after every 4 posts */}
                   {(index + 1) % 4 === 0 && index < displayedPosts.length - 1 && (
