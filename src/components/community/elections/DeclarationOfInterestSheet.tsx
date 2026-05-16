@@ -84,8 +84,10 @@ export function DeclarationOfInterestSheet({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [transactionRef, setTransactionRef] = useState<string>("");
 
+  // Use the current community's effective fee (community override → falls back to system minimum)
+  const currentCommunityId = "comm-current";
   const selectedFeeStructure = selectedOffice ? getNominationFee(selectedOffice) : null;
-  const costBreakdown = selectedOffice ? calculateTotalNominationCost(selectedOffice) : null;
+  const costBreakdown = selectedOffice ? calculateTotalNominationCost(selectedOffice, currentCommunityId) : null;
   // Candidate's wallet only pays nomination fee + service charge (the
   // community wallet is separately debited for its own service charge).
   const hasInsufficientBalance = costBreakdown
