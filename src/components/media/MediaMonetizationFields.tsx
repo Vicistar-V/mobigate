@@ -78,6 +78,7 @@ export function MediaMonetizationFields({
   const docInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   const maxFee = getMediaAccessFeeMax();
+  const minFee = getMediaAccessFeeMin();
   const defaultFee = getMediaAccessFeeDefault();
 
   const toggleAudience = (key: AudienceKey) => {
@@ -96,6 +97,8 @@ export function MediaMonetizationFields({
   const handleFeeBlur = () => {
     let v = Number(value.accessFee);
     if (!Number.isFinite(v) || v < 0) v = 0;
+    // Allow 0 (free) explicitly; otherwise clamp into [minFee, maxFee]
+    if (v > 0 && v < minFee) v = minFee;
     if (v > maxFee) v = maxFee;
     onChange({ ...value, accessFee: v });
   };
@@ -112,7 +115,7 @@ export function MediaMonetizationFields({
             Set Access Fee
           </Label>
           <Badge variant="secondary" className="text-[10px]">
-            Default M{defaultFee} • Max M{maxFee}
+            M{minFee} – M{maxFee} • Default M{defaultFee}
           </Badge>
         </div>
         <div className="flex items-center gap-2">
@@ -134,7 +137,9 @@ export function MediaMonetizationFields({
           </span>
         </div>
         <p className="text-[11px] text-muted-foreground leading-snug">
-          Viewers pay this fee per access. Set 0 to keep it free.
+          Visitors pay this fee to view your content. Allowed range:{" "}
+          <span className="font-semibold">M{minFee} – M{maxFee}</span>. Set to 0
+          to keep it free.
         </p>
       </div>
 
