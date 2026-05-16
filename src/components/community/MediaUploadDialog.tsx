@@ -128,9 +128,18 @@ export const MediaUploadDialog = ({
 
       onUploadComplete(uploadedFiles);
       
+      const totalFee = selectedFiles.reduce((sum, f) => {
+        const type = f.type.startsWith("video/")
+          ? "Video"
+          : f.type.startsWith("audio/")
+          ? "Audio"
+          : "Photo";
+        return sum + getContentPostingFee(type);
+      }, 0);
+
       toast({
-        title: "Upload Complete",
-        description: `Successfully uploaded ${selectedFiles.length} file(s)`,
+        title: `Upload complete • M${totalFee.toLocaleString()} debited`,
+        description: `Uploaded ${selectedFiles.length} file(s). Content fee debited from your Mobi Wallet (non-refundable).`,
       });
 
       setSelectedFiles([]);
