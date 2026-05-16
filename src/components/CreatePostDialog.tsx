@@ -117,6 +117,7 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
     setMediaFile(null);
     setMediaPreview(null);
     setSelectedAlbum(null);
+    setMonetization(defaultMonetizationValue());
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
