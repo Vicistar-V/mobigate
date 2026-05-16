@@ -55,11 +55,16 @@ export default function SubMerchantVoucherTransactions() {
             </div>
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1.5 font-semibold">Sort</p>
-              <div className="flex gap-1.5 flex-wrap">
-                {([["newest","Newest"],["oldest","Oldest"],["amount_high","Amount ↓"],["amount_low","Amount ↑"]] as [SortOption,string][]).map(([val,label]) => (
-                  <button key={val} onClick={() => setSortBy(val)} className={`h-8 px-3 rounded-lg text-xs font-semibold touch-manipulation ${sortBy === val ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>{label}</button>
-                ))}
-              </div>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                className="w-full h-9 px-3 rounded-lg text-xs font-semibold bg-muted text-foreground border border-border/50 touch-manipulation"
+              >
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="amount_high">Amount ↓ (High to Low)</option>
+                <option value="amount_low">Amount ↑ (Low to High)</option>
+              </select>
             </div>
           </div>
         )}
