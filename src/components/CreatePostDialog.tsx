@@ -143,20 +143,19 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
       return;
     }
 
-    // In a real app, you would upload the mediaFile to storage here
-    // and create the post in the database
-    
-    const albumName = selectedAlbum 
-      ? albums.find(a => a.id === selectedAlbum)?.name 
+    const albumName = selectedAlbum
+      ? albums.find(a => a.id === selectedAlbum)?.name
       : null;
-    
+
+    const fee = getContentPostingFee(type);
+
     toast({
-      title: "Success!",
-      description: albumName 
-        ? `Your post has been published to "${albumName}".`
-        : "Your monetized post has been created.",
+      title: `M${fee.toLocaleString()} debited from Mobi Wallet`,
+      description: albumName
+        ? `Post published to "${albumName}". Content fee M${fee.toLocaleString()} (non-refundable).`
+        : `Your monetized post is live. Content fee M${fee.toLocaleString()} (non-refundable).`,
     });
-    
+
     resetForm();
     setOpen(false);
   };
