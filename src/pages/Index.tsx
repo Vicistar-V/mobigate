@@ -360,6 +360,9 @@ const Index = () => {
 
           {/* Main Feed */}
           <div className="lg:col-span-2 space-y-6 min-w-0">
+            {/* User's Status Banner — same banner shown on their Profile, with their click action + auto-rotation */}
+            <UserStatusBanner />
+
             {/* Campaign Banners for Mobigate Interface */}
             <CampaignBannerRotation 
               audienceType="mobigate_interface" 
