@@ -332,18 +332,27 @@ export default function ManageUsersPage() {
     setDetailDrawerOpen(true);
   };
 
-  const handleSuspendUser = (user: PlatformUser) => {
-    toast({ title: "User Suspended", description: `${user.name} has been suspended.` });
-    setDetailDrawerOpen(false);
-  };
+  const openAuthDialog = (action: AdminAction) => setAuthAction(action);
 
-  const handleBanUser = (user: PlatformUser) => {
-    toast({ title: "User Banned", description: `${user.name} has been banned.` });
-    setDetailDrawerOpen(false);
-  };
-
-  const handleReactivateUser = (user: PlatformUser) => {
-    toast({ title: "User Reactivated", description: `${user.name} has been reactivated.` });
+  const handleAuthConfirm = (payload: { months?: number; authorisers: string[] }) => {
+    if (!selectedUser || !authAction) return;
+    const titleMap: Record<AdminAction, string> = {
+      suspend: "User Suspended",
+      ban: "User Banned",
+      deactivate: "User Deactivated",
+      reactivate: "User Reactivated",
+    };
+    const duration = payload.months
+      ? ` for ${payload.months} month${payload.months === 1 ? "" : "s"}`
+      : "";
+    const auth = payload.authorisers.length === 1
+      ? `Authorised by ${payload.authorisers[0]}.`
+      : `Authorised by ${payload.authorisers.join(", ")}.`;
+    toast({
+      title: titleMap[authAction],
+      description: `${selectedUser.name}${duration}. ${auth}`,
+    });
+    setAuthAction(null);
     setDetailDrawerOpen(false);
   };
 
