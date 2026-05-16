@@ -43,7 +43,7 @@ interface CurrencyRate {
 const DEFAULT_SELL_SPREAD = 0.04;
 const sell = (buy: number) => +(buy * (1 - DEFAULT_SELL_SPREAD)).toPrecision(6);
 
-const initialCurrencyRates: CurrencyRate[] = [
+const initialCurrencyRates: CurrencyRate[] = ([
   { code: "NGN", name: "Nigerian Naira", country: "Nigeria", flag: "🇳🇬", ratePerMobi: 1.00, previousRate: 1.00, lastUpdated: "2026-03-17", isBase: true },
   { code: "USD", name: "US Dollar", country: "United States", flag: "🇺🇸", ratePerMobi: 0.00062, previousRate: 0.00065, lastUpdated: "2026-03-17", isBase: false },
   { code: "EUR", name: "Euro", country: "Eurozone", flag: "🇪🇺", ratePerMobi: 0.00057, previousRate: 0.00059, lastUpdated: "2026-03-17", isBase: false },
