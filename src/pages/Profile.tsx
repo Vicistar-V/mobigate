@@ -23,6 +23,7 @@ import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState as useReactState } from "react";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
+import { NotableUsers } from "@/components/NotableUsers";
 import { ProfileAlbumsTab } from "@/components/profile/ProfileAlbumsTab";
 import { ProfileFriendsTab } from "@/components/profile/ProfileFriendsTab";
 import { ProfileLikesTab } from "@/components/profile/ProfileLikesTab";
@@ -830,6 +831,9 @@ const Profile = () => {
           <TabsContent value="status" className="space-y-6">
             {/* People You May Know - First Slot */}
             <PeopleYouMayKnow />
+
+            {/* Notable Users - Auto-curated celebrities/active/online */}
+            <NotableUsers />
 
             {/* Create Monetized Post - Directly above Wall Status */}
             <CreatePostDialog />

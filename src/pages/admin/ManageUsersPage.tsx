@@ -16,6 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerBody } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Trash2 } from "lucide-react";
+import { AdminAuthorizationDialog, AdminAction } from "@/components/admin/AdminAuthorizationDialog";
 import { getNigerianStatesForFilter, getCitiesForLGA } from "@/data/nigerianLocationsData";
 
 // Country definitions with flags
@@ -228,6 +230,7 @@ export default function ManageUsersPage() {
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest" | "name">("newest");
   const [selectedUser, setSelectedUser] = useState<PlatformUser | null>(null);
   const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
+  const [authAction, setAuthAction] = useState<AdminAction | null>(null);
 
   const isNigeria = selectedCountry === "ng";
 
@@ -329,18 +332,27 @@ export default function ManageUsersPage() {
     setDetailDrawerOpen(true);
   };
 
-  const handleSuspendUser = (user: PlatformUser) => {
-    toast({ title: "User Suspended", description: `${user.name} has been suspended.` });
-    setDetailDrawerOpen(false);
-  };
+  const openAuthDialog = (action: AdminAction) => setAuthAction(action);
 
-  const handleBanUser = (user: PlatformUser) => {
-    toast({ title: "User Banned", description: `${user.name} has been banned.` });
-    setDetailDrawerOpen(false);
-  };
-
-  const handleReactivateUser = (user: PlatformUser) => {
-    toast({ title: "User Reactivated", description: `${user.name} has been reactivated.` });
+  const handleAuthConfirm = (payload: { months?: number; authorisers: string[] }) => {
+    if (!selectedUser || !authAction) return;
+    const titleMap: Record<AdminAction, string> = {
+      suspend: "User Suspended",
+      ban: "User Banned",
+      deactivate: "User Deactivated",
+      reactivate: "User Reactivated",
+    };
+    const duration = payload.months
+      ? ` for ${payload.months} month${payload.months === 1 ? "" : "s"}`
+      : "";
+    const auth = payload.authorisers.length === 1
+      ? `Authorised by ${payload.authorisers[0]}.`
+      : `Authorised by ${payload.authorisers.join(", ")}.`;
+    toast({
+      title: titleMap[authAction],
+      description: `${selectedUser.name}${duration}. ${auth}`,
+    });
+    setAuthAction(null);
     setDetailDrawerOpen(false);
   };
 
@@ -716,13 +728,13 @@ export default function ManageUsersPage() {
                           View Full Profile
                         </Button>
 
-                        {selectedUser.status === "active" && (
+                        {selectedUser.status !== "deactivated" && selectedUser.status === "active" && (
                           <>
                             <Button
                               variant="outline"
                               size="sm"
                               className="w-full justify-start text-xs text-amber-600 border-amber-200 hover:bg-amber-50"
-                              onClick={() => handleSuspendUser(selectedUser)}
+                              onClick={() => openAuthDialog("suspend")}
                             >
                               <ShieldAlert className="h-3.5 w-3.5 mr-2" />
                               Suspend User
@@ -731,7 +743,7 @@ export default function ManageUsersPage() {
                               variant="outline"
                               size="sm"
                               className="w-full justify-start text-xs text-red-600 border-red-200 hover:bg-red-50"
-                              onClick={() => handleBanUser(selectedUser)}
+                              onClick={() => openAuthDialog("ban")}
                             >
                               <ShieldBan className="h-3.5 w-3.5 mr-2" />
                               Ban User
@@ -744,10 +756,22 @@ export default function ManageUsersPage() {
                             variant="outline"
                             size="sm"
                             className="w-full justify-start text-xs text-emerald-600 border-emerald-200 hover:bg-emerald-50"
-                            onClick={() => handleReactivateUser(selectedUser)}
+                            onClick={() => openAuthDialog("reactivate")}
                           >
                             <UserCheck className="h-3.5 w-3.5 mr-2" />
                             Reactivate User
+                          </Button>
+                        )}
+
+                        {selectedUser.status !== "deactivated" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full justify-start text-xs text-red-700 border-red-300 hover:bg-red-50"
+                            onClick={() => openAuthDialog("deactivate")}
+                          >
+                            <Trash2 className="h-3.5 w-3.5 mr-2" />
+                            Deactivate User
                           </Button>
                         )}
                       </div>
@@ -759,6 +783,17 @@ export default function ManageUsersPage() {
           )}
         </DrawerContent>
       </Drawer>
+
+      {/* Admin Authorisation Dialog */}
+      {selectedUser && authAction && (
+        <AdminAuthorizationDialog
+          open={!!authAction}
+          onOpenChange={(v) => !v && setAuthAction(null)}
+          action={authAction}
+          targetName={selectedUser.name}
+          onConfirm={handleAuthConfirm}
+        />
+      )}
     </div>
   );
 }
