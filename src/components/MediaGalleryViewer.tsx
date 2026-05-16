@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { CommentDialog } from "@/components/CommentDialog";
 import { useSwipeable } from "react-swipeable";
+import { MediaOwnerMenu } from "@/components/media/MediaOwnerMenu";
 
 export interface MediaItem {
   id?: string;
@@ -250,14 +251,27 @@ export const MediaGalleryViewer = ({
                 </div>
               )}
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-white hover:bg-white/20"
-              onClick={() => onOpenChange(false)}
-            >
-              <X className="h-6 w-6" />
-            </Button>
+            <div className="flex items-center gap-1">
+              {currentItem?.isOwner && (
+                <MediaOwnerMenu
+                  itemLabel={currentItem.type === "video" ? "Video" : currentItem.type === "audio" ? "Audio" : "Photo"}
+                  onEdit={() => toast({ title: "Edit", description: "Open editor for this media." })}
+                  onChangeAccessFee={() => toast({ title: "Set Access Fee", description: "Visitors pay M5 – M100 to view this content." })}
+                  onDelete={() => {
+                    toast({ title: "Deleted", description: "Media removed from your profile." });
+                    onOpenChange(false);
+                  }}
+                />
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white hover:bg-white/20"
+                onClick={() => onOpenChange(false)}
+              >
+                <X className="h-6 w-6" />
+              </Button>
+            </div>
           </div>
         </div>
 

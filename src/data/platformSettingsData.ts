@@ -518,19 +518,20 @@ export function setEligibilitySetting(key: keyof PlatformEligibilitySettings, va
 
 // Platform Media Access Fee Settings - Managed by Mobigate Admin
 // Controls per-content access fee creators set when uploading monetised media
+// Range: M5 (min) – M100 (max). Set to 0 to keep content free.
 export interface PlatformMediaAccessFeeSettings {
-  defaultFee: number;          // default 2 Mobi
-  minFee: number;              // 0 = free allowed
-  maxFee: number;              // 50 Mobi cap
-  hardMaxFee: number;          // upper bound admin can raise to
+  defaultFee: number;
+  minFee: number;
+  maxFee: number;
+  hardMaxFee: number;
   lastUpdatedAt: Date;
   lastUpdatedBy: string;
 }
 
 export const platformMediaAccessFeeSettings: PlatformMediaAccessFeeSettings = {
-  defaultFee: 2,
-  minFee: 0,
-  maxFee: 50,
+  defaultFee: 10,
+  minFee: 5,
+  maxFee: 100,
   hardMaxFee: 500,
   lastUpdatedAt: new Date(),
   lastUpdatedBy: "Mobigate Admin",
@@ -538,6 +539,10 @@ export const platformMediaAccessFeeSettings: PlatformMediaAccessFeeSettings = {
 
 export function getMediaAccessFeeDefault(): number {
   return platformMediaAccessFeeSettings.defaultFee;
+}
+
+export function getMediaAccessFeeMin(): number {
+  return platformMediaAccessFeeSettings.minFee;
 }
 
 export function getMediaAccessFeeMax(): number {
@@ -561,3 +566,54 @@ export function setMediaAccessFeeMax(value: number): void {
     platformMediaAccessFeeSettings.lastUpdatedAt = new Date();
   }
 }
+
+// Platform Content Posting Fees - Managed by Mobigate Admin
+// Charged from creator's Mobi Wallet when a piece of content is posted.
+// Video/Audio media: M300 – M500. Still media (Photo/Article/News/PDF): M200 – M300.
+export type ContentMediaType =
+  | "Photo"
+  | "Article"
+  | "News"
+  | "PDF"
+  | "URL"
+  | "Video"
+  | "Audio";
+
+export interface PlatformContentPostingFee {
+  min: number;
+  max: number;
+  default: number;
+}
+
+export interface PlatformContentPostingFees {
+  motion: PlatformContentPostingFee;   // Video / Audio
+  still: PlatformContentPostingFee;    // Photo / Article / News / PDF / URL
+  lastUpdatedAt: Date;
+  lastUpdatedBy: string;
+}
+
+export const platformContentPostingFees: PlatformContentPostingFees = {
+  motion: { min: 300, max: 500, default: 300 },
+  still: { min: 200, max: 300, default: 200 },
+  lastUpdatedAt: new Date(),
+  lastUpdatedBy: "Mobigate Admin",
+};
+
+export function isMotionMedia(type: ContentMediaType | string): boolean {
+  return type === "Video" || type === "Audio";
+}
+
+export function getContentPostingFee(type: ContentMediaType | string): number {
+  return isMotionMedia(type)
+    ? platformContentPostingFees.motion.default
+    : platformContentPostingFees.still.default;
+}
+
+export function getContentPostingFeeRange(
+  type: ContentMediaType | string
+): { min: number; max: number } {
+  return isMotionMedia(type)
+    ? { min: platformContentPostingFees.motion.min, max: platformContentPostingFees.motion.max }
+    : { min: platformContentPostingFees.still.min, max: platformContentPostingFees.still.max };
+}
+

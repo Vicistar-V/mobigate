@@ -12,12 +12,16 @@ import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { albumsCarouselAdSlots } from "@/data/profileAds";
 import { getRandomAdSlot } from "@/lib/adUtils";
 import { useUserAlbums } from "@/hooks/useWindowData";
+import { RenameAlbumDialog } from "@/components/RenameAlbumDialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProfileAlbumsTabProps {
   userId: string;
   profileImageHistory: string[];
   bannerImageHistory: string[];
   userPosts: Post[];
+  /** When true, show owner Edit/Delete controls on each album. Defaults to true. */
+  isOwner?: boolean;
 }
 
 export const ProfileAlbumsTab = ({
@@ -25,13 +29,17 @@ export const ProfileAlbumsTab = ({
   profileImageHistory,
   bannerImageHistory,
   userPosts,
+  isOwner = true,
 }: ProfileAlbumsTabProps) => {
   const phpAlbums = useUserAlbums();
-  
+  const { toast } = useToast();
+
   const [selectedAlbum, setSelectedAlbum] = useState<(Album & { isSystem?: boolean }) | null>(null);
   const [albumDialogOpen, setAlbumDialogOpen] = useState(false);
   const [albumsView, setAlbumsView] = useState<"normal" | "large">("normal");
   const [visibleAlbumCount, setVisibleAlbumCount] = useState(15);
+  const [albumOverrides, setAlbumOverrides] = useState<Record<string, { name?: string; deleted?: boolean }>>({});
+  const [renameTarget, setRenameTarget] = useState<(Album & { isSystem?: boolean }) | null>(null);
 
   // Create system albums
   const profilePicturesAlbum: Album & { isSystem: boolean } = useMemo(
@@ -62,18 +70,57 @@ export const ProfileAlbumsTab = ({
     [bannerImageHistory]
   );
 
-  // Get user-created albums (from mockAlbums) with posts assigned to them
+  // Get user-created albums (from mockAlbums) with posts assigned to them.
+  // Apply owner overrides (rename/delete) so changes reflect in the UI.
   const userAlbums = useMemo(() => {
     const baseAlbums = phpAlbums || mockAlbums;
-    return baseAlbums.map((album) => {
-      const postsInAlbum = userPosts.filter((post) => post.albumId === album.id);
-      return {
-        ...album,
-        itemCount: postsInAlbum.length,
-        coverImage: postsInAlbum[0]?.imageUrl || album.coverImage,
-      };
-    }).filter((album) => album.itemCount > 0); // Only show albums with items
-  }, [phpAlbums, userPosts]);
+    return baseAlbums
+      .filter((album) => !albumOverrides[album.id]?.deleted)
+      .map((album) => {
+        const postsInAlbum = userPosts.filter((post) => post.albumId === album.id);
+        return {
+          ...album,
+          name: albumOverrides[album.id]?.name ?? album.name,
+          itemCount: postsInAlbum.length,
+          coverImage: postsInAlbum[0]?.imageUrl || album.coverImage,
+        };
+      })
+      .filter((album) => album.itemCount > 0); // Only show albums with items
+  }, [phpAlbums, userPosts, albumOverrides]);
+
+  const handleAlbumRename = (newName: string) => {
+    if (!renameTarget) return;
+    setAlbumOverrides((prev) => ({
+      ...prev,
+      [renameTarget.id]: { ...prev[renameTarget.id], name: newName },
+    }));
+    toast({
+      title: "Album renamed",
+      description: `"${renameTarget.name}" is now "${newName}".`,
+    });
+    setRenameTarget(null);
+  };
+
+  const handleAlbumDelete = (album: Album & { isSystem?: boolean }) => {
+    setAlbumOverrides((prev) => ({
+      ...prev,
+      [album.id]: { ...prev[album.id], deleted: true },
+    }));
+    toast({
+      title: "Album deleted",
+      description: `"${album.name}" was removed from your profile.`,
+    });
+  };
+
+  const handleAlbumChangeCover = (album: Album & { isSystem?: boolean }) => {
+    toast({
+      title: "Change cover",
+      description: `Open "${album.name}" and select an item as the new cover.`,
+    });
+    setSelectedAlbum(album);
+    setAlbumDialogOpen(true);
+  };
+
 
   // Combine all albums for carousel
   const allAlbums = useMemo(() => {
@@ -254,6 +301,10 @@ export const ProfileAlbumsTab = ({
                           album={album}
                           onClick={() => handleAlbumClick(album)}
                           variant="carousel"
+                          isOwner={isOwner}
+                          onEdit={() => setRenameTarget(album)}
+                          onDelete={() => handleAlbumDelete(album)}
+                          onChangeCover={() => handleAlbumChangeCover(album)}
                         />
                         
                         {shouldShowAd && (
@@ -288,6 +339,10 @@ export const ProfileAlbumsTab = ({
                         album={album}
                         onClick={() => handleAlbumClick(album)}
                         variant="grid"
+                        isOwner={isOwner}
+                        onEdit={() => setRenameTarget(album)}
+                        onDelete={() => handleAlbumDelete(album)}
+                        onChangeCover={() => handleAlbumChangeCover(album)}
                       />
                       
                       {shouldShowAd && (
@@ -369,6 +424,14 @@ export const ProfileAlbumsTab = ({
           items={getAlbumItems(selectedAlbum)}
         />
       )}
+
+      {/* Rename Album */}
+      <RenameAlbumDialog
+        open={!!renameTarget}
+        onOpenChange={(o) => !o && setRenameTarget(null)}
+        currentName={renameTarget?.name ?? ""}
+        onRename={handleAlbumRename}
+      />
     </div>
   );
 };

@@ -3,26 +3,42 @@ import { Badge } from "@/components/ui/badge";
 import { Folder, Lock, Users, Globe } from "lucide-react";
 import { Album } from "@/data/posts";
 import { cn } from "@/lib/utils";
+import { MediaOwnerMenu } from "@/components/media/MediaOwnerMenu";
 
 interface AlbumCardProps {
   album: Album & { isSystem?: boolean };
   onClick: () => void;
   variant?: "carousel" | "grid";
+  /** When true (and album is not system), show the owner Edit/Delete menu. */
+  isOwner?: boolean;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onChangeCover?: () => void;
 }
 
-export const AlbumCard = ({ album, onClick, variant = "carousel" }: AlbumCardProps) => {
+export const AlbumCard = ({
+  album,
+  onClick,
+  variant = "carousel",
+  isOwner = false,
+  onEdit,
+  onDelete,
+  onChangeCover,
+}: AlbumCardProps) => {
   const getPrivacyIcon = () => {
     if (album.privacy === "Private") return <Lock className="h-3 w-3" />;
     if (album.privacy === "Friends") return <Users className="h-3 w-3" />;
     return <Globe className="h-3 w-3" />;
   };
 
+  const showOwnerMenu = isOwner && !album.isSystem && (onEdit || onDelete);
+
   return (
     <Card
       className={cn(
         "aspect-square overflow-hidden relative group cursor-pointer hover:scale-105 transition-transform duration-200",
-        variant === "carousel" 
-          ? "flex-shrink-0 w-[160px] sm:w-[180px] lg:w-[200px]" 
+        variant === "carousel"
+          ? "flex-shrink-0 w-[160px] sm:w-[180px] lg:w-[200px]"
           : "w-full"
       )}
       onClick={onClick}
@@ -43,14 +59,22 @@ export const AlbumCard = ({ album, onClick, variant = "carousel" }: AlbumCardPro
       {/* Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
-      {/* Privacy Badge */}
-      <div className="absolute top-2 right-2 z-10">
+      {/* Top-right badges / owner menu */}
+      <div className="absolute top-2 right-2 z-10 flex items-center gap-1">
         <Badge
           variant={album.privacy === "Private" ? "destructive" : "secondary"}
           className="backdrop-blur-sm bg-black/30 text-white border-0 gap-1 px-2 py-0.5"
         >
           {getPrivacyIcon()}
         </Badge>
+        {showOwnerMenu && (
+          <MediaOwnerMenu
+            itemLabel="Album"
+            onEdit={onEdit}
+            onChangeCover={onChangeCover}
+            onDelete={onDelete}
+          />
+        )}
       </div>
 
       {/* Album Info */}
