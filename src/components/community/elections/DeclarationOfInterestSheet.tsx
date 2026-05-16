@@ -86,8 +86,10 @@ export function DeclarationOfInterestSheet({
 
   const selectedFeeStructure = selectedOffice ? getNominationFee(selectedOffice) : null;
   const costBreakdown = selectedOffice ? calculateTotalNominationCost(selectedOffice) : null;
-  const hasInsufficientBalance = costBreakdown 
-    ? walletBalance < costBreakdown.totalDebited 
+  // Candidate's wallet only pays nomination fee + service charge (the
+  // community wallet is separately debited for its own service charge).
+  const hasInsufficientBalance = costBreakdown
+    ? walletBalance < costBreakdown.candidateDebited
     : false;
 
   const handleSelectOffice = (officeId: string) => {
