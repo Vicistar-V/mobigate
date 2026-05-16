@@ -267,7 +267,7 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
               {/* Campaign Period */}
               <div className="space-y-2">
                 <Label className="text-sm font-semibold">Campaign Period *</Label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 xs:grid-cols-2">
                   {/* Start Date */}
                   <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
                     <PopoverTrigger asChild>
@@ -287,7 +287,7 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
                         mode="single"
                         selected={startDate}
                         onSelect={handleStartDateSelect}
-                        disabled={(date) => date < new Date()}
+                        disabled={(date) => startOfDay(date) < today}
                         initialFocus
                         className="p-3 pointer-events-auto"
                       />
@@ -313,7 +313,7 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
                         mode="single"
                         selected={endDate}
                         onSelect={handleEndDateSelect}
-                        disabled={(date) => date < (startDate || new Date())}
+                        disabled={(date) => startOfDay(date) < startOfDay(startDate || today)}
                         initialFocus
                         className="p-3 pointer-events-auto"
                       />
