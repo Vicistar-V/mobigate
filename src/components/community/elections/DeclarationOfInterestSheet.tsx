@@ -430,11 +430,8 @@ export function DeclarationOfInterestSheet({
                 <strong>{selectedFeeStructure?.officeName}</strong>.
               </p>
               <p>
-                <strong>{formatMobiAmount(costBreakdown?.candidateDebited || 0)}</strong>{" "}
-                <span className="text-muted-foreground">
-                  ({formatLocalAmount(costBreakdown?.candidateDebited || 0, "NGN")})
-                </span>{" "}
-                will be debited from your Wallet.
+                <strong>{formatLocalAmount(costBreakdown?.candidateDebited || 0, "NGN")} Declaration Fee</strong>{" "}
+                will be debited on your Wallet. This payment is non-refundable, and also referred to as Nomination Fee.
               </p>
               <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
                 <p className="flex justify-between">
