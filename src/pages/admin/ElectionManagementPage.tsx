@@ -12,6 +12,7 @@ import { AdminClearancesTab } from "@/components/admin/election/AdminClearancesT
 import { AdminWinnersAnnouncementTab } from "@/components/admin/election/AdminWinnersAnnouncementTab";
 import { AdminImpeachmentTab } from "@/components/admin/election/AdminImpeachmentTab";
 import { ElectionSettingsSection } from "@/components/admin/election/ElectionSettingsSection";
+import { CommunityNominationFeeSettings } from "@/components/community/elections/CommunityNominationFeeSettings";
 import { DeclareElectionDrawer } from "@/components/admin/election/DeclareElectionDrawer";
 import { AdminDeclareElectionTab } from "@/components/admin/election/AdminDeclareElectionTab";
 
@@ -123,7 +124,8 @@ export default function ElectionManagementPage() {
           <TabsContent value="impeachment" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
             <AdminImpeachmentTab />
           </TabsContent>
-          <TabsContent value="settings" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+          <TabsContent value="settings" className="mt-0 focus-visible:outline-none focus-visible:ring-0 space-y-6">
+            <CommunityNominationFeeSettings communityName="this community" />
             <ElectionSettingsSection />
           </TabsContent>
         </div>

@@ -26,7 +26,8 @@ import {
   Users,
   AlertCircle,
 } from "lucide-react";
-import { nominationFeeStructures } from "@/data/nominationFeesData";
+import { nominationFeeStructures, mobigateNominationConfig, type CommunityFeePolicy } from "@/data/nominationFeesData";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { NominationFeeStructure } from "@/types/nominationProcess";
 import { formatMobi, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { ServiceChargeConfigCard } from "./ServiceChargeConfigCard";
@@ -175,6 +176,93 @@ const getCategoryIcon = (category: string) => {
   }
 };
 
+// ── Community Fee Policy Card (system-admin scope) ──
+function CommunityFeePolicyCard() {
+  const { toast } = useToast();
+  const [locked, setLocked] = useState(true);
+  const [policy, setPolicy] = useState<CommunityFeePolicy>(mobigateNominationConfig.communityFeePolicy);
+  const [draft, setDraft] = useState<CommunityFeePolicy>(policy);
+
+  const policyMeta: Record<CommunityFeePolicy, { label: string; desc: string; tone: string }> = {
+    enforce_minimum: {
+      label: "Enforce System Minimum",
+      desc: "Communities must set fees ≥ the system minimum for each office.",
+      tone: "text-emerald-600",
+    },
+    allow_below: {
+      label: "Allow Below System Minimum",
+      desc: "Communities may set fees below the system minimum (down to the absolute floor).",
+      tone: "text-amber-600",
+    },
+    free_for_all: {
+      label: "Communities Set Freely",
+      desc: "System values are merely suggestions — communities decide everything.",
+      tone: "text-fuchsia-600",
+    },
+  };
+
+  return (
+    <LockableSetting
+      label="Community Override Policy"
+      description="Controls how much communities can deviate from system minimum fees"
+      locked={locked}
+      onLockedChange={(v) => {
+        if (locked && !v) {
+          setDraft(policy);
+          setLocked(false);
+          return;
+        }
+        // Saving
+        mobigateNominationConfig.communityFeePolicy = draft;
+        setPolicy(draft);
+        setLocked(true);
+        toast({
+          title: "Policy Updated",
+          description: `Community fee policy → ${policyMeta[draft].label}`,
+        });
+      }}
+      displayValue={
+        <Badge variant="outline" className={`text-xs ${policyMeta[policy].tone}`}>
+          {policyMeta[policy].label}
+        </Badge>
+      }
+    >
+      {(unlocked) => (
+        <RadioGroup
+          value={draft}
+          onValueChange={(v) => unlocked && setDraft(v as CommunityFeePolicy)}
+          className="space-y-2"
+        >
+          {(Object.keys(policyMeta) as CommunityFeePolicy[]).map((key) => (
+            <label
+              key={key}
+              htmlFor={`policy-${key}`}
+              className={`flex items-start gap-2.5 rounded-lg border p-2.5 cursor-pointer transition ${
+                draft === key ? "border-primary bg-primary/5" : "border-border bg-card"
+              } ${!unlocked ? "opacity-60 cursor-not-allowed" : ""}`}
+            >
+              <RadioGroupItem
+                id={`policy-${key}`}
+                value={key}
+                disabled={!unlocked}
+                className="mt-0.5 shrink-0"
+              />
+              <div className="min-w-0">
+                <p className={`text-sm font-semibold ${policyMeta[key].tone}`}>
+                  {policyMeta[key].label}
+                </p>
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  {policyMeta[key].desc}
+                </p>
+              </div>
+            </label>
+          ))}
+        </RadioGroup>
+      )}
+    </LockableSetting>
+  );
+}
+
 export function NominationFeeSettingsSection() {
   const { toast } = useToast();
   const [fees, setFees] = useState<NominationFeeStructure[]>(nominationFeeStructures);
@@ -214,9 +302,13 @@ export function NominationFeeSettingsSection() {
       </div>
 
       <p className="text-sm text-muted-foreground">
-        Configure nomination fees for all elective offices. Fees are automatically
-        debited when candidates declare interest.
+        Configure the <strong>system-wide minimum</strong> nomination fees for each elective office.
+        Communities may set their own fees per the policy below.
       </p>
+
+      {/* Community Override Policy — controls whether communities can deviate */}
+      <CommunityFeePolicyCard />
+
 
       {/* Service Charge / Processing Fee — single unified setting */}
       <ServiceChargeConfigCard

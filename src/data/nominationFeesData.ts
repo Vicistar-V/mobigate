@@ -275,14 +275,90 @@ export function isPrimaryRequired(officeId: string): boolean {
 /**
  * Mobigate platform nomination configuration
  * Only accessible to Mobigate Admin
+ *
+ * Community Override Policy controls whether communities can deviate from the
+ * system-wide minimum nomination fees:
+ *  - "enforce_minimum"  — community fee must be ≥ system minimum (default)
+ *  - "allow_below"      — community fee may go BELOW the system minimum
+ *  - "free_for_all"     — community sets any fee; system value is suggestion only
  */
+export type CommunityFeePolicy = "enforce_minimum" | "allow_below" | "free_for_all";
+
 export const mobigateNominationConfig = {
   serviceChargePercent: 20, // 15-30% range
   minimumServiceChargePercent: 15,
   maximumServiceChargePercent: 30,
+  /** How much room communities have over their own nomination fees. */
+  communityFeePolicy: "enforce_minimum" as CommunityFeePolicy,
+  /** Absolute floor for any nomination fee — applies even under "allow_below". */
+  absoluteMinimumFee: 1000,
   lastUpdatedAt: new Date("2025-01-01"),
   lastUpdatedBy: "Mobigate Admin",
 };
+
+/**
+ * Per-community per-office fee overrides.
+ * Shape: { [communityId]: { [officeId]: feeInMobi } }
+ * Mock data — in production this would be persisted in the community's settings.
+ */
+export const communityNominationFeeOverrides: Record<string, Record<string, number>> = {
+  "comm-lagos-devs": {
+    president: 75000,         // raised above system minimum (50k)
+    vice_president: 60000,
+    treasurer: 50000,
+  },
+  "comm-abuja-pros": {
+    president: 30000,         // BELOW system minimum (only valid under allow_below/free_for_all)
+    welfare_officer: 8000,
+  },
+};
+
+/** Get the system-mandated MINIMUM fee for an office. */
+export function getMinimumNominationFee(officeId: string): number {
+  return getNominationFee(officeId)?.feeInMobi ?? 0;
+}
+
+/** Get the EFFECTIVE fee a candidate will be charged in a given community. */
+export function getEffectiveNominationFee(officeId: string, communityId?: string): number {
+  const systemMin = getMinimumNominationFee(officeId);
+  if (!communityId) return systemMin;
+  const override = communityNominationFeeOverrides[communityId]?.[officeId];
+  if (override === undefined) return systemMin;
+
+  const policy = mobigateNominationConfig.communityFeePolicy;
+  if (policy === "free_for_all") {
+    return Math.max(override, mobigateNominationConfig.absoluteMinimumFee);
+  }
+  if (policy === "allow_below") {
+    return Math.max(override, mobigateNominationConfig.absoluteMinimumFee);
+  }
+  // enforce_minimum
+  return Math.max(override, systemMin);
+}
+
+/** Update / set a community's per-office nomination fee. */
+export function setCommunityNominationFee(communityId: string, officeId: string, fee: number) {
+  if (!communityNominationFeeOverrides[communityId]) {
+    communityNominationFeeOverrides[communityId] = {};
+  }
+  communityNominationFeeOverrides[communityId][officeId] = fee;
+}
+
+/**
+ * Validate a community's proposed fee against the current policy.
+ * Returns null on OK, or an error message string.
+ */
+export function validateCommunityNominationFee(officeId: string, fee: number): string | null {
+  if (fee < mobigateNominationConfig.absoluteMinimumFee) {
+    return `Fee cannot be below the absolute floor of M${mobigateNominationConfig.absoluteMinimumFee.toLocaleString()}.`;
+  }
+  const policy = mobigateNominationConfig.communityFeePolicy;
+  if (policy === "enforce_minimum") {
+    const min = getMinimumNominationFee(officeId);
+    if (fee < min) return `System policy: this office requires at least M${min.toLocaleString()}.`;
+  }
+  return null;
+}
 
 /**
  * Calculate total nomination cost.
@@ -291,8 +367,11 @@ export const mobigateNominationConfig = {
  * unified Service Charge / Processing Fee computed as a single percentage of
  * the nomination fee. It is debited from BOTH the Community Wallet AND the
  * Candidate's Wallet (each pays the charge once).
+ *
+ * Pass `communityId` to apply that community's per-office fee override
+ * (subject to the active CommunityFeePolicy).
  */
-export function calculateTotalNominationCost(officeId: string): {
+export function calculateTotalNominationCost(officeId: string, communityId?: string): {
   nominationFee: number;
   /** Unified Service Charge / Processing Fee (single value). */
   serviceCharge: number;
@@ -307,9 +386,15 @@ export function calculateTotalNominationCost(officeId: string): {
   communityReceives: number;
   /** Mobigate receives both sides of the service charge. */
   mobigateReceives: number;
+  /** True if the community has overridden the system minimum for this office. */
+  isCommunityOverride: boolean;
+  /** The system-mandated minimum, for transparency. */
+  systemMinimum: number;
 } {
-  const fee = getNominationFee(officeId);
-  const base = fee?.feeInMobi ?? 0;
+  const systemMinimum = getMinimumNominationFee(officeId);
+  const base = getEffectiveNominationFee(officeId, communityId);
+  const isCommunityOverride =
+    !!communityId && communityNominationFeeOverrides[communityId]?.[officeId] !== undefined;
 
   const serviceCharge = base * (mobigateNominationConfig.serviceChargePercent / 100);
 
@@ -325,6 +410,9 @@ export function calculateTotalNominationCost(officeId: string): {
     communityDebited,
     communityReceives: base - communityDebited,
     mobigateReceives: serviceCharge * 2, // collected from both wallets
+    isCommunityOverride,
+    systemMinimum,
   };
 }
+
 
