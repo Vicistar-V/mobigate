@@ -13,6 +13,11 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import {
+  MediaMonetizationFields,
+  defaultMonetizationValue,
+  type MediaMonetizationValue,
+} from "@/components/media/MediaMonetizationFields";
 
 interface CreateCommunityContentDialogProps {
   open: boolean;
