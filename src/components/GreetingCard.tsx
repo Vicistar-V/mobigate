@@ -550,6 +550,20 @@ export const GreetingSection = () => {
         presetTitle={presetTitle}
       />
 
+      {/* Bigger-window viewer for the featured media */}
+      <MediaGalleryViewer
+        open={viewerOpen}
+        onOpenChange={setViewerOpen}
+        items={myRecentPosts.map((p, i): MediaItem => ({
+          id: p.id || `featured-${i}`,
+          url: p.imageUrl,
+          type: (p as any).type?.toLowerCase() === "video" ? "video" : (p as any).type?.toLowerCase() === "audio" ? "audio" : "photo",
+          title: p.title,
+          author: (p as any).author,
+        }))}
+        initialIndex={safeFeaturedIdx}
+      />
+
       {/* Service Unavailable Dialog */}
       <Dialog />
     </div>
