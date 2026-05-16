@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, MoreHorizontal, ChevronLeft, ImagePlus, BadgeCheck, Images, Plus } from "lucide-react";
+import { Search, MoreHorizontal, ChevronLeft, ImagePlus, BadgeCheck, Images, Plus, Maximize2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { CreatePostDialog } from "./CreatePostDialog";
 import { PeopleYouMayKnow } from "./PeopleYouMayKnow";
@@ -18,6 +18,7 @@ import { UserTagBadges } from "./UserTagBadges";
 import { useUserProfile, useCurrentUserId, useFeedPosts } from "@/hooks/useWindowData";
 import { feedPosts as fallbackFeedPosts } from "@/data/posts";
 import heroAdBanner from "@/assets/hero-ad-banner.jpg";
+import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 
 export const GreetingSection = () => {
   const profile = useUserProfile();
