@@ -463,7 +463,12 @@ export default function WalletPage() {
                       <div className="h-9 w-9 rounded-lg bg-white/10 border border-white/10 flex items-center justify-center">
                         <w.icon className="h-4.5 w-4.5 text-white/80" />
                       </div>
-                      <span className="text-white/70 text-sm font-medium tracking-wide">{w.label}</span>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-white/85 text-sm font-semibold tracking-wide truncate">{w.label}</span>
+                        {(w as any).sublabel && (
+                          <span className="text-white/50 text-[10px] font-medium tracking-wide truncate">{(w as any).sublabel}</span>
+                        )}
+                      </div>
                     </div>
 
                     <p className="text-white/50 text-xs font-medium mb-1 uppercase tracking-widest">Available Balance</p>
