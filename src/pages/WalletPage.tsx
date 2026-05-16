@@ -156,7 +156,40 @@ export default function WalletPage() {
   const [mobiVoucherDenomination, setMobiVoucherDenomination] = useState(0);
   const [mobiProcessingMsg, setMobiProcessingMsg] = useState("");
 
-  // Gateway form fields
+  // Liquidate Sundry Wallet drawer
+  const [liquidateDrawerOpen, setLiquidateDrawerOpen] = useState(false);
+  type LiquidateStep = "input" | "confirm" | "processing" | "success";
+  const [liquidateStep, setLiquidateStep] = useState<LiquidateStep>("input");
+  const [liquidateMobi, setLiquidateMobi] = useState<string>("");
+  const [liquidateProcessingMsg, setLiquidateProcessingMsg] = useState("");
+
+  const liquidateMobiNum = parseFloat(liquidateMobi) || 0;
+  const liquidatePayoutNGN = liquidateMobiNum * SELLING_RATE_NGN_PER_MOBI;
+  const liquidateSpread = liquidateMobiNum - liquidatePayoutNGN;
+
+  const handleProcessLiquidate = useCallback(() => {
+    setLiquidateStep("processing");
+    const msgs = [
+      "Verifying Sundry Wallet balance...",
+      "Applying current Selling Rate...",
+      "Crediting your Local Currency Wallet...",
+    ];
+    let i = 0;
+    setLiquidateProcessingMsg(msgs[0]);
+    const interval = setInterval(() => {
+      i++;
+      if (i < msgs.length) setLiquidateProcessingMsg(msgs[i]);
+      else { clearInterval(interval); setLiquidateStep("success"); }
+    }, 850);
+  }, []);
+
+  const resetLiquidateDrawer = () => {
+    setLiquidateStep("input");
+    setLiquidateMobi("");
+    setLiquidateProcessingMsg("");
+    setLiquidateDrawerOpen(false);
+  };
+
   const [cardNumber, setCardNumber] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");
   const [cardCvv, setCardCvv] = useState("");
