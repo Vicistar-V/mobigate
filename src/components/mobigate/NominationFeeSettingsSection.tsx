@@ -215,9 +215,13 @@ export function NominationFeeSettingsSection() {
       </div>
 
       <p className="text-sm text-muted-foreground">
-        Configure nomination fees for all elective offices. Fees are automatically
-        debited when candidates declare interest.
+        Configure the <strong>system-wide minimum</strong> nomination fees for each elective office.
+        Communities may set their own fees per the policy below.
       </p>
+
+      {/* Community Override Policy — controls whether communities can deviate */}
+      <CommunityFeePolicyCard />
+
 
       {/* Service Charge / Processing Fee — single unified setting */}
       <ServiceChargeConfigCard
