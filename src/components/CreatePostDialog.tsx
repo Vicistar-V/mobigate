@@ -68,47 +68,54 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
   // Prefill from preset media when dialog opens
   useEffect(() => {
     if (open && presetMediaUrl) {
-      setMediaPreview(presetMediaUrl);
-      setMediaFile(null);
+      setMediaPreviews([presetMediaUrl]);
+      setMediaFiles([]);
       setType("Photo");
       if (presetTitle) setTitle(presetTitle);
     }
   }, [open, presetMediaUrl, presetTitle]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 20 * 1024 * 1024) {
-        toast({
-          title: "Error",
-          description: "File size must be less than 20MB",
-          variant: "destructive",
-        });
-        return;
-      }
+    const incoming = Array.from(e.target.files || []);
+    if (incoming.length === 0) return;
 
-      setMediaFile(file);
-      
-      // Create preview URL
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setMediaPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-      
+    const oversized = incoming.filter((f) => f.size > 20 * 1024 * 1024);
+    if (oversized.length > 0) {
       toast({
-        title: "Media selected",
-        description: `${file.name} ready to upload`,
+        title: "Error",
+        description: `${oversized.length} file(s) exceed the 20MB limit and were skipped`,
+        variant: "destructive",
       });
     }
+    const valid = incoming.filter((f) => f.size <= 20 * 1024 * 1024);
+    if (valid.length === 0) {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    setMediaFiles((prev) => [...prev, ...valid]);
+
+    valid.forEach((file) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setMediaPreviews((prev) => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    toast({
+      title: valid.length > 1 ? `${valid.length} files selected` : "Media selected",
+      description: valid.length > 1
+        ? `Added ${valid.length} files to this post`
+        : `${valid[0].name} ready to upload`,
+    });
+
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleRemoveMedia = () => {
-    setMediaFile(null);
-    setMediaPreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+  const handleRemoveMediaAt = (index: number) => {
+    setMediaPreviews((prev) => prev.filter((_, i) => i !== index));
+    setMediaFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const resetForm = () => {
@@ -116,8 +123,8 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
     setSubtitle("");
     setDescription("");
     setType("Photo");
-    setMediaFile(null);
-    setMediaPreview(null);
+    setMediaFiles([]);
+    setMediaPreviews([]);
     setSelectedAlbum(null);
     setMonetization(defaultMonetizationValue());
     if (fileInputRef.current) {
