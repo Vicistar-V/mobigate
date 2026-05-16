@@ -22,6 +22,7 @@ import {
 import {
   getMediaAccessFeeDefault,
   getMediaAccessFeeMax,
+  getMediaAccessFeeMin,
 } from "@/data/platformSettingsData";
 
 export type AudienceKey =
