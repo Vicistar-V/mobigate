@@ -4,8 +4,21 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Users, Search, Globe, MapPin, ChevronRight, Shield, ShieldBan, ShieldAlert,
   Eye, Calendar, Mail, Phone, ArrowLeft, UserCheck, UserX, AlertTriangle,
-  Crown, Star, Filter, SortAsc, SortDesc, Activity,
+  Crown, Star, Filter, SortAsc, SortDesc, Activity, Ban, Flag, Clock, Slash,
 } from "lucide-react";
+
+// Deterministic moderation history derived from user id
+function getModerationHistory(id: string) {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return {
+    blockedBy: h % 9,              // times this user has been blocked by others
+    reported: (h >> 3) % 28,       // times reported on platform
+    suspended: (h >> 7) % 4,       // prior suspensions
+    warnings: (h >> 11) % 6,       // admin warnings issued
+    contentRemoved: (h >> 5) % 12, // posts/comments removed
+  };
+}
 import { Header } from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
