@@ -13,6 +13,7 @@ import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PremiumAdCardProps } from "@/components/PremiumAdCard";
 import { ChatWithFriendsDialog } from "@/components/chat/ChatWithFriendsDialog";
 import { CampaignBannerRotation } from "@/components/community/elections/CampaignBannerRotation";
+import { UserStatusBanner } from "@/components/profile/UserStatusBanner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MessageCircle } from "lucide-react";
@@ -359,6 +360,9 @@ const Index = () => {
 
           {/* Main Feed */}
           <div className="lg:col-span-2 space-y-6 min-w-0">
+            {/* User's Status Banner — same banner shown on their Profile, with their click action + auto-rotation */}
+            <UserStatusBanner />
+
             {/* Campaign Banners for Mobigate Interface */}
             <CampaignBannerRotation 
               audienceType="mobigate_interface" 
