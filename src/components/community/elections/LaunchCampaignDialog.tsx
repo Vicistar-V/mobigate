@@ -267,7 +267,7 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
               {/* Campaign Period */}
               <div className="space-y-2">
                 <Label className="text-sm font-semibold">Campaign Period *</Label>
-                <div className="grid grid-cols-1 gap-3 xs:grid-cols-2">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {/* Start Date */}
                   <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
                     <PopoverTrigger asChild>
