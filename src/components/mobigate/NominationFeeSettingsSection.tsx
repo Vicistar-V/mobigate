@@ -26,7 +26,8 @@ import {
   Users,
   AlertCircle,
 } from "lucide-react";
-import { nominationFeeStructures } from "@/data/nominationFeesData";
+import { nominationFeeStructures, mobigateNominationConfig, type CommunityFeePolicy } from "@/data/nominationFeesData";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { NominationFeeStructure } from "@/types/nominationProcess";
 import { formatMobi, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { ServiceChargeConfigCard } from "./ServiceChargeConfigCard";
