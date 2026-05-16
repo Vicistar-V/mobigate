@@ -402,9 +402,16 @@ const Index = () => {
                 <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} />
               </div>
               <div className="space-y-6 mt-6">
-                {displayedPosts.map((post, index) => (
+                {displayedPosts.map((post, index) => {
+                  const isOwn = !!post.userId && post.userId === currentUserId;
+                  return (
                 <div key={index}>
-                  <FeedPost {...post as any} />
+                  <FeedPost
+                    {...(post as any)}
+                    isOwner={isOwn || (post as any).isOwner}
+                    onEdit={isOwn ? () => handleEditPost(post as Post) : undefined}
+                    onDelete={isOwn ? () => (post as any).id && handleDeletePost((post as any).id) : undefined}
+                  />
                   {/* Insert premium ad after every 4 posts */}
                   {(index + 1) % 4 === 0 && index < displayedPosts.length - 1 && (
                     <div className="my-8">
@@ -422,7 +429,8 @@ const Index = () => {
                     </div>
                   )}
                 </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Pagination Controls */}

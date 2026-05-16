@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Upload, X } from "lucide-react";
+import { Plus, Upload, X, ImagePlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AlbumSelector } from "./AlbumSelector";
 import { CreateAlbumDialog } from "./CreateAlbumDialog";
@@ -56,8 +56,8 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
   const [subtitle, setSubtitle] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState<"Photo" | "Video" | "Audio" | "Article" | "PDF" | "URL">("Photo");
-  const [mediaFile, setMediaFile] = useState<File | null>(null);
-  const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);
   const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null);
   const [showNewAlbumDialog, setShowNewAlbumDialog] = useState(false);
   const [monetization, setMonetization] = useState<MediaMonetizationValue>(
@@ -68,47 +68,54 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
   // Prefill from preset media when dialog opens
   useEffect(() => {
     if (open && presetMediaUrl) {
-      setMediaPreview(presetMediaUrl);
-      setMediaFile(null);
+      setMediaPreviews([presetMediaUrl]);
+      setMediaFiles([]);
       setType("Photo");
       if (presetTitle) setTitle(presetTitle);
     }
   }, [open, presetMediaUrl, presetTitle]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 20 * 1024 * 1024) {
-        toast({
-          title: "Error",
-          description: "File size must be less than 20MB",
-          variant: "destructive",
-        });
-        return;
-      }
+    const incoming = Array.from(e.target.files || []);
+    if (incoming.length === 0) return;
 
-      setMediaFile(file);
-      
-      // Create preview URL
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setMediaPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-      
+    const oversized = incoming.filter((f) => f.size > 20 * 1024 * 1024);
+    if (oversized.length > 0) {
       toast({
-        title: "Media selected",
-        description: `${file.name} ready to upload`,
+        title: "Error",
+        description: `${oversized.length} file(s) exceed the 20MB limit and were skipped`,
+        variant: "destructive",
       });
     }
+    const valid = incoming.filter((f) => f.size <= 20 * 1024 * 1024);
+    if (valid.length === 0) {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    setMediaFiles((prev) => [...prev, ...valid]);
+
+    valid.forEach((file) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setMediaPreviews((prev) => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    toast({
+      title: valid.length > 1 ? `${valid.length} files selected` : "Media selected",
+      description: valid.length > 1
+        ? `Added ${valid.length} files to this post`
+        : `${valid[0].name} ready to upload`,
+    });
+
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleRemoveMedia = () => {
-    setMediaFile(null);
-    setMediaPreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+  const handleRemoveMediaAt = (index: number) => {
+    setMediaPreviews((prev) => prev.filter((_, i) => i !== index));
+    setMediaFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const resetForm = () => {
@@ -116,8 +123,8 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
     setSubtitle("");
     setDescription("");
     setType("Photo");
-    setMediaFile(null);
-    setMediaPreview(null);
+    setMediaFiles([]);
+    setMediaPreviews([]);
     setSelectedAlbum(null);
     setMonetization(defaultMonetizationValue());
     if (fileInputRef.current) {
@@ -239,25 +246,42 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
           <ContentFeeNotice mediaType={type} />
 
           <div className="space-y-2">
-            <Label>Media File</Label>
-            
-            {/* Media Preview */}
-            {mediaPreview && (
-              <div className="relative rounded-lg border overflow-hidden bg-muted">
-                <img 
-                  src={mediaPreview} 
-                  alt="Media preview" 
-                  className="w-full h-48 object-cover"
-                />
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="icon"
-                  className="absolute top-2 right-2"
-                  onClick={handleRemoveMedia}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+            <div className="flex items-center justify-between">
+              <Label>Media Files</Label>
+              {mediaPreviews.length > 0 && (
+                <span className="text-[11px] text-muted-foreground">
+                  {mediaPreviews.length} file{mediaPreviews.length === 1 ? "" : "s"} attached
+                </span>
+              )}
+            </div>
+
+            {/* Multi-file preview grid */}
+            {mediaPreviews.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {mediaPreviews.map((src, idx) => (
+                  <div
+                    key={`${idx}-${src.slice(0, 24)}`}
+                    className="relative rounded-lg border overflow-hidden bg-muted aspect-square"
+                  >
+                    <img
+                      src={src}
+                      alt={`Media preview ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                      {idx + 1}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-1 right-1 h-6 w-6"
+                      onClick={() => handleRemoveMediaAt(idx)}
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                ))}
               </div>
             )}
 
@@ -269,19 +293,29 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
                 className="w-full"
                 onClick={() => fileInputRef.current?.click()}
               >
-                <Upload className="h-4 w-4 mr-2" />
-                {mediaPreview ? "Change Media" : "Upload Media"}
+                {mediaPreviews.length > 0 ? (
+                  <>
+                    <ImagePlus className="h-4 w-4 mr-2" />
+                    Add More Files
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Media
+                  </>
+                )}
               </Button>
               <input
                 ref={fileInputRef}
                 type="file"
+                multiple
                 accept="image/*,video/*,audio/*,.pdf"
                 onChange={handleFileChange}
                 className="hidden"
               />
             </div>
             <p className="text-base text-muted-foreground">
-              Supported formats: Images, Videos, Audio, PDF (Max 20MB)
+              Attach multiple images or files to one post. Supported: Images, Videos, Audio, PDF (Max 20MB each)
             </p>
           </div>
 
