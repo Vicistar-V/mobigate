@@ -515,3 +515,49 @@ export function setEligibilitySetting(key: keyof PlatformEligibilitySettings, va
     platformEligibilitySettings.lastUpdatedAt = new Date();
   }
 }
+
+// Platform Media Access Fee Settings - Managed by Mobigate Admin
+// Controls per-content access fee creators set when uploading monetised media
+export interface PlatformMediaAccessFeeSettings {
+  defaultFee: number;          // default 2 Mobi
+  minFee: number;              // 0 = free allowed
+  maxFee: number;              // 50 Mobi cap
+  hardMaxFee: number;          // upper bound admin can raise to
+  lastUpdatedAt: Date;
+  lastUpdatedBy: string;
+}
+
+export const platformMediaAccessFeeSettings: PlatformMediaAccessFeeSettings = {
+  defaultFee: 2,
+  minFee: 0,
+  maxFee: 50,
+  hardMaxFee: 500,
+  lastUpdatedAt: new Date(),
+  lastUpdatedBy: "Mobigate Admin",
+};
+
+export function getMediaAccessFeeDefault(): number {
+  return platformMediaAccessFeeSettings.defaultFee;
+}
+
+export function getMediaAccessFeeMax(): number {
+  return platformMediaAccessFeeSettings.maxFee;
+}
+
+export function setMediaAccessFeeDefault(value: number): void {
+  if (value >= platformMediaAccessFeeSettings.minFee &&
+      value <= platformMediaAccessFeeSettings.maxFee) {
+    platformMediaAccessFeeSettings.defaultFee = value;
+    platformMediaAccessFeeSettings.lastUpdatedAt = new Date();
+  }
+}
+
+export function setMediaAccessFeeMax(value: number): void {
+  if (value >= 1 && value <= platformMediaAccessFeeSettings.hardMaxFee) {
+    platformMediaAccessFeeSettings.maxFee = value;
+    if (platformMediaAccessFeeSettings.defaultFee > value) {
+      platformMediaAccessFeeSettings.defaultFee = value;
+    }
+    platformMediaAccessFeeSettings.lastUpdatedAt = new Date();
+  }
+}
