@@ -29,6 +29,7 @@ interface ManageELibraryDialogProps {
 
 export const ManageELibraryDialog = ({ open, onClose }: ManageELibraryDialogProps) => {
   const { toast } = useToast();
+  const [createOpen, setCreateOpen] = useState(false);
 
   const handleViewELibrary = () => {
     onClose();
