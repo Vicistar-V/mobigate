@@ -70,18 +70,57 @@ export const ProfileAlbumsTab = ({
     [bannerImageHistory]
   );
 
-  // Get user-created albums (from mockAlbums) with posts assigned to them
+  // Get user-created albums (from mockAlbums) with posts assigned to them.
+  // Apply owner overrides (rename/delete) so changes reflect in the UI.
   const userAlbums = useMemo(() => {
     const baseAlbums = phpAlbums || mockAlbums;
-    return baseAlbums.map((album) => {
-      const postsInAlbum = userPosts.filter((post) => post.albumId === album.id);
-      return {
-        ...album,
-        itemCount: postsInAlbum.length,
-        coverImage: postsInAlbum[0]?.imageUrl || album.coverImage,
-      };
-    }).filter((album) => album.itemCount > 0); // Only show albums with items
-  }, [phpAlbums, userPosts]);
+    return baseAlbums
+      .filter((album) => !albumOverrides[album.id]?.deleted)
+      .map((album) => {
+        const postsInAlbum = userPosts.filter((post) => post.albumId === album.id);
+        return {
+          ...album,
+          name: albumOverrides[album.id]?.name ?? album.name,
+          itemCount: postsInAlbum.length,
+          coverImage: postsInAlbum[0]?.imageUrl || album.coverImage,
+        };
+      })
+      .filter((album) => album.itemCount > 0); // Only show albums with items
+  }, [phpAlbums, userPosts, albumOverrides]);
+
+  const handleAlbumRename = (newName: string) => {
+    if (!renameTarget) return;
+    setAlbumOverrides((prev) => ({
+      ...prev,
+      [renameTarget.id]: { ...prev[renameTarget.id], name: newName },
+    }));
+    toast({
+      title: "Album renamed",
+      description: `"${renameTarget.name}" is now "${newName}".`,
+    });
+    setRenameTarget(null);
+  };
+
+  const handleAlbumDelete = (album: Album & { isSystem?: boolean }) => {
+    setAlbumOverrides((prev) => ({
+      ...prev,
+      [album.id]: { ...prev[album.id], deleted: true },
+    }));
+    toast({
+      title: "Album deleted",
+      description: `"${album.name}" was removed from your profile.`,
+    });
+  };
+
+  const handleAlbumChangeCover = (album: Album & { isSystem?: boolean }) => {
+    toast({
+      title: "Change cover",
+      description: `Open "${album.name}" and select an item as the new cover.`,
+    });
+    setSelectedAlbum(album);
+    setAlbumDialogOpen(true);
+  };
+
 
   // Combine all albums for carousel
   const allAlbums = useMemo(() => {
