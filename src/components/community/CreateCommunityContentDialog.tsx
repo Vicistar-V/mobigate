@@ -70,6 +70,7 @@ export function CreateCommunityContentDialog({
     setDescription("");
     setContentType("photo");
     setMediaPreview("");
+    setMonetization(defaultMonetizationValue());
   };
 
   const handleSubmit = () => {
