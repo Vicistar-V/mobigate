@@ -133,6 +133,7 @@ export function ManageCommunityGalleryDialog({
   // File upload state
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string>("");
+  const [uploadAccessFee, setUploadAccessFee] = useState<number>(getMediaAccessFeeDefault());
 
   // Privacy settings
   const [privacySettings, setPrivacySettings] = useState({
