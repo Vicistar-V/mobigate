@@ -75,7 +75,11 @@ const initialCurrencyRates: CurrencyRate[] = ([
   { code: "CDF", name: "Congolese Franc", country: "DR Congo", flag: "🇨🇩", ratePerMobi: 1.73, previousRate: 1.70, lastUpdated: "2026-03-17", isBase: false },
   { code: "SLL", name: "Sierra Leonean Leone", country: "Sierra Leone", flag: "🇸🇱", ratePerMobi: 13.0, previousRate: 12.8, lastUpdated: "2026-03-17", isBase: false },
   { code: "GMD", name: "Gambian Dalasi", country: "Gambia", flag: "🇬🇲", ratePerMobi: 0.042, previousRate: 0.041, lastUpdated: "2026-03-17", isBase: false },
-];
+] as Omit<CurrencyRate, "sellingRatePerMobi" | "previousSellingRate">[]).map(r => ({
+  ...r,
+  sellingRatePerMobi: sell(r.ratePerMobi),
+  previousSellingRate: sell(r.previousRate),
+}));
 
 export function AdminExchangeRateTab() {
   const [rates, setRates] = useState<CurrencyRate[]>(initialCurrencyRates);
