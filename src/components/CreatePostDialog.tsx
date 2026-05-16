@@ -58,6 +58,9 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
   const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null);
   const [showNewAlbumDialog, setShowNewAlbumDialog] = useState(false);
+  const [monetization, setMonetization] = useState<MediaMonetizationValue>(
+    defaultMonetizationValue()
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Prefill from preset media when dialog opens
