@@ -454,23 +454,31 @@ export default function ManageUsersPage() {
           </div>
         )}
 
-        {/* Online Filter */}
-        <div className="mb-2">
+        {/* Online / Activity Filter — horizontal pill chips */}
+        <div className="mb-3">
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1.5 font-semibold flex items-center gap-1">
             <Activity className="h-3 w-3" /> Online
           </p>
-          <Select value={selectedOnline} onValueChange={setSelectedOnline}>
-            <SelectTrigger className="h-9 text-sm font-medium touch-manipulation">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="z-50 bg-popover">
-              {onlineFilterOptions.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value}>
-                  {opt.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 snap-x">
+            {onlineFilterOptions.map((opt) => {
+              const active = selectedOnline === opt.value;
+              const label = opt.value === "now" ? "Now" : opt.label.replace(/^Last\s+/i, "Last ");
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setSelectedOnline(opt.value)}
+                  className={`snap-start shrink-0 h-8 px-3 rounded-full border text-xs font-semibold whitespace-nowrap transition-colors touch-manipulation ${
+                    active
+                      ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                      : "bg-card text-foreground border-border hover:bg-muted/60"
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Search + Sort */}
