@@ -39,6 +39,23 @@ export function CampaignFullViewSheet({
 
   const daysRemaining = calculateDaysRemaining(campaign.endDate);
 
+  const copyCampaignLink = async (campaignUrl: string) => {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(campaignUrl);
+      return;
+    }
+
+    const textArea = document.createElement("textarea");
+    textArea.value = campaignUrl;
+    textArea.setAttribute("readonly", "");
+    textArea.style.position = "fixed";
+    textArea.style.left = "-9999px";
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textArea);
+  };
+
   const handleShareCampaign = async () => {
     const campaignUrl = `${window.location.origin}${window.location.pathname}?campaign=${encodeURIComponent(campaign.id)}`;
     const shareData = {
@@ -54,16 +71,21 @@ export function CampaignFullViewSheet({
         return;
       }
 
-      await navigator.clipboard.writeText(campaignUrl);
+      await copyCampaignLink(campaignUrl);
       toast({ title: "Campaign Link Copied", description: "Share link copied to clipboard." });
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return;
 
-      toast({
-        title: "Unable to Share",
-        description: "Please try again or copy the campaign link manually.",
-        variant: "destructive",
-      });
+      try {
+        await copyCampaignLink(campaignUrl);
+        toast({ title: "Campaign Link Copied", description: "Share link copied to clipboard." });
+      } catch {
+        toast({
+          title: "Unable to Share",
+          description: "Please try again or copy the campaign link manually.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
