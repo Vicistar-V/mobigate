@@ -29,11 +29,19 @@ interface CurrencyRate {
   name: string;
   country: string;
   flag: string;
+  /** Buying Rate — Local → Mobi (Voucher Recharges). Always more favourable. */
   ratePerMobi: number;
   previousRate: number;
+  /** Selling Rate — Mobi → Local (Liquidation from Sundry Wallet). Less favourable, sustains platform spread. */
+  sellingRatePerMobi: number;
+  previousSellingRate: number;
   lastUpdated: string;
   isBase: boolean;
 }
+
+// Default Selling Rate is 4% LESS favourable than Buying Rate (industry-standard forex spread)
+const DEFAULT_SELL_SPREAD = 0.04;
+const sell = (buy: number) => +(buy * (1 - DEFAULT_SELL_SPREAD)).toPrecision(6);
 
 const initialCurrencyRates: CurrencyRate[] = [
   { code: "NGN", name: "Nigerian Naira", country: "Nigeria", flag: "🇳🇬", ratePerMobi: 1.00, previousRate: 1.00, lastUpdated: "2026-03-17", isBase: true },
