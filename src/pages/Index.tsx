@@ -13,6 +13,7 @@ import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PremiumAdCardProps } from "@/components/PremiumAdCard";
 import { ChatWithFriendsDialog } from "@/components/chat/ChatWithFriendsDialog";
 import { CampaignBannerRotation } from "@/components/community/elections/CampaignBannerRotation";
+import { UserStatusBanner } from "@/components/profile/UserStatusBanner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MessageCircle } from "lucide-react";
