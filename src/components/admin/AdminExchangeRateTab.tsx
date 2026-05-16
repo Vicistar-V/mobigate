@@ -487,14 +487,23 @@ export function AdminExchangeRateTab() {
                   </div>
                 )}
 
-                {/* Row 3: Conversion preview */}
+                {/* Row 3: Buy / Sell rate + conversion preview */}
                 {!isEditing && (
-                  <div className="mt-2 pt-2 border-t border-border/40 space-y-0.5">
-                    <p className="text-xs text-muted-foreground">
-                      M1,000 = {rate.code} {(rate.ratePerMobi * 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      M1,000,000 = {rate.code} {(rate.ratePerMobi * 1000000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  <div className="mt-2 pt-2 border-t border-border/40 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase tracking-wider text-emerald-600 font-semibold">Buy</span>
+                      <span className="text-xs font-mono font-semibold text-foreground">
+                        {formatRate(rate.ratePerMobi)} {rate.code} / Mobi
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase tracking-wider text-fuchsia-600 font-semibold">Sell</span>
+                      <span className="text-xs font-mono font-semibold text-fuchsia-700 dark:text-fuchsia-400">
+                        {formatRate(rate.sellingRatePerMobi)} {rate.code} / Mobi
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground pt-1">
+                      M1,000 → buy {(rate.ratePerMobi * 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {rate.code} · sell {(rate.sellingRatePerMobi * 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {rate.code}
                     </p>
                   </div>
                 )}
