@@ -310,7 +310,9 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
           }}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit}>Publish Post</Button>
+          <Button onClick={handleSubmit}>
+            Publish • Pay M{getContentPostingFee(type).toLocaleString()}
+          </Button>
         </div>
       </DialogContent>
       
