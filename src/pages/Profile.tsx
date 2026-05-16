@@ -832,6 +832,9 @@ const Profile = () => {
             {/* People You May Know - First Slot */}
             <PeopleYouMayKnow />
 
+            {/* Notable Users - Auto-curated celebrities/active/online */}
+            <NotableUsers />
+
             {/* Create Monetized Post - Directly above Wall Status */}
             <CreatePostDialog />
 
