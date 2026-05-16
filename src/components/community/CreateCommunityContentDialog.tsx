@@ -41,6 +41,9 @@ export function CreateCommunityContentDialog({
   const [description, setDescription] = useState("");
   const [contentType, setContentType] = useState("photo");
   const [mediaPreview, setMediaPreview] = useState<string>("");
+  const [monetization, setMonetization] = useState<MediaMonetizationValue>(
+    defaultMonetizationValue()
+  );
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
