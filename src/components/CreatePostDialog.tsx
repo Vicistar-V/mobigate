@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Upload, X } from "lucide-react";
+import { Plus, Upload, X, ImagePlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AlbumSelector } from "./AlbumSelector";
 import { CreateAlbumDialog } from "./CreateAlbumDialog";
