@@ -482,7 +482,9 @@ export default function WalletPage() {
                       className="w-full h-11 bg-white/10 hover:bg-white/15 text-white/90 font-semibold text-sm rounded-xl border border-white/15 touch-manipulation active:scale-[0.97] transition-all"
                       onClick={w.fundAction}
                     >
-                      <Plus className="h-4 w-4 mr-2" />
+                      {(w as any).liquidatable
+                        ? <ArrowUpRight className="h-4 w-4 mr-2" />
+                        : <Plus className="h-4 w-4 mr-2" />}
                       {w.fundLabel}
                     </Button>
                   </div>
