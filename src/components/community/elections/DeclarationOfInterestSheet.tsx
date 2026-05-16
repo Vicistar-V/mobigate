@@ -291,7 +291,7 @@ export function DeclarationOfInterestSheet({
               <div className="flex items-center gap-2 text-destructive text-sm">
                 <AlertCircle className="h-4 w-4" />
                 <span>
-                  Insufficient balance. Need {formatMobiAmount(costBreakdown.totalDebited - walletBalance)} more.
+                  Insufficient balance. Need {formatMobiAmount(costBreakdown.candidateDebited - walletBalance)} more.
                 </span>
               </div>
             )}
@@ -311,7 +311,7 @@ export function DeclarationOfInterestSheet({
       </div>
       <h3 className="text-lg font-semibold">Processing Payment...</h3>
       <p className="text-sm text-muted-foreground text-center">
-        Debiting {formatMobiAmount(costBreakdown?.totalDebited || 0)} ({formatLocalAmount(costBreakdown?.totalDebited || 0, "NGN")}) from your Wallet
+        Debiting {formatMobiAmount(costBreakdown?.candidateDebited || 0)} ({formatLocalAmount(costBreakdown?.candidateDebited || 0, "NGN")}) from your Wallet
       </p>
     </div>
   );
@@ -341,10 +341,10 @@ export function DeclarationOfInterestSheet({
             <span className="text-muted-foreground">Amount Debited</span>
             <div className="text-right">
               <span className="font-semibold text-primary">
-                {formatMobiAmount(costBreakdown?.totalDebited || 0)}
+                {formatMobiAmount(costBreakdown?.candidateDebited || 0)}
               </span>
               <p className="text-xs text-muted-foreground">
-                ({formatLocalAmount(costBreakdown?.totalDebited || 0, "NGN")})
+                ({formatLocalAmount(costBreakdown?.candidateDebited || 0, "NGN")})
               </p>
             </div>
           </div>
@@ -352,10 +352,10 @@ export function DeclarationOfInterestSheet({
             <span className="text-muted-foreground">New Balance</span>
             <div className="text-right">
               <span>
-                {formatMobiAmount(walletBalance - (costBreakdown?.totalDebited || 0))}
+                {formatMobiAmount(walletBalance - (costBreakdown?.candidateDebited || 0))}
               </span>
               <p className="text-xs text-muted-foreground">
-                ({formatLocalAmount(walletBalance - (costBreakdown?.totalDebited || 0), "NGN")})
+                ({formatLocalAmount(walletBalance - (costBreakdown?.candidateDebited || 0), "NGN")})
               </p>
             </div>
           </div>
@@ -428,9 +428,9 @@ export function DeclarationOfInterestSheet({
                 <strong>{selectedFeeStructure?.officeName}</strong>.
               </p>
               <p>
-                <strong>{formatMobiAmount(costBreakdown?.totalDebited || 0)}</strong>{" "}
+                <strong>{formatMobiAmount(costBreakdown?.candidateDebited || 0)}</strong>{" "}
                 <span className="text-muted-foreground">
-                  ({formatLocalAmount(costBreakdown?.totalDebited || 0, "NGN")})
+                  ({formatLocalAmount(costBreakdown?.candidateDebited || 0, "NGN")})
                 </span>{" "}
                 will be debited from your Wallet.
               </p>
