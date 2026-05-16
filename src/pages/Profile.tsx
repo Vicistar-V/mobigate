@@ -23,6 +23,7 @@ import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState as useReactState } from "react";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
+import { NotableUsers } from "@/components/NotableUsers";
 import { ProfileAlbumsTab } from "@/components/profile/ProfileAlbumsTab";
 import { ProfileFriendsTab } from "@/components/profile/ProfileFriendsTab";
 import { ProfileLikesTab } from "@/components/profile/ProfileLikesTab";
