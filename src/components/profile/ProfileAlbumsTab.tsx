@@ -424,6 +424,14 @@ export const ProfileAlbumsTab = ({
           items={getAlbumItems(selectedAlbum)}
         />
       )}
+
+      {/* Rename Album */}
+      <RenameAlbumDialog
+        open={!!renameTarget}
+        onOpenChange={(o) => !o && setRenameTarget(null)}
+        currentName={renameTarget?.name ?? ""}
+        onRename={handleAlbumRename}
+      />
     </div>
   );
 };
