@@ -431,10 +431,10 @@ export const GreetingSection = () => {
                     onClick={openComposerBlank}
                     className="text-foreground p-2.5 text-left active:opacity-90 touch-manipulation"
                   >
-                    <p className="text-[12px] font-bold leading-snug">
+                    <p className="text-[15px] font-bold leading-snug">
                       Public Post or Content Description or Storyline here.
                     </p>
-                    <p className="text-[11.5px] leading-snug mt-1">
+                    <p className="text-[14px] leading-snug mt-1">
                       However, the storyline may not just exceed certain word-counts or be made to be unnecessarily bulky or voluminous in any case, or
                       <span className="font-extrabold italic">…More</span>
                     </p>
