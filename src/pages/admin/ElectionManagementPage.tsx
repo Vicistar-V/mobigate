@@ -12,6 +12,7 @@ import { AdminClearancesTab } from "@/components/admin/election/AdminClearancesT
 import { AdminWinnersAnnouncementTab } from "@/components/admin/election/AdminWinnersAnnouncementTab";
 import { AdminImpeachmentTab } from "@/components/admin/election/AdminImpeachmentTab";
 import { ElectionSettingsSection } from "@/components/admin/election/ElectionSettingsSection";
+import { CommunityNominationFeeSettings } from "@/components/community/elections/CommunityNominationFeeSettings";
 import { DeclareElectionDrawer } from "@/components/admin/election/DeclareElectionDrawer";
 import { AdminDeclareElectionTab } from "@/components/admin/election/AdminDeclareElectionTab";
 
