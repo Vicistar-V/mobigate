@@ -14,6 +14,8 @@ import {
   defaultMonetizationValue,
   type MediaMonetizationValue,
 } from "@/components/media/MediaMonetizationFields";
+import { ContentFeeNotice } from "@/components/media/ContentFeeNotice";
+import { getContentPostingFee } from "@/data/platformSettingsData";
 
 interface MediaUploadDialogProps {
   open: boolean;
