@@ -158,7 +158,18 @@ export const FeedPost = ({
             )}
           </div>
           {isOwner && onEdit && onDelete && (
-            <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+            <div className="flex-shrink-0 flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+              {!imageUrl && (
+                <button
+                  type="button"
+                  onClick={onEdit}
+                  className="inline-flex items-center gap-1 rounded-full bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold px-2.5 py-1"
+                  aria-label="Edit this post"
+                >
+                  <Pencil className="h-3 w-3" />
+                  Edit
+                </button>
+              )}
               <PostOptionsMenu onEdit={onEdit} onDelete={onDelete} />
             </div>
           )}
