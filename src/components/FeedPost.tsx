@@ -129,6 +129,20 @@ export const FeedPost = ({
             <Badge className="absolute top-2 left-2" variant="destructive">
               {type}
             </Badge>
+            {isOwner && onEdit && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit();
+                }}
+                className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-full bg-black/55 hover:bg-black/75 backdrop-blur-sm text-white text-[11px] font-semibold px-2.5 py-1 shadow-md"
+                aria-label="Edit this post"
+              >
+                <Pencil className="h-3 w-3" />
+                Edit
+              </button>
+            )}
           </div>
         )}
       
