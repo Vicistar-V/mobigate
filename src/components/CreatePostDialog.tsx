@@ -246,25 +246,42 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
           <ContentFeeNotice mediaType={type} />
 
           <div className="space-y-2">
-            <Label>Media File</Label>
-            
-            {/* Media Preview */}
-            {mediaPreview && (
-              <div className="relative rounded-lg border overflow-hidden bg-muted">
-                <img 
-                  src={mediaPreview} 
-                  alt="Media preview" 
-                  className="w-full h-48 object-cover"
-                />
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="icon"
-                  className="absolute top-2 right-2"
-                  onClick={handleRemoveMedia}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+            <div className="flex items-center justify-between">
+              <Label>Media Files</Label>
+              {mediaPreviews.length > 0 && (
+                <span className="text-[11px] text-muted-foreground">
+                  {mediaPreviews.length} file{mediaPreviews.length === 1 ? "" : "s"} attached
+                </span>
+              )}
+            </div>
+
+            {/* Multi-file preview grid */}
+            {mediaPreviews.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {mediaPreviews.map((src, idx) => (
+                  <div
+                    key={`${idx}-${src.slice(0, 24)}`}
+                    className="relative rounded-lg border overflow-hidden bg-muted aspect-square"
+                  >
+                    <img
+                      src={src}
+                      alt={`Media preview ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                      {idx + 1}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-1 right-1 h-6 w-6"
+                      onClick={() => handleRemoveMediaAt(idx)}
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                ))}
               </div>
             )}
 
@@ -276,19 +293,29 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
                 className="w-full"
                 onClick={() => fileInputRef.current?.click()}
               >
-                <Upload className="h-4 w-4 mr-2" />
-                {mediaPreview ? "Change Media" : "Upload Media"}
+                {mediaPreviews.length > 0 ? (
+                  <>
+                    <ImagePlus className="h-4 w-4 mr-2" />
+                    Add More Files
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Media
+                  </>
+                )}
               </Button>
               <input
                 ref={fileInputRef}
                 type="file"
+                multiple
                 accept="image/*,video/*,audio/*,.pdf"
                 onChange={handleFileChange}
                 className="hidden"
               />
             </div>
             <p className="text-base text-muted-foreground">
-              Supported formats: Images, Videos, Audio, PDF (Max 20MB)
+              Attach multiple images or files to one post. Supported: Images, Videos, Audio, PDF (Max 20MB each)
             </p>
           </div>
 
