@@ -24,6 +24,11 @@ import { AlbumSelector } from "./AlbumSelector";
 import { CreateAlbumDialog } from "./CreateAlbumDialog";
 import { useUserAlbums } from "@/hooks/useWindowData";
 import { mockAlbums } from "@/data/posts";
+import {
+  MediaMonetizationFields,
+  defaultMonetizationValue,
+  type MediaMonetizationValue,
+} from "@/components/media/MediaMonetizationFields";
 
 interface CreatePostDialogProps {
   open?: boolean;
