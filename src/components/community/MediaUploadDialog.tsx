@@ -9,6 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Upload, X, Image, Video, FileCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  MediaMonetizationFields,
+  defaultMonetizationValue,
+  type MediaMonetizationValue,
+} from "@/components/media/MediaMonetizationFields";
 
 interface MediaUploadDialogProps {
   open: boolean;
