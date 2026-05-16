@@ -429,7 +429,8 @@ const Index = () => {
                     </div>
                   )}
                 </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Pagination Controls */}
