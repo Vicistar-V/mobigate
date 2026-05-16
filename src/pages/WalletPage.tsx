@@ -35,6 +35,25 @@ const MOBI_WALLET = {
   monthlyOut: 78400,
 };
 
+// Sundry Wallet: holds Mobi earned from Quiz wins, Services, Active Engagements,
+// Royalties, Referrals, and other sundry income. ONLY this wallet's balance can
+// be liquidated to Local Currency (at the prevailing Selling Rate).
+// Mobi from Voucher Recharges sits in MOBI_WALLET and is NOT liquidatable —
+// it can only be spent on the platform/network. This guards against arbitrage.
+const SUNDRY_WALLET = {
+  balance: 86420.00,
+  currency: "Mobi",
+  symbol: "M",
+  monthlyIn: 42500,
+  monthlyOut: 12000,
+};
+
+// Dual exchange rates — Buying Rate (Local → Mobi via Voucher Recharge) is always
+// MORE FAVOURABLE than Selling Rate (Mobi → Local via Liquidation), preserving
+// platform margin and discouraging discount-arbitrage round-trips.
+// Base: 1 Mobi = 1 NGN (Buying), 1 Mobi = 0.96 NGN (Selling)  →  4% spread.
+const SELLING_RATE_NGN_PER_MOBI = 0.96;
+
 interface WalletTransaction {
   id: string;
   type: "credit" | "debit";
@@ -137,7 +156,40 @@ export default function WalletPage() {
   const [mobiVoucherDenomination, setMobiVoucherDenomination] = useState(0);
   const [mobiProcessingMsg, setMobiProcessingMsg] = useState("");
 
-  // Gateway form fields
+  // Liquidate Sundry Wallet drawer
+  const [liquidateDrawerOpen, setLiquidateDrawerOpen] = useState(false);
+  type LiquidateStep = "input" | "confirm" | "processing" | "success";
+  const [liquidateStep, setLiquidateStep] = useState<LiquidateStep>("input");
+  const [liquidateMobi, setLiquidateMobi] = useState<string>("");
+  const [liquidateProcessingMsg, setLiquidateProcessingMsg] = useState("");
+
+  const liquidateMobiNum = parseFloat(liquidateMobi) || 0;
+  const liquidatePayoutNGN = liquidateMobiNum * SELLING_RATE_NGN_PER_MOBI;
+  const liquidateSpread = liquidateMobiNum - liquidatePayoutNGN;
+
+  const handleProcessLiquidate = useCallback(() => {
+    setLiquidateStep("processing");
+    const msgs = [
+      "Verifying Sundry Wallet balance...",
+      "Applying current Selling Rate...",
+      "Crediting your Local Currency Wallet...",
+    ];
+    let i = 0;
+    setLiquidateProcessingMsg(msgs[0]);
+    const interval = setInterval(() => {
+      i++;
+      if (i < msgs.length) setLiquidateProcessingMsg(msgs[i]);
+      else { clearInterval(interval); setLiquidateStep("success"); }
+    }, 850);
+  }, []);
+
+  const resetLiquidateDrawer = () => {
+    setLiquidateStep("input");
+    setLiquidateMobi("");
+    setLiquidateProcessingMsg("");
+    setLiquidateDrawerOpen(false);
+  };
+
   const [cardNumber, setCardNumber] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");
   const [cardCvv, setCardCvv] = useState("");
@@ -353,8 +405,9 @@ export default function WalletPage() {
   const totalDebit = filteredTxns.filter(t => t.type === "debit").reduce((s, t) => s + t.amount, 0);
 
   const wallets = [
-    { ...MOBI_WALLET, label: "Mobi Wallet", icon: Coins, gradient: "from-[#1a1a2e] via-[#16213e] to-[#0f3460] dark:from-[#1a1a2e] dark:via-[#16213e] dark:to-[#0f3460]", accentBorder: "border-indigo-500/20", fundAction: () => setFundMobiDrawerOpen(true), fundLabel: "Fund Mobi Wallet" },
-    { ...LOCAL_WALLET, label: "Local Currency Wallet", icon: Banknote, gradient: "from-[#1a2e1a] via-[#1e3a1e] to-[#2d4a2d] dark:from-[#1a2e1a] dark:via-[#1e3a1e] dark:to-[#2d4a2d]", accentBorder: "border-emerald-500/20", fundAction: () => setFundDrawerOpen(true), fundLabel: "Fund Local Wallet" },
+    { ...MOBI_WALLET, label: "Mobi Wallet", sublabel: "Voucher Recharges • Network-spend only", icon: Coins, gradient: "from-[#1a1a2e] via-[#16213e] to-[#0f3460] dark:from-[#1a1a2e] dark:via-[#16213e] dark:to-[#0f3460]", accentBorder: "border-indigo-500/20", fundAction: () => setFundMobiDrawerOpen(true), fundLabel: "Fund Mobi Wallet", liquidatable: false },
+    { ...SUNDRY_WALLET, label: "Sundry Wallet", sublabel: "Earned Mobi • Liquidatable to Local", icon: Sparkles, gradient: "from-[#2e1a2e] via-[#3e1e3a] to-[#5a2d4a] dark:from-[#2e1a2e] dark:via-[#3e1e3a] dark:to-[#5a2d4a]", accentBorder: "border-fuchsia-500/20", fundAction: () => setLiquidateDrawerOpen(true), fundLabel: "Liquidate to Local Currency", liquidatable: true },
+    { ...LOCAL_WALLET, label: "Local Currency Wallet", sublabel: "Cash equivalence • Fund & spend", icon: Banknote, gradient: "from-[#1a2e1a] via-[#1e3a1e] to-[#2d4a2d] dark:from-[#1a2e1a] dark:via-[#1e3a1e] dark:to-[#2d4a2d]", accentBorder: "border-emerald-500/20", fundAction: () => setFundDrawerOpen(true), fundLabel: "Fund Local Wallet", liquidatable: false },
   ];
   const currentWallet = wallets[activeWallet];
 
@@ -410,7 +463,12 @@ export default function WalletPage() {
                       <div className="h-9 w-9 rounded-lg bg-white/10 border border-white/10 flex items-center justify-center">
                         <w.icon className="h-4.5 w-4.5 text-white/80" />
                       </div>
-                      <span className="text-white/70 text-sm font-medium tracking-wide">{w.label}</span>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-white/85 text-sm font-semibold tracking-wide truncate">{w.label}</span>
+                        {(w as any).sublabel && (
+                          <span className="text-white/50 text-[10px] font-medium tracking-wide truncate">{(w as any).sublabel}</span>
+                        )}
+                      </div>
                     </div>
 
                     <p className="text-white/50 text-xs font-medium mb-1 uppercase tracking-widest">Available Balance</p>
@@ -424,7 +482,9 @@ export default function WalletPage() {
                       className="w-full h-11 bg-white/10 hover:bg-white/15 text-white/90 font-semibold text-sm rounded-xl border border-white/15 touch-manipulation active:scale-[0.97] transition-all"
                       onClick={w.fundAction}
                     >
-                      <Plus className="h-4 w-4 mr-2" />
+                      {(w as any).liquidatable
+                        ? <ArrowUpRight className="h-4 w-4 mr-2" />
+                        : <Plus className="h-4 w-4 mr-2" />}
                       {w.fundLabel}
                     </Button>
                   </div>
@@ -1422,6 +1482,194 @@ export default function WalletPage() {
               </div>
               <ChevronRight className="h-5 w-5 text-muted-foreground" />
             </button>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* ── Liquidate Sundry Wallet Drawer ── */}
+      <Drawer open={liquidateDrawerOpen} onOpenChange={open => { if (!open) resetLiquidateDrawer(); }}>
+        <DrawerContent className="max-h-[92vh] flex flex-col overflow-hidden">
+          <div className="shrink-0 px-5 pt-3 pb-2 border-b border-border/30">
+            <div className="flex items-center gap-3">
+              {liquidateStep === "confirm" && (
+                <button
+                  onClick={() => setLiquidateStep("input")}
+                  className="h-8 w-8 rounded-full bg-muted/50 flex items-center justify-center touch-manipulation active:scale-95 shrink-0"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-base font-bold text-foreground">Liquidate Sundry Wallet</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {liquidateStep === "input" && "Convert earned Mobi to Local Currency"}
+                  {liquidateStep === "confirm" && "Review payout at Selling Rate"}
+                  {liquidateStep === "processing" && "Settling to Local Wallet..."}
+                  {liquidateStep === "success" && "Local Wallet credited!"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto touch-auto overscroll-contain">
+            <div className="px-5 py-5 space-y-5">
+
+              {liquidateStep === "input" && (
+                <>
+                  <div className="bg-fuchsia-500/10 rounded-2xl p-4 text-center">
+                    <p className="text-[10px] text-fuchsia-600 dark:text-fuchsia-400 font-medium uppercase tracking-wider">Available Sundry Balance</p>
+                    <p className="text-2xl font-black text-fuchsia-700 dark:text-fuchsia-300 mt-1 font-mono">
+                      M{formatNumberFull(SUNDRY_WALLET.balance)}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mt-1">From Quiz wins, Services, Royalties &amp; Sundry Income</p>
+                  </div>
+
+                  <div className="flex items-start gap-2.5 p-3 bg-amber-500/5 border border-amber-500/20 rounded-xl">
+                    <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Only <span className="font-semibold text-foreground">Sundry Wallet</span> Mobi can be liquidated.
+                      Voucher-Recharge Mobi (in Mobi Wallet) is for network spending only.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-foreground mb-2 block">
+                      Amount to Liquidate (Mobi)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base font-bold text-muted-foreground pointer-events-none">M</span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        placeholder="0.00"
+                        value={liquidateMobi}
+                        onChange={e => setLiquidateMobi(e.target.value.replace(/[^\d.]/g, ""))}
+                        onPointerDown={e => e.stopPropagation()}
+                        className="w-full h-14 pl-9 pr-3 rounded-xl bg-card border-2 border-border/60 text-xl font-bold tabular-nums focus:border-primary focus:outline-none transition-all"
+                      />
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 mt-2.5">
+                      {[5000, 10000, 25000, 50000, SUNDRY_WALLET.balance].map((amt, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setLiquidateMobi(String(amt))}
+                          className="px-3 py-1.5 rounded-lg bg-muted/50 text-xs font-semibold hover:bg-muted touch-manipulation active:scale-95 transition-all"
+                        >
+                          {idx === 4 ? "Max" : `M${formatNumberFull(amt)}`}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {liquidateMobiNum > 0 && (
+                    <div className="rounded-2xl border-2 border-fuchsia-500/30 bg-gradient-to-br from-fuchsia-500/5 to-emerald-500/5 p-4 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">Selling Rate</span>
+                        <span className="text-xs font-mono font-semibold text-foreground">
+                          1 Mobi = ₦{SELLING_RATE_NGN_PER_MOBI.toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">You Sell</span>
+                        <span className="text-sm font-bold text-fuchsia-700 dark:text-fuchsia-400">−M{formatNumberFull(liquidateMobiNum)}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">Platform Spread (4%)</span>
+                        <span className="text-xs font-medium text-amber-600">₦{formatNumberFull(liquidateSpread)}</span>
+                      </div>
+                      <div className="flex items-center justify-between pt-2 border-t border-border/40">
+                        <span className="text-sm font-bold text-foreground">You Receive</span>
+                        <span className="text-lg font-black text-emerald-700 dark:text-emerald-400">
+                          ₦{formatNumberFull(liquidatePayoutNGN)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  <Button
+                    className="w-full h-12 rounded-xl font-bold text-sm bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white touch-manipulation active:scale-[0.97] disabled:opacity-50"
+                    disabled={liquidateMobiNum <= 0 || liquidateMobiNum > SUNDRY_WALLET.balance}
+                    onClick={() => setLiquidateStep("confirm")}
+                  >
+                    <ArrowUpRight className="h-4 w-4 mr-2" />
+                    {liquidateMobiNum > SUNDRY_WALLET.balance ? "Exceeds Balance" : "Continue"}
+                  </Button>
+                </>
+              )}
+
+              {liquidateStep === "confirm" && (
+                <>
+                  <div className="bg-card border-2 border-border/60 rounded-2xl p-4 space-y-3">
+                    <div className="flex justify-between items-center pb-2 border-b border-border/40">
+                      <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Liquidation Summary</span>
+                      <Badge variant="secondary" className="text-[10px]">Selling Rate</Badge>
+                    </div>
+                    <div className="flex justify-between"><span className="text-xs text-muted-foreground">From</span><span className="text-xs font-semibold text-foreground">Sundry Wallet</span></div>
+                    <div className="flex justify-between"><span className="text-xs text-muted-foreground">To</span><span className="text-xs font-semibold text-foreground">Local Currency Wallet</span></div>
+                    <div className="flex justify-between"><span className="text-xs text-muted-foreground">Mobi Sold</span><span className="text-sm font-bold text-fuchsia-700 dark:text-fuchsia-400">M{formatNumberFull(liquidateMobiNum)}</span></div>
+                    <div className="flex justify-between"><span className="text-xs text-muted-foreground">Rate Applied</span><span className="text-xs font-mono text-foreground">₦{SELLING_RATE_NGN_PER_MOBI.toFixed(2)}/Mobi</span></div>
+                    <div className="flex justify-between pt-2 border-t border-border/40"><span className="text-sm font-bold text-foreground">Payout</span><span className="text-lg font-black text-emerald-700 dark:text-emerald-400">₦{formatNumberFull(liquidatePayoutNGN)}</span></div>
+                  </div>
+
+                  <div className="flex items-start gap-2.5 p-3 bg-blue-500/5 border border-blue-500/20 rounded-xl">
+                    <ShieldCheck className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Selling Rate differs from the Buying Rate (used for Voucher Recharges) — this is standard forex practice and protects the platform from arbitrage.
+                    </p>
+                  </div>
+
+                  <Button
+                    className="w-full h-12 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-600 to-teal-600 text-white touch-manipulation active:scale-[0.97]"
+                    onClick={handleProcessLiquidate}
+                  >
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    Confirm &amp; Liquidate
+                  </Button>
+                </>
+              )}
+
+              {liquidateStep === "processing" && (
+                <div className="flex flex-col items-center justify-center py-12 space-y-6">
+                  <div className="relative">
+                    <div className="h-20 w-20 rounded-3xl bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center animate-pulse">
+                      <ArrowUpRight className="h-10 w-10 text-white" />
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-primary flex items-center justify-center">
+                      <Loader2 className="h-4 w-4 text-primary-foreground animate-spin" />
+                    </div>
+                  </div>
+                  <div className="text-center space-y-2">
+                    <p className="text-sm font-bold text-foreground">Liquidating Sundry Mobi</p>
+                    <p className="text-xs text-muted-foreground animate-pulse">{liquidateProcessingMsg}</p>
+                    <p className="text-lg font-black text-emerald-600 mt-3">+₦{formatNumberFull(liquidatePayoutNGN)}</p>
+                  </div>
+                </div>
+              )}
+
+              {liquidateStep === "success" && (
+                <div className="flex flex-col items-center justify-center py-8 space-y-5">
+                  <div className="h-20 w-20 rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                    <CheckCircle2 className="h-10 w-10 text-white" />
+                  </div>
+                  <div className="text-center space-y-1">
+                    <p className="text-lg font-black text-foreground">Liquidation Complete!</p>
+                    <p className="text-xs text-muted-foreground">Local Wallet credited at Selling Rate</p>
+                  </div>
+                  <div className="w-full bg-emerald-500/10 rounded-2xl p-4 space-y-3">
+                    <div className="flex justify-between"><span className="text-xs text-muted-foreground">Mobi Sold</span><span className="text-sm font-bold text-fuchsia-700 dark:text-fuchsia-400">−M{formatNumberFull(liquidateMobiNum)}</span></div>
+                    <div className="flex justify-between"><span className="text-xs text-muted-foreground">Local Credited</span><span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">+₦{formatNumberFull(liquidatePayoutNGN)}</span></div>
+                    <div className="flex justify-between"><span className="text-xs text-muted-foreground">New Sundry Balance</span><span className="text-xs font-bold text-foreground">M{formatNumberFull(SUNDRY_WALLET.balance - liquidateMobiNum)}</span></div>
+                    <div className="flex justify-between"><span className="text-xs text-muted-foreground">New Local Balance</span><span className="text-xs font-bold text-foreground">₦{formatNumberFull(LOCAL_WALLET.balance + liquidatePayoutNGN)}</span></div>
+                    <div className="flex justify-between"><span className="text-xs text-muted-foreground">Reference</span><span className="text-xs font-mono font-semibold text-foreground">LIQ-{Date.now().toString().slice(-8)}</span></div>
+                  </div>
+                  <Button className="w-full h-11 rounded-xl font-bold touch-manipulation active:scale-[0.97]" onClick={resetLiquidateDrawer}>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Done
+                  </Button>
+                </div>
+              )}
+
+            </div>
           </div>
         </DrawerContent>
       </Drawer>

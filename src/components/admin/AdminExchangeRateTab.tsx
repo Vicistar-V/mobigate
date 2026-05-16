@@ -29,13 +29,21 @@ interface CurrencyRate {
   name: string;
   country: string;
   flag: string;
+  /** Buying Rate — Local → Mobi (Voucher Recharges). Always more favourable. */
   ratePerMobi: number;
   previousRate: number;
+  /** Selling Rate — Mobi → Local (Liquidation from Sundry Wallet). Less favourable, sustains platform spread. */
+  sellingRatePerMobi: number;
+  previousSellingRate: number;
   lastUpdated: string;
   isBase: boolean;
 }
 
-const initialCurrencyRates: CurrencyRate[] = [
+// Default Selling Rate is 4% LESS favourable than Buying Rate (industry-standard forex spread)
+const DEFAULT_SELL_SPREAD = 0.04;
+const sell = (buy: number) => +(buy * (1 - DEFAULT_SELL_SPREAD)).toPrecision(6);
+
+const initialCurrencyRates: CurrencyRate[] = ([
   { code: "NGN", name: "Nigerian Naira", country: "Nigeria", flag: "🇳🇬", ratePerMobi: 1.00, previousRate: 1.00, lastUpdated: "2026-03-17", isBase: true },
   { code: "USD", name: "US Dollar", country: "United States", flag: "🇺🇸", ratePerMobi: 0.00062, previousRate: 0.00065, lastUpdated: "2026-03-17", isBase: false },
   { code: "EUR", name: "Euro", country: "Eurozone", flag: "🇪🇺", ratePerMobi: 0.00057, previousRate: 0.00059, lastUpdated: "2026-03-17", isBase: false },
@@ -67,7 +75,11 @@ const initialCurrencyRates: CurrencyRate[] = [
   { code: "CDF", name: "Congolese Franc", country: "DR Congo", flag: "🇨🇩", ratePerMobi: 1.73, previousRate: 1.70, lastUpdated: "2026-03-17", isBase: false },
   { code: "SLL", name: "Sierra Leonean Leone", country: "Sierra Leone", flag: "🇸🇱", ratePerMobi: 13.0, previousRate: 12.8, lastUpdated: "2026-03-17", isBase: false },
   { code: "GMD", name: "Gambian Dalasi", country: "Gambia", flag: "🇬🇲", ratePerMobi: 0.042, previousRate: 0.041, lastUpdated: "2026-03-17", isBase: false },
-];
+] as Omit<CurrencyRate, "sellingRatePerMobi" | "previousSellingRate">[]).map(r => ({
+  ...r,
+  sellingRatePerMobi: sell(r.ratePerMobi),
+  previousSellingRate: sell(r.previousRate),
+}));
 
 export function AdminExchangeRateTab() {
   const [rates, setRates] = useState<CurrencyRate[]>(initialCurrencyRates);
@@ -75,18 +87,33 @@ export function AdminExchangeRateTab() {
   const [editingCode, setEditingCode] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [cascadeChanges, setCascadeChanges] = useState(true);
+  // Global Selling Spread (% applied below Buying Rate). Default 4%.
+  const [sellingSpreadPct, setSellingSpreadPct] = useState<number>(4);
+  const [spreadLocked, setSpreadLocked] = useState(true);
+  const [spreadDraft, setSpreadDraft] = useState("4");
   const { toast } = useToast();
 
+  // Recompute Selling Rates whenever Buying Rate or Spread changes
+  const ratesWithSell = useMemo(() => {
+    const factor = 1 - sellingSpreadPct / 100;
+    return rates.map(r => ({
+      ...r,
+      sellingRatePerMobi: +(r.ratePerMobi * factor).toPrecision(6),
+      previousSellingRate: +(r.previousRate * factor).toPrecision(6),
+    }));
+  }, [rates, sellingSpreadPct]);
+
+
   const filteredRates = useMemo(() => {
-    if (!searchQuery.trim()) return rates;
+    if (!searchQuery.trim()) return ratesWithSell;
     const q = searchQuery.toLowerCase();
-    return rates.filter(
+    return ratesWithSell.filter(
       r =>
         r.code.toLowerCase().includes(q) ||
         r.name.toLowerCase().includes(q) ||
         r.country.toLowerCase().includes(q)
     );
-  }, [rates, searchQuery]);
+  }, [ratesWithSell, searchQuery]);
 
   const totalCurrencies = rates.length;
   const baseRate = rates.find(r => r.isBase);
@@ -304,6 +331,67 @@ export function AdminExchangeRateTab() {
           </div>
         </div>
 
+        {/* Selling Spread (Buy/Sell margin) — global, lockable */}
+        <div className="rounded-xl border-2 border-fuchsia-500/30 bg-gradient-to-br from-fuchsia-500/10 to-purple-500/5 p-3.5 space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <TrendingDown className="h-4 w-4 text-fuchsia-600 shrink-0" />
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-foreground">Selling Spread</p>
+                <p className="text-[10px] text-muted-foreground leading-tight">
+                  % discount applied below Buying Rate when users Liquidate Mobi → Local
+                </p>
+              </div>
+            </div>
+            <Button
+              size="icon"
+              variant={spreadLocked ? "outline" : "default"}
+              className="h-9 w-9 shrink-0 touch-manipulation active:scale-95"
+              onClick={() => {
+                if (!spreadLocked) {
+                  // Saving: apply draft
+                  const v = parseFloat(spreadDraft);
+                  if (isNaN(v) || v < 0 || v > 25) {
+                    toast({ title: "Invalid Spread", description: "Enter 0–25%.", variant: "destructive" });
+                    return;
+                  }
+                  setSellingSpreadPct(v);
+                  toast({ title: "Selling Spread Updated", description: `Now ${v}% across all ${totalCurrencies} currencies.` });
+                }
+                setSpreadLocked(!spreadLocked);
+              }}
+              aria-label={spreadLocked ? "Unlock spread" : "Save & lock spread"}
+            >
+              {spreadLocked
+                ? <span className="text-xs">🔒</span>
+                : <Check className="h-4 w-4" />}
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              value={spreadLocked ? sellingSpreadPct : spreadDraft}
+              onChange={(e) => setSpreadDraft(e.target.value)}
+              disabled={spreadLocked}
+              step="0.1"
+              min="0"
+              max="25"
+              className="h-10 text-base font-bold tabular-nums text-right"
+            />
+            <span className="text-sm font-semibold text-muted-foreground shrink-0">%</span>
+          </div>
+          <div className="flex items-center justify-between text-[11px] pt-1 border-t border-fuchsia-500/15">
+            <span className="text-muted-foreground">Buy Rate (Recharge)</span>
+            <span className="font-mono font-semibold text-emerald-700 dark:text-emerald-400">₦{formatRate(baseRate?.ratePerMobi || 1)} / Mobi</span>
+          </div>
+          <div className="flex items-center justify-between text-[11px]">
+            <span className="text-muted-foreground">Sell Rate (Liquidate)</span>
+            <span className="font-mono font-semibold text-fuchsia-700 dark:text-fuchsia-400">
+              ₦{formatRate((baseRate?.ratePerMobi || 1) * (1 - sellingSpreadPct / 100))} / Mobi
+            </span>
+          </div>
+        </div>
+
         {/* Search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -399,14 +487,23 @@ export function AdminExchangeRateTab() {
                   </div>
                 )}
 
-                {/* Row 3: Conversion preview */}
+                {/* Row 3: Buy / Sell rate + conversion preview */}
                 {!isEditing && (
-                  <div className="mt-2 pt-2 border-t border-border/40 space-y-0.5">
-                    <p className="text-xs text-muted-foreground">
-                      M1,000 = {rate.code} {(rate.ratePerMobi * 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      M1,000,000 = {rate.code} {(rate.ratePerMobi * 1000000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  <div className="mt-2 pt-2 border-t border-border/40 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase tracking-wider text-emerald-600 font-semibold">Buy</span>
+                      <span className="text-xs font-mono font-semibold text-foreground">
+                        {formatRate(rate.ratePerMobi)} {rate.code} / Mobi
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase tracking-wider text-fuchsia-600 font-semibold">Sell</span>
+                      <span className="text-xs font-mono font-semibold text-fuchsia-700 dark:text-fuchsia-400">
+                        {formatRate(rate.sellingRatePerMobi)} {rate.code} / Mobi
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground pt-1">
+                      M1,000 → buy {(rate.ratePerMobi * 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {rate.code} · sell {(rate.sellingRatePerMobi * 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {rate.code}
                     </p>
                   </div>
                 )}
