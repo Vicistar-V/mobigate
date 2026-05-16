@@ -216,14 +216,44 @@ export const MediaUploadDialog = ({
             </div>
           )}
 
-          {/* Monetization, Audience, Copyright, Audio */}
+          {/* Content Fee Notice + Monetization */}
           {selectedFiles.length > 0 && (
-            <MediaMonetizationFields
-              value={monetization}
-              onChange={setMonetization}
-              hideAudio={selectedFiles.every((f) => f.type.startsWith("video/"))}
-              compact
-            />
+            <>
+              {(() => {
+                const hasVideo = selectedFiles.some((f) => f.type.startsWith("video/"));
+                const totalFee = selectedFiles.reduce((sum, f) => {
+                  const type = f.type.startsWith("video/")
+                    ? "Video"
+                    : f.type.startsWith("audio/")
+                    ? "Audio"
+                    : "Photo";
+                  return sum + getContentPostingFee(type);
+                }, 0);
+                return (
+                  <div className="space-y-2">
+                    <ContentFeeNotice
+                      mediaType={hasVideo ? "Video" : "Photo"}
+                      compact
+                    />
+                    {selectedFiles.length > 1 && (
+                      <p className="text-xs text-muted-foreground text-center">
+                        Total for {selectedFiles.length} files:{" "}
+                        <span className="font-semibold text-foreground">
+                          M{totalFee.toLocaleString()}
+                        </span>{" "}
+                        (debited from Mobi Wallet)
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
+              <MediaMonetizationFields
+                value={monetization}
+                onChange={setMonetization}
+                hideAudio={selectedFiles.every((f) => f.type.startsWith("video/"))}
+                compact
+              />
+            </>
           )}
 
           {/* Upload Progress */}
