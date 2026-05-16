@@ -382,7 +382,7 @@ export const GreetingSection = () => {
                     <button
                       type="button"
                       onClick={openComposerBlank}
-                      className="bg-primary text-primary-foreground rounded-md px-2.5 py-2 text-center text-[12.5px] font-bold leading-tight truncate active:opacity-90 touch-manipulation shadow-sm"
+                      className="bg-primary text-primary-foreground rounded-md px-2.5 py-2.5 text-center text-[15px] font-bold leading-tight truncate active:opacity-90 touch-manipulation shadow-sm"
                     >
                       Post &amp; Share something now
                     </button>
@@ -394,10 +394,10 @@ export const GreetingSection = () => {
                       }
                       className="flex-1 bg-lime-200/70 text-foreground p-2.5 text-left rounded-md active:opacity-90 touch-manipulation"
                     >
-                      <p className="text-[12px] font-bold leading-snug">
+                      <p className="text-[15px] font-bold leading-snug">
                         Your Post or Content Description or Storyline here.
                       </p>
-                      <p className="text-[11.5px] leading-snug mt-1">
+                      <p className="text-[14px] leading-snug mt-1">
                         However, the storyline may not just exceed certain word-counts or be made to be unnecessary
                         <span className="font-extrabold italic">…More</span>
                       </p>
