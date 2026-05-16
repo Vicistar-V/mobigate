@@ -292,6 +292,12 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
               Organize your post into an album for better management
             </p>
           </div>
+
+          <MediaMonetizationFields
+            value={monetization}
+            onChange={setMonetization}
+            hideAudio={type === "Video"}
+          />
         </div>
         <div className="flex justify-end gap-3">
           <Button variant="outline" onClick={() => {
