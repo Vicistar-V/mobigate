@@ -26,19 +26,41 @@ export const GreetingSection = () => {
   const phpFeedPosts = useFeedPosts();
   const allPosts = phpFeedPosts || fallbackFeedPosts;
 
-  // Last posts of the current user (fallback to fill from latest overall) — featured + RTL strip
-  const myRecentPosts = (() => {
-    const mine = allPosts.filter((p) => p.userId === currentUserId).slice(0, 12);
-    if (mine.length >= 12) return mine;
-    return [...mine, ...allPosts.filter((p) => p.userId !== currentUserId)].slice(0, 12);
-  })();
-  const featuredPostThumb = myRecentPosts[0]?.imageUrl;
+  // The User's OWN most recent post — pinned to the TOP big image space (never changes via thumbs)
+  const myOwnPosts = allPosts.filter((p) => p.userId === currentUserId);
+  const myLatestOwnPost = myOwnPosts[0] || allPosts[0];
 
-  // Featured selection driven by the RTL thumb strip
-  const [featuredIdx, setFeaturedIdx] = useState(0);
+  // Public/connection posts from OTHER users — drive the SECOND big image space
+  const publicConnectionPosts = (() => {
+    const others = allPosts.filter(
+      (p) => p.userId !== currentUserId && ((p as any).privacy ?? "Public") === "Public",
+    );
+    // Fallback so the space is never empty
+    return others.length > 0 ? others.slice(0, 16) : allPosts.filter((p) => p.userId !== currentUserId).slice(0, 16);
+  })();
+
+  // Thumbnail strip — User's own + Public connection posts, de-duped
+  const thumbnailPosts = (() => {
+    const seen = new Set<string>();
+    const out: typeof allPosts = [];
+    for (const p of [...myOwnPosts, ...publicConnectionPosts]) {
+      const key = p.id || p.imageUrl;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(p);
+    }
+    return out.slice(0, 16);
+  })();
+
+  // The SECOND big space rotates based on which thumbnail was tapped
+  const [featuredPublicIdx, setFeaturedPublicIdx] = useState(0);
   const [viewerOpen, setViewerOpen] = useState(false);
-  const safeFeaturedIdx = Math.min(featuredIdx, Math.max(0, myRecentPosts.length - 1));
-  const featuredPost = myRecentPosts[safeFeaturedIdx] || myRecentPosts[0];
+  const safeFeaturedIdx = Math.min(featuredPublicIdx, Math.max(0, publicConnectionPosts.length - 1));
+  const featuredPublicPost = publicConnectionPosts[safeFeaturedIdx] || publicConnectionPosts[0];
+  // Keep legacy names so the rest of the file keeps compiling unchanged
+  const featuredPost = myLatestOwnPost;
+  const myRecentPosts = thumbnailPosts;
+
 
   const [friendsMenuView, setFriendsMenuView] = useState<"main" | "requests">("main");
   const [createPostOpen, setCreatePostOpen] = useState(false);
