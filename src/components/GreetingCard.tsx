@@ -189,6 +189,11 @@ export const GreetingSection = () => {
                 className="absolute bottom-1.5 right-1.5 h-4 w-4 rounded-full bg-green-500 ring-2 ring-card"
                 aria-label="Online"
               />
+              {/* Verified badge at bottom of avatar */}
+              <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 inline-flex items-center gap-0.5 bg-black/55 text-white text-[9px] font-bold px-1.5 py-[2px] rounded-full ring-2 ring-card whitespace-nowrap">
+                <BadgeCheck className="h-2.5 w-2.5 fill-green-400 text-white" />
+                Verified
+              </span>
             </div>
 
             {/* Date/time on top, greeting below */}
@@ -202,12 +207,8 @@ export const GreetingSection = () => {
             </div>
           </div>
 
-          {/* Verified + Full Name — under avatar */}
+          {/* Full Name + Badges — under avatar */}
           <div className="mt-2 flex items-center gap-2 flex-wrap">
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-green-600">
-              <BadgeCheck className="h-3.5 w-3.5 fill-green-600 text-white" />
-              Verified
-            </span>
             <h2 className="text-lg font-bold tracking-tight truncate">
               {profile.fullName}
             </h2>
