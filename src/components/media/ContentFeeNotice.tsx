@@ -1,13 +1,18 @@
-import { Coins, Wallet, Info } from "lucide-react";
+import { Coins, Wallet, Info, Images } from "lucide-react";
 import {
   getContentPostingFee,
+  getContentPostingFeeForCount,
   getContentPostingFeeRange,
   isMotionMedia,
+  EXTRA_IMAGE_FEE,
+  MAX_IMAGES_PER_POST,
   type ContentMediaType,
 } from "@/data/platformSettingsData";
 
 interface ContentFeeNoticeProps {
   mediaType: ContentMediaType | string;
+  /** Number of images attached (Photo posts only). Defaults to 1. */
+  imageCount?: number;
   /** Compact variant for tight drawers */
   compact?: boolean;
 }
@@ -18,11 +23,20 @@ interface ContentFeeNoticeProps {
  *
  * Video / Audio media: M300 – M500.
  * Still media (Photo / Article / News / PDF / URL): M200 – M300.
+ * Photo posts scale by image count: 1 = M200, 2 = M250, 3 = M300.
  */
-export const ContentFeeNotice = ({ mediaType, compact = false }: ContentFeeNoticeProps) => {
-  const fee = getContentPostingFee(mediaType);
+export const ContentFeeNotice = ({
+  mediaType,
+  imageCount = 1,
+  compact = false,
+}: ContentFeeNoticeProps) => {
+  const baseFee = getContentPostingFee(mediaType);
+  const fee = getContentPostingFeeForCount(mediaType, imageCount);
   const { min, max } = getContentPostingFeeRange(mediaType);
   const motion = isMotionMedia(mediaType);
+  const isPhoto = mediaType === "Photo";
+  const safeCount = Math.max(1, Math.min(MAX_IMAGES_PER_POST, imageCount || 1));
+  const extras = isPhoto ? safeCount - 1 : 0;
 
   return (
     <div
@@ -47,6 +61,28 @@ export const ContentFeeNotice = ({ mediaType, compact = false }: ContentFeeNotic
           (range M{min} – M{max})
         </span>
       </div>
+      {isPhoto && (
+        <div className="rounded-md bg-amber-500/10 border border-amber-500/30 px-2 py-1.5">
+          <p className="text-[11px] font-semibold text-foreground flex items-center gap-1">
+            <Images className="h-3 w-3 text-amber-700 shrink-0" />
+            {safeCount} of {MAX_IMAGES_PER_POST} image{safeCount === 1 ? "" : "s"} attached
+          </p>
+          <p className="text-[10.5px] text-muted-foreground leading-snug mt-0.5">
+            Base M{baseFee.toLocaleString()}
+            {extras > 0 && (
+              <>
+                {" "}+ {extras} extra image{extras === 1 ? "" : "s"} × M{EXTRA_IMAGE_FEE}
+                {" "}= <span className="font-semibold text-foreground">M{fee.toLocaleString()}</span>
+              </>
+            )}
+            {extras === 0 && (
+              <>
+                {" "}· add up to {MAX_IMAGES_PER_POST - safeCount} more (+M{EXTRA_IMAGE_FEE} each)
+              </>
+            )}
+          </p>
+        </div>
+      )}
       <p className="text-[11px] text-muted-foreground leading-snug flex items-start gap-1">
         <Wallet className="h-3 w-3 mt-0.5 shrink-0" />
         <span>

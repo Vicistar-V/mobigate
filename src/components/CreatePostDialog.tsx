@@ -30,7 +30,11 @@ import {
   type MediaMonetizationValue,
 } from "@/components/media/MediaMonetizationFields";
 import { ContentFeeNotice } from "@/components/media/ContentFeeNotice";
-import { getContentPostingFee } from "@/data/platformSettingsData";
+import {
+  getContentPostingFee,
+  getContentPostingFeeForCount,
+  MAX_IMAGES_PER_POST,
+} from "@/data/platformSettingsData";
 
 interface CreatePostDialogProps {
   open?: boolean;
@@ -87,10 +91,32 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
         variant: "destructive",
       });
     }
-    const valid = incoming.filter((f) => f.size <= 20 * 1024 * 1024);
+    let valid = incoming.filter((f) => f.size <= 20 * 1024 * 1024);
     if (valid.length === 0) {
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
+    }
+
+    // Enforce 3-image maximum per Photo post
+    if (type === "Photo") {
+      const remainingSlots = Math.max(0, MAX_IMAGES_PER_POST - mediaPreviews.length);
+      if (remainingSlots === 0) {
+        toast({
+          title: "Maximum reached",
+          description: `Photo posts allow up to ${MAX_IMAGES_PER_POST} images. Remove one to add another.`,
+          variant: "destructive",
+        });
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      }
+      if (valid.length > remainingSlots) {
+        toast({
+          title: `Only ${remainingSlots} more allowed`,
+          description: `Photo posts cap at ${MAX_IMAGES_PER_POST} images. Extra files were skipped.`,
+          variant: "destructive",
+        });
+        valid = valid.slice(0, remainingSlots);
+      }
     }
 
     setMediaFiles((prev) => [...prev, ...valid]);
@@ -103,15 +129,19 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
       reader.readAsDataURL(file);
     });
 
+    const extraCost = type === "Photo" && mediaPreviews.length >= 1
+      ? ` (+M50 per extra image)`
+      : "";
     toast({
       title: valid.length > 1 ? `${valid.length} files selected` : "Media selected",
       description: valid.length > 1
-        ? `Added ${valid.length} files to this post`
-        : `${valid[0].name} ready to upload`,
+        ? `Added ${valid.length} files to this post${extraCost}`
+        : `${valid[0].name} ready to upload${extraCost}`,
     });
 
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
+
 
   const handleRemoveMediaAt = (index: number) => {
     setMediaPreviews((prev) => prev.filter((_, i) => i !== index));
@@ -154,7 +184,7 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
       ? albums.find(a => a.id === selectedAlbum)?.name
       : null;
 
-    const fee = getContentPostingFee(type);
+    const fee = getContentPostingFeeForCount(type, mediaPreviews.length);
 
     toast({
       title: `M${fee.toLocaleString()} debited from Mobi Wallet`,
@@ -162,6 +192,7 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
         ? `Post published to "${albumName}". Content fee M${fee.toLocaleString()} (non-refundable).`
         : `Your monetized post is live. Content fee M${fee.toLocaleString()} (non-refundable).`,
     });
+
 
     resetForm();
     setOpen(false);
@@ -242,18 +273,25 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
             </Select>
           </div>
 
-          {/* Content posting fee notice based on selected media type */}
-          <ContentFeeNotice mediaType={type} />
+          {/* Content posting fee notice based on selected media type + image count */}
+          <ContentFeeNotice
+            mediaType={type}
+            imageCount={type === "Photo" ? Math.max(1, mediaPreviews.length) : 1}
+          />
+
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label>Media Files</Label>
               {mediaPreviews.length > 0 && (
                 <span className="text-[11px] text-muted-foreground">
-                  {mediaPreviews.length} file{mediaPreviews.length === 1 ? "" : "s"} attached
+                  {mediaPreviews.length}
+                  {type === "Photo" ? ` / ${MAX_IMAGES_PER_POST}` : ""} file
+                  {mediaPreviews.length === 1 ? "" : "s"} attached
                 </span>
               )}
             </div>
+
 
             {/* Multi-file preview grid */}
             {mediaPreviews.length > 0 && (
@@ -291,12 +329,15 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
                 type="button"
                 variant="outline"
                 className="w-full"
+                disabled={type === "Photo" && mediaPreviews.length >= MAX_IMAGES_PER_POST}
                 onClick={() => fileInputRef.current?.click()}
               >
                 {mediaPreviews.length > 0 ? (
                   <>
                     <ImagePlus className="h-4 w-4 mr-2" />
-                    Add More Files
+                    {type === "Photo" && mediaPreviews.length >= MAX_IMAGES_PER_POST
+                      ? `Maximum ${MAX_IMAGES_PER_POST} images reached`
+                      : `Add More Files${type === "Photo" ? ` (+M50 each, up to ${MAX_IMAGES_PER_POST})` : ""}`}
                   </>
                 ) : (
                   <>
@@ -308,16 +349,19 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
               <input
                 ref={fileInputRef}
                 type="file"
-                multiple
-                accept="image/*,video/*,audio/*,.pdf"
+                multiple={type !== "Photo" || mediaPreviews.length + 1 < MAX_IMAGES_PER_POST}
+                accept={type === "Photo" ? "image/*" : "image/*,video/*,audio/*,.pdf"}
                 onChange={handleFileChange}
                 className="hidden"
               />
             </div>
             <p className="text-base text-muted-foreground">
-              Attach multiple images or files to one post. Supported: Images, Videos, Audio, PDF (Max 20MB each)
+              {type === "Photo"
+                ? `Up to ${MAX_IMAGES_PER_POST} images per Photo post. 1st image M200, +M50 for each extra image (Max 20MB each).`
+                : "Attach multiple images or files to one post. Supported: Images, Videos, Audio, PDF (Max 20MB each)"}
             </p>
           </div>
+
 
           <div className="space-y-2">
             <Label htmlFor="album">Album (Optional)</Label>
@@ -345,8 +389,9 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
             Cancel
           </Button>
           <Button onClick={handleSubmit}>
-            Publish • Pay M{getContentPostingFee(type).toLocaleString()}
+            Publish • Pay M{getContentPostingFeeForCount(type, mediaPreviews.length).toLocaleString()}
           </Button>
+
         </div>
       </DialogContent>
       
