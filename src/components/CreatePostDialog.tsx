@@ -329,12 +329,15 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
                 type="button"
                 variant="outline"
                 className="w-full"
+                disabled={type === "Photo" && mediaPreviews.length >= MAX_IMAGES_PER_POST}
                 onClick={() => fileInputRef.current?.click()}
               >
                 {mediaPreviews.length > 0 ? (
                   <>
                     <ImagePlus className="h-4 w-4 mr-2" />
-                    Add More Files
+                    {type === "Photo" && mediaPreviews.length >= MAX_IMAGES_PER_POST
+                      ? `Maximum ${MAX_IMAGES_PER_POST} images reached`
+                      : `Add More Files${type === "Photo" ? ` (+M50 each, up to ${MAX_IMAGES_PER_POST})` : ""}`}
                   </>
                 ) : (
                   <>
@@ -346,16 +349,19 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
               <input
                 ref={fileInputRef}
                 type="file"
-                multiple
-                accept="image/*,video/*,audio/*,.pdf"
+                multiple={type !== "Photo" || mediaPreviews.length + 1 < MAX_IMAGES_PER_POST}
+                accept={type === "Photo" ? "image/*" : "image/*,video/*,audio/*,.pdf"}
                 onChange={handleFileChange}
                 className="hidden"
               />
             </div>
             <p className="text-base text-muted-foreground">
-              Attach multiple images or files to one post. Supported: Images, Videos, Audio, PDF (Max 20MB each)
+              {type === "Photo"
+                ? `Up to ${MAX_IMAGES_PER_POST} images per Photo post. 1st image M200, +M50 for each extra image (Max 20MB each).`
+                : "Attach multiple images or files to one post. Supported: Images, Videos, Audio, PDF (Max 20MB each)"}
             </p>
           </div>
+
 
           <div className="space-y-2">
             <Label htmlFor="album">Album (Optional)</Label>
