@@ -285,10 +285,13 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
               <Label>Media Files</Label>
               {mediaPreviews.length > 0 && (
                 <span className="text-[11px] text-muted-foreground">
-                  {mediaPreviews.length} file{mediaPreviews.length === 1 ? "" : "s"} attached
+                  {mediaPreviews.length}
+                  {type === "Photo" ? ` / ${MAX_IMAGES_PER_POST}` : ""} file
+                  {mediaPreviews.length === 1 ? "" : "s"} attached
                 </span>
               )}
             </div>
+
 
             {/* Multi-file preview grid */}
             {mediaPreviews.length > 0 && (
