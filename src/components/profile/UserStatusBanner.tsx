@@ -93,42 +93,38 @@ export const UserStatusBanner = ({ className = "" }: { className?: string }) => 
 
   return (
     <>
-      {/* Outer wrapper provides the distinct thick frame with 4 rounded corners */}
-      <div
-        className={`relative w-full rounded-3xl border-[5px] border-primary/80 bg-card p-1 shadow-[0_4px_18px_-6px_hsl(var(--primary)/0.45)] ring-1 ring-primary/20 ${className}`}
-      >
-        <div className="relative w-full overflow-hidden rounded-2xl bg-muted">
-          <button
-            type="button"
-            onClick={handleClick}
-            className="block w-full aspect-[16/6] sm:aspect-[16/5] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            aria-label={isLinked ? `Open ${settings.url}` : "Open banner in viewer"}
-          >
-            <img
-              src={displayImage}
-              alt="Your status banner"
-              className="w-full h-full object-cover transition-opacity duration-500"
-            />
-            <span className="pointer-events-none absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-md bg-black/55 px-2 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
-              {isLinked ? (
-                <>
-                  <ExternalLink className="h-3 w-3" />
-                  Open link
-                </>
-              ) : (
-                <>
-                  <Maximize2 className="h-3 w-3" />
-                  View
-                </>
-              )}
-            </span>
-            {settings.seconds > 0 && settings.history.length > 1 && (
-              <span className="pointer-events-none absolute top-2 left-2 inline-flex items-center gap-1 rounded-md bg-emerald-500/90 px-2 py-0.5 text-[10px] font-semibold text-white">
-                Auto-rotating
-              </span>
+      {/* Banner image only — thick blue border with 4 rounded corners */}
+      <div className={`relative w-full ${className}`}>
+        <button
+          type="button"
+          onClick={handleClick}
+          className="relative block w-full aspect-[16/6] sm:aspect-[16/5] overflow-hidden rounded-2xl border-[5px] border-[hsl(212_95%_50%)] bg-muted shadow-[0_4px_18px_-6px_hsl(212_95%_50%/0.45)] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(212_95%_50%)]"
+          aria-label={isLinked ? `Open ${settings.url}` : "Open banner in viewer"}
+        >
+          <img
+            src={displayImage}
+            alt="Your status banner"
+            className="w-full h-full object-cover transition-opacity duration-500"
+          />
+          <span className="pointer-events-none absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-md bg-black/55 px-2 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
+            {isLinked ? (
+              <>
+                <ExternalLink className="h-3 w-3" />
+                Open link
+              </>
+            ) : (
+              <>
+                <Maximize2 className="h-3 w-3" />
+                View
+              </>
             )}
-          </button>
-        </div>
+          </span>
+          {settings.seconds > 0 && settings.history.length > 1 && (
+            <span className="pointer-events-none absolute top-2 left-2 inline-flex items-center gap-1 rounded-md bg-emerald-500/90 px-2 py-0.5 text-[10px] font-semibold text-white">
+              Auto-rotating
+            </span>
+          )}
+        </button>
       </div>
 
       <MediaGalleryViewer
