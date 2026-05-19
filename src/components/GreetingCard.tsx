@@ -207,12 +207,8 @@ export const GreetingSection = () => {
             </div>
           </div>
 
-          {/* Verified + Full Name — under avatar */}
+          {/* Full Name + Badges — under avatar */}
           <div className="mt-2 flex items-center gap-2 flex-wrap">
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-green-600">
-              <BadgeCheck className="h-3.5 w-3.5 fill-green-600 text-white" />
-              Verified
-            </span>
             <h2 className="text-lg font-bold tracking-tight truncate">
               {profile.fullName}
             </h2>
