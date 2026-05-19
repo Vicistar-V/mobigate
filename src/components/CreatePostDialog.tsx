@@ -273,8 +273,12 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
             </Select>
           </div>
 
-          {/* Content posting fee notice based on selected media type */}
-          <ContentFeeNotice mediaType={type} />
+          {/* Content posting fee notice based on selected media type + image count */}
+          <ContentFeeNotice
+            mediaType={type}
+            imageCount={type === "Photo" ? Math.max(1, mediaPreviews.length) : 1}
+          />
+
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
