@@ -26,19 +26,44 @@ export const GreetingSection = () => {
   const phpFeedPosts = useFeedPosts();
   const allPosts = phpFeedPosts || fallbackFeedPosts;
 
-  // Last posts of the current user (fallback to fill from latest overall) — featured + RTL strip
-  const myRecentPosts = (() => {
-    const mine = allPosts.filter((p) => p.userId === currentUserId).slice(0, 12);
-    if (mine.length >= 12) return mine;
-    return [...mine, ...allPosts.filter((p) => p.userId !== currentUserId)].slice(0, 12);
-  })();
-  const featuredPostThumb = myRecentPosts[0]?.imageUrl;
+  // The User's OWN most recent post — pinned to the TOP big image space (never changes via thumbs)
+  const myOwnPosts = allPosts.filter((p) => p.userId === currentUserId);
+  const myLatestOwnPost = myOwnPosts[0] || allPosts[0];
 
-  // Featured selection driven by the RTL thumb strip
-  const [featuredIdx, setFeaturedIdx] = useState(0);
+  // Public/connection posts from OTHER users — drive the SECOND big image space
+  const publicConnectionPosts = (() => {
+    const others = allPosts.filter(
+      (p) => p.userId !== currentUserId && ((p as any).privacy ?? "Public") === "Public",
+    );
+    // Fallback so the space is never empty
+    return others.length > 0 ? others.slice(0, 16) : allPosts.filter((p) => p.userId !== currentUserId).slice(0, 16);
+  })();
+
+  // Thumbnail strip — User's own + Public connection posts, de-duped
+  const thumbnailPosts = (() => {
+    const seen = new Set<string>();
+    const out: typeof allPosts = [];
+    for (const p of [...myOwnPosts, ...publicConnectionPosts]) {
+      const key = p.id || p.imageUrl;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(p);
+    }
+    return out.slice(0, 16);
+  })();
+
+  // The SECOND big space rotates based on which thumbnail was tapped (any thumb, own or public)
+  const [featuredPublicIdx, setFeaturedPublicIdx] = useState(0);
   const [viewerOpen, setViewerOpen] = useState(false);
-  const safeFeaturedIdx = Math.min(featuredIdx, Math.max(0, myRecentPosts.length - 1));
-  const featuredPost = myRecentPosts[safeFeaturedIdx] || myRecentPosts[0];
+  const safeFeaturedIdx = Math.min(featuredPublicIdx, Math.max(0, thumbnailPosts.length - 1));
+  const featuredPublicPost = thumbnailPosts[safeFeaturedIdx] || thumbnailPosts[0] || myLatestOwnPost;
+  // Keep legacy names so the rest of the file keeps compiling unchanged
+  const featuredPost = myLatestOwnPost;
+  const myRecentPosts = thumbnailPosts;
+  const setFeaturedIdx = setFeaturedPublicIdx;
+
+
+
 
   const [friendsMenuView, setFriendsMenuView] = useState<"main" | "requests">("main");
   const [createPostOpen, setCreatePostOpen] = useState(false);
@@ -427,24 +452,27 @@ export const GreetingSection = () => {
               </div>
             )}
 
-            {/* Public post — image (red border) left, lavender text right */}
-            {myRecentPosts[1] && (
+            {/* Public/Connection post — driven by thumbnail selection below */}
+            {featuredPublicPost && (
               <div className="mt-2 rounded-lg overflow-hidden bg-purple-200/60 p-1.5">
                 <div className="grid grid-cols-[40%_1fr] gap-2 items-stretch">
                   <button
                     type="button"
-                    onClick={() =>
-                      openComposerWithImage(myRecentPosts[1].imageUrl, myRecentPosts[1].title)
-                    }
-                    className="bg-muted active:scale-[0.98] transition-transform touch-manipulation rounded-md overflow-hidden border-2 border-red-500"
-                    aria-label="Use this image to post"
+                    onClick={() => setViewerOpen(true)}
+                    className="relative bg-muted active:scale-[0.98] transition-transform touch-manipulation rounded-md overflow-hidden border-2 border-red-500"
+                    aria-label="Open this public post in a bigger window"
                   >
                     <img
-                      src={myRecentPosts[1].imageUrl}
-                      alt={myRecentPosts[1].title}
-                      className="w-full h-full object-cover aspect-[4/5]"
+                      key={featuredPublicPost.id || `pub-${safeFeaturedIdx}`}
+                      src={featuredPublicPost.imageUrl}
+                      alt={featuredPublicPost.title}
+                      className="w-full h-full object-cover aspect-[4/5] transition-opacity duration-300"
                       loading="lazy"
                     />
+                    <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded-md bg-black/55 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
+                      <Maximize2 className="h-3 w-3" />
+                      Tap to enlarge
+                    </span>
                   </button>
                   <button
                     type="button"
@@ -452,16 +480,21 @@ export const GreetingSection = () => {
                     className="text-foreground p-2.5 text-left active:opacity-90 touch-manipulation"
                   >
                     <p className="text-[15px] font-bold leading-snug">
-                      Public Post or Content Description or Storyline here.
+                      {featuredPublicPost.title || "Public Post or Content Description or Storyline here."}
                     </p>
                     <p className="text-[14px] leading-snug mt-1">
-                      However, the storyline may not just exceed certain word-counts or be made to be unnecessarily bulky or voluminous in any case, or
+                      {(featuredPublicPost as any).description ||
+                        "However, the storyline may not just exceed certain word-counts or be made to be unnecessarily bulky or voluminous in any case, or"}
                       <span className="font-extrabold italic">…More</span>
+                    </p>
+                    <p className="text-[11px] text-muted-foreground mt-1 italic">
+                      by {(featuredPublicPost as any).author || "Public User"} · {featuredPublicPost.userId === currentUserId ? "Your post" : "Public / Connection"}
                     </p>
                   </button>
                 </div>
               </div>
             )}
+
 
             {/* RTL auto-scrolling thumbnail strip — click to load into the big featured panel above */}
             {myRecentPosts.length > 1 && (
@@ -504,8 +537,9 @@ export const GreetingSection = () => {
                   </div>
                 </div>
                 <p className="mt-1 text-[11px] text-muted-foreground text-center italic">
-                  Auto-scrolls right → left · tap any thumbnail to feature it above · tap the big image to open larger
+                  Your posts + Public &amp; Connection posts · auto-scrolls right → left · tap any thumb to feature it in the lower image · tap the big image to enlarge
                 </p>
+
               </div>
             )}
 
