@@ -55,11 +55,16 @@ export const GreetingSection = () => {
   // The SECOND big space rotates based on which thumbnail was tapped
   const [featuredPublicIdx, setFeaturedPublicIdx] = useState(0);
   const [viewerOpen, setViewerOpen] = useState(false);
-  const safeFeaturedIdx = Math.min(featuredPublicIdx, Math.max(0, publicConnectionPosts.length - 1));
-  const featuredPublicPost = publicConnectionPosts[safeFeaturedIdx] || publicConnectionPosts[0];
+  // The SECOND big space rotates based on which thumbnail was tapped (any thumb, own or public)
+  const [featuredPublicIdx, setFeaturedPublicIdx] = useState(0);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const safeFeaturedIdx = Math.min(featuredPublicIdx, Math.max(0, thumbnailPosts.length - 1));
+  const featuredPublicPost = thumbnailPosts[safeFeaturedIdx] || thumbnailPosts[0] || myLatestOwnPost;
   // Keep legacy names so the rest of the file keeps compiling unchanged
   const featuredPost = myLatestOwnPost;
   const myRecentPosts = thumbnailPosts;
+  const setFeaturedIdx = setFeaturedPublicIdx;
+
 
 
   const [friendsMenuView, setFriendsMenuView] = useState<"main" | "requests">("main");
