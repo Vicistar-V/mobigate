@@ -452,24 +452,27 @@ export const GreetingSection = () => {
               </div>
             )}
 
-            {/* Public post — image (red border) left, lavender text right */}
-            {myRecentPosts[1] && (
+            {/* Public/Connection post — driven by thumbnail selection below */}
+            {featuredPublicPost && (
               <div className="mt-2 rounded-lg overflow-hidden bg-purple-200/60 p-1.5">
                 <div className="grid grid-cols-[40%_1fr] gap-2 items-stretch">
                   <button
                     type="button"
-                    onClick={() =>
-                      openComposerWithImage(myRecentPosts[1].imageUrl, myRecentPosts[1].title)
-                    }
-                    className="bg-muted active:scale-[0.98] transition-transform touch-manipulation rounded-md overflow-hidden border-2 border-red-500"
-                    aria-label="Use this image to post"
+                    onClick={() => setViewerOpen(true)}
+                    className="relative bg-muted active:scale-[0.98] transition-transform touch-manipulation rounded-md overflow-hidden border-2 border-red-500"
+                    aria-label="Open this public post in a bigger window"
                   >
                     <img
-                      src={myRecentPosts[1].imageUrl}
-                      alt={myRecentPosts[1].title}
-                      className="w-full h-full object-cover aspect-[4/5]"
+                      key={featuredPublicPost.id || `pub-${safeFeaturedIdx}`}
+                      src={featuredPublicPost.imageUrl}
+                      alt={featuredPublicPost.title}
+                      className="w-full h-full object-cover aspect-[4/5] transition-opacity duration-300"
                       loading="lazy"
                     />
+                    <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded-md bg-black/55 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
+                      <Maximize2 className="h-3 w-3" />
+                      Tap to enlarge
+                    </span>
                   </button>
                   <button
                     type="button"
@@ -477,16 +480,21 @@ export const GreetingSection = () => {
                     className="text-foreground p-2.5 text-left active:opacity-90 touch-manipulation"
                   >
                     <p className="text-[15px] font-bold leading-snug">
-                      Public Post or Content Description or Storyline here.
+                      {featuredPublicPost.title || "Public Post or Content Description or Storyline here."}
                     </p>
                     <p className="text-[14px] leading-snug mt-1">
-                      However, the storyline may not just exceed certain word-counts or be made to be unnecessarily bulky or voluminous in any case, or
+                      {(featuredPublicPost as any).description ||
+                        "However, the storyline may not just exceed certain word-counts or be made to be unnecessarily bulky or voluminous in any case, or"}
                       <span className="font-extrabold italic">…More</span>
+                    </p>
+                    <p className="text-[11px] text-muted-foreground mt-1 italic">
+                      by {(featuredPublicPost as any).author || "Public User"} · {featuredPublicPost.userId === currentUserId ? "Your post" : "Public / Connection"}
                     </p>
                   </button>
                 </div>
               </div>
             )}
+
 
             {/* RTL auto-scrolling thumbnail strip — click to load into the big featured panel above */}
             {myRecentPosts.length > 1 && (
