@@ -163,7 +163,7 @@ export const GreetingSection = () => {
         {/* Top Advert Banner — full image */}
         <a
           href={heroAd.ctaUrl}
-          className="block relative active:opacity-95 transition-opacity touch-manipulation border-[5px] border-primary/80"
+          className="block relative active:opacity-95 transition-opacity touch-manipulation border-[5px] border-primary/80 rounded-t-3xl overflow-hidden"
         >
           <img
             src={heroAdBanner}
