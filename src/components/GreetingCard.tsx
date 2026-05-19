@@ -52,9 +52,6 @@ export const GreetingSection = () => {
     return out.slice(0, 16);
   })();
 
-  // The SECOND big space rotates based on which thumbnail was tapped
-  const [featuredPublicIdx, setFeaturedPublicIdx] = useState(0);
-  const [viewerOpen, setViewerOpen] = useState(false);
   // The SECOND big space rotates based on which thumbnail was tapped (any thumb, own or public)
   const [featuredPublicIdx, setFeaturedPublicIdx] = useState(0);
   const [viewerOpen, setViewerOpen] = useState(false);
@@ -64,6 +61,7 @@ export const GreetingSection = () => {
   const featuredPost = myLatestOwnPost;
   const myRecentPosts = thumbnailPosts;
   const setFeaturedIdx = setFeaturedPublicIdx;
+
 
 
 
