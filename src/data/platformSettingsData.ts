@@ -617,3 +617,28 @@ export function getContentPostingFeeRange(
     : { min: platformContentPostingFees.still.min, max: platformContentPostingFees.still.max };
 }
 
+/**
+ * Max images a single post can include (Photo type).
+ * 1st image is the base fee; each extra image adds MAX_EXTRA_IMAGE_FEE.
+ */
+export const MAX_IMAGES_PER_POST = 3;
+export const EXTRA_IMAGE_FEE = 50;
+
+/**
+ * Computes the actual Content Posting Fee given the media type and number of
+ * attached images. Photo posts scale: 1 img = base (M200), 2 imgs = M250,
+ * 3 imgs = M300. Motion media and other still types use the flat default.
+ */
+export function getContentPostingFeeForCount(
+  type: ContentMediaType | string,
+  imageCount: number,
+): number {
+  const base = getContentPostingFee(type);
+  if (type === "Photo") {
+    const count = Math.max(1, Math.min(MAX_IMAGES_PER_POST, imageCount || 1));
+    return base + (count - 1) * EXTRA_IMAGE_FEE;
+  }
+  return base;
+}
+
+
