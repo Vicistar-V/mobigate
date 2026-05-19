@@ -184,7 +184,7 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
       ? albums.find(a => a.id === selectedAlbum)?.name
       : null;
 
-    const fee = getContentPostingFee(type);
+    const fee = getContentPostingFeeForCount(type, mediaPreviews.length);
 
     toast({
       title: `M${fee.toLocaleString()} debited from Mobi Wallet`,
@@ -192,6 +192,7 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
         ? `Post published to "${albumName}". Content fee M${fee.toLocaleString()} (non-refundable).`
         : `Your monetized post is live. Content fee M${fee.toLocaleString()} (non-refundable).`,
     });
+
 
     resetForm();
     setOpen(false);
