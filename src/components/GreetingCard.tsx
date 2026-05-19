@@ -159,11 +159,11 @@ export const GreetingSection = () => {
   return (
     <div className="space-y-3">
       {/* ============ HERO BLOCK ============ */}
-      <Card className="overflow-hidden rounded-3xl border-[5px] border-primary/80 shadow-[0_6px_20px_-8px_hsl(var(--primary)/0.45)] ring-1 ring-primary/25">
+      <Card className="overflow-hidden rounded-3xl shadow-[0_6px_20px_-8px_hsl(var(--primary)/0.45)]">
         {/* Top Advert Banner — full image */}
         <a
           href={heroAd.ctaUrl}
-          className="block relative active:opacity-95 transition-opacity touch-manipulation"
+          className="block relative active:opacity-95 transition-opacity touch-manipulation border-[5px] border-primary/80"
         >
           <img
             src={heroAdBanner}
