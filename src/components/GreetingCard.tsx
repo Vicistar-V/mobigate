@@ -537,8 +537,9 @@ export const GreetingSection = () => {
                   </div>
                 </div>
                 <p className="mt-1 text-[11px] text-muted-foreground text-center italic">
-                  Auto-scrolls right → left · tap any thumbnail to feature it above · tap the big image to open larger
+                  Your posts + Public &amp; Connection posts · auto-scrolls right → left · tap any thumb to feature it in the lower image · tap the big image to enlarge
                 </p>
+
               </div>
             )}
 
