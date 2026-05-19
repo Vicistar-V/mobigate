@@ -192,11 +192,11 @@ export const GreetingSection = () => {
             </div>
 
             {/* Date/time on top, greeting below */}
-            <div className="flex-1 min-w-0 pb-1.5 flex flex-col gap-0.5">
-              <p className="text-[11px] text-muted-foreground tabular-nums whitespace-nowrap leading-tight">
+            <div className="flex-1 min-w-0 pb-1.5 flex flex-col gap-1">
+              <p className="text-[13px] font-medium text-muted-foreground tabular-nums whitespace-nowrap leading-tight">
                 {liveDate} · {liveTime}
               </p>
-              <p className="text-[13px] font-bold text-destructive leading-tight whitespace-nowrap">
+              <p className="text-[15px] font-bold text-destructive leading-tight whitespace-nowrap">
                 {profile.greeting}
               </p>
             </div>
