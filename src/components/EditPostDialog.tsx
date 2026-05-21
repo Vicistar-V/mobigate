@@ -18,12 +18,18 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Post } from "@/data/posts";
+<<<<<<< Updated upstream
 import { Upload, X, Image as ImageIcon } from "lucide-react";
 import {
   MediaMonetizationFields,
   defaultMonetizationValue,
   type MediaMonetizationValue,
 } from "@/components/media/MediaMonetizationFields";
+=======
+import { Upload, X } from "lucide-react";
+
+const API_BASE = (import.meta.env.VITE_API_URL as string) || "https://angola-press.com/en/api";
+>>>>>>> Stashed changes
 
 interface EditPostDialogProps {
   post: Post;
@@ -32,22 +38,21 @@ interface EditPostDialogProps {
   onSave: (updatedPost: Post) => void;
 }
 
-export const EditPostDialog = ({
-  post,
-  open,
-  onOpenChange,
-  onSave,
-}: EditPostDialogProps) => {
-  const [title, setTitle] = useState(post.title);
-  const [subtitle, setSubtitle] = useState(post.subtitle || "");
+export const EditPostDialog = ({ post, open, onOpenChange, onSave }: EditPostDialogProps) => {
+  const [title,       setTitle]       = useState(post.title);
+  const [subtitle,    setSubtitle]    = useState(post.subtitle    || "");
   const [description, setDescription] = useState(post.description || "");
-  const [type, setType] = useState(post.type);
-  const [imageUrl, setImageUrl] = useState(post.imageUrl || "");
+  const [type,        setType]        = useState(post.type);
+  const [imageUrl,    setImageUrl]    = useState(post.imageUrl    || "");
   const [newMediaFile, setNewMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
+<<<<<<< Updated upstream
   const [monetization, setMonetization] = useState<MediaMonetizationValue>(
     defaultMonetizationValue()
   );
+=======
+  const [submitting,   setSubmitting]   = useState(false);
+>>>>>>> Stashed changes
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -55,18 +60,10 @@ export const EditPostDialog = ({
     const file = e.target.files?.[0];
     if (file) {
       setNewMediaFile(file);
-      
-      // Create preview URL
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setMediaPreview(reader.result as string);
-      };
+      reader.onloadend = () => setMediaPreview(reader.result as string);
       reader.readAsDataURL(file);
-      
-      toast({
-        title: "Media selected",
-        description: `${file.name} ready to upload`,
-      });
+      toast({ title: "Media selected", description: `${file.name} ready to upload` });
     }
   };
 
@@ -74,40 +71,55 @@ export const EditPostDialog = ({
     setNewMediaFile(null);
     setMediaPreview(null);
     setImageUrl("");
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!title.trim()) {
-      toast({
-        title: "Error",
-        description: "Title is required",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Title is required", variant: "destructive" });
       return;
     }
 
-    // In a real app, you would upload the newMediaFile to storage here
-    // and get back the URL to save in the post
-    const finalImageUrl = mediaPreview || imageUrl;
+    setSubmitting(true);
 
-    const updatedPost: Post = {
-      ...post,
-      title: title.trim(),
-      subtitle: subtitle.trim() || undefined,
-      description: description.trim() || undefined,
-      type,
-      imageUrl: finalImageUrl || undefined,
-    };
+    try {
+      const form = new FormData();
+      form.append("post_id",   post.id ?? "");
+      form.append("title",     title.trim());
+      form.append("subtitle",  subtitle.trim());
+      form.append("content",   description.trim());
+      form.append("post_type", type.toLowerCase());
+      if (newMediaFile) form.append("media", newMediaFile);
 
-    onSave(updatedPost);
-    toast({
-      title: "Success",
-      description: "Post updated successfully",
-    });
-    onOpenChange(false);
+      const xhr = new XMLHttpRequest();
+      const result = await new Promise<{ success: boolean; error?: string }>((resolve, reject) => {
+        xhr.onload  = () => { try { resolve(JSON.parse(xhr.responseText)); } catch { reject(new Error("Invalid response")); } };
+        xhr.onerror = () => reject(new Error("Network error"));
+        xhr.open("POST", `${API_BASE}/posts/update.php`);
+        xhr.withCredentials = true;
+        xhr.send(form);
+      });
+
+      if (result.success) {
+        const updatedPost: Post = {
+          ...post,
+          title:       title.trim(),
+          subtitle:    subtitle.trim()    || undefined,
+          description: description.trim() || undefined,
+          type,
+          imageUrl:    mediaPreview || imageUrl || undefined,
+        };
+        onSave(updatedPost);
+        toast({ title: "Success", description: "Post updated successfully" });
+        onOpenChange(false);
+      } else {
+        toast({ title: "Error", description: result.error || "Could not save post.", variant: "destructive" });
+      }
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message || "Upload failed.", variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -120,41 +132,20 @@ export const EditPostDialog = ({
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="title">Title *</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter post title"
-            />
+            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Enter post title" />
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="subtitle">Subtitle</Label>
-            <Input
-              id="subtitle"
-              value={subtitle}
-              onChange={(e) => setSubtitle(e.target.value)}
-              placeholder="Enter post subtitle (optional)"
-            />
+            <Input id="subtitle" value={subtitle} onChange={(e) => setSubtitle(e.target.value)} placeholder="Enter post subtitle (optional)" />
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="description">Description / Story</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Add accompanying story, description or more information about your media"
-              className="min-h-[120px]"
-            />
+            <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Add accompanying story, description or more information about your media" className="min-h-[120px]" />
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="type">Content Type</Label>
             <Select value={type} onValueChange={(value: any) => setType(value)}>
-              <SelectTrigger id="type">
-                <SelectValue />
-              </SelectTrigger>
+              <SelectTrigger id="type"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="Photo">Photo</SelectItem>
                 <SelectItem value="Video">Video</SelectItem>
@@ -165,52 +156,24 @@ export const EditPostDialog = ({
               </SelectContent>
             </Select>
           </div>
-
           <div className="space-y-2">
             <Label>Media File</Label>
-            
-            {/* Current or New Media Preview */}
             {(mediaPreview || imageUrl) && (
               <div className="relative rounded-lg border overflow-hidden bg-muted">
-                <img 
-                  src={mediaPreview || imageUrl} 
-                  alt="Media preview" 
-                  className="w-full h-48 object-cover"
-                />
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="icon"
-                  className="absolute top-2 right-2"
-                  onClick={handleRemoveMedia}
-                >
+                <img src={mediaPreview || imageUrl} alt="Media preview" className="w-full h-48 object-cover" />
+                <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2" onClick={handleRemoveMedia}>
                   <X className="h-4 w-4" />
                 </Button>
               </div>
             )}
-
-            {/* Upload Button */}
             <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={() => fileInputRef.current?.click()}
-              >
+              <Button type="button" variant="outline" className="w-full" onClick={() => fileInputRef.current?.click()}>
                 <Upload className="h-4 w-4 mr-2" />
                 {mediaPreview || imageUrl ? "Change Media" : "Upload Media"}
               </Button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*,video/*,audio/*,.pdf"
-                onChange={handleFileChange}
-                className="hidden"
-              />
+              <input ref={fileInputRef} type="file" accept="image/*,video/*,audio/*,.pdf" onChange={handleFileChange} className="hidden" />
             </div>
-            <p className="text-base text-muted-foreground">
-              Supported formats: Images, Videos, Audio, PDF (Max 20MB)
-            </p>
+            <p className="text-base text-muted-foreground">Supported formats: Images, Videos, Audio, PDF (Max 20MB)</p>
           </div>
 
           <MediaMonetizationFields
@@ -221,10 +184,12 @@ export const EditPostDialog = ({
         </div>
 
         <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
             Cancel
           </Button>
-          <Button onClick={handleSave}>Save Changes</Button>
+          <Button onClick={handleSave} disabled={submitting}>
+            {submitting ? "Saving..." : "Save Changes"}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

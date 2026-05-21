@@ -1,23 +1,29 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Columns2, LayoutGrid } from "lucide-react";
+import { Columns2, LayoutGrid, Loader2 } from "lucide-react";
 import { AlbumCard } from "./AlbumCard";
 import { AlbumDetailDialog } from "./AlbumDetailDialog";
 import { AllPhotosGrid } from "./AllPhotosGrid";
 import { AllVideosGrid } from "./AllVideosGrid";
-import { mockAlbums, Album, Post } from "@/data/posts";
+import { Album, Post } from "@/data/posts";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { albumsCarouselAdSlots } from "@/data/profileAds";
 import { getRandomAdSlot } from "@/lib/adUtils";
+<<<<<<< Updated upstream
 import { useUserAlbums } from "@/hooks/useWindowData";
 import { RenameAlbumDialog } from "@/components/RenameAlbumDialog";
 import { useToast } from "@/hooks/use-toast";
+=======
+
+const API_BASE = (import.meta.env.VITE_API_URL as string) || "/api";
+>>>>>>> Stashed changes
 
 interface ProfileAlbumsTabProps {
   userId: string;
   profileImageHistory: string[];
+<<<<<<< Updated upstream
   bannerImageHistory: string[];
   userPosts: Post[];
   /** When true, show owner Edit/Delete controls on each album. Defaults to true. */
@@ -40,36 +46,45 @@ export const ProfileAlbumsTab = ({
   const [visibleAlbumCount, setVisibleAlbumCount] = useState(15);
   const [albumOverrides, setAlbumOverrides] = useState<Record<string, { name?: string; deleted?: boolean }>>({});
   const [renameTarget, setRenameTarget] = useState<(Album & { isSystem?: boolean }) | null>(null);
+=======
+  bannerImageHistory:  string[];
+  userPosts:           Post[];
+}
 
-  // Create system albums
-  const profilePicturesAlbum: Album & { isSystem: boolean } = useMemo(
-    () => ({
-      id: "system_profile_pics",
-      name: "Profile Pictures",
-      description: "All your profile pictures",
-      coverImage: profileImageHistory[0] || "/placeholder.svg",
-      itemCount: profileImageHistory.length,
-      privacy: "Public",
-      createdAt: "System",
-      isSystem: true,
-    }),
-    [profileImageHistory]
-  );
+interface ApiAlbum {
+  id: string; name: string; description: string | null;
+  coverImage: string | null; itemCount: number; privacy: string; createdAt: string;
+}
+>>>>>>> Stashed changes
 
-  const profileBannersAlbum: Album & { isSystem: boolean } = useMemo(
-    () => ({
-      id: "system_profile_banners",
-      name: "Profile Banners",
-      description: "All your banner images",
-      coverImage: bannerImageHistory[0] || "/placeholder.svg",
-      itemCount: bannerImageHistory.length,
-      privacy: "Public",
-      createdAt: "System",
-      isSystem: true,
-    }),
-    [bannerImageHistory]
-  );
+export const ProfileAlbumsTab = ({ userId, profileImageHistory, bannerImageHistory, userPosts }: ProfileAlbumsTabProps) => {
+  const [albums,         setAlbums]         = useState<(Album & { isSystem?: boolean })[]>([]);
+  const [loading,        setLoading]        = useState(true);
+  const [selectedAlbum,  setSelectedAlbum]  = useState<(Album & { isSystem?: boolean }) | null>(null);
+  const [albumDialogOpen,setAlbumDialogOpen]= useState(false);
+  const [albumsView,     setAlbumsView]     = useState<"normal"|"large">("normal");
+  const [visibleCount,   setVisibleCount]   = useState(15);
 
+  const fetchAlbums = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/profile/albums.php?user_id=${userId}`, { credentials: "include" });
+      if (!res.ok) throw new Error();
+      const data: ApiAlbum[] = await res.json();
+      setAlbums(data.map(a => ({
+        id:          a.id,
+        name:        a.name,
+        description: a.description || "",
+        coverImage:  a.coverImage  || "/placeholder.svg",
+        itemCount:   a.itemCount,
+        privacy:     a.privacy as "Public"|"Friends"|"Private",
+        createdAt:   a.createdAt,
+      })));
+    } catch { setAlbums([]); }
+    finally { setLoading(false); }
+  }, [userId]);
+
+<<<<<<< Updated upstream
   // Get user-created albums (from mockAlbums) with posts assigned to them.
   // Apply owner overrides (rename/delete) so changes reflect in the UI.
   const userAlbums = useMemo(() => {
@@ -121,182 +136,68 @@ export const ProfileAlbumsTab = ({
     setAlbumDialogOpen(true);
   };
 
+=======
+  useEffect(() => { fetchAlbums(); }, [fetchAlbums]);
+>>>>>>> Stashed changes
 
-  // Combine all albums for carousel
-  const allAlbums = useMemo(() => {
-    const albums: (Album & { isSystem?: boolean })[] = [];
-    
-    // Add system albums first (if they have items)
-    if (profilePicturesAlbum.itemCount > 0) albums.push(profilePicturesAlbum);
-    if (profileBannersAlbum.itemCount > 0) albums.push(profileBannersAlbum);
-    
-    // Add user albums
-    albums.push(...userAlbums);
-    
-    return albums;
-  }, [profilePicturesAlbum, profileBannersAlbum, userAlbums]);
+  // System albums (always shown if they have items)
+  const systemAlbums: (Album & { isSystem: boolean })[] = [];
+  if (profileImageHistory.length > 0) systemAlbums.push({
+    id: "system_profile_pics", name: "Profile Pictures", description: "All your profile pictures",
+    coverImage: profileImageHistory[0] || "/placeholder.svg", itemCount: profileImageHistory.length,
+    privacy: "Public", createdAt: "System", isSystem: true,
+  });
+  if (bannerImageHistory.length > 0) systemAlbums.push({
+    id: "system_profile_banners", name: "Profile Banners", description: "All your banner images",
+    coverImage: bannerImageHistory[0] || "/placeholder.svg", itemCount: bannerImageHistory.length,
+    privacy: "Public", createdAt: "System", isSystem: true,
+  });
 
-  // Prepare all photos for the "All Photos" grid (excluding videos)
-  const allPhotos = useMemo(() => {
-    const photos: Array<{
-      id: string;
-      url: string;
-      type: "profile-picture" | "banner" | "post";
-      date: string;
-      title?: string;
-      author?: string;
-    }> = [];
+  const allAlbums = [...systemAlbums, ...albums];
 
-    // Add profile pictures
-    profileImageHistory.forEach((url, index) => {
-      photos.push({
-        id: `profile_pic_${index}`,
-        url,
-        type: "profile-picture",
-        date: new Date(Date.now() - index * 86400000).toISOString(),
-        title: "Profile Picture",
-      });
-    });
+  // All photos from posts
+  const allPhotos = [
+    ...profileImageHistory.map((url, i) => ({ id: `pp_${i}`, url, type: "profile-picture" as const, date: new Date(Date.now() - i * 86400000).toISOString(), title: "Profile Picture" })),
+    ...bannerImageHistory.map((url, i) => ({ id: `bn_${i}`, url, type: "banner" as const, date: new Date(Date.now() - i * 86400000).toISOString(), title: "Profile Banner" })),
+    ...userPosts.filter(p => p.imageUrl && p.type === "Photo").map(p => ({ id: p.id, url: p.imageUrl!, type: "post" as const, date: p.id || "", title: p.title, author: p.author })),
+  ].sort((a, b) => b.date.localeCompare(a.date));
 
-    // Add banner images
-    bannerImageHistory.forEach((url, index) => {
-      photos.push({
-        id: `banner_${index}`,
-        url,
-        type: "banner",
-        date: new Date(Date.now() - index * 86400000).toISOString(),
-        title: "Profile Banner",
-      });
-    });
+  const allVideos = userPosts.filter(p => p.imageUrl && p.type === "Video").map(p => ({
+    id: p.id, url: p.imageUrl!, type: "post" as const, date: p.id || "", title: p.title, author: p.author,
+  }));
 
-    // Add ONLY Photo type posts (exclude videos)
-    userPosts
-      .filter((post) => post.imageUrl && post.type === "Photo")
-      .forEach((post) => {
-        photos.push({
-          id: post.id || `post_${Math.random()}`,
-          url: post.imageUrl!,
-          type: "post",
-          date: post.id || new Date().toISOString(),
-          title: post.title,
-          author: post.author,
-        });
-      });
-
-    return photos.sort((a, b) => b.date.localeCompare(a.date));
-  }, [profileImageHistory, bannerImageHistory, userPosts]);
-
-  // Prepare all videos for the "All Videos" grid
-  const allVideos = useMemo(() => {
-    const videos: Array<{
-      id: string;
-      url: string;
-      type: "post";
-      date: string;
-      title?: string;
-      author?: string;
-    }> = [];
-
-    // Add ONLY Video type posts
-    userPosts
-      .filter((post) => post.imageUrl && post.type === "Video")
-      .forEach((post) => {
-        videos.push({
-          id: post.id || `video_${Math.random()}`,
-          url: post.imageUrl!,
-          type: "post",
-          date: post.id || new Date().toISOString(),
-          title: post.title,
-          author: post.author,
-        });
-      });
-
-    return videos.sort((a, b) => b.date.localeCompare(a.date));
-  }, [userPosts]);
-
-  // Handle album click
-  const handleAlbumClick = (album: Album & { isSystem?: boolean }) => {
-    setSelectedAlbum(album);
-    setAlbumDialogOpen(true);
-  };
-
-  // Get items for selected album
   const getAlbumItems = (album: Album & { isSystem?: boolean }) => {
-    if (album.id === "system_profile_pics") {
-      return profileImageHistory.map((url, index) => ({
-        id: `profile_pic_${index}`,
-        url,
-        title: "Profile Picture",
-      }));
-    }
-
-    if (album.id === "system_profile_banners") {
-      return bannerImageHistory.map((url, index) => ({
-        id: `banner_${index}`,
-        url,
-        title: "Profile Banner",
-      }));
-    }
-
-    // Regular album - get posts assigned to it
-    return userPosts
-      .filter((post) => post.albumId === album.id && post.imageUrl)
-      .map((post) => ({
-        id: post.id || `post_${Math.random()}`,
-        url: post.imageUrl!,
-        title: post.title,
-        author: post.author,
-        type: post.type,
-      }));
+    if (album.id === "system_profile_pics") return profileImageHistory.map((url, i) => ({ id: `pp_${i}`, url, title: "Profile Picture" }));
+    if (album.id === "system_profile_banners") return bannerImageHistory.map((url, i) => ({ id: `bn_${i}`, url, title: "Profile Banner" }));
+    return userPosts.filter(p => p.albumId === album.id && p.imageUrl).map(p => ({ id: p.id, url: p.imageUrl!, title: p.title, author: p.author, type: p.type }));
   };
 
-  const displayedAlbums = albumsView === "large" 
-    ? allAlbums.slice(0, visibleAlbumCount) 
-    : allAlbums;
+  const displayed = albumsView === "large" ? allAlbums.slice(0, visibleCount) : allAlbums;
 
-  const handleLoadMore = () => {
-    setVisibleAlbumCount((prev) => prev + 15);
-  };
-
-  const handleShowLess = () => {
-    setVisibleAlbumCount(15);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  if (loading) return <div className="flex justify-center py-16"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
 
   return (
     <div className="space-y-8">
-      {/* Albums Section */}
       {allAlbums.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <h2 className="text-2xl font-bold">Albums</h2>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setAlbumsView(albumsView === "normal" ? "large" : "normal")}
-                className="gap-1"
-              >
-                {albumsView === "normal" ? (
-                  <Columns2 className="h-4 w-4" />
-                ) : (
-                  <LayoutGrid className="h-4 w-4" />
-                )}
+              <Button variant="outline" size="sm" onClick={() => setAlbumsView(v => v === "normal" ? "large" : "normal")} className="gap-1">
+                {albumsView === "normal" ? <Columns2 className="h-4 w-4" /> : <LayoutGrid className="h-4 w-4" />}
               </Button>
             </div>
           </div>
 
-          {/* Carousel View */}
           {albumsView === "normal" && (
             <div className="relative -mx-4 px-4">
               <ScrollArea className="w-full">
                 <div className="flex gap-3 pb-2">
                   {allAlbums.map((album, index) => {
                     const shouldShowAd = (index + 1) % 4 === 0 && index < allAlbums.length - 1;
-                    const adSlotIndex = Math.floor((index + 1) / 4) - 1;
-                    
                     return (
                       <React.Fragment key={album.id}>
+<<<<<<< Updated upstream
                         <AlbumCard
                           album={album}
                           onClick={() => handleAlbumClick(album)}
@@ -307,13 +208,12 @@ export const ProfileAlbumsTab = ({
                           onChangeCover={() => handleAlbumChangeCover(album)}
                         />
                         
+=======
+                        <AlbumCard album={album} onClick={() => { setSelectedAlbum(album); setAlbumDialogOpen(true); }} variant="carousel" />
+>>>>>>> Stashed changes
                         {shouldShowAd && (
                           <div className="flex-shrink-0 w-[85vw] sm:w-[90vw] max-w-[400px]">
-                            <PremiumAdRotation
-                              slotId={`albums-carousel-premium-${adSlotIndex}`}
-                              ads={getRandomAdSlot(albumsCarouselAdSlots)}
-                              context="albums-carousel"
-                            />
+                            <PremiumAdRotation slotId={`albums-carousel-${Math.floor((index+1)/4)}`} ads={getRandomAdSlot(albumsCarouselAdSlots)} context="albums-carousel" />
                           </div>
                         )}
                       </React.Fragment>
@@ -325,10 +225,10 @@ export const ProfileAlbumsTab = ({
             </div>
           )}
 
-          {/* Grid View */}
           {albumsView === "large" && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
+<<<<<<< Updated upstream
                 {displayedAlbums.map((album, index) => {
                   const adSlotNumber = Math.floor(index / 4);
                   const shouldShowAd = (index + 1) % 4 === 0 && index < displayedAlbums.length - 1;
@@ -357,72 +257,46 @@ export const ProfileAlbumsTab = ({
                     </React.Fragment>
                   );
                 })}
+=======
+                {displayed.map((album, index) => (
+                  <React.Fragment key={album.id}>
+                    <AlbumCard album={album} onClick={() => { setSelectedAlbum(album); setAlbumDialogOpen(true); }} variant="grid" />
+                    {(index + 1) % 4 === 0 && index < displayed.length - 1 && (
+                      <div className="col-span-2 my-2">
+                        <PremiumAdRotation slotId={`albums-grid-${Math.floor((index+1)/4)}`} ads={getRandomAdSlot(albumsCarouselAdSlots)} context="albums-carousel" />
+                      </div>
+                    )}
+                  </React.Fragment>
+                ))}
+>>>>>>> Stashed changes
               </div>
-
-              {/* Pagination Controls */}
-              {allAlbums.length > visibleAlbumCount && (
-                <div className="flex justify-center mt-6">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    onClick={handleLoadMore}
-                    className="w-full sm:w-auto"
-                  >
-                    ...more
-                  </Button>
-                </div>
+              {allAlbums.length > visibleCount && (
+                <Button variant="outline" size="lg" onClick={() => setVisibleCount(v => v + 15)} className="w-full">...more</Button>
               )}
-
-              {visibleAlbumCount > 15 && allAlbums.length >= visibleAlbumCount && (
-                <div className="flex justify-center mt-2">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    onClick={handleShowLess}
-                    className="w-full sm:w-auto"
-                  >
-                    Less...
-                  </Button>
-                </div>
+              {visibleCount > 15 && (
+                <Button variant="outline" size="lg" onClick={() => setVisibleCount(15)} className="w-full">Less...</Button>
               )}
             </div>
           )}
         </div>
       )}
 
-      {/* All Photos/Videos Tabbed Section */}
       <div>
         <Tabs defaultValue="photos" className="w-full">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <h2 className="text-xl sm:text-2xl font-bold">Media Gallery</h2>
-            <TabsList className="grid w-full sm:w-auto sm:max-w-md grid-cols-2">
-              <TabsTrigger value="photos" className="text-sm sm:text-base">
-                All Photos ({allPhotos.length})
-              </TabsTrigger>
-              <TabsTrigger value="videos" className="text-sm sm:text-base">
-                All Videos ({allVideos.length})
-              </TabsTrigger>
+            <TabsList className="grid w-full sm:w-auto grid-cols-2">
+              <TabsTrigger value="photos">All Photos ({allPhotos.length})</TabsTrigger>
+              <TabsTrigger value="videos">All Videos ({allVideos.length})</TabsTrigger>
             </TabsList>
           </div>
-          
-          <TabsContent value="photos" className="mt-0">
-            <AllPhotosGrid photos={allPhotos} />
-          </TabsContent>
-          
-          <TabsContent value="videos" className="mt-0">
-            <AllVideosGrid videos={allVideos} />
-          </TabsContent>
+          <TabsContent value="photos"><AllPhotosGrid photos={allPhotos} /></TabsContent>
+          <TabsContent value="videos"><AllVideosGrid videos={allVideos} /></TabsContent>
         </Tabs>
       </div>
 
-      {/* Album Detail Dialog */}
       {selectedAlbum && (
-        <AlbumDetailDialog
-          open={albumDialogOpen}
-          onOpenChange={setAlbumDialogOpen}
-          album={selectedAlbum}
-          items={getAlbumItems(selectedAlbum)}
-        />
+        <AlbumDetailDialog open={albumDialogOpen} onOpenChange={setAlbumDialogOpen} album={selectedAlbum} items={getAlbumItems(selectedAlbum)} />
       )}
 
       {/* Rename Album */}

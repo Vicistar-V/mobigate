@@ -1,632 +1,233 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, Heart, MessageCircle, Video, FileText, Image, Music, Link, ChevronDown, ChevronUp, FileIcon, MoreHorizontal, UserPlus, Share2, MoveHorizontal, MoveVertical } from "lucide-react";
-import { getPostsByUserId, Post } from "@/data/posts";
-import { useUserPosts } from "@/hooks/useWindowData";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { PremiumAdRotation } from "@/components/PremiumAdRotation";
-import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
-import { contentsAdSlots } from "@/data/profileAds";
+  Eye, Heart, MessageCircle, Video, FileText, Image,
+  Music, Link, ChevronDown, ChevronUp, FileIcon,
+  MoreHorizontal, UserPlus, Share2, MoveHorizontal, MoveVertical, Loader2,
+} from "lucide-react";
+import { Post } from "@/data/posts";
 import { useToast } from "@/hooks/use-toast";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 import { CommentDialog } from "@/components/CommentDialog";
 import { ShareDialog } from "@/components/ShareDialog";
 import { generateShareUrl } from "@/lib/shareUtils";
+import { PremiumAdRotation } from "@/components/PremiumAdRotation";
+import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
+
+
+const API_BASE = (import.meta.env.VITE_API_URL as string) || "/api";
+
+// Safe fallback ad slots — never undefined
+const CONTENT_AD_SLOTS = [
+  {
+    slotId: "profile-content-ad-1",
+    ads: [{
+      id: "pca-1",
+      advertiser: { name: "Mobigate Premium", verified: true },
+      content: { headline: "Upgrade to Premium", description: "Get more visibility for your content.", ctaText: "Learn More", ctaUrl: "#" },
+      media: { type: "image" as const, items: [{ url: "https://images.unsplash.com/photo-1557838923-2985c318be48?w=800&q=80" }] },
+      layout: "standard" as const,
+      duration: 10,
+    }],
+  },
+];
+
+const getIcon = (type: string) => {
+  const map: Record<string, React.ReactNode> = {
+    Video: <Video className="h-8 w-8 text-muted-foreground" />,
+    Article: <FileText className="h-8 w-8 text-muted-foreground" />,
+    Photo: <Image className="h-8 w-8 text-muted-foreground" />,
+    Audio: <Music className="h-8 w-8 text-muted-foreground" />,
+    PDF: <FileText className="h-8 w-8 text-muted-foreground" />,
+    URL: <Link className="h-8 w-8 text-muted-foreground" />,
+  };
+  return map[type] || <FileText className="h-8 w-8 text-muted-foreground" />;
+};
 
 interface ProfileContentsTabProps {
   userName: string;
   userId: string;
 }
 
-// Helper function to get icon based on content type
-const getContentTypeIcon = (type: string) => {
-  switch(type) {
-    case "Video":
-      return <Video className="h-8 w-8 text-muted-foreground" />;
-    case "Article":
-      return <FileText className="h-8 w-8 text-muted-foreground" />;
-    case "Photo":
-      return <Image className="h-8 w-8 text-muted-foreground" />;
-    case "Audio":
-      return <Music className="h-8 w-8 text-muted-foreground" />;
-    case "PDF":
-      return <FileText className="h-8 w-8 text-muted-foreground" />;
-    case "URL":
-      return <Link className="h-8 w-8 text-muted-foreground" />;
-    default:
-      return <FileText className="h-8 w-8 text-muted-foreground" />;
-  }
-};
-
-// Helper function to get badge color classes based on content type
-const getContentTypeBadgeClass = (type: string) => {
-  const variants: Record<string, string> = {
-    "Video": "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800",
-    "Article": "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800",
-    "Photo": "bg-pink-100 text-pink-700 border-pink-200 dark:bg-pink-950 dark:text-pink-300 dark:border-pink-800",
-    "Audio": "bg-green-100 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-300 dark:border-green-800",
-    "PDF": "bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-950 dark:text-orange-300 dark:border-orange-800",
-    "URL": "bg-cyan-100 text-cyan-700 border-cyan-200 dark:bg-cyan-950 dark:text-cyan-300 dark:border-cyan-800",
-  };
-  return variants[type] || "bg-muted text-muted-foreground border-border";
-};
-
-// Helper function to sort content
-const sortContent = (posts: Post[], sortBy: string) => {
-  switch(sortBy) {
-    case "recent":
-      return [...posts].reverse(); // Newest first
-    case "popular":
-      return [...posts].sort((a, b) => {
-        const likesA = parseInt(a.likes.replace(/[^0-9]/g, '')) || 0;
-        const likesB = parseInt(b.likes.replace(/[^0-9]/g, '')) || 0;
-        return likesB - likesA;
-      });
-    case "oldest":
-      return posts; // Original order (oldest first)
-    default:
-      return posts;
-  }
-};
-
 export const ProfileContentsTab = ({ userName, userId }: ProfileContentsTabProps) => {
-  const [sortBy, setSortBy] = useState<string>("recent");
-  const [visibleCount, setVisibleCount] = useState<number>(15);
-  const [contentFilter, setContentFilter] = useState<string>("all");
-  const [followingAuthors, setFollowingAuthors] = useState<Set<string>>(new Set());
-  const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
-  const [viewOrientation, setViewOrientation] = useState<"horizontal" | "vertical">("vertical");
   const { toast } = useToast();
-  
-  // Media Gallery states
-  const [mediaGalleryOpen, setMediaGalleryOpen] = useState(false);
-  const [galleryItems, setGalleryItems] = useState<MediaItem[]>([]);
-  const [galleryInitialIndex, setGalleryInitialIndex] = useState(0);
-  
-  // Comment Dialog states
-  const [commentDialogOpen, setCommentDialogOpen] = useState(false);
-  const [selectedPostForComment, setSelectedPostForComment] = useState<Post | null>(null);
-  
-  // Share Dialog states
-  const [shareDialogOpen, setShareDialogOpen] = useState(false);
-  const [shareUrl, setShareUrl] = useState("");
-  const [shareTitle, setShareTitle] = useState("");
-  const [shareDescription, setShareDescription] = useState("");
+  const [posts,         setPosts]         = useState<Post[]>([]);
+  const [loading,       setLoading]       = useState(true);
+  const [sortBy,        setSortBy]        = useState("recent");
+  const [visibleCount,  setVisibleCount]  = useState(15);
+  const [filter,        setFilter]        = useState("all");
+  const [likedPosts,    setLikedPosts]    = useState<Set<string>>(new Set());
+  const [viewMode,      setViewMode]      = useState<"horizontal"|"vertical">("vertical");
+  const [galleryOpen,   setGalleryOpen]   = useState(false);
+  const [galleryItems,  setGalleryItems]  = useState<MediaItem[]>([]);
+  const [galleryIdx,    setGalleryIdx]    = useState(0);
+  const [commentOpen,   setCommentOpen]   = useState(false);
+  const [commentPost,   setCommentPost]   = useState<Post | null>(null);
+  const [shareOpen,     setShareOpen]     = useState(false);
+  const [shareData,     setShareData]     = useState({ url: "", title: "", description: "" });
 
-  const handleFollowAuthor = (authorUserId: string) => {
-    setFollowingAuthors(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(authorUserId)) {
-        newSet.delete(authorUserId);
-      } else {
-        newSet.add(authorUserId);
-      }
-      return newSet;
-    });
-  };
-
-  const handleLike = (postId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setLikedPosts(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(postId)) {
-        newSet.delete(postId);
-        toast({
-          title: "Removed like",
-          description: "Post unliked successfully",
-        });
-      } else {
-        newSet.add(postId);
-        toast({
-          title: "Liked!",
-          description: "Post liked successfully",
-        });
-      }
-      return newSet;
-    });
-  };
-
-  const formatFollowerCount = (count: string | undefined): string => {
-    if (!count) return "0";
-    return count;
-  };
-
-  // Open media gallery when clicking on card or image
-  const openMediaGallery = (post: Post, index: number) => {
-    // Convert visible posts to MediaItem format
-    const items: MediaItem[] = visiblePosts.map((p) => ({
-      id: p.id,
-      url: p.imageUrl || "",
-      type: p.type.toLowerCase() === "video" ? "video" : p.type.toLowerCase() === "audio" ? "audio" : "photo",
-      title: p.title,
-      description: p.subtitle,
-      author: p.author,
-      authorImage: p.authorProfileImage,
-      authorUserId: p.userId,
-      likes: parseInt(p.likes.replace(/[^0-9]/g, '')) || 0,
-      comments: parseInt(p.comments.replace(/[^0-9]/g, '')) || 0,
-      followers: p.followers,
-      isLiked: likedPosts.has(p.id),
-      isOwner: p.isOwner,
-    }));
-    
-    setGalleryItems(items);
-    setGalleryInitialIndex(index);
-    setMediaGalleryOpen(true);
-  };
-
-  // Open comment dialog when clicking comment count
-  const openCommentDialog = (post: Post) => {
-    setSelectedPostForComment(post);
-    setCommentDialogOpen(true);
-  };
-
-  // Open share dialog
-  const openShareDialog = (post: Post) => {
-    setShareUrl(generateShareUrl('post', post.id));
-    setShareTitle(post.title);
-    setShareDescription(post.subtitle || "");
-    setShareDialogOpen(true);
-  };
-
-  // Filter options configuration
-  const primaryFilters = [
-    { value: "all", label: "All", icon: null },
-    { value: "Video", label: "Videos", icon: Video },
-    { value: "Photo", label: "Photos", icon: Image },
-    { value: "Article", label: "Articles", icon: FileText },
-  ];
-
-  const moreFilters = [
-    { value: "Audio", label: "Audio", icon: Music },
-    { value: "PDF", label: "PDF", icon: FileIcon },
-    { value: "URL", label: "URL Links", icon: Link },
-  ];
-
-  // Fetch user's posts
-  const phpUserPosts = useUserPosts();
-  const userPosts = useMemo(() => {
-    // Priority 1: PHP data
-    if (phpUserPosts && phpUserPosts.length > 0) {
-      return phpUserPosts as Post[];
+  const fetchPosts = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res  = await fetch(`${API_BASE}/posts/feed.php?user_id=${userId}&limit=100`, { credentials: "include" });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setPosts(data.map((p: any) => ({
+        id:           p.id,
+        title:        p.title,
+        subtitle:     p.subtitle || undefined,
+        description:  p.content || undefined,
+        author:       p.author_name,
+        authorProfileImage: p.author_profile_photo || undefined,
+        userId:       p.user_id,
+        type:         (p.post_type.charAt(0).toUpperCase() + p.post_type.slice(1)) as Post["type"],
+        imageUrl:     p.thumbnail_url || p.media_url || undefined,
+        views:        String(p.view_count || 0),
+        likes:        String(p.like_count || 0),
+        comments:     String(p.comment_count || 0),
+        followers:    String(p.author_follower_count || 0),
+        fee:          p.access_fee || "0",
+        status:       "Online" as const,
+        isOwner:      p.is_owner,
+        isLiked:      p.is_liked,
+      })));
+    } catch {
+      setPosts([]);
+    } finally {
+      setLoading(false);
     }
-    // Priority 2: Mock data (development)
-    return getPostsByUserId(userId);
-  }, [phpUserPosts, userId]);
-  
-  // Prepare premium ad slots for rotation
-  const premiumAdSlots = contentsAdSlots.map((ads, index) => ({
-    slotId: `contents-premium-${index}`,
-    ads: ads,
-  }));
-  
-  // Calculate content counts
-  const contentCounts = useMemo(() => {
-    const counts: Record<string, number> = {
-      all: userPosts.length,
-      Video: 0,
-      Photo: 0,
-      Article: 0,
-      Audio: 0,
-      PDF: 0,
-      URL: 0,
-    };
-    
-    userPosts.forEach(post => {
-      counts[post.type] = (counts[post.type] || 0) + 1;
-    });
-    
-    return counts;
-  }, [userPosts]);
+  }, [userId]);
 
-  // Filter content by type
-  const filterContent = (posts: Post[], filterType: string) => {
-    if (filterType === "all") return posts;
-    return posts.filter(post => post.type === filterType);
+  useEffect(() => { fetchPosts(); }, [fetchPosts]);
+
+  const handleLike = async (postId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const isLiked = likedPosts.has(postId);
+    setLikedPosts(prev => { const s = new Set(prev); isLiked ? s.delete(postId) : s.add(postId); return s; });
+    try {
+      await fetch(`${API_BASE}/posts/like.php`, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ post_id: postId }),
+      });
+    } catch {}
+    toast({ title: isLiked ? "Removed like" : "Liked!" });
   };
 
-  // Apply filtering first, then sorting
-  const filteredPosts = useMemo(() => filterContent(userPosts, contentFilter), [userPosts, contentFilter]);
-  const sortedPosts = useMemo(() => sortContent(filteredPosts, sortBy), [filteredPosts, sortBy]);
-  
-  // Get visible posts based on pagination
-  const visiblePosts = sortedPosts.slice(0, visibleCount);
-  
-  const hasMore = visibleCount < sortedPosts.length;
-  const canShowLess = visibleCount > 15;
+  const filtered = useMemo(() => {
+    let p = filter === "all" ? posts : posts.filter(p => p.type === filter);
+    if (sortBy === "recent")  p = [...p].reverse();
+    if (sortBy === "popular") p = [...p].sort((a, b) => parseInt(b.likes) - parseInt(a.likes));
+    return p;
+  }, [posts, filter, sortBy]);
 
-  const handleLoadMore = () => {
-    setVisibleCount(prev => Math.min(prev + 15, sortedPosts.length));
-  };
+  const visible   = filtered.slice(0, visibleCount);
+  const hasMore   = visibleCount < filtered.length;
+  const canLess   = visibleCount > 15;
 
-  const handleShowLess = () => {
-    setVisibleCount(15);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
-  // Empty state
-  if (userPosts.length === 0) {
-    return (
-      <Card className="p-12 text-center">
-        <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-        <h3 className="text-lg font-semibold mb-2">No Content Posted Yet</h3>
-        <p className="text-sm text-muted-foreground">
-          {userName} hasn't posted any content yet. Check back later!
-        </p>
-      </Card>
-    );
-  }
+
+  if (loading) return <div className="flex justify-center py-16"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
 
   return (
-    <div className="space-y-4">
-      {/* Header Section */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <h2 className="text-lg font-semibold">
-            All Contents <span className="text-muted-foreground">({sortedPosts.length})</span>
-          </h2>
-          
-          <div className="flex items-center gap-2">
-            {/* Orientation Toggle */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setViewOrientation(viewOrientation === "horizontal" ? "vertical" : "horizontal")}
-              className="gap-1.5 transition-all duration-200"
-              title={viewOrientation === "horizontal" ? "Switch to Vertical View" : "Switch to Horizontal View"}
-            >
-              {viewOrientation === "horizontal" ? (
-                <>
-                  <MoveHorizontal className="h-4 w-4" />
-                  <span className="text-xs hidden sm:inline">Horizontal</span>
-                </>
-              ) : (
-                <>
-                  <MoveVertical className="h-4 w-4" />
-                  <span className="text-xs hidden sm:inline">Vertical</span>
-                </>
-              )}
+    <div className="space-y-4 pb-6">
+      {/* Filters */}
+      <div className="flex flex-wrap gap-2 items-center justify-between">
+        <div className="flex gap-2 flex-wrap">
+          {["all","Video","Photo","Article","Audio","PDF","URL"].map(f => (
+            <Button key={f} variant={filter === f ? "default" : "outline"} size="sm" onClick={() => setFilter(f)} className="h-8">
+              {f === "all" ? "All" : f}
             </Button>
-            
-            {/* Sort Dropdown */}
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="recent">Most Recent</SelectItem>
-                <SelectItem value="popular">Most Popular</SelectItem>
-                <SelectItem value="oldest">Oldest First</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          ))}
         </div>
-
-        {/* Content Type Filters */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Primary Filters */}
-          {primaryFilters.map((filter) => {
-            const isActive = contentFilter === filter.value;
-            const Icon = filter.icon;
-            const count = contentCounts[filter.value] || 0;
-            
-            return (
-              <Button
-                key={filter.value}
-                variant={isActive ? "default" : "outline"}
-                size="sm"
-                onClick={() => setContentFilter(filter.value)}
-                className="gap-1.5"
-              >
-                {Icon && <Icon className="h-4 w-4" />}
-                <span>{filter.label}</span>
-                <span className={isActive ? "opacity-90" : "text-muted-foreground"}>
-                  ({count})
-                </span>
-              </Button>
-            );
-          })}
-
-          {/* More Filters Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-1.5">
-                <MoreHorizontal className="h-4 w-4" />
-                <span>More</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-48">
-              {moreFilters.map((filter) => {
-                const isActive = contentFilter === filter.value;
-                const Icon = filter.icon;
-                const count = contentCounts[filter.value] || 0;
-                
-                return (
-                  <DropdownMenuItem
-                    key={filter.value}
-                    onClick={() => setContentFilter(filter.value)}
-                    className={isActive ? "bg-accent" : ""}
-                  >
-                    <Icon className="h-4 w-4 mr-2" />
-                    <span>{filter.label}</span>
-                    <span className="ml-auto text-muted-foreground text-sm">
-                      ({count})
-                    </span>
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <div className="flex gap-2 items-center">
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="h-8 w-32"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recent">Recent</SelectItem>
+              <SelectItem value="popular">Popular</SelectItem>
+              <SelectItem value="oldest">Oldest</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button variant="outline" size="sm" className="h-8" onClick={() => setViewMode(v => v === "horizontal" ? "vertical" : "horizontal")}>
+            {viewMode === "horizontal" ? <MoveVertical className="h-4 w-4" /> : <MoveHorizontal className="h-4 w-4" />}
+          </Button>
         </div>
       </div>
 
-      {/* Content Display - Horizontal Carousel or Vertical List */}
-      {viewOrientation === "horizontal" ? (
-        <Carousel
-          opts={{
-            align: "start",
-            loop: false,
-          }}
-          className="w-full"
-        >
-          <CarouselContent className="-ml-2 md:-ml-4">
-            {visiblePosts.map((post, index) => (
-              <CarouselItem key={post.id} className="pl-2 md:pl-4 basis-[85%] sm:basis-[60%] md:basis-[45%] lg:basis-[35%]">
-                <Card 
-                  className="h-[65vh] overflow-hidden relative group cursor-pointer"
-                  onClick={() => openMediaGallery(post, index)}
-                >
-                  {post.imageUrl ? (
-                    <img 
-                      src={post.imageUrl} 
-                      alt={post.title}
-                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-muted flex items-center justify-center">
-                      {getContentTypeIcon(post.type)}
-                    </div>
-                  )}
-                  <Badge className="absolute top-2 left-2 z-10 text-xs" variant="secondary">
-                    {post.type}
-                  </Badge>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-3 sm:p-4">
-                    <h3 className="text-white text-sm sm:text-base font-semibold line-clamp-2">{post.title}</h3>
-                    {post.subtitle && (
-                      <p className="text-white/80 text-xs sm:text-sm line-clamp-2 mt-1">{post.subtitle}</p>
-                    )}
-                    <div className="flex items-center gap-3 mt-2 text-white/90 text-xs">
-                      <span className="flex items-center gap-1">
-                        <Eye className="h-3.5 w-3.5" />
-                        {post.views}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Heart className={`h-3.5 w-3.5 ${likedPosts.has(post.id) ? 'fill-red-500 text-red-500' : ''}`} />
-                        {post.likes}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <MessageCircle className="h-3.5 w-3.5" />
-                        {post.comments}
-                      </span>
-                    </div>
-                  </div>
-                </Card>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="hidden md:flex -left-4" />
-          <CarouselNext className="hidden md:flex -right-4" />
-        </Carousel>
+      {visible.length === 0 ? (
+        <div className="text-center py-16 text-muted-foreground">
+          <FileText className="h-12 w-12 mx-auto mb-3 opacity-30" />
+          <p className="text-sm">No content yet</p>
+        </div>
       ) : (
-        <div className="space-y-3">
-          {visiblePosts.map((post, index) => {
-            // Calculate if we should show People You May Know (every 12 posts)
-            const shouldShowPeopleSuggestions = (index + 1) % 12 === 0 && index < visiblePosts.length - 1;
-            
-            // Calculate if we should show an ad after this post (every 6 posts, but NOT when people suggestions show)
-            const shouldShowAd = (index + 1) % 6 === 0 && !shouldShowPeopleSuggestions && index < visiblePosts.length - 1 && premiumAdSlots.length > 0;
-            const adSlotIndex = Math.floor((index + 1) / 6) - 1;
-            
+        <div className={`grid gap-4 ${viewMode === "vertical" ? "grid-cols-1" : "grid-cols-2 sm:grid-cols-3"}`}>
+          {visible.map((post, index) => {
+            const shouldShowAd = (index + 1) % 6 === 0;
+            const shouldShowPeople = (index + 1) % 12 === 0;
             return (
               <React.Fragment key={post.id}>
-                {/* Content Card */}
-                <Card 
-                  className="overflow-hidden hover:shadow-md transition-all duration-200 cursor-pointer hover:border-primary/50"
-                  onClick={() => openMediaGallery(post, index)}
-                >
-                  {/* Top: Full-Width Thumbnail or Icon */}
-                  <div className="w-full aspect-[4/3] sm:aspect-video bg-muted flex items-center justify-center">
-                    {post.imageUrl ? (
-                      <img 
-                        src={post.imageUrl} 
-                        alt={post.title} 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      getContentTypeIcon(post.type)
-                    )}
+                <Card className="overflow-hidden hover:shadow-md cursor-pointer hover:border-primary/50 transition-all"
+                  onClick={() => {
+                    const items: MediaItem[] = visible.map(p => ({
+                      id: p.id, url: p.imageUrl || "",
+                      type: p.type.toLowerCase() === "video" ? "video" : p.type.toLowerCase() === "audio" ? "audio" : "photo",
+                      title: p.title, description: p.subtitle, author: p.author,
+                      authorImage: p.authorProfileImage, likes: parseInt(p.likes) || 0,
+                      comments: parseInt(p.comments) || 0, isLiked: likedPosts.has(p.id), isOwner: p.isOwner,
+                    }));
+                    setGalleryItems(items); setGalleryIdx(index); setGalleryOpen(true);
+                  }}>
+                  <div className="w-full aspect-video bg-muted flex items-center justify-center">
+                    {post.imageUrl
+                      ? <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover" />
+                      : getIcon(post.type)
+                    }
                   </div>
-
-                  {/* Bottom: Content Info */}
-                  <div className="p-3 sm:p-4 space-y-2.5">
-                    {/* Title */}
-                    <h3 className="font-semibold text-base sm:text-lg line-clamp-2 leading-snug">
-                      {post.title}
-                    </h3>
-                    
-                    {/* Badge directly under title */}
-                    <Badge 
-                      variant="secondary" 
-                      className="text-xs font-medium w-fit"
-                    >
-                      {post.type}
-                    </Badge>
-
-                    {/* Description (2-3 lines max) */}
-                    {post.subtitle && (
-                      <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
-                        {post.subtitle}
-                      </p>
-                    )}
-
-                    {/* Metadata Row */}
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap pt-2">
-                      <span className="flex items-center gap-1.5">
-                        <Eye className="h-4 w-4" />
-                        <span className="font-medium">{post.views}</span>
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => handleLike(post.id, e)}
-                        className={`flex items-center gap-1.5 h-auto p-1.5 hover:bg-accent transition-colors ${
-                          likedPosts.has(post.id) ? 'text-red-500 hover:text-red-600' : ''
-                        }`}
-                      >
-                        <Heart className={`h-4 w-4 ${likedPosts.has(post.id) ? 'fill-current' : ''}`} />
-                        <span className="font-medium">{post.likes}</span>
-                      </Button>
-                      <button
-                        className="flex items-center gap-1.5 hover:underline transition-all"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openCommentDialog(post);
-                        }}
-                      >
-                        <MessageCircle className="h-4 w-4" />
-                        <span className="font-medium">{post.comments}</span>
+                  <div className="p-3 space-y-2">
+                    <h3 className="font-semibold text-base line-clamp-2">{post.title}</h3>
+                    <Badge variant="secondary" className="text-xs">{post.type}</Badge>
+                    {post.subtitle && <p className="text-sm text-muted-foreground line-clamp-2">{post.subtitle}</p>}
+                    <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap pt-1">
+                      <span className="flex items-center gap-1"><Eye className="h-4 w-4" />{post.views}</span>
+                      <button onClick={e => handleLike(post.id, e)} className={`flex items-center gap-1 ${likedPosts.has(post.id) ? "text-red-500" : ""}`}>
+                        <Heart className={`h-4 w-4 ${likedPosts.has(post.id) ? "fill-current" : ""}`} />{post.likes}
                       </button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openShareDialog(post);
-                        }}
-                        className="flex items-center gap-1.5 h-auto p-1.5 hover:bg-accent transition-colors"
-                      >
+                      <button onClick={e => { e.stopPropagation(); setCommentPost(post); setCommentOpen(true); }} className="flex items-center gap-1">
+                        <MessageCircle className="h-4 w-4" />{post.comments}
+                      </button>
+                      <button onClick={e => { e.stopPropagation(); setShareData({ url: generateShareUrl("post", post.id), title: post.title, description: post.subtitle || "" }); setShareOpen(true); }} className="flex items-center gap-1 ml-auto">
                         <Share2 className="h-4 w-4" />
-                      </Button>
-                      {post.followers && !post.isOwner && (
-                        <Button
-                          variant={followingAuthors.has(post.userId) ? "secondary" : "default"}
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleFollowAuthor(post.userId);
-                          }}
-                          className="gap-1.5 h-7 px-3 text-xs ml-auto"
-                          aria-label={followingAuthors.has(post.userId) ? "Unfollow" : "Follow"}
-                        >
-                          <UserPlus className="h-3.5 w-3.5" />
-                          <span>{followingAuthors.has(post.userId) ? "Following" : "Follow"}</span>
-                          <span className="opacity-75">({formatFollowerCount(post.followers)})</span>
-                        </Button>
-                      )}
-                      {post.fee && (
-                        <span className={`font-semibold text-base text-emerald-600 dark:text-emerald-400 ${post.followers && !post.isOwner ? '' : 'ml-auto'}`}>
-                          {post.fee}
-                        </span>
-                      )}
+                      </button>
+                      {post.fee && post.fee !== "0" && <span className="font-semibold text-emerald-600">{post.fee} Mobi</span>}
                     </div>
                   </div>
                 </Card>
-                
-                {/* Premium Ad after every 6 posts */}
                 {shouldShowAd && (
-                  <div className="w-full my-4">
-                    <PremiumAdRotation
-                      slotId={premiumAdSlots[adSlotIndex % premiumAdSlots.length]?.slotId}
-                      ads={premiumAdSlots[adSlotIndex % premiumAdSlots.length]?.ads || []}
-                      context="profile"
-                    />
+                  <div className="w-full my-2">
+                    <PremiumAdRotation slotId={CONTENT_AD_SLOTS[0].slotId} ads={CONTENT_AD_SLOTS[0].ads} context="profile" />
                   </div>
                 )}
-                
-                {/* People You May Know after every 12 posts */}
-                {shouldShowPeopleSuggestions && (
-                  <div className="w-full my-4">
-                    <PeopleYouMayKnow />
-                  </div>
-                )}
+                {shouldShowPeople && <div className="w-full my-2"><PeopleYouMayKnow /></div>}
               </React.Fragment>
             );
           })}
         </div>
       )}
 
-      {/* Pagination Buttons */}
-      {(hasMore || canShowLess) && (
+      {(hasMore || canLess) && (
         <div className="flex gap-3 justify-center pt-4">
-          {hasMore && (
-            <Button 
-              onClick={handleLoadMore}
-              variant="outline"
-              className="min-w-[140px]"
-            >
-              Load More
-              <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          )}
-          {canShowLess && (
-            <Button 
-              onClick={handleShowLess}
-              variant="ghost"
-              className="min-w-[140px]"
-            >
-              Show Less
-              <ChevronUp className="ml-2 h-4 w-4" />
-            </Button>
-          )}
+          {hasMore && <Button onClick={() => setVisibleCount(v => Math.min(v + 15, filtered.length))} variant="outline"><ChevronDown className="h-4 w-4 mr-1" />Load More</Button>}
+          {canLess  && <Button onClick={() => setVisibleCount(15)} variant="ghost"><ChevronUp className="h-4 w-4 mr-1" />Show Less</Button>}
         </div>
       )}
 
-      {/* Media Gallery Viewer */}
-      <MediaGalleryViewer
-        open={mediaGalleryOpen}
-        onOpenChange={setMediaGalleryOpen}
-        items={galleryItems}
-        initialIndex={galleryInitialIndex}
-        showActions={true}
-        galleryType="post"
-      />
-
-      {/* Comment Dialog */}
-      {selectedPostForComment && (
-        <CommentDialog
-          open={commentDialogOpen}
-          onOpenChange={setCommentDialogOpen}
-          post={{
-            id: selectedPostForComment.id,
-            title: selectedPostForComment.title,
-            subtitle: selectedPostForComment.subtitle,
-            author: selectedPostForComment.author,
-            authorProfileImage: selectedPostForComment.authorProfileImage,
-            type: selectedPostForComment.type,
-            imageUrl: selectedPostForComment.imageUrl,
-            views: selectedPostForComment.views,
-            likes: selectedPostForComment.likes,
-          }}
-        />
-      )}
-
-      {/* Share Dialog */}
-      <ShareDialog
-        open={shareDialogOpen}
-        onOpenChange={setShareDialogOpen}
-        shareUrl={shareUrl}
-        title={shareTitle}
-        description={shareDescription}
-      />
+      <MediaGalleryViewer open={galleryOpen} onOpenChange={setGalleryOpen} items={galleryItems} initialIndex={galleryIdx} showActions galleryType="post" />
+      {commentPost && <CommentDialog open={commentOpen} onOpenChange={setCommentOpen} post={{ id: commentPost.id, title: commentPost.title, subtitle: commentPost.subtitle, author: commentPost.author, authorProfileImage: commentPost.authorProfileImage, type: commentPost.type, imageUrl: commentPost.imageUrl, views: commentPost.views, likes: commentPost.likes }} />}
+      <ShareDialog open={shareOpen} onOpenChange={setShareOpen} shareUrl={shareData.url} title={shareData.title} description={shareData.description} />
     </div>
   );
 };

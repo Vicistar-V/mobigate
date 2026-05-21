@@ -1,0 +1,8 @@
+Product Environment Credentials for CLOUDINARY
+
+
+Cloud name : dkamyp0kw
+API key	: 797125787596338
+API secret : hNlqpYATu6ujL4H0nAQGYlcqMsc
+API environment variable : CLOUDINARY_URL=cloudinary://797125787596338:hNlqpYATu6ujL4H0nAQGYlcqMsc@dkamyp0kw
+

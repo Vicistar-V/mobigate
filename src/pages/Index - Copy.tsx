@@ -13,7 +13,6 @@ import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PremiumAdCardProps } from "@/components/PremiumAdCard";
 import { ChatWithFriendsDialog } from "@/components/chat/ChatWithFriendsDialog";
 import { CampaignBannerRotation } from "@/components/community/elections/CampaignBannerRotation";
-import { UserStatusBanner } from "@/components/profile/UserStatusBanner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MessageCircle } from "lucide-react";
@@ -48,23 +47,22 @@ const Index = () => {
         authorProfileImage: p.author_profile_photo || undefined,
         userId:             p.user_id,
         type:               (p.post_type.charAt(0).toUpperCase() + p.post_type.slice(1)) as Post["type"],
-        imageUrl:           p.thumbnail_url        || undefined,
-        mediaUrl:           p.media_url            || undefined,
+        imageUrl:           p.thumbnail_url        || undefined,  // thumbnail for display
+        mediaUrl:           p.media_url            || undefined,  // actual file for playback
         views:              String(p.view_count    || 0),
         likes:              String(p.like_count    || 0),
         comments:           String(p.comment_count || 0),
         followers:          String(p.author_follower_count || 0),
         fee:                String(p.access_fee    || 0),
         status:             "Online" as const,
-        isOwner:            p.is_owner    || false,
-        isLiked:            p.is_liked    || false,
-        isMonetized:        p.is_monetized|| false,
-        hasPaid:            p.has_paid    || false,
+        isOwner:            p.is_owner  || false,
+        isLiked:            p.is_liked  || false,
       })));
     } catch {}
   }, [API_BASE]);
 
   useEffect(() => { fetchFeed(); }, [fetchFeed]);
+
   useEffect(() => {
     const h = () => fetchFeed();
     window.addEventListener("postCreated", h);
@@ -92,27 +90,27 @@ const Index = () => {
   const handleSavePost = async (updatedPost: Post) => {
     try {
       const form = new FormData();
-      form.append("post_id", updatedPost.id ?? "");
-      form.append("title",   updatedPost.title);
-      form.append("subtitle",updatedPost.subtitle ?? "");
-      form.append("content", updatedPost.description ?? "");
-      form.append("post_type",updatedPost.type.toLowerCase());
-      await fetch(`${API_BASE}/posts/update.php`, { method:"POST", credentials:"include", body:form });
-      setApiFeedPosts(posts => posts.map(p => p.id===updatedPost.id ? updatedPost : p));
+      form.append("post_id",   updatedPost.id ?? "");
+      form.append("title",     updatedPost.title);
+      form.append("subtitle",  updatedPost.subtitle    ?? "");
+      form.append("content",   updatedPost.description ?? "");
+      form.append("post_type", updatedPost.type.toLowerCase());
+      await fetch(`${API_BASE}/posts/update.php`, { method: "POST", credentials: "include", body: form });
+      setApiFeedPosts(posts => posts.map(p => p.id === updatedPost.id ? updatedPost : p));
     } catch {}
-    toast({ title:"Post updated" });
+    toast({ title: "Post updated" });
   };
 
   const handleDeletePost = async (postId: string) => {
     try {
       await fetch(`${API_BASE}/posts/delete.php`, {
-        method:"POST", credentials:"include",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({post_id:postId}),
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ post_id: postId }),
       });
-      setApiFeedPosts(posts => posts.filter(p => p.id!==postId));
+      setApiFeedPosts(posts => posts.filter(p => p.id !== postId));
     } catch {}
-    toast({ title:"Post deleted", variant:"destructive" });
+    toast({ title: "Post deleted", variant: "destructive" });
   };
 
   // Open media gallery for wall status
@@ -409,9 +407,6 @@ const Index = () => {
 
           {/* Main Feed */}
           <div className="lg:col-span-2 space-y-6 min-w-0">
-            {/* User's Status Banner — same banner shown on their Profile, with their click action + auto-rotation */}
-            <UserStatusBanner />
-
             {/* Campaign Banners for Mobigate Interface */}
             <CampaignBannerRotation 
               audienceType="mobigate_interface" 
@@ -447,27 +442,14 @@ const Index = () => {
             
             {/* Feed Posts with Filter */}
             <div className="space-y-0">
-              <div id="recommended-elibrary" style={{ scrollMarginTop: 96 }}>
-                <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} />
-              </div>
+              <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} />
               <div className="space-y-6 mt-6">
-                {displayedPosts.map((post, index) => {
-                  const isOwn = !!post.userId && post.userId === currentUserId;
-                  return (
+                {displayedPosts.map((post, index) => (
                 <div key={index}>
                   <FeedPost
-<<<<<<< Updated upstream
-                    {...(post as any)}
-                    isOwner={isOwn || (post as any).isOwner}
-                    onEdit={isOwn ? () => handleEditPost(post as Post) : undefined}
-                    onDelete={isOwn ? () => (post as any).id && handleDeletePost((post as any).id) : undefined}
-=======
                     {...post as any}
-                    isMonetized={(post as any).isMonetized || false}
-                    hasPaid={(post as any).hasPaid || false}
                     onEdit={post.isOwner ? () => handleEditPost(post as Post) : undefined}
                     onDelete={post.isOwner ? () => handleDeletePost(post.id ?? "") : undefined}
->>>>>>> Stashed changes
                   />
                   {/* Insert premium ad after every 4 posts */}
                   {(index + 1) % 4 === 0 && index < displayedPosts.length - 1 && (
@@ -486,8 +468,7 @@ const Index = () => {
                     </div>
                   )}
                 </div>
-                  );
-                })}
+                ))}
               </div>
 
               {/* Pagination Controls */}

@@ -1,0 +1,50 @@
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
+import Index from "./pages/Index";
+import MyProfile from "./pages/MyProfile";
+import UserProfile from "./pages/UserProfile";
+import { ScrollToTop } from "./components/ScrollToTop";
+import { BackToTopButton } from "./components/BackToTopButton";
+
+const queryClient = new QueryClient();
+
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <SidebarProvider defaultOpen={true}>
+            <div className="flex min-h-screen w-full">
+              <AppSidebar />
+              <div className="flex-1 flex flex-col w-full">
+                <ScrollToTop />
+                <BackToTopButton />
+                <Routes>
+                  <Route path="/" element={<Index />} />
+
+                  {/* Own profile — no ID in URL */}
+                  <Route path="/profile" element={<MyProfile />} />
+
+                  {/* Other user's profile — ID in URL */}
+                  <Route path="/profile/:id" element={<UserProfile />} />
+
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </div>
+            </div>
+          </SidebarProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
+
+export default App;

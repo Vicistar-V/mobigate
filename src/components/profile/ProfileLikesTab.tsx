@@ -1,335 +1,145 @@
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { mockLikes } from "@/data/profileData";
 import { useToast } from "@/hooks/use-toast";
-import { useLikesList } from "@/hooks/useWindowData";
-import { Eye, Users, Heart, UserPlus, Eye as EyeIcon, MoreVertical, ThumbsUp, MessageCircle, Phone, Gift, Ban, Flag, UserMinus } from "lucide-react";
+import { Eye, UserPlus, Users, Heart, MoreVertical, ThumbsUp, MessageCircle, Phone, Gift, Ban, Flag, UserMinus, Loader2 } from "lucide-react";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { likesAdSlots } from "@/data/profileAds";
 import { getRandomAdSlot } from "@/lib/adUtils";
 import React from "react";
-import { useState } from "react";
-import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
+import { SendGiftDialog } from "@/components/chat/SendGiftDialog";
 
-interface ProfileLikesTabProps {
-  userName: string;
-  userId?: string;
+const API_BASE = (import.meta.env.VITE_API_URL as string) || "/api";
+
+interface LikeUser {
+  id: string; name: string; username: string; avatar: string | null;
+  isOnline: boolean; likeCount: number;
+  stats: { friends: number; likes: number; followers: number; following: number };
 }
 
-export const ProfileLikesTab = ({ userName }: ProfileLikesTabProps) => {
-  const { toast } = useToast();
-  const phpLikes = useLikesList();
-  const likes = phpLikes || mockLikes;
-  const [interactions, setInteractions] = useState<{
-    [key: string]: { isFollowing: boolean; isLiked: boolean; isBlocked: boolean };
-  }>({});
-  const [giftDialogOpen, setGiftDialogOpen] = useState(false);
-  const [selectedUserForGift, setSelectedUserForGift] = useState<{ name: string } | null>(null);
+interface ProfileLikesTabProps { userName: string; userId?: string; }
 
-  const handleViewProfile = (userId: string, name: string) => {
-    toast({
-      title: "Viewing Profile",
-      description: `Opening ${name}'s profile...`,
-    });
+export const ProfileLikesTab = ({ userName, userId }: ProfileLikesTabProps) => {
+  const { toast }   = useToast();
+  const navigate    = useNavigate();
+  const [likers,    setLikers]    = useState<LikeUser[]>([]);
+  const [loading,   setLoading]   = useState(true);
+  const [following, setFollowing] = useState<Record<string, boolean>>({});
+  const [giftOpen,  setGiftOpen]  = useState(false);
+  const [giftUser,  setGiftUser]  = useState<{ id: string; name: string } | null>(null);
+
+  const fetchLikes = useCallback(async () => {
+    setLoading(true);
+    try {
+      const url = userId ? `${API_BASE}/profile/likes.php?user_id=${userId}` : `${API_BASE}/profile/likes.php`;
+      const res = await fetch(url, { credentials: "include" });
+      if (!res.ok) throw new Error();
+      const data: LikeUser[] = await res.json();
+      setLikers(data);
+    } catch { setLikers([]); }
+    finally { setLoading(false); }
+  }, [userId]);
+
+  useEffect(() => { fetchLikes(); }, [fetchLikes]);
+
+  const handleFollow = async (uid: string, name: string) => {
+    const isNow = !following[uid];
+    setFollowing(p => ({ ...p, [uid]: isNow }));
+    try {
+      await fetch(`${API_BASE}/friends/follow.php`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ following_id: uid }) });
+      toast({ title: isNow ? "Following" : "Unfollowed" });
+    } catch {}
   };
 
-  const handleToggleFollow = (userId: string, userName: string) => {
-    const isFollowing = interactions[userId]?.isFollowing || false;
-    setInteractions(prev => ({
-      ...prev,
-      [userId]: { ...prev[userId], isFollowing: !isFollowing }
-    }));
-    
-    toast({
-      title: isFollowing ? "Unfollowed" : "Following",
-      description: `You are ${isFollowing ? 'no longer following' : 'now following'} ${userName}`,
-    });
+  const handleBlock = async (uid: string, name: string) => {
+    try {
+      await fetch(`${API_BASE}/friends/block.php`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ blocked_id: uid }) });
+      setLikers(p => p.filter(u => u.id !== uid));
+      toast({ title: "Blocked", variant: "destructive" });
+    } catch {}
   };
 
-  const handleToggleLike = (userId: string, userName: string) => {
-    const isLiked = interactions[userId]?.isLiked || false;
-    setInteractions(prev => ({
-      ...prev,
-      [userId]: { ...prev[userId], isLiked: !isLiked }
-    }));
-    
-    toast({
-      title: isLiked ? "Unliked" : "Liked",
-      description: `You ${isLiked ? 'unliked' : 'liked'} ${userName}`,
-    });
-  };
+  const handleChat = (uid: string, name: string) => window.dispatchEvent(new CustomEvent("openChatWithUser", { detail: { userId: uid, userName: name } }));
 
-  const handleChat = (userId: string, userName: string) => {
-    window.dispatchEvent(new CustomEvent('openChatWithUser', {
-      detail: { 
-        userId: userId,
-        userName: userName 
-      }
-    }));
-  };
-
-  const handleCall = (userId: string, userName: string) => {
-    toast({
-      title: "Calling",
-      description: `Initiating call with ${userName}`,
-    });
-  };
-
-  const handleSendGift = (userId: string, userName: string) => {
-    setSelectedUserForGift({ name: userName });
-    setGiftDialogOpen(true);
-  };
-
-  const handleGiftSent = (giftData: GiftSelection) => {
-    if (selectedUserForGift) {
-      toast({
-        title: "Gift Sent",
-        description: `Gift sent to ${selectedUserForGift.name}!`,
-      });
-    }
-    setGiftDialogOpen(false);
-    setSelectedUserForGift(null);
-  };
-
-  const handleAddToCircle = (userId: string, userName: string) => {
-    toast({
-      title: "Add to Circle",
-      description: `Opening circle selection for ${userName}`,
-    });
-  };
-
-  const handleBlock = (userId: string, userName: string) => {
-    const isBlocked = interactions[userId]?.isBlocked || false;
-    setInteractions(prev => ({
-      ...prev,
-      [userId]: { ...prev[userId], isBlocked: !isBlocked }
-    }));
-    
-    toast({
-      title: isBlocked ? "Unblocked" : "Blocked",
-      description: `You ${isBlocked ? 'unblocked' : 'blocked'} ${userName}`,
-      variant: isBlocked ? "default" : "destructive",
-    });
-  };
-
-  const handleReport = (userId: string, userName: string) => {
-    toast({
-      title: "Report User",
-      description: `Opening report form for ${userName}`,
-      variant: "destructive",
-    });
-  };
+  if (loading) return <div className="flex justify-center py-16"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
 
   return (
     <div className="space-y-4 pb-6">
-      {/* Header */}
       <div className="space-y-1">
-        <h2 className="text-lg font-bold uppercase">
-          LIKES RECEIVED BY {userName}
-        </h2>
-        <p className="text-sm text-destructive italic">
-          Users blocked by you and/or users that blocked you will not be displayed
-        </p>
+        <h2 className="text-lg font-bold uppercase">LIKES RECEIVED BY {userName}</h2>
+        <p className="text-sm text-destructive italic">Blocked users will not be displayed</p>
       </div>
 
-      {/* Likes List */}
-      <Card className="divide-y">
-        {likes.map((like, index) => (
-          <React.Fragment key={like.id}>
-            <div className="group p-4 flex gap-4 hover:bg-accent/5 transition-all duration-200">
-              {/* Avatar Section */}
-              <div className="relative flex-shrink-0">
-                <button 
-                  onClick={() => handleViewProfile(like.id, like.name)}
-                  className="relative block transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-full"
-                >
-                  <Avatar className={`h-20 w-20 sm:h-26 sm:w-26 ring-2 transition-all ${
-                    like.isOnline ? 'ring-emerald-500/50' : 'ring-border'
-                  }`}>
-                    <AvatarImage src={like.avatar} alt={like.name} />
-                    <AvatarFallback>{like.name.substring(0, 2)}</AvatarFallback>
-                  </Avatar>
-                  
-                  {/* Animated Online Indicator */}
-                  <div className={`absolute bottom-0 right-0 h-5 w-5 rounded-full border-2 border-card transition-all ${
-                    like.isOnline 
-                      ? 'bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50' 
-                      : 'bg-destructive'
-                  }`} />
-                </button>
-              </div>
-
-              {/* Content Section */}
-              <div className="flex-1 min-w-0 space-y-1.5">
-                <div className="space-y-0.5">
-                  <button
-                    onClick={() => handleViewProfile(like.id, like.name)}
-                    className="text-left hover:underline focus:outline-none focus:underline group/name"
-                  >
-                    <h3 className="text-base font-bold uppercase group-hover/name:text-primary transition-colors">
-                      {like.name}
-                    </h3>
+      {likers.length === 0 ? (
+        <div className="flex flex-col items-center py-16 gap-3 text-muted-foreground">
+          <Heart className="h-12 w-12 opacity-30" />
+          <p className="text-sm font-medium">No likes yet</p>
+          <p className="text-xs text-center">When someone likes this profile, they'll appear here.</p>
+        </div>
+      ) : (
+        <Card className="divide-y">
+          {likers.map((liker, index) => (
+            <React.Fragment key={liker.id}>
+              <div className="p-4 flex gap-4 hover:bg-accent/5 transition-colors">
+                <div className="relative flex-shrink-0">
+                  <button onClick={() => navigate(`/profile/${liker.id}`)}>
+                    <Avatar className={`h-20 w-20 ring-2 ${liker.isOnline ? "ring-emerald-500/50" : "ring-border"}`}>
+                      <AvatarImage src={liker.avatar || undefined} />
+                      <AvatarFallback>{liker.name.substring(0,2)}</AvatarFallback>
+                    </Avatar>
+                    <div className={`absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-card ${liker.isOnline ? "bg-emerald-500 animate-pulse" : "bg-destructive"}`} />
                   </button>
-                  
-                  {like.isContentCreator && (
-                    <p className="text-xs text-primary/70 italic">
-                      Upcoming Content Creator
-                    </p>
-                  )}
                 </div>
-                
-                {/* Stats */}
-                <div className="flex flex-wrap gap-x-3 gap-y-1">
-                  <div className="flex items-center gap-1.5 text-sm text-primary font-medium">
-                    <Users className="h-3.5 w-3.5 flex-shrink-0" />
-                    <span>{like.stats.friends.toLocaleString()} Friends</span>
+                <div className="flex-1 min-w-0 space-y-2">
+                  <button onClick={() => navigate(`/profile/${liker.id}`)} className="text-left hover:underline">
+                    <h3 className="text-base font-bold">{liker.name}</h3>
+                  </button>
+                  <div className="flex flex-wrap gap-x-3 gap-y-1">
+                    <span className="flex items-center gap-1.5 text-sm text-primary font-medium"><Users className="h-3.5 w-3.5" />{liker.stats.friends.toLocaleString()} Friends</span>
+                    <span className="flex items-center gap-1.5 text-sm text-primary font-medium"><Heart className="h-3.5 w-3.5" />{liker.stats.likes.toLocaleString()} Likes</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-sm text-primary font-medium">
-                    <Heart className="h-3.5 w-3.5 flex-shrink-0" />
-                    <span>{like.stats.likes.toLocaleString()} Likes</span>
+                  <p className="text-sm text-foreground">
+                    Has given {userName} <span className="font-semibold text-primary">{liker.likeCount} Like{liker.likeCount !== 1 ? "s" : ""}</span>
+                  </p>
+                  <div className="flex gap-2">
+                    <Button onClick={() => navigate(`/profile/${liker.id}`)} className="bg-success hover:bg-success/90 text-success-foreground" size="sm">
+                      <Eye className="h-4 w-4 mr-1" />View Profile
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild><Button variant="outline" size="sm"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48 bg-card z-50">
+                        <DropdownMenuItem onClick={() => handleFollow(liker.id, liker.name)} className="cursor-pointer">
+                          {following[liker.id] ? <><UserMinus className="h-4 w-4 mr-2" />Unfollow</> : <><UserPlus className="h-4 w-4 mr-2" />Follow</>}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => toast({ title: "Liked" })} className="cursor-pointer"><ThumbsUp className="h-4 w-4 mr-2" />Like</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleChat(liker.id, liker.name)} className="cursor-pointer"><MessageCircle className="h-4 w-4 mr-2" />Chat</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => toast({ title: "Calling" })} className="cursor-pointer"><Phone className="h-4 w-4 mr-2" />Call</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => { setGiftUser({ id: liker.id, name: liker.name }); setGiftOpen(true); }} className="cursor-pointer"><Gift className="h-4 w-4 mr-2" />Send Gift</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleBlock(liker.id, liker.name)} className="cursor-pointer text-destructive focus:text-destructive"><Ban className="h-4 w-4 mr-2" />Block</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => toast({ title: "Report submitted", variant: "destructive" })} className="cursor-pointer text-destructive focus:text-destructive"><Flag className="h-4 w-4 mr-2" />Report</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                  <div className="flex items-center gap-1.5 text-sm text-primary/80 italic">
-                    <UserPlus className="h-3.5 w-3.5 flex-shrink-0" />
-                    <span>{like.stats.followers.toLocaleString()} Followers</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-sm text-primary/80 italic">
-                    <EyeIcon className="h-3.5 w-3.5 flex-shrink-0" />
-                    <span>{like.stats.following.toLocaleString()} Following</span>
-                  </div>
-                </div>
-
-                {/* Like Count Info */}
-                <p className="text-sm text-foreground">
-                  Has given {userName} <span className="font-semibold text-primary">{like.likeCount} Like{like.likeCount !== 1 ? 's' : ''}</span>
-                </p>
-
-                {/* Action Buttons */}
-                <div className="flex flex-wrap gap-2 pt-1">
-                  <Button
-                    onClick={() => handleViewProfile(like.id, like.name)}
-                    className="bg-success hover:bg-success/90 text-success-foreground hover:scale-105 transition-transform"
-                    size="sm"
-                  >
-                    <Eye className="h-4 w-4" />
-                    View Profile
-                  </Button>
-                  
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="hover:scale-105 transition-transform px-2"
-                      >
-                        <MoreVertical className="h-4 w-4" />
-                        <span className="sr-only">Do More</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48 bg-card z-50">
-                      <DropdownMenuItem
-                        onClick={() => handleToggleFollow(like.id, like.name)}
-                        className="cursor-pointer"
-                      >
-                        {interactions[like.id]?.isFollowing ? (
-                          <>
-                            <UserMinus className="h-4 w-4 mr-2" />
-                            Unfollow
-                          </>
-                        ) : (
-                          <>
-                            <UserPlus className="h-4 w-4 mr-2" />
-                            Follow
-                          </>
-                        )}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleToggleLike(like.id, like.name)}
-                        className="cursor-pointer"
-                      >
-                        <ThumbsUp className="h-4 w-4 mr-2" />
-                        {interactions[like.id]?.isLiked ? 'Unlike' : 'Like'}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleChat(like.id, like.name)}
-                        className="cursor-pointer"
-                      >
-                        <MessageCircle className="h-4 w-4 mr-2" />
-                        Chat
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleCall(like.id, like.name)}
-                        className="cursor-pointer"
-                      >
-                        <Phone className="h-4 w-4 mr-2" />
-                        Call
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleSendGift(like.id, like.name)}
-                        className="cursor-pointer"
-                      >
-                        <Gift className="h-4 w-4 mr-2" />
-                        Send Gift
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleAddToCircle(like.id, like.name)}
-                        className="cursor-pointer"
-                      >
-                        <Users className="h-4 w-4 mr-2" />
-                        Add to Circle
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => handleBlock(like.id, like.name)}
-                        className="cursor-pointer text-destructive focus:text-destructive"
-                      >
-                        <Ban className="h-4 w-4 mr-2" />
-                        {interactions[like.id]?.isBlocked ? 'Unblock' : 'Block'}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleReport(like.id, like.name)}
-                        className="cursor-pointer text-destructive focus:text-destructive"
-                      >
-                        <Flag className="h-4 w-4 mr-2" />
-                        Report
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
               </div>
-            </div>
-
-            {/* Insert Premium Ad after every 4 likes */}
-            {(index + 1) % 4 === 0 && index < likes.length - 1 && (
-              <div className="col-span-full p-4 bg-muted/30">
-                <PremiumAdRotation
-                  slotId={`likes-premium-${Math.floor((index + 1) / 4)}`}
-                  ads={getRandomAdSlot(likesAdSlots)}
-                  context="feed"
-                />
-              </div>
-            )}
-          </React.Fragment>
-        ))}
-      </Card>
-
-      <SendGiftDialog
-        isOpen={giftDialogOpen}
-        onClose={() => {
-          setGiftDialogOpen(false);
-          setSelectedUserForGift(null);
-        }}
-        recipientName={selectedUserForGift?.name || ""}
-        onSendGift={handleGiftSent}
-      />
+              {(index + 1) % 4 === 0 && index < likers.length - 1 && (
+                <div className="p-4 bg-muted/30">
+                  <PremiumAdRotation slotId={`likes-premium-${Math.floor((index+1)/4)}`} ads={getRandomAdSlot(likesAdSlots)} context="feed" />
+                </div>
+              )}
+            </React.Fragment>
+          ))}
+        </Card>
+      )}
+      <SendGiftDialog isOpen={giftOpen} onClose={() => { setGiftOpen(false); setGiftUser(null); }} recipientName={giftUser?.name || ""}
+        onSendGift={() => { toast({ title: "Gift Sent!" }); setGiftOpen(false); setGiftUser(null); }} />
     </div>
   );
 };

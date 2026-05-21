@@ -1,435 +1,329 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
-import { 
-  specialDigitalGiftFolders,
-  classicDigitalGifts, 
-  tangibleGifts, 
-  giftsVault,
-} from "@/data/profileData";
-import { useToast } from "@/hooks/use-toast";
-import { useWalletBalance } from "@/hooks/useWindowData";
-import { Gift, Wallet, Heart, ChevronLeft, ChevronDown, Coins, X } from "lucide-react";
-import { useState } from "react";
-import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
+/**
+ * SendGiftDialog.tsx
+ * - Fetches real wallet balance from API
+ * - Shows balance and validates before sending
+ * - Calls POST /api/gifts/send.php to actually save the gift
+ * - Updates local balance display after sending
+ */
 
+import { useState, useEffect, useCallback } from "react";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import { Button }   from "@/components/ui/button";
+import { Badge }    from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Gift, Wallet, Loader2, ChevronDown, ChevronUp, Send,
+} from "lucide-react";
+import { useToast }  from "@/hooks/use-toast";
+import { cn }        from "@/lib/utils";
+import {
+  specialDigitalGiftFolders,
+  classicDigitalGifts,
+} from "@/data/profileData";
+
+const API_BASE = (import.meta.env.VITE_API_URL as string) || "/api";
+
+// ── Types ─────────────────────────────────────────────────────────────────────
 export type GiftSelection = {
-  type: 'special' | 'classic' | 'tangible';
-  giftId: string;
+  type:     "special" | "classic" | "tangible";
+  giftId:   string;
   giftData: {
-    id: string;
-    name: string;
-    mobiValue: number;
-    icon?: string;
-    image?: string;
-    category?: string;
-    description?: string;
+    id:          string;
+    name:        string;
+    mobiValue:   number;
+    icon?:       string;
+    image?:      string;
+    category?:   string;
+    description?:string;
   };
 } | null;
 
 interface SendGiftDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  recipientName: string;
-  onSendGift: (giftData: GiftSelection) => void;
+  isOpen:       boolean;
+  onClose:      () => void;
+  recipientName:string;
+  recipientId?: string;  // needed to call the API
+  onSendGift:   (gift: GiftSelection) => void;
 }
 
+// ── Component ─────────────────────────────────────────────────────────────────
 export const SendGiftDialog = ({
-  isOpen,
-  onClose,
-  recipientName,
-  onSendGift,
+  isOpen, onClose, recipientName, recipientId, onSendGift,
 }: SendGiftDialogProps) => {
   const { toast } = useToast();
-  const walletData = useWalletBalance();
-  const walletBalance = walletData.mobi; // Gifts use Mobi wallet
-  const [selectedGift, setSelectedGift] = useState<GiftSelection>(null);
+
+  const [wallet,         setWallet]         = useState<{ mobi: number; credit: number } | null>(null);
+  const [walletLoading,  setWalletLoading]  = useState(false);
+  const [selectedGift,   setSelectedGift]   = useState<GiftSelection>(null);
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
-  const [tangibleGiftTab, setTangibleGiftTab] = useState<"vault" | "buy">("vault");
-  
-  // Collapsible states
-  const [specialGiftOpen, setSpecialGiftOpen] = useState(true);
-  const [classicGiftOpen, setClassicGiftOpen] = useState(false);
-  const [tangibleGiftOpen, setTangibleGiftOpen] = useState(false);
+  const [specialOpen,    setSpecialOpen]    = useState(false);
+  const [classicOpen,    setClassicOpen]    = useState(false);
+  const [sending,        setSending]        = useState(false);
 
-  const handleSendGift = () => {
+  // ── Fetch wallet balance ───────────────────────────────────────────────────
+  const fetchWallet = useCallback(async () => {
+    setWalletLoading(true);
+    try {
+      const res  = await fetch(`${API_BASE}/profile/wallet.php`, { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setWallet({ mobi: data.main_balance || 0, credit: data.credit_balance || 0 });
+      }
+    } catch {}
+    finally { setWalletLoading(false); }
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) fetchWallet();
+    else { setSelectedGift(null); setSelectedFolder(null); }
+  }, [isOpen, fetchWallet]);
+
+  // ── Send gift ──────────────────────────────────────────────────────────────
+  const handleSend = async () => {
     if (!selectedGift) {
+      toast({ title: "Please select a gift first", variant: "destructive" }); return;
+    }
+    if (!recipientId) {
+      toast({ title: "Error", description: "Recipient not found", variant: "destructive" }); return;
+    }
+
+    const cost = selectedGift.giftData.mobiValue;
+
+    // Client-side balance check
+    if (wallet !== null && wallet.mobi < cost) {
       toast({
-        title: "No Gift Selected",
-        description: "Please select a gift to send",
+        title: "Insufficient Mobi Balance",
+        description: `You need ${cost.toLocaleString()} Mobi but have ${wallet.mobi.toLocaleString()} Mobi.`,
         variant: "destructive",
       });
       return;
     }
 
-    const { giftData } = selectedGift;
-    
-    if (walletBalance < giftData.mobiValue) {
-      toast({
-        title: "Insufficient Funds",
-        description: `You need ${giftData.mobiValue.toLocaleString()} Mobi. Your wallet balance is ${walletBalance.toLocaleString()} Mobi.`,
-        variant: "destructive",
+    setSending(true);
+    try {
+      const res  = await fetch(`${API_BASE}/gifts/send.php`, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recipient_id: recipientId,
+          gift_id:      selectedGift.giftId,
+          gift_name:    selectedGift.giftData.name,
+          icon:         selectedGift.giftData.icon || "🎁",
+          gift_type:    selectedGift.type,
+          mobi_value:   selectedGift.giftData.mobiValue,
+        }),
       });
-      return;
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        // Deduct from local wallet display
+        if (wallet !== null) {
+          setWallet(w => w ? { ...w, mobi: Math.max(0, w.mobi - cost) } : w);
+        }
+        toast({
+          title: "Gift Sent! 🎁",
+          description: `You sent ${selectedGift.giftData.icon || ""} ${selectedGift.giftData.name} to ${recipientName}`,
+        });
+        onSendGift(selectedGift);
+        setSelectedGift(null);
+        onClose();
+      } else {
+        toast({
+          title: "Could not send gift",
+          description: data.error || "Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch {
+      toast({ title: "Error", description: "Cannot reach server.", variant: "destructive" });
+    } finally {
+      setSending(false);
     }
-
-    onSendGift(selectedGift);
-    
-    toast({
-      title: "Gift Sent! 🎁",
-      description: `You sent ${giftData.name} to ${recipientName}`,
-    });
-
-    // Reset state and close
-    setSelectedGift(null);
-    setSelectedFolder(null);
-    onClose();
   };
 
-  const getCategoryColor = (category: string) => {
-    const colors: Record<string, string> = {
-      "Sweet": "bg-pink-500/10 text-pink-700 border-pink-500/20",
-      "Meal-Ticket": "bg-green-500/10 text-green-700 border-green-500/20",
-      "Special": "bg-purple-500/10 text-purple-700 border-purple-500/20",
-      "Premium": "bg-yellow-500/10 text-yellow-700 border-yellow-500/20",
-      "T-Fare": "bg-blue-500/10 text-blue-700 border-blue-500/20",
-      "Emotion": "bg-red-500/10 text-red-700 border-red-500/20",
-      "House": "bg-orange-500/10 text-orange-700 border-orange-500/20",
-      "Luxury": "bg-indigo-500/10 text-indigo-700 border-indigo-500/20",
-    };
-    return colors[category] || "bg-muted text-muted-foreground";
+  const getValueBadge = (value: number) => {
+    if (value <= 100)   return { label: "Sweet",   cls: "bg-emerald-100 text-emerald-700 border-emerald-300" };
+    if (value <= 1000)  return { label: "Special", cls: "bg-blue-100 text-blue-700 border-blue-300" };
+    if (value <= 10000) return { label: "Premium", cls: "bg-purple-100 text-purple-700 border-purple-300" };
+    return                     { label: "Luxury",  cls: "bg-yellow-100 text-yellow-700 border-yellow-300" };
   };
+
+  const insufficient = wallet !== null && selectedGift !== null && wallet.mobi < selectedGift.giftData.mobiValue;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Send Gift to {recipientName}</DialogTitle>
+    <Dialog open={isOpen} onOpenChange={v => !v && onClose()}>
+      <DialogContent className="max-w-md max-h-[90vh] flex flex-col p-0 gap-0">
+        <DialogHeader className="px-4 pt-4 pb-3 border-b shrink-0">
+          <DialogTitle className="flex items-center gap-2">
+            <Gift className="h-5 w-5 text-primary" />
+            Send Gift to {recipientName}
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
-          {/* Wallet Balance */}
-          <Card className="p-3 bg-gradient-to-r from-primary/5 to-primary/10">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Wallet className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">Wallet Balance:</span>
-              </div>
-              <div className="text-right">
-                <span className="font-bold text-primary block">{walletBalance.toLocaleString()} Mobi</span>
-                <span className="text-sm text-muted-foreground">₦{walletData.credit.toLocaleString()} Credit</span>
-              </div>
+        {/* Wallet balance */}
+        <div className="px-4 py-3 bg-muted/40 border-b shrink-0">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Wallet className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium">Your Balance</span>
             </div>
-          </Card>
-
-          {/* Selection Indicator */}
-          {selectedGift && (
-            <Card className="p-4 sm:p-5 lg:p-6 bg-gradient-to-br from-primary/5 via-primary/3 to-transparent border-primary/20">
-              {/* Header: Category + Clear */}
-              <div className="flex items-center justify-between mb-3">
-                <Badge variant="default" className="text-sm font-medium">
-                  {selectedGift.type === 'special' && 'Special Digital'}
-                  {selectedGift.type === 'classic' && 'Classic Digital'}
-                  {selectedGift.type === 'tangible' && 'Tangible Gifts'}
-                </Badge>
-                
-                <Button
-                  onClick={() => setSelectedGift(null)}
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 gap-1"
-                >
-                  <X className="h-4 w-4" />
-                  <span className="hidden sm:inline">Clear</span>
-                </Button>
-              </div>
-
-              {/* Gift Icon */}
-              <div className="flex justify-center mb-3">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-primary/10 flex items-center justify-center">
-                  {selectedGift.giftData.icon ? (
-                    <span className="text-4xl sm:text-5xl">
-                      {selectedGift.giftData.icon}
-                    </span>
-                  ) : (
-                    <Gift className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
-                  )}
-                </div>
-              </div>
-
-              {/* Gift Name */}
-              <div className="text-center mb-3">
-                <h3 className="text-base sm:text-lg font-semibold text-foreground">
-                  {selectedGift.giftData.name}
-                </h3>
-                {selectedGift.giftData.category && (
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {selectedGift.giftData.category}
-                  </p>
+            {walletLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            ) : wallet !== null ? (
+              <div className="text-right">
+                <p className={`font-bold text-lg ${wallet.mobi < 10 ? "text-destructive" : "text-primary"}`}>
+                  {wallet.mobi.toLocaleString()} Mobi
+                </p>
+                {wallet.credit > 0 && (
+                  <p className="text-xs text-muted-foreground">₦{wallet.credit.toLocaleString()} Credit</p>
+                )}
+                {(wallet as any).gift_balance > 0 && (
+                  <p className="text-xs text-emerald-600">+{(wallet as any).gift_balance.toLocaleString()} Gift Balance</p>
                 )}
               </div>
-
-              {/* Divider */}
-              <Separator className="my-3" />
-
-              {/* Price */}
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-1.5 mb-1">
-                  <Coins className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Price</span>
-                </div>
-                <div className="text-2xl sm:text-3xl font-bold text-primary">
-                  {selectedGift.giftData.mobiValue.toLocaleString()} Mobi
-                </div>
-              </div>
-            </Card>
+            ) : (
+              <span className="text-sm text-muted-foreground">—</span>
+            )}
+          </div>
+          {wallet !== null && wallet.mobi < 10 && (
+            <p className="text-xs text-destructive mt-1">Low balance — top up to send gifts</p>
           )}
+        </div>
+
+        {/* Selected gift preview */}
+        {selectedGift && (
+          <div className={cn(
+            "mx-4 mt-3 flex items-center justify-between gap-3 rounded-xl border px-3 py-2",
+            insufficient ? "border-destructive bg-destructive/5" : "border-primary bg-primary/5"
+          )}>
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              {selectedGift.giftData.icon && <span className="text-2xl">{selectedGift.giftData.icon}</span>}
+              <div className="min-w-0">
+                <p className="text-sm font-semibold truncate">{selectedGift.giftData.name}</p>
+                <p className={`text-xs font-bold ${insufficient ? "text-destructive" : "text-primary"}`}>
+                  {selectedGift.giftData.mobiValue.toLocaleString()} Mobi
+                  {insufficient && " — insufficient balance"}
+                </p>
+              </div>
+            </div>
+            <button onClick={() => setSelectedGift(null)} className="text-xs text-muted-foreground hover:text-foreground shrink-0">
+              Clear
+            </button>
+          </div>
+        )}
+
+        {/* Gift picker */}
+        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-0">
 
           {/* Special Digital Gifts */}
-          <Collapsible open={specialGiftOpen} onOpenChange={setSpecialGiftOpen}>
-            <Card>
-              <CollapsibleTrigger asChild>
-                <button className="w-full p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
-                  <span className="text-sm font-medium">Special Digital Gifts</span>
-                  <ChevronDown className={cn("h-4 w-4 transition-transform", specialGiftOpen && "rotate-180")} />
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="px-4 pb-4">
-                  {!selectedFolder ? (
-                    <ScrollArea className="h-[280px]">
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pr-2">
-                        {specialDigitalGiftFolders.map(folder => (
-                          <button
-                            key={folder.id}
-                            onClick={() => setSelectedFolder(folder.id)}
-                            className="p-3 rounded-lg border-2 border-border hover:border-primary hover:bg-primary/5 transition-all flex flex-col items-center gap-2 text-center group"
-                          >
-                            <span className="text-3xl">{folder.icon}</span>
-                            <span className="text-sm font-medium group-hover:text-primary transition-colors">
-                              {folder.name}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  ) : (
-                    <div className="space-y-3">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedFolder(null);
-                          if (selectedGift?.type === 'special') {
-                            setSelectedGift(null);
-                          }
-                        }}
-                        className="mb-2"
-                      >
-                        <ChevronLeft className="h-4 w-4 mr-1" />
-                        Back to Folders
-                      </Button>
-                      
-                      {(() => {
-                        const folder = specialDigitalGiftFolders.find(f => f.id === selectedFolder);
-                        if (!folder) return null;
-                        
+          <div className="border rounded-xl overflow-hidden">
+            <button
+              className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/60 transition-colors text-sm font-medium"
+              onClick={() => setSpecialOpen(v => !v)}
+            >
+              ✨ Special Digital Gifts
+              {specialOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </button>
+            {specialOpen && (
+              <div className="p-3">
+                {selectedFolder === null ? (
+                  <div className="grid grid-cols-3 gap-2">
+                    {specialDigitalGiftFolders.map(folder => (
+                      <button key={folder.id}
+                        onClick={() => setSelectedFolder(folder.id)}
+                        className="p-2 rounded-lg border hover:border-primary/50 hover:bg-primary/5 transition-all text-center">
+                        <span className="text-2xl block">{folder.icon}</span>
+                        <p className="text-xs font-medium mt-1 truncate">{folder.name}</p>
+                        <p className="text-xs text-muted-foreground">{folder.itemCount} gifts</p>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div>
+                    <button onClick={() => setSelectedFolder(null)} className="text-xs text-primary hover:underline mb-2 flex items-center gap-1">
+                      ← Back to folders
+                    </button>
+                    <div className="grid grid-cols-2 gap-2">
+                      {specialDigitalGiftFolders.find(f => f.id === selectedFolder)?.gifts.map(gift => {
+                        const badge = getValueBadge(gift.mobiValue);
+                        const isSelected = selectedGift?.giftId === gift.id;
+                        const canAfford = wallet === null || wallet.mobi >= gift.mobiValue;
                         return (
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2 mb-3 p-2 bg-muted/50 rounded-lg">
-                              <span className="text-2xl">{folder.icon}</span>
-                              <span className="font-semibold">{folder.name}</span>
-                            </div>
-                            
-                            <ScrollArea className="h-[200px] pr-2">
-                              <div className="space-y-2">
-                                {folder.gifts.map(gift => (
-                                  <button
-                                    key={gift.id}
-                                    onClick={() => {
-                                      setSelectedGift({
-                                        type: 'special',
-                                        giftId: gift.id,
-                                        giftData: {
-                                          id: gift.id,
-                                          name: `${folder.name.replace(" Gifts", "")} ${gift.mobiValue.toLocaleString()} Mobi`,
-                                          icon: folder.icon,
-                                          mobiValue: gift.mobiValue
-                                        }
-                                      });
-                                    }}
-                                    className={cn(
-                                      "w-full p-3 rounded-lg border-2 transition-all",
-                                      "flex items-center justify-between",
-                                      "hover:bg-muted/50 hover:shadow-md",
-                                      selectedGift?.type === 'special' && selectedGift.giftId === gift.id
-                                        ? "border-primary bg-primary/5 shadow-sm"
-                                        : "border-border"
-                                    )}
-                                  >
-                                    <div className="flex items-center gap-3">
-                                      <span className="text-2xl">{folder.icon}</span>
-                                      <span className="font-medium text-sm">
-                                        {folder.name.replace(" Gifts", "")} - {gift.mobiValue.toLocaleString()} Mobi
-                                      </span>
-                                    </div>
-                                    {selectedGift?.type === 'special' && selectedGift.giftId === gift.id && (
-                                      <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center">
-                                        <div className="h-2 w-2 rounded-full bg-primary-foreground" />
-                                      </div>
-                                    )}
-                                  </button>
-                                ))}
-                              </div>
-                            </ScrollArea>
-                          </div>
+                          <button key={gift.id}
+                            onClick={() => setSelectedGift({ type: "special", giftId: gift.id, giftData: gift })}
+                            className={cn(
+                              "p-3 rounded-xl border text-center transition-all",
+                              isSelected ? "border-primary bg-primary/10 ring-1 ring-primary" : "hover:border-primary/40 hover:bg-muted/50",
+                              !canAfford && "opacity-50"
+                            )}>
+                            <span className="text-3xl block">{gift.icon}</span>
+                            <p className="text-xs font-semibold mt-1 truncate">{gift.name}</p>
+                            <p className="text-xs font-bold text-primary">{gift.mobiValue.toLocaleString()} Mobi</p>
+                            <Badge variant="outline" className={cn("text-xs mt-1", badge.cls)}>{badge.label}</Badge>
+                          </button>
                         );
-                      })()}
+                      })}
                     </div>
-                  )}
-                </div>
-              </CollapsibleContent>
-            </Card>
-          </Collapsible>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Classic Digital Gifts */}
-          <Collapsible open={classicGiftOpen} onOpenChange={setClassicGiftOpen}>
-            <Card>
-              <CollapsibleTrigger asChild>
-                <button className="w-full p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
-                  <span className="text-sm font-medium">Classic Digital Gifts</span>
-                  <ChevronDown className={cn("h-4 w-4 transition-transform", classicGiftOpen && "rotate-180")} />
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="px-4 pb-4">
-                  <ScrollArea className="h-[280px] pr-2">
-                    <div className="space-y-2">
-                      {classicDigitalGifts.map(gift => (
-                        <button
-                          key={gift.id}
-                          onClick={() => {
-                            setSelectedGift({
-                              type: 'classic',
-                              giftId: gift.id,
-                              giftData: gift
-                            });
-                          }}
-                          className={cn(
-                            "w-full p-3 rounded-lg border-2 transition-all",
-                            "flex items-center justify-between",
-                            "hover:bg-muted/50 hover:shadow-md",
-                            selectedGift?.type === 'classic' && selectedGift.giftId === gift.id
-                              ? "border-primary bg-primary/5 shadow-sm"
-                              : "border-border"
-                          )}
-                        >
-                          <div className="flex items-center gap-3">
-                            <span className="text-2xl">{gift.icon}</span>
-                            <div className="text-left">
-                              <p className="font-medium text-sm">{gift.name}</p>
-                              <Badge variant="outline" className={cn("text-sm mt-1", getCategoryColor(gift.category))}>
-                                {gift.category}
-                              </Badge>
-                            </div>
-                          </div>
-                          <span className="font-bold text-primary text-sm">
-                            {gift.mobiValue.toLocaleString()} Mobi
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </div>
-              </CollapsibleContent>
-            </Card>
-          </Collapsible>
+          <div className="border rounded-xl overflow-hidden">
+            <button
+              className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/60 transition-colors text-sm font-medium"
+              onClick={() => setClassicOpen(v => !v)}
+            >
+              🎁 Classic Digital Gifts
+              {classicOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </button>
+            {classicOpen && (
+              <div className="p-3 grid grid-cols-2 gap-2">
+                {classicDigitalGifts.map(gift => {
+                  const badge = getValueBadge(gift.mobiValue);
+                  const isSelected = selectedGift?.giftId === gift.id;
+                  const canAfford = wallet === null || wallet.mobi >= gift.mobiValue;
+                  return (
+                    <button key={gift.id}
+                      onClick={() => setSelectedGift({ type: "classic", giftId: gift.id, giftData: gift })}
+                      className={cn(
+                        "p-3 rounded-xl border text-center transition-all",
+                        isSelected ? "border-primary bg-primary/10 ring-1 ring-primary" : "hover:border-primary/40 hover:bg-muted/50",
+                        !canAfford && "opacity-50"
+                      )}>
+                      <span className="text-3xl block">{gift.icon}</span>
+                      <p className="text-xs font-semibold mt-1 truncate">{gift.name}</p>
+                      <p className="text-xs font-bold text-primary">{gift.mobiValue.toLocaleString()} Mobi</p>
+                      <Badge variant="outline" className={cn("text-xs mt-1", badge.cls)}>{badge.label}</Badge>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
 
-          {/* Tangible Mobi-Store Gifts */}
-          <Collapsible open={tangibleGiftOpen} onOpenChange={setTangibleGiftOpen}>
-            <Card>
-              <CollapsibleTrigger asChild>
-                <button className="w-full p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
-                  <span className="text-sm font-medium">Tangible Mobi-Store Gifts</span>
-                  <ChevronDown className={cn("h-4 w-4 transition-transform", tangibleGiftOpen && "rotate-180")} />
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="px-4 pb-4">
-                  <Tabs value={tangibleGiftTab} onValueChange={(v) => setTangibleGiftTab(v as any)}>
-                    <TabsList className="w-full grid grid-cols-2 mb-4">
-                      <TabsTrigger value="vault">Gifts Vault</TabsTrigger>
-                      <TabsTrigger value="buy">Buy Gifts Items</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="vault" className="mt-0">
-                      {giftsVault.length === 0 && (
-                        <div className="text-center py-8">
-                          <Heart className="h-10 w-10 mx-auto mb-2 text-muted-foreground/50" />
-                          <p className="text-sm text-muted-foreground">
-                            No saved gifts in vault
-                          </p>
-                        </div>
-                      )}
-                    </TabsContent>
-                    
-                    <TabsContent value="buy" className="mt-0">
-                      <div className="grid grid-cols-2 gap-3">
-                        {tangibleGifts.map(gift => (
-                          <button
-                            key={gift.id}
-                            onClick={() => {
-                              setSelectedGift({
-                                type: 'tangible',
-                                giftId: gift.id,
-                                giftData: gift
-                              });
-                            }}
-                            className={cn(
-                              "border-2 rounded-lg overflow-hidden transition-all hover:shadow-lg",
-                              selectedGift?.type === 'tangible' && selectedGift.giftId === gift.id
-                                ? "border-primary shadow-md"
-                                : "border-border"
-                            )}
-                          >
-                            <div className="aspect-square bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center">
-                              <Gift className="h-12 w-12 text-pink-400" />
-                            </div>
-                            <div className="p-3 text-left bg-card">
-                              <p className="font-medium text-sm line-clamp-1">{gift.name}</p>
-                              <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                                {gift.description}
-                              </p>
-                              <p className="font-bold text-primary text-sm">
-                                {gift.mobiValue.toLocaleString()} Mobi
-                              </p>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </TabsContent>
-                  </Tabs>
-                </div>
-              </CollapsibleContent>
-            </Card>
-          </Collapsible>
-
-          {/* Send Button */}
+        {/* Footer */}
+        <div className="border-t px-4 py-3 shrink-0 flex gap-3">
+          <Button variant="outline" className="flex-1" onClick={onClose} disabled={sending}>
+            Cancel
+          </Button>
           <Button
-            onClick={handleSendGift}
-            disabled={!selectedGift}
-            className="w-full h-11 text-base font-semibold"
+            className="flex-1"
+            onClick={handleSend}
+            disabled={!selectedGift || sending || insufficient}
           >
-            <Gift className="h-5 w-5 mr-2" />
-            {selectedGift 
-              ? `Send Gift (${selectedGift.giftData.mobiValue.toLocaleString()} Mobi)`
-              : 'Send Gift'
-            }
+            {sending ? (
+              <><Loader2 className="h-4 w-4 animate-spin mr-2" />Sending...</>
+            ) : selectedGift ? (
+              <><Send className="h-4 w-4 mr-2" />Send ({selectedGift.giftData.mobiValue.toLocaleString()} Mobi)</>
+            ) : (
+              <><Gift className="h-4 w-4 mr-2" />Select a Gift</>
+            )}
           </Button>
         </div>
       </DialogContent>
