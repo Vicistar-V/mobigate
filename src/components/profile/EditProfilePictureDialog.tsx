@@ -1,11 +1,10 @@
 /**
  * EditProfilePictureDialog.tsx
- *
- * FIXED: Uploads photo to API via /api/profile/update_photo.php
- * so the new photo is visible to ALL users, not just saved locally.
+ * Lets the user pick a new profile/banner image and hands the resulting
+ * data URL back via onSave. Upload to PHP backend is handled by the caller.
  */
 
-import { useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,15 +13,15 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ImageUploader } from "./ImageUploader";
 import { toast } from "sonner";
-import { Maximize2, Link as LinkIcon } from "lucide-react";
+import { Maximize2, Link as LinkIcon, Loader2 } from "lucide-react";
 
 interface EditProfilePictureDialogProps {
-  open:          boolean;
-  onOpenChange:  (open: boolean) => void;
-  currentImage:  string;
-  onSave:        (newUrl: string) => void;
-  type?:         "profile" | "banner";
-  title?:        string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  currentImage: string;
+  onSave: (newUrl: string) => void;
+  type?: "profile" | "banner";
+  title?: string;
 }
 
 type ClickAction = "viewer" | "url";
@@ -32,16 +31,12 @@ export const EditProfilePictureDialog = ({
   onOpenChange,
   currentImage,
   onSave,
-  type = "avatar",
-  title = "Change Profile Picture",
+  type = "profile",
+  title,
 }: EditProfilePictureDialogProps) => {
-  
-  const [preview,  setPreview]  = useState<string | null>(null);
-  const [file,     setFile]     = useState<File | null>(null);
-  const [saving,   setSaving]   = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const [profileImage, setProfileImage] = useState<string | undefined>(currentImage);
+  const [saving, setSaving] = useState(false);
 
-  // Banner-only settings (persisted in localStorage for the UI template)
   const [clickAction, setClickAction] = useState<ClickAction>(() => {
     if (typeof window === "undefined") return "viewer";
     return (localStorage.getItem("bannerClickAction") as ClickAction) || "viewer";
@@ -70,7 +65,6 @@ export const EditProfilePictureDialog = ({
           return;
         }
         try {
-          // Accept bare domains by adding protocol if missing
           const candidate = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
           new URL(candidate);
           localStorage.setItem("bannerLinkedUrl", candidate);
@@ -85,14 +79,21 @@ export const EditProfilePictureDialog = ({
       localStorage.setItem("bannerRotateSeconds", rotateSeconds);
     }
 
-    onSave(profileImage);
-    toast.success(type === "banner" ? "Banner updated successfully" : "Profile picture updated successfully");
-    onOpenChange(false);
+    setSaving(true);
+    try {
+      onSave(profileImage);
+      toast.success(type === "banner" ? "Banner updated successfully" : "Profile picture updated successfully");
+      onOpenChange(false);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleClose = () => {
-    if (!saving) { setFile(null); setPreview(null); onOpenChange(false); }
+    if (!saving) onOpenChange(false);
   };
+
+  const uploaderType: "avatar" | "banner" = type === "banner" ? "banner" : "avatar";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -102,11 +103,10 @@ export const EditProfilePictureDialog = ({
         </DialogHeader>
 
         <div className="py-3 space-y-5">
-          <ImageUploader value={profileImage} onChange={setProfileImage} type={type} />
+          <ImageUploader value={profileImage} onChange={setProfileImage} type={uploaderType} />
 
           {type === "banner" && (
             <>
-              {/* Click action */}
               <div className="space-y-2">
                 <Label className="text-sm font-semibold">When this banner is tapped</Label>
                 <RadioGroup
@@ -148,9 +148,7 @@ export const EditProfilePictureDialog = ({
 
                 {clickAction === "url" && (
                   <div className="space-y-1.5 pt-1">
-                    <Label htmlFor="banner-url" className="text-xs font-semibold">
-                      Link URL
-                    </Label>
+                    <Label htmlFor="banner-url" className="text-xs font-semibold">Link URL</Label>
                     <Input
                       id="banner-url"
                       type="url"
@@ -163,13 +161,10 @@ export const EditProfilePictureDialog = ({
                 )}
               </div>
 
-              {/* Auto-rotation */}
               <div className="space-y-2">
                 <Label className="text-sm font-semibold">Auto-rotate banner every</Label>
                 <Select value={rotateSeconds} onValueChange={setRotateSeconds}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="0">Off (no auto-rotation)</SelectItem>
                     <SelectItem value="5">Every 5 seconds</SelectItem>
@@ -190,8 +185,8 @@ export const EditProfilePictureDialog = ({
 
         <div className="flex justify-end gap-2 pt-2">
           <Button variant="outline" onClick={handleClose} disabled={saving}>Cancel</Button>
-          <Button onClick={handleSave} disabled={saving || !file}>
-            {saving ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Saving...</> : "Save"}
+          <Button onClick={handleSave} disabled={saving || !profileImage || profileImage === currentImage}>
+            {saving ? (<><Loader2 className="h-4 w-4 animate-spin mr-2" />Saving...</>) : "Save"}
           </Button>
         </div>
       </DialogContent>
