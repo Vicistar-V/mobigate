@@ -266,14 +266,14 @@ export const FeedPost = ({
   const hasMedia = !!(playbackUrl || imageUrl);
 
   const mediaItem: MediaItem = {
-    id, url: playbackUrl,
-    thumbnailUrl: imageUrl,
+    id, url: playbackUrl || imageUrl,
     type: type.toLowerCase() === "video" ? "video" : type.toLowerCase() === "audio" ? "audio" : "photo",
     title, description: subtitle || description,
     author, authorImage: authorProfileImage, authorUserId: userId,
     likes: likeCount, comments: commentCount,
     followers, isLiked, isOwner,
   };
+
 
   return (
     <>
