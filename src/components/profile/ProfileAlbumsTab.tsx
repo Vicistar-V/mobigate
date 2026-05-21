@@ -108,7 +108,13 @@ export const ProfileAlbumsTab = ({
     privacy: "Public", createdAt: "System", isSystem: true,
   });
 
-  const allAlbums = [...systemAlbums, ...albums];
+  const allAlbums = [...systemAlbums, ...userAlbums];
+
+  const handleAlbumClick = (album: Album & { isSystem?: boolean }) => {
+    setSelectedAlbum(album);
+    setAlbumDialogOpen(true);
+  };
+
 
   // All photos from posts
   const allPhotos = [
