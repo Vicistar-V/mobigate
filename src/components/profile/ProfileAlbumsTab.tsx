@@ -135,7 +135,7 @@ export const ProfileAlbumsTab = ({
 
   const displayed = albumsView === "large" ? allAlbums.slice(0, visibleAlbumCount) : allAlbums;
 
-  if (loading) return <div className="flex justify-center py-16"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
+  
 
   return (
     <div className="space-y-8">
