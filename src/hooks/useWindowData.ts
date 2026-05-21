@@ -187,6 +187,7 @@ export function useUserPosts() {
 }
 
 export function useCurrentUserId(): string {
+  const { user } = useAuth();
   const [userId, setUserId] = useState<string>(() => {
     if (typeof window !== 'undefined' && window.__CURRENT_USER_ID__) {
       return window.__CURRENT_USER_ID__;
@@ -205,7 +206,7 @@ export function useCurrentUserId(): string {
     }
   }, [userId]);
 
-  return userId;
+  return userId || user?.id || '';
 }
 
 export interface WalletData {
