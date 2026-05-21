@@ -5,6 +5,8 @@ import { Loader2 } from "lucide-react";
 
 export const AuthGuard = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
+
+  // Don't show LoginModal on the forgot-password page
   const isForgotPassword = window.location.pathname === "/forgot-password";
 
   if (isLoading) {
@@ -18,7 +20,10 @@ export const AuthGuard = ({ children }: { children: ReactNode }) => {
     );
   }
 
-  if (isForgotPassword) return <>{children}</>;
+  // On forgot-password page, just render children without auth check
+  if (isForgotPassword) {
+    return <>{children}</>;
+  }
 
   return (
     <>
