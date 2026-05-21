@@ -1,50 +1,19 @@
 import { useState, useEffect } from 'react';
 import { UserProfile } from '@/types/window';
-import profilePhoto from '@/assets/profile-photo.jpg';
 
-export function useUserProfile(): UserProfile {
-  const [profile, setProfile] = useState<UserProfile>(() => {
-    // Try to get PHP-injected data immediately
+export function useUserProfile(): UserProfile | null {
+  const [profile, setProfile] = useState<UserProfile | null>(() => {
     if (typeof window !== 'undefined' && window.__USER_PROFILE__) {
       return window.__USER_PROFILE__;
     }
-    
-    // Fallback to mock data
-    return {
-      id: 'current-user',
-      username: 'NKEMJKA PETER I.',
-      fullName: 'NKEMJKA PETER IPREC',
-      avatar: profilePhoto,
-      email: 'peter@mobigate.com',
-      greeting: (() => {
-        const hour = new Date().getHours();
-        if (hour >= 5 && hour < 12) return 'Good Morning';
-        if (hour >= 12 && hour < 17) return 'Good Afternoon';
-        return 'Good Evening';
-      })(),
-      timestamp: new Date().toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-      }),
-      stats: {
-        friends: 17,
-        likes: 132,
-        followers: 45,
-        following: 38
-      }
-    };
+    return null;
   });
 
   useEffect(() => {
-    // Double-check for late injection
-    if (window.__USER_PROFILE__ && profile.id === 'current-user') {
+    if (window.__USER_PROFILE__ && !profile) {
       setProfile(window.__USER_PROFILE__);
     }
-  }, [profile.id]);
+  }, [profile]);
 
   return profile;
 }
@@ -207,12 +176,17 @@ export function useCurrentUserId(): string {
     if (typeof window !== 'undefined' && window.__CURRENT_USER_ID__) {
       return window.__CURRENT_USER_ID__;
     }
-    return 'current-user';
+    if (typeof window !== 'undefined' && window.__USER_PROFILE__?.id) {
+      return window.__USER_PROFILE__.id;
+    }
+    return '';
   });
 
   useEffect(() => {
-    if (window.__CURRENT_USER_ID__ && userId === 'current-user') {
+    if (window.__CURRENT_USER_ID__ && !userId) {
       setUserId(window.__CURRENT_USER_ID__);
+    } else if (window.__USER_PROFILE__?.id && !userId) {
+      setUserId(window.__USER_PROFILE__.id);
     }
   }, [userId]);
 
