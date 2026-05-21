@@ -185,7 +185,7 @@ export const ProfileGiftsTab = ({ userName, userId }: ProfileGiftsTabProps) => {
                     <button key={folder.id} onClick={() => setSelectedFolder(folder.id)} className="p-3 rounded-lg border hover:border-primary/50 hover:bg-primary/5 transition-all text-center space-y-2">
                       <span className="text-3xl block">{folder.icon}</span>
                       <p className="text-xs font-medium">{folder.name}</p>
-                      <p className="text-xs text-muted-foreground">{folder.itemCount} gifts</p>
+                      <p className="text-xs text-muted-foreground">{folder.gifts.length} gifts</p>
                     </button>
                   ))}
                 </div>
@@ -193,14 +193,20 @@ export const ProfileGiftsTab = ({ userName, userId }: ProfileGiftsTabProps) => {
                 <div>
                   <button onClick={() => setSelectedFolder(null)} className="text-sm text-primary hover:underline mb-3 block">← Back to folders</button>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {specialDigitalGiftFolders.find(f => f.id === selectedFolder)?.gifts.map(gift => (
-                      <button key={gift.id} onClick={() => setSelectedGift({ type: "special", giftId: gift.id, giftData: gift })}
+                    {specialDigitalGiftFolders.find(f => f.id === selectedFolder)?.gifts.map(gift => {
+                      const folder = specialDigitalGiftFolders.find(f => f.id === selectedFolder)!;
+                      const giftName = `${folder.name.replace(/ Gifts$/, '')} ${gift.mobiValue.toLocaleString()}`;
+                      const giftWithMeta = { ...gift, name: giftName, icon: folder.icon };
+                      return (
+                      <button key={gift.id} onClick={() => setSelectedGift({ type: "special", giftId: gift.id, giftData: giftWithMeta })}
                         className={cn("p-3 rounded-lg border text-center space-y-1 transition-all", selectedGift?.giftId === gift.id ? "border-primary bg-primary/10" : "hover:border-primary/50 hover:bg-primary/5")}>
-                        <span className="text-3xl block">{gift.icon}</span>
-                        <p className="text-xs font-medium">{gift.name}</p>
+                        <span className="text-3xl block">{folder.icon}</span>
+                        <p className="text-xs font-medium">{giftName}</p>
                         <p className="text-xs font-bold text-primary">{gift.mobiValue.toLocaleString()} Mobi</p>
                       </button>
-                    ))}
+                      );
+                    })}
+
                   </div>
                 </div>
               )}

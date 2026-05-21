@@ -28,12 +28,29 @@ const NEEDS_THUMBNAIL: PostType[] = ["Video", "Audio", "Article", "PDF", "URL"];
 // Suggested fee amounts
 const FEE_PRESETS = [5, 10, 20, 50, 100, 200, 500];
 
-export const CreatePostDialog = () => {
+interface CreatePostDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideTrigger?: boolean;
+  presetMediaUrl?: string;
+  presetTitle?: string;
+}
+
+export const CreatePostDialog = ({
+  open: openProp,
+  onOpenChange: onOpenChangeProp,
+  hideTrigger = false,
+  presetMediaUrl,
+  presetTitle,
+}: CreatePostDialogProps = {}) => {
   const { toast }   = useToast();
   const phpAlbums   = useUserAlbums();
   const albums      = phpAlbums || mockAlbums;
 
-  const [open,             setOpen]             = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = openProp !== undefined ? openProp : internalOpen;
+  const setOpen = (v: boolean) => { onOpenChangeProp ? onOpenChangeProp(v) : setInternalOpen(v); };
+
   const [title,            setTitle]            = useState("");
   const [subtitle,         setSubtitle]         = useState("");
   const [description,      setDescription]      = useState("");
@@ -79,56 +96,8 @@ export const CreatePostDialog = () => {
     } else {
       setMediaPreview(null);
     }
-    let valid = incoming.filter((f) => f.size <= 20 * 1024 * 1024);
-    if (valid.length === 0) {
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      return;
-    }
-
-    // Enforce 3-image maximum per Photo post
-    if (type === "Photo") {
-      const remainingSlots = Math.max(0, MAX_IMAGES_PER_POST - mediaPreviews.length);
-      if (remainingSlots === 0) {
-        toast({
-          title: "Maximum reached",
-          description: `Photo posts allow up to ${MAX_IMAGES_PER_POST} images. Remove one to add another.`,
-          variant: "destructive",
-        });
-        if (fileInputRef.current) fileInputRef.current.value = "";
-        return;
-      }
-      if (valid.length > remainingSlots) {
-        toast({
-          title: `Only ${remainingSlots} more allowed`,
-          description: `Photo posts cap at ${MAX_IMAGES_PER_POST} images. Extra files were skipped.`,
-          variant: "destructive",
-        });
-        valid = valid.slice(0, remainingSlots);
-      }
-    }
-
-    setMediaFiles((prev) => [...prev, ...valid]);
-
-    valid.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setMediaPreviews((prev) => [...prev, reader.result as string]);
-      };
-      reader.readAsDataURL(file);
-    });
-
-    const extraCost = type === "Photo" && mediaPreviews.length >= 1
-      ? ` (+M50 per extra image)`
-      : "";
-    toast({
-      title: valid.length > 1 ? `${valid.length} files selected` : "Media selected",
-      description: valid.length > 1
-        ? `Added ${valid.length} files to this post${extraCost}`
-        : `${valid[0].name} ready to upload${extraCost}`,
-    });
-
-    if (fileInputRef.current) fileInputRef.current.value = "";
   };
+
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

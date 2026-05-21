@@ -236,7 +236,7 @@ export const SendGiftDialog = ({
                         className="p-2 rounded-lg border hover:border-primary/50 hover:bg-primary/5 transition-all text-center">
                         <span className="text-2xl block">{folder.icon}</span>
                         <p className="text-xs font-medium mt-1 truncate">{folder.name}</p>
-                        <p className="text-xs text-muted-foreground">{folder.itemCount} gifts</p>
+                        <p className="text-xs text-muted-foreground">{folder.gifts.length} gifts</p>
                       </button>
                     ))}
                   </div>
@@ -247,24 +247,28 @@ export const SendGiftDialog = ({
                     </button>
                     <div className="grid grid-cols-2 gap-2">
                       {specialDigitalGiftFolders.find(f => f.id === selectedFolder)?.gifts.map(gift => {
+                        const folder = specialDigitalGiftFolders.find(f => f.id === selectedFolder)!;
+                        const giftName = `${folder.name.replace(/ Gifts$/, '')} ${gift.mobiValue.toLocaleString()}`;
+                        const giftWithMeta = { ...gift, name: giftName, icon: folder.icon };
                         const badge = getValueBadge(gift.mobiValue);
                         const isSelected = selectedGift?.giftId === gift.id;
                         const canAfford = wallet === null || wallet.mobi >= gift.mobiValue;
                         return (
                           <button key={gift.id}
-                            onClick={() => setSelectedGift({ type: "special", giftId: gift.id, giftData: gift })}
+                            onClick={() => setSelectedGift({ type: "special", giftId: gift.id, giftData: giftWithMeta })}
                             className={cn(
                               "p-3 rounded-xl border text-center transition-all",
                               isSelected ? "border-primary bg-primary/10 ring-1 ring-primary" : "hover:border-primary/40 hover:bg-muted/50",
                               !canAfford && "opacity-50"
                             )}>
-                            <span className="text-3xl block">{gift.icon}</span>
-                            <p className="text-xs font-semibold mt-1 truncate">{gift.name}</p>
+                            <span className="text-3xl block">{folder.icon}</span>
+                            <p className="text-xs font-semibold mt-1 truncate">{giftName}</p>
                             <p className="text-xs font-bold text-primary">{gift.mobiValue.toLocaleString()} Mobi</p>
                             <Badge variant="outline" className={cn("text-xs mt-1", badge.cls)}>{badge.label}</Badge>
                           </button>
                         );
                       })}
+
                     </div>
                   </div>
                 )}

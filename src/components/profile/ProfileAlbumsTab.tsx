@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { AlbumCard } from "./AlbumCard";
 import { AlbumDetailDialog } from "./AlbumDetailDialog";
 import { AllPhotosGrid } from "./AllPhotosGrid";
 import { AllVideosGrid } from "./AllVideosGrid";
-import { Album, Post } from "@/data/posts";
+import { Album, Post, mockAlbums } from "@/data/posts";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { albumsCarouselAdSlots } from "@/data/profileAds";
 import { getRandomAdSlot } from "@/lib/adUtils";
@@ -108,7 +108,13 @@ export const ProfileAlbumsTab = ({
     privacy: "Public", createdAt: "System", isSystem: true,
   });
 
-  const allAlbums = [...systemAlbums, ...albums];
+  const allAlbums = [...systemAlbums, ...userAlbums];
+
+  const handleAlbumClick = (album: Album & { isSystem?: boolean }) => {
+    setSelectedAlbum(album);
+    setAlbumDialogOpen(true);
+  };
+
 
   // All photos from posts
   const allPhotos = [
@@ -127,9 +133,9 @@ export const ProfileAlbumsTab = ({
     return userPosts.filter(p => p.albumId === album.id && p.imageUrl).map(p => ({ id: p.id, url: p.imageUrl!, title: p.title, author: p.author, type: p.type }));
   };
 
-  const displayed = albumsView === "large" ? allAlbums.slice(0, visibleCount) : allAlbums;
+  const displayed = albumsView === "large" ? allAlbums.slice(0, visibleAlbumCount) : allAlbums;
 
-  if (loading) return <div className="flex justify-center py-16"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
+  
 
   return (
     <div className="space-y-8">
@@ -179,9 +185,9 @@ export const ProfileAlbumsTab = ({
           {albumsView === "large" && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                {displayedAlbums.map((album, index) => {
+                {displayed.map((album, index) => {
                   const adSlotNumber = Math.floor(index / 4);
-                  const shouldShowAd = (index + 1) % 4 === 0 && index < displayedAlbums.length - 1;
+                  const shouldShowAd = (index + 1) % 4 === 0 && index < displayed.length - 1;
                   
                   return (
                     <React.Fragment key={album.id}>
@@ -208,11 +214,11 @@ export const ProfileAlbumsTab = ({
                   );
                 })}
               </div>
-              {allAlbums.length > visibleCount && (
-                <Button variant="outline" size="lg" onClick={() => setVisibleCount(v => v + 15)} className="w-full">...more</Button>
+              {allAlbums.length > visibleAlbumCount && (
+                <Button variant="outline" size="lg" onClick={() => setVisibleAlbumCount(v => v + 15)} className="w-full">...more</Button>
               )}
-              {visibleCount > 15 && (
-                <Button variant="outline" size="lg" onClick={() => setVisibleCount(15)} className="w-full">Less...</Button>
+              {visibleAlbumCount > 15 && (
+                <Button variant="outline" size="lg" onClick={() => setVisibleAlbumCount(15)} className="w-full">Less...</Button>
               )}
             </div>
           )}
