@@ -456,18 +456,10 @@ const Index = () => {
                   return (
                 <div key={index}>
                   <FeedPost
-<<<<<<< Updated upstream
                     {...(post as any)}
                     isOwner={isOwn || (post as any).isOwner}
                     onEdit={isOwn ? () => handleEditPost(post as Post) : undefined}
                     onDelete={isOwn ? () => (post as any).id && handleDeletePost((post as any).id) : undefined}
-=======
-                    {...post as any}
-                    isMonetized={(post as any).isMonetized || false}
-                    hasPaid={(post as any).hasPaid || false}
-                    onEdit={post.isOwner ? () => handleEditPost(post as Post) : undefined}
-                    onDelete={post.isOwner ? () => handleDeletePost(post.id ?? "") : undefined}
->>>>>>> Stashed changes
                   />
                   {/* Insert premium ad after every 4 posts */}
                   {(index + 1) % 4 === 0 && index < displayedPosts.length - 1 && (
