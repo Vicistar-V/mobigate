@@ -28,12 +28,29 @@ const NEEDS_THUMBNAIL: PostType[] = ["Video", "Audio", "Article", "PDF", "URL"];
 // Suggested fee amounts
 const FEE_PRESETS = [5, 10, 20, 50, 100, 200, 500];
 
-export const CreatePostDialog = () => {
+interface CreatePostDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideTrigger?: boolean;
+  presetMediaUrl?: string;
+  presetTitle?: string;
+}
+
+export const CreatePostDialog = ({
+  open: openProp,
+  onOpenChange: onOpenChangeProp,
+  hideTrigger = false,
+  presetMediaUrl,
+  presetTitle,
+}: CreatePostDialogProps = {}) => {
   const { toast }   = useToast();
   const phpAlbums   = useUserAlbums();
   const albums      = phpAlbums || mockAlbums;
 
-  const [open,             setOpen]             = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = openProp !== undefined ? openProp : internalOpen;
+  const setOpen = (v: boolean) => { onOpenChangeProp ? onOpenChangeProp(v) : setInternalOpen(v); };
+
   const [title,            setTitle]            = useState("");
   const [subtitle,         setSubtitle]         = useState("");
   const [description,      setDescription]      = useState("");
