@@ -35,7 +35,7 @@ export const EditProfilePictureDialog = ({
   type = "avatar",
   title = "Change Profile Picture",
 }: EditProfilePictureDialogProps) => {
-  const { toast }             = useToast();
+  
   const [preview,  setPreview]  = useState<string | null>(null);
   const [file,     setFile]     = useState<File | null>(null);
   const [saving,   setSaving]   = useState(false);
