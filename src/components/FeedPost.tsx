@@ -1,7 +1,12 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+<<<<<<< Updated upstream
 import { Eye, MessageSquare, Heart, Share2, UserPlus, Pencil } from "lucide-react";
 import { useState } from "react";
+=======
+import { Eye, MessageSquare, Heart, Share2, UserPlus, Play, Music, FileText, Lock, Loader2, Wallet } from "lucide-react";
+import { useState, useEffect } from "react";
+>>>>>>> Stashed changes
 import { Link } from "react-router-dom";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -282,6 +287,7 @@ export const FeedPost = ({
         {/* Media area */}
         {hasMedia && (
           <div className="relative h-48 bg-muted">
+<<<<<<< Updated upstream
             <img src={imageUrl} alt={title} className="w-full h-full object-cover" />
             <Badge className="absolute top-2 left-2" variant="destructive">
               {type}
@@ -302,8 +308,92 @@ export const FeedPost = ({
             )}
           </div>
         )}
+      
+      <div className="p-4 space-y-3">
+        <div className="flex items-start gap-2">
+          <div className="flex-1">
+            <h3 className="font-semibold text-xl leading-tight line-clamp-2">{title}</h3>
+            {subtitle && (
+              <p className="text-lg text-muted-foreground mt-1 line-clamp-2">{subtitle}</p>
+            )}
+            {description && (
+              <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{description}</p>
+            )}
+          </div>
+          {isOwner && onEdit && onDelete && (
+            <div className="flex-shrink-0 flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+              {!imageUrl && (
+                <button
+                  type="button"
+                  onClick={onEdit}
+                  className="inline-flex items-center gap-1 rounded-full bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold px-2.5 py-1"
+                  aria-label="Edit this post"
+                >
+                  <Pencil className="h-3 w-3" />
+                  Edit
+                </button>
+              )}
+              <PostOptionsMenu onEdit={onEdit} onDelete={onDelete} />
+            </div>
+          )}
+        </div>
+=======
+            {/* Thumbnail always visible as preview even for locked content */}
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={title}
+                className={`w-full h-full object-cover ${!hasAccess ? "blur-sm brightness-50" : ""}`}
+              />
+            ) : (
+              <div className={`w-full h-full bg-muted flex items-center justify-center ${!hasAccess ? "brightness-50" : ""}`}>
+                <TypeOverlay type={type} />
+              </div>
+            )}
 
+            {/* Play overlay for video/audio — only when has access */}
+            {hasAccess && (type === "Video" || type === "Audio") && imageUrl && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors">
+                <div className="bg-black/60 rounded-full p-3">
+                  {type === "Video"
+                    ? <Play  className="h-8 w-8 text-white fill-white" />
+                    : <Music className="h-8 w-8 text-white" />
+                  }
+                </div>
+              </div>
+            )}
 
+            {/* Paywall overlay — shown when locked and user clicked */}
+            {!hasAccess && showPaywall && (
+              <PaywallGate
+                fee={feeNum}
+                title={title}
+                onPay={handlePay}
+                paying={paying}
+              />
+            )}
+
+            {/* Lock icon badge when not paying/showing paywall yet */}
+            {!hasAccess && !showPaywall && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="bg-black/50 rounded-full p-4">
+                  <Lock className="h-8 w-8 text-amber-400" />
+                </div>
+              </div>
+            )}
+
+            {/* Type badge */}
+            <Badge className="absolute top-2 left-2" variant="destructive">{type}</Badge>
+
+            {/* Fee badge */}
+            {isPaid && (
+              <div className={`absolute top-2 right-2 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold shadow-lg ${hasAccess ? "bg-emerald-500 text-white" : "bg-amber-500 text-white"}`}>
+                {hasAccess ? "✓ Unlocked" : <><Lock className="h-3 w-3" />{feeNum.toLocaleString()} Mobi</>}
+              </div>
+            )}
+          </div>
+        )}
+>>>>>>> Stashed changes
 
         <div className="p-4 space-y-3">
           <div className="flex items-start gap-2">
