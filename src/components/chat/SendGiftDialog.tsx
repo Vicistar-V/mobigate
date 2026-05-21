@@ -236,7 +236,7 @@ export const SendGiftDialog = ({
                         className="p-2 rounded-lg border hover:border-primary/50 hover:bg-primary/5 transition-all text-center">
                         <span className="text-2xl block">{folder.icon}</span>
                         <p className="text-xs font-medium mt-1 truncate">{folder.name}</p>
-                        <p className="text-xs text-muted-foreground">{folder.itemCount} gifts</p>
+                        <p className="text-xs text-muted-foreground">{folder.gifts.length} gifts</p>
                       </button>
                     ))}
                   </div>
