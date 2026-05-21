@@ -44,25 +44,39 @@ export const PeopleYouMayKnow = () => {
   const [giftOpen,     setGiftOpen]     = useState(false);
   const [giftUser,     setGiftUser]     = useState<{ id: string; name: string } | null>(null);
 
+  // ── Fallback suggestions (used when API is empty / unauth / fails) ──────────
+  const FALLBACK_USERS: SuggestedUser[] = [
+    { id: "fallback-1", name: "Chef Ngozi",     username: "chef.ngozi",     profileImage: "https://api.dicebear.com/7.x/initials/svg?seed=Chef+Ngozi",    mutualFriends: 12 },
+    { id: "fallback-2", name: "Tunde Bakare",   username: "tunde.bakare",   profileImage: "https://api.dicebear.com/7.x/initials/svg?seed=Tunde+Bakare",  mutualFriends: 8  },
+    { id: "fallback-3", name: "Dr. Amina Yusuf",username: "amina.yusuf",    profileImage: "https://api.dicebear.com/7.x/initials/svg?seed=Amina+Yusuf",  mutualFriends: 5  },
+    { id: "fallback-4", name: "Emeka Okafor",   username: "emeka.okafor",   profileImage: "https://api.dicebear.com/7.x/initials/svg?seed=Emeka+Okafor", mutualFriends: 3  },
+    { id: "fallback-5", name: "Funke Adebayo",  username: "funke.adebayo",  profileImage: "https://api.dicebear.com/7.x/initials/svg?seed=Funke+Adebayo",mutualFriends: 2  },
+  ];
+
   // ── Fetch suggestions from API ──────────────────────────────────────────────
   const fetchSuggestions = useCallback(async () => {
-    if (!isAuthenticated) { setLoading(false); return; }
     setLoading(true);
+    if (!isAuthenticated) {
+      setUsers(FALLBACK_USERS);
+      setLoading(false);
+      return;
+    }
     try {
       const res  = await fetch(`${API_BASE}/friends/suggestions.php`, {
         credentials: "include",
       });
       if (!res.ok) throw new Error();
       const data = await res.json();
-      setUsers(data.map((u: any) => ({
+      const mapped = (Array.isArray(data) ? data : []).map((u: any) => ({
         id:            u.id,
         name:          u.name           || u.username || "Unknown",
         profileImage:  u.profile_photo  || undefined,
         mutualFriends: u.mutual_friends || 0,
         username:      u.username,
-      })));
+      }));
+      setUsers(mapped.length > 0 ? mapped : FALLBACK_USERS);
     } catch {
-      setUsers([]); // empty — no mock data
+      setUsers(FALLBACK_USERS);
     } finally {
       setLoading(false);
     }
