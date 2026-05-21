@@ -312,7 +312,8 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
               <Upload className="h-4 w-4 mr-2" />{mediaFile ? "Change File" : `Upload ${type} File`}
             </Button>
             <input ref={mediaRef} type="file" accept={mediaAccept[type]} onChange={handleMediaChange} className="hidden" />
-          </div>
+
+
 
             {/* Upload Button */}
             <div className="flex gap-2">

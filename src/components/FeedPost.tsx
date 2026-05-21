@@ -456,6 +456,7 @@ export const FeedPost = ({
               {!hasMedia && <Badge variant={type === "Video" ? "destructive" : "secondary"}>{type}</Badge>}
             </div>
           </div>
+          </div>
         </div>
       </Card>
 

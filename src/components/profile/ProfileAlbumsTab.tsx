@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useMemo } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Columns2, LayoutGrid, Loader2 } from "lucide-react";
+import { Columns2, LayoutGrid } from "lucide-react";
 import { AlbumCard } from "./AlbumCard";
 import { AlbumDetailDialog } from "./AlbumDetailDialog";
 import { AllPhotosGrid } from "./AllPhotosGrid";
 import { AllVideosGrid } from "./AllVideosGrid";
-import { Album, Post } from "@/data/posts";
+import { Album, Post, mockAlbums } from "@/data/posts";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { albumsCarouselAdSlots } from "@/data/profileAds";
 import { getRandomAdSlot } from "@/lib/adUtils";
@@ -37,36 +37,16 @@ export const ProfileAlbumsTab = ({
   const [selectedAlbum, setSelectedAlbum] = useState<(Album & { isSystem?: boolean }) | null>(null);
   const [albumDialogOpen, setAlbumDialogOpen] = useState(false);
   const [albumsView, setAlbumsView] = useState<"normal" | "large">("normal");
-  const [visibleAlbumCount, setVisibleAlbumCount] = useState(15);
+  const [visibleCount, setVisibleCount] = useState(15);
   const [albumOverrides, setAlbumOverrides] = useState<Record<string, { name?: string; deleted?: boolean }>>({});
   const [renameTarget, setRenameTarget] = useState<(Album & { isSystem?: boolean }) | null>(null);
 
-export const ProfileAlbumsTab = ({ userId, profileImageHistory, bannerImageHistory, userPosts }: ProfileAlbumsTabProps) => {
-  const [albums,         setAlbums]         = useState<(Album & { isSystem?: boolean })[]>([]);
-  const [loading,        setLoading]        = useState(true);
-  const [selectedAlbum,  setSelectedAlbum]  = useState<(Album & { isSystem?: boolean }) | null>(null);
-  const [albumDialogOpen,setAlbumDialogOpen]= useState(false);
-  const [albumsView,     setAlbumsView]     = useState<"normal"|"large">("normal");
-  const [visibleCount,   setVisibleCount]   = useState(15);
+  const handleAlbumClick = (album: Album & { isSystem?: boolean }) => {
+    setSelectedAlbum(album);
+    setAlbumDialogOpen(true);
+  };
 
-  const fetchAlbums = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_BASE}/profile/albums.php?user_id=${userId}`, { credentials: "include" });
-      if (!res.ok) throw new Error();
-      const data: ApiAlbum[] = await res.json();
-      setAlbums(data.map(a => ({
-        id:          a.id,
-        name:        a.name,
-        description: a.description || "",
-        coverImage:  a.coverImage  || "/placeholder.svg",
-        itemCount:   a.itemCount,
-        privacy:     a.privacy as "Public"|"Friends"|"Private",
-        createdAt:   a.createdAt,
-      })));
-    } catch { setAlbums([]); }
-    finally { setLoading(false); }
-  }, [userId]);
+
 
   // Get user-created albums (from mockAlbums) with posts assigned to them.
   // Apply owner overrides (rename/delete) so changes reflect in the UI.
@@ -133,7 +113,7 @@ export const ProfileAlbumsTab = ({ userId, profileImageHistory, bannerImageHisto
     privacy: "Public", createdAt: "System", isSystem: true,
   });
 
-  const allAlbums = [...systemAlbums, ...albums];
+  const allAlbums = [...systemAlbums, ...userAlbums];
 
   // All photos from posts
   const allPhotos = [
@@ -152,9 +132,8 @@ export const ProfileAlbumsTab = ({ userId, profileImageHistory, bannerImageHisto
     return userPosts.filter(p => p.albumId === album.id && p.imageUrl).map(p => ({ id: p.id, url: p.imageUrl!, title: p.title, author: p.author, type: p.type }));
   };
 
-  const displayed = albumsView === "large" ? allAlbums.slice(0, visibleCount) : allAlbums;
+  const displayedAlbums = albumsView === "large" ? allAlbums.slice(0, visibleCount) : allAlbums;
 
-  if (loading) return <div className="flex justify-center py-16"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
 
   return (
     <div className="space-y-8">
