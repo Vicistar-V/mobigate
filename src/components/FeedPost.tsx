@@ -302,35 +302,8 @@ export const FeedPost = ({
             )}
           </div>
         )}
-      
-      <div className="p-4 space-y-3">
-        <div className="flex items-start gap-2">
-          <div className="flex-1">
-            <h3 className="font-semibold text-xl leading-tight line-clamp-2">{title}</h3>
-            {subtitle && (
-              <p className="text-lg text-muted-foreground mt-1 line-clamp-2">{subtitle}</p>
-            )}
-            {description && (
-              <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{description}</p>
-            )}
-          </div>
-          {isOwner && onEdit && onDelete && (
-            <div className="flex-shrink-0 flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-              {!imageUrl && (
-                <button
-                  type="button"
-                  onClick={onEdit}
-                  className="inline-flex items-center gap-1 rounded-full bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold px-2.5 py-1"
-                  aria-label="Edit this post"
-                >
-                  <Pencil className="h-3 w-3" />
-                  Edit
-                </button>
-              )}
-              <PostOptionsMenu onEdit={onEdit} onDelete={onDelete} />
-            </div>
-          )}
-        </div>
+
+
 
         <div className="p-4 space-y-3">
           <div className="flex items-start gap-2">
