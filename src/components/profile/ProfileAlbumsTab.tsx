@@ -11,19 +11,13 @@ import { Album, Post } from "@/data/posts";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { albumsCarouselAdSlots } from "@/data/profileAds";
 import { getRandomAdSlot } from "@/lib/adUtils";
-<<<<<<< Updated upstream
 import { useUserAlbums } from "@/hooks/useWindowData";
 import { RenameAlbumDialog } from "@/components/RenameAlbumDialog";
 import { useToast } from "@/hooks/use-toast";
-=======
-
-const API_BASE = (import.meta.env.VITE_API_URL as string) || "/api";
->>>>>>> Stashed changes
 
 interface ProfileAlbumsTabProps {
   userId: string;
   profileImageHistory: string[];
-<<<<<<< Updated upstream
   bannerImageHistory: string[];
   userPosts: Post[];
   /** When true, show owner Edit/Delete controls on each album. Defaults to true. */
@@ -46,16 +40,6 @@ export const ProfileAlbumsTab = ({
   const [visibleAlbumCount, setVisibleAlbumCount] = useState(15);
   const [albumOverrides, setAlbumOverrides] = useState<Record<string, { name?: string; deleted?: boolean }>>({});
   const [renameTarget, setRenameTarget] = useState<(Album & { isSystem?: boolean }) | null>(null);
-=======
-  bannerImageHistory:  string[];
-  userPosts:           Post[];
-}
-
-interface ApiAlbum {
-  id: string; name: string; description: string | null;
-  coverImage: string | null; itemCount: number; privacy: string; createdAt: string;
-}
->>>>>>> Stashed changes
 
 export const ProfileAlbumsTab = ({ userId, profileImageHistory, bannerImageHistory, userPosts }: ProfileAlbumsTabProps) => {
   const [albums,         setAlbums]         = useState<(Album & { isSystem?: boolean })[]>([]);
@@ -84,7 +68,6 @@ export const ProfileAlbumsTab = ({ userId, profileImageHistory, bannerImageHisto
     finally { setLoading(false); }
   }, [userId]);
 
-<<<<<<< Updated upstream
   // Get user-created albums (from mockAlbums) with posts assigned to them.
   // Apply owner overrides (rename/delete) so changes reflect in the UI.
   const userAlbums = useMemo(() => {
@@ -136,9 +119,6 @@ export const ProfileAlbumsTab = ({ userId, profileImageHistory, bannerImageHisto
     setAlbumDialogOpen(true);
   };
 
-=======
-  useEffect(() => { fetchAlbums(); }, [fetchAlbums]);
->>>>>>> Stashed changes
 
   // System albums (always shown if they have items)
   const systemAlbums: (Album & { isSystem: boolean })[] = [];
@@ -197,7 +177,6 @@ export const ProfileAlbumsTab = ({ userId, profileImageHistory, bannerImageHisto
                     const shouldShowAd = (index + 1) % 4 === 0 && index < allAlbums.length - 1;
                     return (
                       <React.Fragment key={album.id}>
-<<<<<<< Updated upstream
                         <AlbumCard
                           album={album}
                           onClick={() => handleAlbumClick(album)}
@@ -208,9 +187,6 @@ export const ProfileAlbumsTab = ({ userId, profileImageHistory, bannerImageHisto
                           onChangeCover={() => handleAlbumChangeCover(album)}
                         />
                         
-=======
-                        <AlbumCard album={album} onClick={() => { setSelectedAlbum(album); setAlbumDialogOpen(true); }} variant="carousel" />
->>>>>>> Stashed changes
                         {shouldShowAd && (
                           <div className="flex-shrink-0 w-[85vw] sm:w-[90vw] max-w-[400px]">
                             <PremiumAdRotation slotId={`albums-carousel-${Math.floor((index+1)/4)}`} ads={getRandomAdSlot(albumsCarouselAdSlots)} context="albums-carousel" />
@@ -228,7 +204,6 @@ export const ProfileAlbumsTab = ({ userId, profileImageHistory, bannerImageHisto
           {albumsView === "large" && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
-<<<<<<< Updated upstream
                 {displayedAlbums.map((album, index) => {
                   const adSlotNumber = Math.floor(index / 4);
                   const shouldShowAd = (index + 1) % 4 === 0 && index < displayedAlbums.length - 1;
@@ -257,18 +232,6 @@ export const ProfileAlbumsTab = ({ userId, profileImageHistory, bannerImageHisto
                     </React.Fragment>
                   );
                 })}
-=======
-                {displayed.map((album, index) => (
-                  <React.Fragment key={album.id}>
-                    <AlbumCard album={album} onClick={() => { setSelectedAlbum(album); setAlbumDialogOpen(true); }} variant="grid" />
-                    {(index + 1) % 4 === 0 && index < displayed.length - 1 && (
-                      <div className="col-span-2 my-2">
-                        <PremiumAdRotation slotId={`albums-grid-${Math.floor((index+1)/4)}`} ads={getRandomAdSlot(albumsCarouselAdSlots)} context="albums-carousel" />
-                      </div>
-                    )}
-                  </React.Fragment>
-                ))}
->>>>>>> Stashed changes
               </div>
               {allAlbums.length > visibleCount && (
                 <Button variant="outline" size="lg" onClick={() => setVisibleCount(v => v + 15)} className="w-full">...more</Button>
