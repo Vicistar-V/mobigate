@@ -41,32 +41,10 @@ export const ProfileAlbumsTab = ({
   const [albumOverrides, setAlbumOverrides] = useState<Record<string, { name?: string; deleted?: boolean }>>({});
   const [renameTarget, setRenameTarget] = useState<(Album & { isSystem?: boolean }) | null>(null);
 
-export const ProfileAlbumsTab = ({ userId, profileImageHistory, bannerImageHistory, userPosts }: ProfileAlbumsTabProps) => {
-  const [albums,         setAlbums]         = useState<(Album & { isSystem?: boolean })[]>([]);
-  const [loading,        setLoading]        = useState(true);
-  const [selectedAlbum,  setSelectedAlbum]  = useState<(Album & { isSystem?: boolean }) | null>(null);
-  const [albumDialogOpen,setAlbumDialogOpen]= useState(false);
-  const [albumsView,     setAlbumsView]     = useState<"normal"|"large">("normal");
-  const [visibleCount,   setVisibleCount]   = useState(15);
+  const [albums] = useState<(Album & { isSystem?: boolean })[]>([]);
+  const [loading] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(15);
 
-  const fetchAlbums = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_BASE}/profile/albums.php?user_id=${userId}`, { credentials: "include" });
-      if (!res.ok) throw new Error();
-      const data: ApiAlbum[] = await res.json();
-      setAlbums(data.map(a => ({
-        id:          a.id,
-        name:        a.name,
-        description: a.description || "",
-        coverImage:  a.coverImage  || "/placeholder.svg",
-        itemCount:   a.itemCount,
-        privacy:     a.privacy as "Public"|"Friends"|"Private",
-        createdAt:   a.createdAt,
-      })));
-    } catch { setAlbums([]); }
-    finally { setLoading(false); }
-  }, [userId]);
 
   // Get user-created albums (from mockAlbums) with posts assigned to them.
   // Apply owner overrides (rename/delete) so changes reflect in the UI.
