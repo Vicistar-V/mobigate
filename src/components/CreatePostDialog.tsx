@@ -351,7 +351,8 @@ export const CreatePostDialog = ({ open: controlledOpen, onOpenChange, hideTrigg
                 ? `Up to ${MAX_IMAGES_PER_POST} images per Photo post. 1st image M200, +M50 for each extra image (Max 20MB each).`
                 : "Attach multiple images or files to one post. Supported: Images, Videos, Audio, PDF (Max 20MB each)"}
             </p>
-          </div>
+
+
 
 
           <div className="space-y-2">
