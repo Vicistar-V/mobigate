@@ -7,7 +7,7 @@ import { AlbumCard } from "./AlbumCard";
 import { AlbumDetailDialog } from "./AlbumDetailDialog";
 import { AllPhotosGrid } from "./AllPhotosGrid";
 import { AllVideosGrid } from "./AllVideosGrid";
-import { Album, Post } from "@/data/posts";
+import { Album, Post, mockAlbums } from "@/data/posts";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { albumsCarouselAdSlots } from "@/data/profileAds";
 import { getRandomAdSlot } from "@/lib/adUtils";
