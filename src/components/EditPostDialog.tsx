@@ -161,11 +161,6 @@ export const EditPostDialog = ({ post, open, onOpenChange, onSave }: EditPostDia
             <p className="text-base text-muted-foreground">Supported formats: Images, Videos, Audio, PDF (Max 20MB)</p>
           </div>
 
-          <MediaMonetizationFields
-            value={monetization}
-            onChange={setMonetization}
-            hideAudio={type === "Video"}
-          />
         </div>
 
         <div className="flex justify-end gap-2">
