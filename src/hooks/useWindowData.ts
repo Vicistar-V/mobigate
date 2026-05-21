@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { UserProfile } from '@/types/window';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function useUserProfile(): UserProfile | null {
+  const { user } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(() => {
     if (typeof window !== 'undefined' && window.__USER_PROFILE__) {
       return window.__USER_PROFILE__;
@@ -15,7 +17,20 @@ export function useUserProfile(): UserProfile | null {
     }
   }, [profile]);
 
-  return profile;
+  // Fall back to AuthContext user (post-login) when no PHP-injected profile exists
+  return useMemo<UserProfile | null>(() => {
+    if (profile) return profile;
+    if (!user) return null;
+    return {
+      id: user.id,
+      username: user.username || user.fullName || 'user',
+      fullName: user.fullName || user.username || '',
+      avatar: user.profilePhoto || '',
+      greeting: '',
+      timestamp: new Date().toISOString(),
+      email: user.email,
+    };
+  }, [profile, user]);
 }
 
 export function useFriendsList() {
@@ -172,6 +187,7 @@ export function useUserPosts() {
 }
 
 export function useCurrentUserId(): string {
+  const { user } = useAuth();
   const [userId, setUserId] = useState<string>(() => {
     if (typeof window !== 'undefined' && window.__CURRENT_USER_ID__) {
       return window.__CURRENT_USER_ID__;
@@ -190,7 +206,7 @@ export function useCurrentUserId(): string {
     }
   }, [userId]);
 
-  return userId;
+  return userId || user?.id || '';
 }
 
 export interface WalletData {
