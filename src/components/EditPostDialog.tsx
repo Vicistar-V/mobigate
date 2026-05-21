@@ -18,12 +18,9 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Post } from "@/data/posts";
-import { Upload, X, Image as ImageIcon } from "lucide-react";
-import {
-  MediaMonetizationFields,
-  defaultMonetizationValue,
-  type MediaMonetizationValue,
-} from "@/components/media/MediaMonetizationFields";
+import { Upload, X } from "lucide-react";
+
+const API_BASE = (import.meta.env.VITE_API_URL as string) || "https://angola-press.com/en/api";
 
 interface EditPostDialogProps {
   post: Post;
@@ -40,9 +37,7 @@ export const EditPostDialog = ({ post, open, onOpenChange, onSave }: EditPostDia
   const [imageUrl,    setImageUrl]    = useState(post.imageUrl    || "");
   const [newMediaFile, setNewMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
-  const [monetization, setMonetization] = useState<MediaMonetizationValue>(
-    defaultMonetizationValue()
-  );
+  const [submitting,   setSubmitting]   = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
