@@ -224,8 +224,7 @@ export const GreetingSection = () => {
                 {profile.greeting?.trim() || (() => {
                   const h = now.getHours();
                   const part = h < 12 ? "morning" : h < 17 ? "afternoon" : h < 21 ? "evening" : "night";
-                  const first = (profile.fullName || profile.username || "").split(" ")[0];
-                  return `Good ${part}${first ? `, ${first}` : ""}!`;
+                  return `Good ${part}!`;
                 })()}
               </p>
             </div>
