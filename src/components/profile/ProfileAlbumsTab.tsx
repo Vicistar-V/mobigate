@@ -132,9 +132,8 @@ export const ProfileAlbumsTab = ({
     return userPosts.filter(p => p.albumId === album.id && p.imageUrl).map(p => ({ id: p.id, url: p.imageUrl!, title: p.title, author: p.author, type: p.type }));
   };
 
-  const displayed = albumsView === "large" ? allAlbums.slice(0, visibleCount) : allAlbums;
+  const displayedAlbums = albumsView === "large" ? allAlbums.slice(0, visibleCount) : allAlbums;
 
-  if (loading) return <div className="flex justify-center py-16"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
 
   return (
     <div className="space-y-8">
