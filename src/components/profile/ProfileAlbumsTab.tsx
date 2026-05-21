@@ -215,10 +215,10 @@ export const ProfileAlbumsTab = ({
                 })}
               </div>
               {allAlbums.length > visibleAlbumCount && (
-                <Button variant="outline" size="lg" onClick={() => setVisibleCount(v => v + 15)} className="w-full">...more</Button>
+                <Button variant="outline" size="lg" onClick={() => setVisibleAlbumCount(v => v + 15)} className="w-full">...more</Button>
               )}
               {visibleAlbumCount > 15 && (
-                <Button variant="outline" size="lg" onClick={() => setVisibleCount(15)} className="w-full">Less...</Button>
+                <Button variant="outline" size="lg" onClick={() => setVisibleAlbumCount(15)} className="w-full">Less...</Button>
               )}
             </div>
           )}
