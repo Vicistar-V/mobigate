@@ -1,29 +1,42 @@
-## Goal
-Fix the Vite/SWC syntax error in `src/components/profile/ProfileAlbumsTab.tsx` caused by leftover code from the earlier merge-conflict cleanup, without changing any behavior or UI.
 
-## Changes (single file: `src/components/profile/ProfileAlbumsTab.tsx`)
 
-1. **Delete the stray duplicate block (lines 44–69).**
-   This removes the second `export const ProfileAlbumsTab = (...)`, the duplicate `useState` declarations, and the `fetchAlbums` function that references undefined `API_BASE` / `ApiAlbum`. The component already has all the state it needs from lines 37–42.
+## Plan: Add "Complaints" Tab to Manage Merchants Admin Page
 
-2. **Add `useMemo` to the React import** (line 1):
-   `import React, { useState, useEffect, useMemo, useCallback } from "react";`
-   (Drop `useEffect`/`useCallback` if unused after cleanup.)
+### What We're Building
 
-3. **Import `mockAlbums`** so the `userAlbums` memo at line 73 still resolves:
-   `import { mockAlbums } from "@/data/posts";` (or the correct path used elsewhere — confirm during edit).
+A new **"Complaints"** tab on the `/mobigate-admin/merchants` page, positioned right after "Applications". This tab gives admins a full interface to view, filter, and manage all merchant report cases submitted by users.
 
-4. **Define the missing `handleAlbumClick` helper** (used at lines 182 and 215):
-   ```ts
-   const handleAlbumClick = (album: Album & { isSystem?: boolean }) => {
-     setSelectedAlbum(album);
-     setAlbumDialogOpen(true);
-   };
-   ```
+### Tab Layout
 
-5. **Rename `displayed` → `displayedAlbums`** (or vice-versa) so line 155's declaration matches its usages at lines 207 and 209.
+```text
+[ All Merchants ] [ Applications (4) ] [ Complaints (3) ] [ Settings ]
+```
 
-6. **Remove now-unused state** (`visibleAlbumCount` at line 40) since the file uses `visibleCount` instead — keep only one.
+The Complaints tab will show:
+1. **Summary stats row** — Total, Pending, Investigating, Resolved, Dismissed counts with color-coded styling
+2. **Filter chips** — Filter by status (All / Pending / Investigating / Resolved / Dismissed) and by category (Scam/Fraud, Harassment, etc.)
+3. **Complaint cards list** — Each card shows:
+   - Category badge + status badge (color-coded)
+   - Merchant name the complaint is against
+   - Truncated description
+   - Reporter info (or "Anonymous")
+   - Submission date + reference number
+   - Action buttons: "Investigate", "Resolve", "Dismiss" depending on current status
+4. **Complaint detail drawer** — Tapping a card opens a 92vh drawer with full details, resolution history, and action buttons
 
-## Out of scope
-No UI/visual changes, no behavior changes, no backend work — purely a syntax/merge cleanup so the preview compiles again.
+### Files to Modify/Create
+
+| File | Action |
+|------|--------|
+| `src/components/admin/AdminComplaintsTab.tsx` | **Create** — Full complaints management UI component |
+| `src/pages/admin/ManageMerchantsPage.tsx` | **Modify** — Add "Complaints" tab with badge count, import and render the new component |
+
+### Technical Details
+
+- Reuses the `reportCategories`, status types, and mock data patterns from `MerchantReportDrawer.tsx` (but with expanded admin-specific mock data covering multiple merchants)
+- Mock complaints data will include merchant names, reporter info, dates, categories, statuses, and resolution notes
+- Status transitions: Pending → Investigating → Resolved/Dismissed (with required reason textarea for Resolve/Dismiss)
+- Admin actions use toast confirmations with beast-mode processing animation (2s delay + spinner)
+- Complaint detail drawer: 92vh, `overflow-y-auto touch-auto overscroll-contain`, with action buttons pinned to bottom
+- All touch targets h-11 minimum, no font size reductions, mobile-only focus
+
