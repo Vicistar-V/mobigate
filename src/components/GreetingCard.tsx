@@ -221,7 +221,12 @@ export const GreetingSection = () => {
                 {liveDate} · {liveTime}
               </p>
               <p className="text-[15px] font-bold text-destructive leading-tight whitespace-nowrap">
-                {profile.greeting}
+                {profile.greeting?.trim() || (() => {
+                  const h = now.getHours();
+                  const part = h < 12 ? "morning" : h < 17 ? "afternoon" : h < 21 ? "evening" : "night";
+                  const first = (profile.fullName || profile.username || "").split(" ")[0];
+                  return `Good ${part}${first ? `, ${first}` : ""}!`;
+                })()}
               </p>
             </div>
           </div>
