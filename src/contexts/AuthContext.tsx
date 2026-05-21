@@ -10,6 +10,7 @@ import {
 } from "react";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string) || "/api";
+const AUTH_CACHE_KEY = "mobigate.auth.user";
 
 export interface AuthUser {
   id:            string;
@@ -41,19 +42,37 @@ export const useAuth = () => useContext(AuthContext);
 
 // Map raw API data to AuthUser
 function mapUser(data: any): AuthUser {
+  const raw = data?.user || data?.profile || data || {};
   return {
-    id:            data.user_id       || data.id || "",
-    username:      data.username      || "",
-    fullName:      data.full_name     || "",
-    email:         data.email         || "",
-    profilePhoto:  data.profile_photo || null,
-    bannerImage:   data.banner_image  || null,
-    followerCount: data.follower_count || 0,
+    id:            raw.user_id || raw.id || "",
+    username:      raw.username || "",
+    fullName:      raw.full_name || raw.fullName || raw.name || "",
+    email:         raw.email || "",
+    profilePhoto:  raw.profile_photo || raw.profilePhoto || raw.avatar || null,
+    bannerImage:   raw.banner_image || raw.bannerImage || null,
+    followerCount: raw.follower_count || raw.followerCount || 0,
   };
 }
 
+function readCachedUser(): AuthUser | null {
+  if (typeof window === "undefined") return null;
+  if (window.__USER_PROFILE__) return mapUser(window.__USER_PROFILE__);
+  try {
+    const cached = localStorage.getItem(AUTH_CACHE_KEY);
+    return cached ? JSON.parse(cached) : null;
+  } catch {
+    return null;
+  }
+}
+
+function cacheUser(user: AuthUser | null) {
+  if (typeof window === "undefined") return;
+  if (user?.id) localStorage.setItem(AUTH_CACHE_KEY, JSON.stringify(user));
+  else localStorage.removeItem(AUTH_CACHE_KEY);
+}
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user,      setUser]    = useState<AuthUser | null>(null);
+  const [user,      setUser]    = useState<AuthUser | null>(() => readCachedUser());
   const [isLoading, setLoading] = useState(true);
   const done = useRef(false);
 
@@ -63,9 +82,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const res  = await fetch(`${API_BASE}/auth/session.php`, { credentials: "include" });
       const data = await res.json();
       if (data?.logged_in && data.user_id) {
-        setUser(mapUser(data));
+        const mapped = mapUser(data);
+        setUser(mapped);
+        cacheUser(mapped);
       } else {
         setUser(null);
+        cacheUser(null);
       }
     } catch {
       // keep existing state on network error
@@ -88,7 +110,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        setUser(mapUser(data)); // set user directly — no session roundtrip
+        const mapped = mapUser(data);
+        setUser(mapped); // set user directly — no session roundtrip
+        cacheUser(mapped);
         return { success: true };
       }
       return { success: false, error: data.error || "Invalid email or password" };
@@ -102,6 +126,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await fetch(`${API_BASE}/auth/logout.php`, { method: "POST", credentials: "include" });
     } catch {}
     setUser(null);
+    cacheUser(null);
   }, []);
 
   return (
