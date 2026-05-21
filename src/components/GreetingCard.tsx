@@ -13,7 +13,6 @@ import { Link } from "react-router-dom";
 import { CreatePostDialog } from "./CreatePostDialog";
 import { PeopleYouMayKnow } from "./PeopleYouMayKnow";
 import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
-<<<<<<< Updated upstream
 import { useState, useEffect, useRef } from "react";
 import { UserTagBadges } from "./UserTagBadges";
 import { useUserProfile, useCurrentUserId, useFeedPosts } from "@/hooks/useWindowData";
@@ -122,47 +121,6 @@ export const GreetingSection = () => {
         "[data-messages-trigger]"
       ) as HTMLElement;
       messagesButton?.click();
-=======
-import { useState, useMemo } from "react";
-import { UserTagBadges } from "./UserTagBadges";
-import { useAuth } from "@/contexts/AuthContext";
-
-// Greeting based on time of day
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good Morning";
-  if (hour < 17) return "Good Afternoon";
-  return "Good Evening";
-}
-
-// Format timestamp
-function getTimestamp(): string {
-  return new Date().toLocaleDateString("en-US", {
-    weekday: "long", year: "numeric", month: "long", day: "numeric",
-  });
-}
-
-export const GreetingSection = () => {
-  const { user } = useAuth();
-  const [friendsMenuView, setFriendsMenuView] = useState<"main" | "requests">("main");
-  const { showDialog, Dialog } = useServiceUnavailableDialog();
-
-  // Use real user data — own profile always uses /profile (no ID)
-  const currentUserId = user?.id || "";
-  const displayName   = user?.fullName || user?.username || "";
-  const avatar        = user?.profilePhoto || "";
-  const initials      = displayName.substring(0, 2).toUpperCase();
-  const greeting      = getGreeting();
-  const timestamp     = getTimestamp();
-
-  const restrictedServices = ["/mobi-shop", "/mobi-circle", "/biz-catalogue"];
-
-  const handleLinkClick = (e: React.MouseEvent, href: string, action?: string) => {
-    if (action === "openChat") {
-      e.preventDefault();
-      const btn = document.querySelector("[data-messages-trigger]") as HTMLElement;
-      btn?.click();
->>>>>>> Stashed changes
       return;
     }
     if (restrictedServices.includes(href)) {
@@ -170,7 +128,6 @@ export const GreetingSection = () => {
       showDialog();
     }
   };
-<<<<<<< Updated upstream
 
   const primaryLinks = [{ label: "About", href: `/profile/${currentUserId}#about` }];
   const moreLinks = [
@@ -362,73 +319,11 @@ export const GreetingSection = () => {
 
             {/* More */}
             <DropdownMenu>
-=======
-
-  // All profile links point to /profile (own profile, no ID)
-  const primaryLinks = [
-    { label: "About",    href: "/profile#about" },
-  ];
-
-  const moreLinks = [
-    { label: "Followers",       href: "/profile#followers" },
-    { label: "Following",       href: "/profile#following" },
-    { label: "Gifts",           href: "/profile#gifts" },
-    { label: "MobiChat",        href: "#", action: "openChat" },
-    { label: "Mobi Quiz Games", href: "/mobi-quiz-games" },
-    { label: "Mobi-Store",      href: "/mobi-shop" },
-    { label: "Mobi-Circle",     href: "/mobi-circle" },
-    { label: "Community",       href: "/community" },
-    { label: "Biz-Catalogue",   href: "/biz-catalogue" },
-    { label: "E-Library",       href: "/profile#contents" },
-    { label: "Adverts Log",     href: "/adverts-log" },
-  ];
-
-  return (
-    <div className="space-y-4">
-      {/* Greeting Card */}
-      <Card className="p-6 space-y-4 hover:shadow-md transition-shadow px-[10px]">
-        <div className="flex items-start gap-4">
-          <Avatar className="h-20 w-20 border-2 border-primary/20">
-            <AvatarImage src={avatar} alt={displayName} />
-            <AvatarFallback>{initials}</AvatarFallback>
-          </Avatar>
-          <div className="flex-1 space-y-2">
-            <p className="text-lg text-destructive font-semibold">{greeting}</p>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-3xl font-bold">{displayName}</h2>
-              {currentUserId && <UserTagBadges userId={currentUserId} />}
-            </div>
-            <p className="text-base text-muted-foreground">{timestamp}</p>
-          </div>
-        </div>
-
-        {/* Nav Links */}
-        <div className="flex flex-nowrap items-center pt-2 border-t overflow-x-auto scrollbar-hide">
-
-          {/* Primary links */}
-          {primaryLinks.map(link => (
-            <span key={link.label} className="flex items-center flex-shrink-0">
-              <Link
-                to={link.href}
-                className="text-base sm:text-xl font-medium text-primary hover:underline transition-all hover:text-primary/80 tracking-wide whitespace-nowrap"
-                onClick={e => handleLinkClick(e, link.href)}
-              >
-                {link.label}
-              </Link>
-              <span className="text-muted-foreground px-1.5">|</span>
-            </span>
-          ))}
-
-          {/* Friends dropdown */}
-          <span className="flex items-center flex-shrink-0">
-            <DropdownMenu onOpenChange={open => !open && setFriendsMenuView("main")}>
->>>>>>> Stashed changes
               <DropdownMenuTrigger asChild>
                 <button className="text-base font-semibold text-foreground hover:text-primary transition-colors inline-flex items-center gap-1 flex-shrink-0">
                   <MoreHorizontal className="h-5 w-5" />
                 </button>
               </DropdownMenuTrigger>
-<<<<<<< Updated upstream
               <DropdownMenuContent align="start" className="bg-card z-50 w-48">
                 {moreLinks.map((link) => (
                   <DropdownMenuItem
@@ -463,91 +358,6 @@ export const GreetingSection = () => {
               aria-label="Search"
             >
               <Search className="h-5 w-5" />
-=======
-              <DropdownMenuContent align="start" side="bottom" sideOffset={5} className="bg-card z-50 w-48">
-                {friendsMenuView === "main" ? (
-                  <>
-                    <DropdownMenuItem asChild className="text-base font-medium text-primary">
-                      <Link to="/profile#friends" className="cursor-pointer">Friends</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="text-base font-medium text-primary cursor-pointer flex justify-between items-center"
-                      onSelect={e => { e.preventDefault(); setFriendsMenuView("requests"); }}
-                    >
-                      Friend Requests <span className="ml-auto">&gt;</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="text-base font-medium text-primary">
-                      <Link to="/friends/find" className="cursor-pointer">Find Friends</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="text-base font-medium text-primary">
-                      <Link to="/friends/invite" className="cursor-pointer">Invite People</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="text-base font-medium text-primary">
-                      <Link to="/friends/referred" className="cursor-pointer">Referred Friends</Link>
-                    </DropdownMenuItem>
-                  </>
-                ) : (
-                  <>
-                    <DropdownMenuItem
-                      className="text-base font-medium text-primary cursor-pointer"
-                      onSelect={e => { e.preventDefault(); setFriendsMenuView("main"); }}
-                    >
-                      <ChevronLeft className="h-4 w-4 mr-2" />Back
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="text-base font-medium text-primary">
-                      <Link to="/friends/requests/received" className="cursor-pointer">Received Requests</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="text-base font-medium text-primary">
-                      <Link to="/friends/requests/sent" className="cursor-pointer">Sent Requests</Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <span className="text-muted-foreground px-1.5">|</span>
-          </span>
-
-          {/* Albums */}
-          <span className="flex items-center flex-shrink-0">
-            <Link
-              to="/profile#albums"
-              className="text-base sm:text-xl font-medium text-primary hover:underline transition-all hover:text-primary/80 tracking-wide whitespace-nowrap"
-            >
-              Albums
-            </Link>
-            <span className="text-muted-foreground px-1.5">|</span>
-          </span>
-
-          {/* More dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="text-base sm:text-xl font-medium text-primary hover:underline transition-all hover:text-primary/80 tracking-wide inline-flex items-center gap-1 flex-shrink-0 whitespace-nowrap">
-                <MoreHorizontal className="h-5 w-5" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="bg-card z-50 w-48">
-              {moreLinks.map(link => (
-                <DropdownMenuItem key={link.label} asChild className="text-base font-medium text-primary">
-                  <Link
-                    to={link.href}
-                    className="cursor-pointer"
-                    onClick={e => handleLinkClick(e, link.href, link.action)}
-                  >
-                    {link.label}
-                  </Link>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {/* Search */}
-        <div className="pt-4 border-t">
-          <div className="relative">
-            <Input placeholder="Search for anything on Mobigate..." className="pr-12" />
-            <Button size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
-              <Search className="h-4 w-4" />
->>>>>>> Stashed changes
             </Button>
           </div>
 
@@ -766,7 +576,6 @@ export const GreetingSection = () => {
       {/* People You May Know */}
       <PeopleYouMayKnow />
 
-<<<<<<< Updated upstream
       {/* Compose dialog */}
       <CreatePostDialog
         open={createPostOpen}
@@ -795,9 +604,3 @@ export const GreetingSection = () => {
     </div>
   );
 };
-=======
-      <Dialog />
-    </div>
-  );
-};
->>>>>>> Stashed changes
