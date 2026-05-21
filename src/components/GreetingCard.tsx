@@ -156,6 +156,25 @@ export const GreetingSection = () => {
     ctaUrl: "#",
   };
 
+  if (!profile) {
+    return (
+      <div className="space-y-3">
+        <Card className="overflow-hidden rounded-3xl">
+          <div className="h-[150px] sm:h-[180px] bg-muted animate-pulse" />
+          <div className="p-4 space-y-3">
+            <div className="flex items-end gap-3">
+              <div className="h-24 w-24 rounded-full bg-muted animate-pulse" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-1/2 bg-muted animate-pulse rounded" />
+                <div className="h-3 w-1/3 bg-muted animate-pulse rounded" />
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3">
       {/* ============ HERO BLOCK ============ */}
