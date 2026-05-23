@@ -1,111 +1,111 @@
-/**
- * NotificationsSheet.tsx — API-powered notifications
- * Fetches from: GET /api/notifications/list.php
- * Falls back to empty state if API is unavailable.
- */
-
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
+  Sheet, SheetContent, SheetDescription,
+  SheetHeader, SheetTitle, SheetTrigger,
 } from "@/components/ui/sheet";
-import { Bell, Loader2, RefreshCw } from "lucide-react";
+import { Bell, Check, UserPlus, Heart, MessageSquare, Gift, Eye, Users } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/useAuth";
 
-const API_BASE =
-  (import.meta.env.VITE_API_URL as string) ||
-  "https://angola-press.com/en/api";
+const API_BASE = (import.meta.env.VITE_API_URL as string) || "/api";
 
-interface ApiNotification {
-  id: string;
-  type: string;
-  title: string | null;
-  body: string;
-  entity_id: string | null;
+interface Notification {
+  id:          string;
+  type:        string;
+  title:       string;
+  body:        string;
+  entity_id:   string | null;
   entity_type: string | null;
-  is_read: boolean;
-  created_at: string;
-  actor_name: string | null;
+  is_read:     boolean;
+  actor_name:  string | null;
   actor_photo: string | null;
+  created_at:  string;
 }
 
-// Format relative time
-function relativeTime(dateStr: string): string {
+function timeAgo(dateStr: string): string {
   const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-  if (diff < 60)   return "Just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`;
-  return `${Math.floor(diff / 86400)} day${Math.floor(diff / 86400) > 1 ? "s" : ""} ago`;
+  if (diff < 60)     return "just now";
+  if (diff < 3600)   return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400)  return `${Math.floor(diff / 3600)}h ago`;
+  if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+  return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
+
+const typeIcon: Record<string, React.ReactNode> = {
+  friend_request: <UserPlus     className="h-3 w-3" />,
+  friend_accept:  <Users        className="h-3 w-3" />,
+  post_like:      <Heart        className="h-3 w-3" />,
+  profile_like:   <Heart        className="h-3 w-3" />,
+  comment:        <MessageSquare className="h-3 w-3" />,
+  gift:           <Gift         className="h-3 w-3" />,
+  follow:         <Eye          className="h-3 w-3" />,
+};
+
+const typeColor: Record<string, string> = {
+  friend_request: "bg-blue-100 text-blue-600",
+  friend_accept:  "bg-green-100 text-green-600",
+  post_like:      "bg-red-100 text-red-600",
+  profile_like:   "bg-pink-100 text-pink-600",
+  comment:        "bg-teal-100 text-teal-600",
+  gift:           "bg-amber-100 text-amber-600",
+  follow:         "bg-purple-100 text-purple-600",
+};
 
 export const NotificationsSheet = () => {
-  const { isAuthenticated } = useAuth();
-  const [isOpen, setIsOpen]             = useState(false);
-  const [notifications, setNotifications] = useState<ApiNotification[]>([]);
-  const [loading, setLoading]           = useState(false);
-  const [error, setError]               = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [open, setOpen] = useState(false);
 
   const fetchNotifications = useCallback(async () => {
-    if (!isAuthenticated) return;
-    setLoading(true);
-    setError(false);
     try {
-      const res = await fetch(`${API_BASE}/notifications/list.php`, {
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error();
-      const data: ApiNotification[] = await res.json();
-      setNotifications(data);
-    } catch {
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  }, [isAuthenticated]);
+      const res  = await fetch(`${API_BASE}/notifications/list.php?limit=30`, { credentials: "include" });
+      if (!res.ok) return;
+      const data = await res.json();
+      // Handle plain array (original format) or object with notifications key
+      const list = Array.isArray(data) ? data : (Array.isArray(data?.notifications) ? data.notifications : []);
+      setNotifications(list);
+    } catch {}
+  }, []);
 
-  // Fetch on open
+  // Fetch on mount and every 30s
   useEffect(() => {
-    if (isOpen) fetchNotifications();
-  }, [isOpen, fetchNotifications]);
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [fetchNotifications]);
 
-  // Mark a notification as read
+  // Fetch when sheet opens
+  useEffect(() => {
+    if (open) fetchNotifications();
+  }, [open, fetchNotifications]);
+
   const markRead = async (id: string) => {
-    setNotifications(prev =>
-      prev.map(n => n.id === id ? { ...n, is_read: true } : n)
-    );
     try {
-      await fetch(`${API_BASE}/notifications/mark_read.php`, {
-        method: "POST",
-        credentials: "include",
+      await fetch(`${API_BASE}/notifications/list.php`, {
+        method: "POST", credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ notification_id: id }),
+        body: JSON.stringify({ action: "mark_read", id }),
       });
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
     } catch {}
   };
 
-  // Mark all as read
   const markAllRead = async () => {
-    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
     try {
-      await fetch(`${API_BASE}/notifications/mark_all_read.php`, {
-        method: "POST",
-        credentials: "include",
+      await fetch(`${API_BASE}/notifications/list.php`, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "mark_read" }),
       });
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
     } catch {}
   };
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button variant="ghost" size="iconLg" className="relative hover:bg-primary/10">
           <Bell />
@@ -118,108 +118,91 @@ export const NotificationsSheet = () => {
       </SheetTrigger>
 
       <SheetContent className="w-full sm:w-[440px] p-0">
-        {/* Header */}
-        <div className="px-6 py-5 border-b flex items-start justify-between">
-          <div>
-            <SheetHeader className="p-0">
+        <div className="px-6 py-5 border-b">
+          <SheetHeader>
+            <div className="flex items-center justify-between">
               <SheetTitle>Notifications</SheetTitle>
-              <SheetDescription>
-                {loading
-                  ? "Loading…"
-                  : unreadCount > 0
-                  ? `${unreadCount} unread notification${unreadCount !== 1 ? "s" : ""}`
-                  : "All caught up!"}
-              </SheetDescription>
-            </SheetHeader>
-          </div>
-          <div className="flex items-center gap-2">
-            {unreadCount > 0 && (
-              <Button variant="ghost" size="sm" onClick={markAllRead} className="text-xs">
-                Mark all read
-              </Button>
-            )}
-            <Button variant="ghost" size="icon" onClick={fetchNotifications} disabled={loading}>
-              <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
-            </Button>
-          </div>
+              {unreadCount > 0 && (
+                <Button variant="ghost" size="sm" onClick={markAllRead}
+                  className="text-xs text-primary hover:text-primary gap-1">
+                  <Check className="h-3 w-3" />Mark all read
+                </Button>
+              )}
+            </div>
+            <SheetDescription>
+              {unreadCount > 0
+                ? `You have ${unreadCount} unread notification${unreadCount !== 1 ? "s" : ""}`
+                : "You're all caught up!"}
+            </SheetDescription>
+          </SheetHeader>
         </div>
 
-        {/* Body */}
-        <ScrollArea className="h-[calc(100vh-120px)]">
-          <div className="px-4 py-2 space-y-2">
+        <ScrollArea className="h-[calc(100vh-140px)]">
+          {notifications.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center px-6">
+              <Bell className="h-12 w-12 text-muted-foreground/30 mb-3" />
+              <p className="font-semibold text-muted-foreground">No notifications yet</p>
+              <p className="text-sm text-muted-foreground/60 mt-1">
+                We'll notify you when something happens
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y">
+              {notifications.map((n) => (
+                <div
+                  key={n.id}
+                  onClick={() => !n.is_read && markRead(n.id)}
+                  className={cn(
+                    "flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors",
+                    n.is_read
+                      ? "hover:bg-accent"
+                      : "bg-primary/5 hover:bg-primary/10 border-l-4 border-primary pl-3"
+                  )}
+                >
+                  {/* Avatar with type icon badge */}
+                  <div className="relative shrink-0">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={n.actor_photo || undefined} />
+                      <AvatarFallback>
+                        {(n.actor_name || "?").charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    {typeIcon[n.type] && (
+                      <div className={cn(
+                        "absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center border-2 border-background",
+                        typeColor[n.type] || "bg-gray-100 text-gray-600"
+                      )}>
+                        {typeIcon[n.type]}
+                      </div>
+                    )}
+                  </div>
 
-            {/* Loading state */}
-            {loading && notifications.length === 0 && (
-              <div className="flex flex-col items-center py-16 gap-3 text-muted-foreground">
-                <Loader2 className="h-8 w-8 animate-spin" />
-                <span className="text-sm">Loading notifications…</span>
-              </div>
-            )}
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm leading-snug">
+                      <span className={n.is_read ? "font-semibold" : "font-bold"}>
+                        {n.actor_name || "Someone"}
+                      </span>{" "}
+                      <span className="text-muted-foreground">{n.title}</span>
+                    </p>
+                    {n.body && (
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                        {n.body}
+                      </p>
+                    )}
+                    <p className="text-xs text-muted-foreground/60 mt-1">
+                      {timeAgo(n.created_at)}
+                    </p>
+                  </div>
 
-            {/* Error state */}
-            {error && !loading && (
-              <div className="flex flex-col items-center py-16 gap-3 text-muted-foreground">
-                <Bell className="h-10 w-10 opacity-30" />
-                <p className="text-sm font-medium">Could not load notifications</p>
-                <Button variant="outline" size="sm" onClick={fetchNotifications}>
-                  Try again
-                </Button>
-              </div>
-            )}
-
-            {/* Empty state */}
-            {!loading && !error && notifications.length === 0 && (
-              <div className="flex flex-col items-center py-16 gap-3 text-muted-foreground">
-                <Bell className="h-10 w-10 opacity-30" />
-                <p className="text-sm font-medium">No notifications yet</p>
-                <p className="text-xs text-center">
-                  When someone likes your post, follows you, or comments,<br />you'll see it here.
-                </p>
-              </div>
-            )}
-
-            {/* Notification list */}
-            {notifications.map(notification => (
-              <div
-                key={notification.id}
-                onClick={() => !notification.is_read && markRead(notification.id)}
-                className={cn(
-                  "flex items-start gap-3 rounded-lg transition-colors cursor-pointer",
-                  notification.is_read
-                    ? "p-3 hover:bg-accent"
-                    : "pl-2 pr-3 py-3 bg-primary/10 hover:bg-primary/15 border-l-4 border-primary"
-                )}
-              >
-                {/* Avatar */}
-                <div className="relative flex-shrink-0">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={notification.actor_photo || undefined} />
-                    <AvatarFallback>
-                      {(notification.actor_name || "?")[0].toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  {!notification.is_read && (
-                    <div className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 bg-primary border-2 border-background rounded-full" />
+                  {/* Unread dot */}
+                  {!n.is_read && (
+                    <div className="w-2 h-2 bg-primary rounded-full shrink-0 mt-1.5" />
                   )}
                 </div>
-
-                {/* Text */}
-                <div className="flex-1 min-w-0 space-y-1">
-                  <p className="text-sm leading-snug">
-                    {notification.actor_name && (
-                      <span className={notification.is_read ? "font-semibold" : "font-bold"}>
-                        {notification.actor_name}{" "}
-                      </span>
-                    )}
-                    {notification.body}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {relativeTime(notification.created_at)}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </ScrollArea>
       </SheetContent>
     </Sheet>

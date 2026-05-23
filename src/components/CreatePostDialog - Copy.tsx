@@ -28,12 +28,29 @@ const NEEDS_THUMBNAIL: PostType[] = ["Video", "Audio", "Article", "PDF", "URL"];
 // Suggested fee amounts
 const FEE_PRESETS = [5, 10, 20, 50, 100, 200, 500];
 
-export const CreatePostDialog = () => {
+interface CreatePostDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideTrigger?: boolean;
+  presetMediaUrl?: string;
+  presetTitle?: string;
+}
+
+export const CreatePostDialog = ({
+  open: openProp,
+  onOpenChange: onOpenChangeProp,
+  hideTrigger = false,
+  presetMediaUrl,
+  presetTitle,
+}: CreatePostDialogProps = {}) => {
   const { toast }   = useToast();
   const phpAlbums   = useUserAlbums();
   const albums      = phpAlbums || mockAlbums;
 
-  const [open,             setOpen]             = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = openProp !== undefined ? openProp : internalOpen;
+  const setOpen = (v: boolean) => { onOpenChangeProp ? onOpenChangeProp(v) : setInternalOpen(v); };
+
   const [title,            setTitle]            = useState("");
   const [subtitle,         setSubtitle]         = useState("");
   const [description,      setDescription]      = useState("");
@@ -48,17 +65,8 @@ export const CreatePostDialog = () => {
   const [progress,         setProgress]         = useState(0);
 
   // Monetization
-  const [isMonetized,  setIsMonetized]  = useState(false);
-  const [accessFee,    setAccessFee]    = useState("10");
-  const [creatorPct,   setCreatorPct]   = useState(60);
-
-  // Fetch creator earning % from admin settings
-  useEffect(() => {
-    fetch(`${API_BASE}/settings/creator_pct.php`, { credentials: "include" })
-      .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d?.pct) setCreatorPct(Number(d.pct)); })
-      .catch(() => {});
-  }, []);
+  const [isMonetized, setIsMonetized] = useState(false);
+  const [accessFee,   setAccessFee]   = useState("10");
 
   const mediaRef = useRef<HTMLInputElement>(null);
   const thumbRef = useRef<HTMLInputElement>(null);
@@ -89,6 +97,7 @@ export const CreatePostDialog = () => {
       setMediaPreview(null);
     }
   };
+
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -352,10 +361,10 @@ export const CreatePostDialog = () => {
                   <Info className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
                   <div className="text-xs text-amber-800 space-y-1">
                     <p className="font-semibold">How monetization works:</p>
-                    <p>• Viewers pay <strong>{feeValue > 0 ? feeValue : '?'} Mobi</strong> Access Fee from their Wallets to unlock this Post.</p>
+                    <p>• Viewers pay <strong>{feeValue > 0 ? feeValue : '?'} Mobi</strong> from their wallet to unlock this post.</p>
                     <p>• Users without sufficient balance will see a paywall and cannot access the content.</p>
                     <p>• Your post thumbnail, title and description are always visible as a preview.</p>
-                    <p>• Content Creator earns about <strong>{creatorPct}%</strong> of the Access Fee ({feeValue > 0 ? Math.round(feeValue * creatorPct / 100) : '?'} Mobi per unlock).</p>
+                    <p>• You keep <strong>100%</strong> of the Mobi earned.</p>
                   </div>
                 </div>
               </div>

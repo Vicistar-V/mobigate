@@ -1,0 +1,14 @@
+git config --global user.name "ebuskye"
+git config --global user.email "ebuskye@gmail.com"
+
+
+Tracking
+https://netsuslogistics.com/tracking.php
+CRG-11-1614BB
+
+Admin Login Details
+https://netsuslogistics.com/en/admin/login.php
+Email: admin@netsus.com
+Password: Admin020304
+
+https://codeplugg.com.ng/qfsfreshreturn/
