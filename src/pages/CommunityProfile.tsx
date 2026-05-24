@@ -121,6 +121,7 @@ const CommunityProfile = () => {
   const [showDonationDialog, setShowDonationDialog] = useState(false);
   const [showPostTypeSelector, setShowPostTypeSelector] = useState(false);
   const [showWallStatusDialog, setShowWallStatusDialog] = useState(false);
+  const [showLogoViewer, setShowLogoViewer] = useState(false);
   const [showGalleryUploadDialog, setShowGalleryUploadDialog] = useState(false);
   const [showContentDialog, setShowContentDialog] = useState(false);
   const [showArticleEditorDialog, setShowArticleEditorDialog] = useState(false);
