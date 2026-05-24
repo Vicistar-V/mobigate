@@ -28,6 +28,7 @@ interface MediaFile {
 export const CreateVibeForm = ({ onVibeCreated, canPost = true, className }: CreateVibeFormProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
   
   // Form state
   const [title, setTitle] = useState("");
