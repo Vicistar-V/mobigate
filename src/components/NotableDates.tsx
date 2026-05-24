@@ -270,7 +270,7 @@ export const NotableDates = () => {
         {filtered.length > 0 ? (
           <div className="flex gap-3 pb-1">
             {filtered.map(p => (
-              <PersonCard key={p.id} p={p} showViewDetails={tab === "events"} />
+              <PersonCard key={p.id} p={p} showViewDetails={tab === "events"} onMessage={handleMessage} onGift={handleGift} />
             ))}
           </div>
         ) : (
