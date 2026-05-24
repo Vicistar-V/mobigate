@@ -7,14 +7,15 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Button }   from "@/components/ui/button";
 import { Badge }    from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Gift, Wallet, Loader2, ChevronDown, ChevronUp, Send,
+  Plus, Ticket, CreditCard, Building2, ArrowRight,
 } from "lucide-react";
 import { useToast }  from "@/hooks/use-toast";
 import { cn }        from "@/lib/utils";
