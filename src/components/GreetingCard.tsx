@@ -498,33 +498,38 @@ export const GreetingSection = () => {
             )}
 
 
-            {/* Public/Connection post — driven by thumbnail selection below */}
+            {/* Public/Connection post — driven by thumbnail selection below.
+                Image Y + Storyline 2 form ONE read-only click area that opens the
+                bigger MediaGalleryViewer window. Not editable. */}
             {featuredPublicPost && (
-              <div className="mt-2 rounded-lg overflow-hidden bg-purple-200/60 p-1.5">
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => setViewerOpen(true)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setViewerOpen(true);
+                  }
+                }}
+                className="mt-2 rounded-lg overflow-hidden bg-purple-200/60 p-1.5 cursor-pointer active:opacity-95 active:scale-[0.997] transition-transform touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                aria-label="Open this public post in a bigger window"
+              >
                 <div className="grid grid-cols-[40%_1fr] gap-2 items-stretch">
-                  <button
-                    type="button"
-                    onClick={() => setViewerOpen(true)}
-                    className="relative bg-muted active:scale-[0.98] transition-transform touch-manipulation rounded-md overflow-hidden border-2 border-red-500"
-                    aria-label="Open this public post in a bigger window"
-                  >
+                  <div className="relative bg-muted rounded-md overflow-hidden border-2 border-red-500">
                     <img
                       key={featuredPublicPost.id || `pub-${safeFeaturedIdx}`}
                       src={featuredPublicPost.imageUrl}
                       alt={featuredPublicPost.title}
-                      className="w-full h-full object-cover aspect-[4/5] transition-opacity duration-300"
+                      className="w-full h-full object-cover aspect-[4/5] transition-opacity duration-300 pointer-events-none"
                       loading="lazy"
                     />
-                    <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded-md bg-black/55 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
+                    <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded-md bg-black/55 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm pointer-events-none">
                       <Maximize2 className="h-3 w-3" />
                       Tap to enlarge
                     </span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={openComposerBlank}
-                    className="text-foreground p-2.5 text-left active:opacity-90 touch-manipulation"
-                  >
+                  </div>
+                  <div className="text-foreground p-2.5 text-left select-none">
                     <p className="text-[15px] font-bold leading-snug">
                       {featuredPublicPost.title || "Public Post or Content Description or Storyline here."}
                     </p>
@@ -536,10 +541,11 @@ export const GreetingSection = () => {
                     <p className="text-[11px] text-muted-foreground mt-1 italic">
                       by {(featuredPublicPost as any).author || "Public User"} · {featuredPublicPost.userId === currentUserId ? "Your post" : "Public / Connection"}
                     </p>
-                  </button>
+                  </div>
                 </div>
               </div>
             )}
+
 
 
             {/* RTL auto-scrolling thumbnail strip — click to load into the big featured panel above */}
