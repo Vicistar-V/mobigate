@@ -5,7 +5,8 @@
 // menu (Create New / Edit / Delete / Pause).
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Plus, Pause, Play, Pencil, Trash2, FilePlus2, Settings2 } from "lucide-react";
+import { Plus, Pause, Play, Pencil, Trash2, FilePlus2, Settings2, Images } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 import { WallBannerSlide } from "@/types/wallBanner";
 import {
@@ -62,7 +63,9 @@ export function WallBannerSlideshow({
   const timerRef = useRef<number | null>(null);
   const { toast } = useToast();
   const [createOpen, setCreateOpen] = useState(false);
+  const [bulkOpen, setBulkOpen] = useState(false);
   const [editSlide, setEditSlide] = useState<WallBannerSlide | null>(null);
+
 
   // The owner "+" quick-menu trigger and content (reused for both states)
   const OwnerPlusMenu = ({ slide }: { slide?: WallBannerSlide | null }) => (
@@ -87,6 +90,11 @@ export function WallBannerSlideshow({
           <FilePlus2 className="h-4 w-4 mr-2" />
           Create New
         </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => setBulkOpen(true)}>
+          <Images className="h-4 w-4 mr-2" />
+          Bulk Upload…
+        </DropdownMenuItem>
+
         <DropdownMenuItem
           disabled={!slide}
           onSelect={() => slide && setEditSlide(slide)}
@@ -208,12 +216,21 @@ export function WallBannerSlideshow({
           </div>
         )}
         {isOwner && (
-          <WallBannerEditDialog
-            open={createOpen}
-            onOpenChange={setCreateOpen}
-            ownerId={ownerId}
-            scope={scope}
-          />
+          <>
+            <WallBannerEditDialog
+              open={createOpen}
+              onOpenChange={setCreateOpen}
+              ownerId={ownerId}
+              scope={scope}
+            />
+            <WallBannerEditDialog
+              open={bulkOpen}
+              onOpenChange={setBulkOpen}
+              ownerId={ownerId}
+              scope={scope}
+              bulkMode
+            />
+          </>
         )}
       </div>
     );
@@ -313,6 +330,13 @@ export function WallBannerSlideshow({
             onOpenChange={setCreateOpen}
             ownerId={ownerId}
             scope={scope}
+          />
+          <WallBannerEditDialog
+            open={bulkOpen}
+            onOpenChange={setBulkOpen}
+            ownerId={ownerId}
+            scope={scope}
+            bulkMode
           />
           <WallBannerEditDialog
             open={!!editSlide}

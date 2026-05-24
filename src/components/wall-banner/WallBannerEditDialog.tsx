@@ -1,9 +1,10 @@
-// WallBannerEditDialog — add/edit a single slide.
-// Owner specifies media (photo/video URL or upload), caption, click action
-// (URL/email/WhatsApp/viewer), display duration (seconds), schedule
-// (start/end dates), and optional Sponsored tag.
+// WallBannerEditDialog — add/edit slides.
+// • Edit mode: works on a single existing slide.
+// • Add mode: accepts ONE OR MANY files. When >1 file is chosen the dialog
+//   switches to "Bulk add" — shared settings (caption template, click action,
+//   duration, schedule, sponsored) are applied to all new slides at once.
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -24,13 +25,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { X, Images } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   WallBannerLinkAction,
   WallBannerMediaType,
   WallBannerSlide,
 } from "@/types/wallBanner";
-import { newSlideId, upsertSlide } from "@/lib/wallBannerStorage";
+import {
+  bulkInsertSlides,
+  newSlideId,
+  upsertSlide,
+} from "@/lib/wallBannerStorage";
 
 interface WallBannerEditDialogProps {
   open: boolean;
@@ -38,9 +44,18 @@ interface WallBannerEditDialogProps {
   ownerId: string;
   scope: "profile" | "home";
   initial?: WallBannerSlide | null;
+  /** When true, the file input opens in multi-select mode. */
+  bulkMode?: boolean;
 }
 
 const DEFAULT_DURATION = 6;
+const MAX_BYTES = 20 * 1024 * 1024;
+
+interface PendingItem {
+  url: string;
+  mediaType: WallBannerMediaType;
+  name: string;
+}
 
 export function WallBannerEditDialog({
   open,
@@ -48,8 +63,12 @@ export function WallBannerEditDialog({
   ownerId,
   scope,
   initial,
+  bulkMode = false,
 }: WallBannerEditDialogProps) {
   const { toast } = useToast();
+  const isEdit = !!initial;
+
+  // Single slide state (used for edit + single-file add)
   const [mediaType, setMediaType] = useState<WallBannerMediaType>("photo");
   const [mediaUrl, setMediaUrl] = useState("");
   const [posterUrl, setPosterUrl] = useState("");
@@ -61,6 +80,9 @@ export function WallBannerEditDialog({
   const [endDate, setEndDate] = useState("");
   const [sponsored, setSponsored] = useState(false);
   const [sponsorLabel, setSponsorLabel] = useState("");
+
+  // Bulk add state — list of pending uploads
+  const [pending, setPending] = useState<PendingItem[]>([]);
 
   useEffect(() => {
     if (!open) return;
@@ -76,6 +98,7 @@ export function WallBannerEditDialog({
       setEndDate(initial.endDate || "");
       setSponsored(!!initial.sponsored);
       setSponsorLabel(initial.sponsorLabel || "");
+      setPending([]);
     } else {
       setMediaType("photo");
       setMediaUrl("");
@@ -88,29 +111,165 @@ export function WallBannerEditDialog({
       setEndDate("");
       setSponsored(false);
       setSponsorLabel("");
+      setPending([]);
     }
   }, [open, initial]);
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 20 * 1024 * 1024) {
-      toast({
-        title: "File too large",
-        description: "Maximum size is 20MB.",
-        variant: "destructive",
-      });
+  // Toggle between single-file and bulk based on `pending` count when adding
+  const inBulk = !isEdit && pending.length > 1;
+
+  const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    // Edit mode → only first file replaces the current media
+    if (isEdit) {
+      const file = files[0];
+      if (file.size > MAX_BYTES) {
+        toast({
+          title: "File too large",
+          description: "Maximum size is 20MB.",
+          variant: "destructive",
+        });
+        e.target.value = "";
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setMediaUrl(reader.result as string);
+        setMediaType(file.type.startsWith("video/") ? "video" : "photo");
+      };
+      reader.readAsDataURL(file);
+      e.target.value = "";
       return;
     }
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setMediaUrl(reader.result as string);
-      setMediaType(file.type.startsWith("video/") ? "video" : "photo");
-    };
-    reader.readAsDataURL(file);
+
+    // Add mode → enqueue every accepted file
+    const accepted: File[] = [];
+    let skipped = 0;
+    for (const f of files) {
+      if (f.size > MAX_BYTES) {
+        skipped++;
+        continue;
+      }
+      accepted.push(f);
+    }
+    if (skipped) {
+      toast({
+        title: `${skipped} file${skipped === 1 ? "" : "s"} skipped`,
+        description: "Max size per file is 20MB.",
+        variant: "destructive",
+      });
+    }
+    if (!accepted.length) {
+      e.target.value = "";
+      return;
+    }
+
+    Promise.all(
+      accepted.map(
+        (file) =>
+          new Promise<PendingItem>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () =>
+              resolve({
+                url: reader.result as string,
+                mediaType: file.type.startsWith("video/") ? "video" : "photo",
+                name: file.name,
+              });
+            reader.readAsDataURL(file);
+          }),
+      ),
+    ).then((items) => {
+      setPending((prev) => [...prev, ...items]);
+      // If only ONE file total (and no URL typed), sync the single-slide preview
+      const combined = [...pending, ...items];
+      if (combined.length === 1) {
+        setMediaUrl(combined[0].url);
+        setMediaType(combined[0].mediaType);
+      } else {
+        // bulk path — clear single-slide preview
+        setMediaUrl("");
+      }
+    });
+    e.target.value = "";
+  };
+
+  const removePending = (i: number) => {
+    setPending((prev) => {
+      const next = prev.filter((_, idx) => idx !== i);
+      if (next.length === 1) {
+        setMediaUrl(next[0].url);
+        setMediaType(next[0].mediaType);
+      } else if (next.length === 0) {
+        setMediaUrl("");
+      }
+      return next;
+    });
+  };
+
+  const validateShared = (): string | null => {
+    if (
+      (linkAction === "url" ||
+        linkAction === "email" ||
+        linkAction === "whatsapp") &&
+      !linkValue.trim()
+    ) {
+      return "Provide a destination for the chosen click action.";
+    }
+    if (startDate && endDate && startDate > endDate) {
+      return "End date must be on or after start date.";
+    }
+    return null;
   };
 
   const handleSave = () => {
+    const shared = validateShared();
+    if (shared) {
+      toast({ title: "Check your inputs", description: shared, variant: "destructive" });
+      return;
+    }
+
+    const now = new Date().toISOString();
+    const clampedSeconds = Math.max(
+      2,
+      Math.min(600, Number(displaySeconds) || DEFAULT_DURATION),
+    );
+
+    // BULK ADD path
+    if (inBulk) {
+      const captionTpl = caption.trim();
+      const slides: WallBannerSlide[] = pending.map((p, i) => ({
+        id: newSlideId(),
+        ownerId,
+        scope,
+        mediaType: p.mediaType,
+        mediaUrl: p.url,
+        posterUrl: undefined,
+        caption: captionTpl
+          ? captionTpl.replace(/\{n\}/g, String(i + 1))
+          : undefined,
+        linkAction,
+        linkValue: linkValue.trim() || undefined,
+        displaySeconds: clampedSeconds,
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
+        sponsored,
+        sponsorLabel: sponsored ? sponsorLabel.trim() || undefined : undefined,
+        paused: false,
+        createdAt: now,
+        updatedAt: now,
+      }));
+      bulkInsertSlides(slides);
+      toast({
+        title: `${slides.length} slides added`,
+        description: "Your wall banner has been updated.",
+      });
+      onOpenChange(false);
+      return;
+    }
+
+    // SINGLE add or EDIT
     if (!mediaUrl.trim()) {
       toast({
         title: "Media required",
@@ -119,29 +278,6 @@ export function WallBannerEditDialog({
       });
       return;
     }
-    if (
-      (linkAction === "url" ||
-        linkAction === "email" ||
-        linkAction === "whatsapp") &&
-      !linkValue.trim()
-    ) {
-      toast({
-        title: "Link required",
-        description: "Provide a destination for the chosen click action.",
-        variant: "destructive",
-      });
-      return;
-    }
-    if (startDate && endDate && startDate > endDate) {
-      toast({
-        title: "Invalid schedule",
-        description: "End date must be on or after start date.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const now = new Date().toISOString();
     const slide: WallBannerSlide = {
       id: initial?.id || newSlideId(),
       ownerId,
@@ -152,7 +288,7 @@ export function WallBannerEditDialog({
       caption: caption.trim() || undefined,
       linkAction,
       linkValue: linkValue.trim() || undefined,
-      displaySeconds: Math.max(2, Math.min(600, Number(displaySeconds) || DEFAULT_DURATION)),
+      displaySeconds: clampedSeconds,
       startDate: startDate || undefined,
       endDate: endDate || undefined,
       sponsored,
@@ -169,53 +305,87 @@ export function WallBannerEditDialog({
     onOpenChange(false);
   };
 
+  const titleText = useMemo(() => {
+    if (isEdit) return "Edit banner slide";
+    if (inBulk) return `Bulk add — ${pending.length} slides`;
+    return "Add banner slide";
+  }, [isEdit, inBulk, pending.length]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[92dvh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
-            {initial ? "Edit banner slide" : "Add banner slide"}
+          <DialogTitle className="flex items-center gap-2">
+            {inBulk && <Images className="h-4 w-4 text-primary" />}
+            {titleText}
           </DialogTitle>
           <DialogDescription>
-            Configure how this image or video will display on your wall banner.
+            {inBulk
+              ? "Configure the shared settings — they apply to every uploaded item."
+              : "Configure how this image or video will display on your wall banner."}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 pt-2">
-          {/* Media */}
-          <div className="space-y-2">
-            <Label>Media type</Label>
-            <Select
-              value={mediaType}
-              onValueChange={(v) => setMediaType(v as WallBannerMediaType)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="photo">Photo</SelectItem>
-                <SelectItem value="video">Video</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Media type (single mode only) */}
+          {!inBulk && (
+            <div className="space-y-2">
+              <Label>Media type</Label>
+              <Select
+                value={mediaType}
+                onValueChange={(v) => setMediaType(v as WallBannerMediaType)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="photo">Photo</SelectItem>
+                  <SelectItem value="video">Video</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
+          {/* File picker */}
           <div className="space-y-2">
-            <Label>Upload file or paste URL</Label>
+            <Label>
+              {isEdit
+                ? "Replace media (file or paste URL)"
+                : "Upload one or many files"}
+            </Label>
             <Input
               type="file"
-              accept={mediaType === "video" ? "video/*" : "image/*"}
-              onChange={handleFile}
-            />
-            <Input
-              placeholder={
-                mediaType === "video"
-                  ? "https://… video URL"
-                  : "https://… image URL"
+              multiple={!isEdit}
+              accept={
+                isEdit && mediaType === "video"
+                  ? "video/*"
+                  : isEdit
+                    ? "image/*"
+                    : "image/*,video/*"
               }
-              value={mediaUrl.startsWith("data:") ? "" : mediaUrl}
-              onChange={(e) => setMediaUrl(e.target.value)}
+              onChange={handleFiles}
             />
-            {mediaUrl && (
+            {!isEdit && (
+              <p className="text-[11px] text-muted-foreground">
+                Pick multiple files to add them all at once (max 20MB each).
+              </p>
+            )}
+
+            {/* URL input — only in single mode */}
+            {!inBulk && (
+              <Input
+                placeholder={
+                  mediaType === "video"
+                    ? "https://… video URL"
+                    : "https://… image URL"
+                }
+                value={mediaUrl.startsWith("data:") ? "" : mediaUrl}
+                onChange={(e) => setMediaUrl(e.target.value)}
+              />
+            )}
+
+            {/* Single preview */}
+            {!inBulk && mediaUrl && (
               <div className="rounded-md overflow-hidden border bg-muted/40">
                 {mediaType === "video" ? (
                   <video
@@ -232,9 +402,38 @@ export function WallBannerEditDialog({
                 )}
               </div>
             )}
+
+            {/* Bulk preview grid */}
+            {inBulk && (
+              <div className="grid grid-cols-3 gap-2 max-h-56 overflow-y-auto p-1 border rounded-md bg-muted/30">
+                {pending.map((p, i) => (
+                  <div
+                    key={`${p.name}-${i}`}
+                    className="relative aspect-square rounded overflow-hidden bg-muted group"
+                  >
+                    {p.mediaType === "video" ? (
+                      <video src={p.url} className="w-full h-full object-cover" muted />
+                    ) : (
+                      <img src={p.url} alt={p.name} className="w-full h-full object-cover" />
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => removePending(i)}
+                      aria-label="Remove"
+                      className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/70 text-white flex items-center justify-center"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                    <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[9px] px-1 py-0.5 truncate">
+                      #{i + 1} · {p.mediaType}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {mediaType === "video" && (
+          {mediaType === "video" && !inBulk && (
             <div className="space-y-2">
               <Label>Video poster URL (optional)</Label>
               <Input
@@ -246,11 +445,17 @@ export function WallBannerEditDialog({
           )}
 
           <div className="space-y-2">
-            <Label>Caption (optional)</Label>
+            <Label>
+              Caption {inBulk && <span className="text-muted-foreground font-normal">(applied to all — use {"{n}"} for the index)</span>}
+            </Label>
             <Textarea
               rows={2}
               maxLength={140}
-              placeholder="Short headline shown on the slide"
+              placeholder={
+                inBulk
+                  ? 'e.g. "Promo slide {n}" — leave blank for no caption'
+                  : "Short headline shown on the slide"
+              }
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
             />
@@ -339,7 +544,9 @@ export function WallBannerEditDialog({
             <div>
               <Label className="font-semibold">Mark as Sponsored</Label>
               <p className="text-[11px] text-muted-foreground">
-                Tag this slide as a paid / third-party advert.
+                {inBulk
+                  ? "Tag every uploaded slide as a paid / third-party advert."
+                  : "Tag this slide as a paid / third-party advert."}
               </p>
             </div>
             <Switch checked={sponsored} onCheckedChange={setSponsored} />
@@ -358,7 +565,11 @@ export function WallBannerEditDialog({
             Cancel
           </Button>
           <Button onClick={handleSave}>
-            {initial ? "Save changes" : "Add slide"}
+            {isEdit
+              ? "Save changes"
+              : inBulk
+                ? `Add ${pending.length} slides`
+                : "Add slide"}
           </Button>
         </DialogFooter>
       </DialogContent>

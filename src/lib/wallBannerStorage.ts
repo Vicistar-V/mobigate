@@ -69,8 +69,23 @@ export function upsertSlide(slide: WallBannerSlide) {
   write(list);
 }
 
+/** Insert many slides at once (used for bulk upload). */
+export function bulkInsertSlides(slides: WallBannerSlide[]) {
+  if (!slides.length) return;
+  const now = new Date().toISOString();
+  const stamped = slides.map((s) => ({ ...s, updatedAt: now }));
+  write([...stamped, ...read()]);
+}
+
 export function deleteSlide(id: string) {
   write(read().filter((s) => s.id !== id));
+}
+
+/** Delete many slides at once. */
+export function bulkDeleteSlides(ids: string[]) {
+  if (!ids.length) return;
+  const set = new Set(ids);
+  write(read().filter((s) => !set.has(s.id)));
 }
 
 export function togglePauseSlide(id: string) {
@@ -78,6 +93,17 @@ export function togglePauseSlide(id: string) {
     s.id === id
       ? { ...s, paused: !s.paused, updatedAt: new Date().toISOString() }
       : s,
+  );
+  write(list);
+}
+
+/** Set paused=true/false on many slides at once. */
+export function bulkSetPaused(ids: string[], paused: boolean) {
+  if (!ids.length) return;
+  const set = new Set(ids);
+  const now = new Date().toISOString();
+  const list = read().map((s) =>
+    set.has(s.id) ? { ...s, paused, updatedAt: now } : s,
   );
   write(list);
 }
