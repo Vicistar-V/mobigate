@@ -296,10 +296,10 @@ export const CreatePostDialog = ({
         </DialogTrigger>
       )}
 
-      <DialogContent className="sm:max-w-[620px] max-h-[92dvh] overflow-y-auto overscroll-contain p-4 sm:p-6">
-        <DialogHeader>
-          <DialogTitle>Create a Post</DialogTitle>
-          <DialogDescription>Share your content with the community.</DialogDescription>
+      <DialogContent className="w-[calc(100vw-0.5rem)] sm:w-full sm:max-w-[620px] max-h-[92dvh] overflow-y-auto overscroll-contain px-3 py-4 sm:p-6 rounded-xl">
+        <DialogHeader className="text-left space-y-1 pr-6">
+          <DialogTitle className="text-base sm:text-lg leading-snug break-words">Create a Post</DialogTitle>
+          <DialogDescription className="text-sm leading-snug break-words">Share your content with the community.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
