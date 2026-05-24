@@ -18,6 +18,7 @@ import { AlbumSelector }     from "./AlbumSelector";
 import { CreateAlbumDialog } from "./CreateAlbumDialog";
 import { useUserAlbums }     from "@/hooks/useWindowData";
 import { mockAlbums }        from "@/data/posts";
+import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string) || "/api";
 
@@ -65,6 +66,8 @@ export const CreatePostDialog = ({
   const [showNewAlbum,     setShowNewAlbum]     = useState(false);
   const [submitting,       setSubmitting]       = useState(false);
   const [progress,         setProgress]         = useState(0);
+  const [legalAccepted,    setLegalAccepted]    = useState(false);
+
 
   // Monetization
   const [isMonetized,  setIsMonetized]  = useState(false);
@@ -130,6 +133,7 @@ export const CreatePostDialog = ({
     setThumbnailFile(null); setThumbnailPreview(null);
     setSelectedAlbum(null); setProgress(0);
     setIsMonetized(false); setAccessFee("10");
+    setLegalAccepted(false);
     if (mediaRef.current)  mediaRef.current.value  = "";
     if (thumbRef.current)  thumbRef.current.value  = "";
   };
@@ -408,13 +412,21 @@ export const CreatePostDialog = ({
           )}
         </div>
 
+        {/* Legal / Copyright acceptance — required before publishing */}
+        <div className="px-1 pt-1">
+          <LegalCopyrightAcceptance
+            accepted={legalAccepted}
+            onAcceptedChange={setLegalAccepted}
+          />
+        </div>
+
         <div className="flex justify-end gap-3 pt-2">
           <Button variant="outline" onClick={() => { resetForm(); setOpen(false); }} disabled={submitting}>
             Cancel
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={submitting || !isValidFee}
+            disabled={submitting || !isValidFee || !legalAccepted}
             className={isMonetized ? "bg-amber-500 hover:bg-amber-600 text-white" : ""}
           >
             {submitting
@@ -425,6 +437,7 @@ export const CreatePostDialog = ({
             }
           </Button>
         </div>
+
       </DialogContent>
 
       <CreateAlbumDialog open={showNewAlbum} onOpenChange={setShowNewAlbum} onAlbumCreated={(id, name) => {

@@ -19,6 +19,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Post } from "@/data/posts";
 import { Upload, X } from "lucide-react";
+import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string) || "https://angola-press.com/en/api";
 
@@ -38,6 +39,7 @@ export const EditPostDialog = ({ post, open, onOpenChange, onSave }: EditPostDia
   const [newMediaFile, setNewMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
   const [submitting,   setSubmitting]   = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -163,15 +165,22 @@ export const EditPostDialog = ({ post, open, onOpenChange, onSave }: EditPostDia
 
         </div>
 
-        <div className="flex justify-end gap-2">
+        <LegalCopyrightAcceptance
+          accepted={legalAccepted}
+          onAcceptedChange={setLegalAccepted}
+          className="mt-2"
+        />
+
+        <div className="flex justify-end gap-2 mt-3">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={submitting}>
+          <Button onClick={handleSave} disabled={submitting || !legalAccepted}>
             {submitting ? "Saving..." : "Save Changes"}
           </Button>
         </div>
       </DialogContent>
     </Dialog>
+
   );
 };

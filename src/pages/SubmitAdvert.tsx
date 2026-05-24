@@ -43,6 +43,7 @@ import { FilePreviewGrid } from "@/components/advert/FilePreviewGrid";
 import { AdvertPreviewDialog } from "@/components/advert/AdvertPreviewDialog";
 import { DisplayModeSelector } from "@/components/advert/DisplayModeSelector";
 import { MultipleCountCard } from "@/components/advert/MultipleCountCard";
+import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
 import { AccreditedAdvertiserBadge } from "@/components/advert/AccreditedAdvertiserBadge";
 import { getUserDiscountProfile } from "@/data/discountData";
 import { useCurrentUserId, useWalletBalance } from "@/hooks/useWindowData";
@@ -218,6 +219,7 @@ export default function SubmitAdvert() {
   const [launchDate, setLaunchDate] = useState<Date>();
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [agreed, setAgreed] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
   const [contactPhone, setContactPhone] = useState("");
   const [contactMethod, setContactMethod] = useState<"whatsapp" | "call">("whatsapp");
   const [contactEmail, setContactEmail] = useState("");
@@ -905,6 +907,7 @@ export default function SubmitAdvert() {
     setLaunchDate(undefined);
     setUploadedFiles([]);
     setAgreed(false);
+    setLegalAccepted(false);
     setEditingSlotId(null);
   };
 
@@ -2190,6 +2193,13 @@ export default function SubmitAdvert() {
                   </label>
                 </div>
 
+                {/* Legal / Copyright acceptance */}
+                <LegalCopyrightAcceptance
+                  accepted={legalAccepted}
+                  onAcceptedChange={setLegalAccepted}
+                />
+
+
                 {/* Validation Status Alert */}
                 {!validateSlotForm(false) && (
                   <Alert variant="destructive" className="animate-in fade-in">
@@ -2236,7 +2246,9 @@ export default function SubmitAdvert() {
                           uploadedFiles.length === 0 || 
                           catchmentTotal !== 100 ||
                           !agreed || 
+                          !legalAccepted ||
                           isSubmitting
+
                         }
                         className="flex-1 h-14 px-6 py-4"
                         size="lg"
@@ -2255,7 +2267,8 @@ export default function SubmitAdvert() {
                           !dpdPackage || 
                           uploadedFiles.length === 0 || 
                           catchmentTotal !== 100 ||
-                          !agreed
+                          !agreed ||
+                          !legalAccepted
                         }
                         className="flex-1 h-14 px-6 py-4"
                         size="lg"
