@@ -186,7 +186,9 @@ const VibesFlexingPage = () => {
       <CreatePostDialog
         open={composerOpen}
         onOpenChange={setComposerOpen}
+        hideTrigger
       />
+
     </div>
   );
 };
