@@ -1106,11 +1106,30 @@ const CommunityProfile = () => {
         onSelectType={handlePostTypeSelect}
       />
 
+      {/* Community Logo (Profile Picture) full-screen viewer */}
+      <MediaGalleryViewer
+        open={showLogoViewer}
+        onOpenChange={setShowLogoViewer}
+        items={[
+          {
+            id: `${community.id}-logo`,
+            url: community.logoImage || community.coverImage || "",
+            type: "photo",
+            title: `${community.name} — Profile Picture`,
+            author: community.name,
+            authorImage: community.logoImage,
+          } as MediaItem,
+        ]}
+        initialIndex={0}
+        galleryType="profile-picture"
+      />
+
       {/* Wall Status Dialog */}
       <CommunityPostDialog 
         open={showWallStatusDialog} 
         onOpenChange={setShowWallStatusDialog} 
       />
+
 
       {/* Gallery Upload Dialog */}
       <MediaUploadDialog
