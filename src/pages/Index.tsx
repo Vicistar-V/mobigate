@@ -385,9 +385,22 @@ const Index = () => {
     },
   ];
 
-  const filteredPosts = contentFilter === "all"
-    ? activeFeedPosts 
+  const typeFilteredPosts = contentFilter === "all"
+    ? activeFeedPosts
     : activeFeedPosts.filter(post => post.type.toLowerCase() === contentFilter);
+
+  // Label filter narrows to posts matching the clicked section label
+  // ("Vibes & Flexing" / "Breaking News"). We match against an optional
+  // `label`/`category` field first, then fall back to title/subtitle text.
+  const filteredPosts = !labelFilter
+    ? typeFilteredPosts
+    : typeFilteredPosts.filter((post) => {
+        const needle = labelFilter.toLowerCase();
+        const tagged = ((post as any).label || (post as any).category || "").toString().toLowerCase();
+        if (tagged && tagged === needle) return true;
+        const hay = `${post.title || ""} ${post.subtitle || ""} ${post.description || ""}`.toLowerCase();
+        return hay.includes(needle);
+      });
   
   const displayedPosts = filteredPosts.slice(0, visiblePostCount);
   const hasMorePosts = visiblePostCount < filteredPosts.length;
