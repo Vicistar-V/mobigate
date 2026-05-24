@@ -11,7 +11,8 @@ import {
   Wallet, ArrowUpRight, ArrowDownLeft, Plus, ChevronRight, ChevronLeft,
   Search, Filter, ArrowUpDown, Clock, CheckCircle2,
   XCircle, AlertCircle, Coins, Banknote, Loader2, Sparkles, ShieldCheck,
-  CreditCard, Building2, Ticket, MoreHorizontal, ArrowLeft, Copy, Eye, EyeOff, Hash
+  CreditCard, Building2, Ticket, MoreHorizontal, ArrowLeft, Copy, Eye, EyeOff, Hash,
+  ArrowRightLeft, ChevronDown, ChevronUp
 } from "lucide-react";
 import { formatNumberFull } from "@/lib/financialDisplay";
 import { cn } from "@/lib/utils";
