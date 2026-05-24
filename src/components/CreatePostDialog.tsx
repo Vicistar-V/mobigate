@@ -236,7 +236,14 @@ export const CreatePostDialog = ({
       form.append("is_monetized", isMonetized ? "1" : "0");
       form.append("access_fee",   isMonetized ? String(feeValue) : "0");
       if (selectedAlbum) form.append("album_id", selectedAlbum);
-      if (mediaFile)     form.append("media",    mediaFile);
+      if (type === "Photo" && photoFiles.length > 0) {
+        // First image is primary, remaining are extras (for backwards-compatible PHP endpoint)
+        form.append("media", photoFiles[0]);
+        photoFiles.forEach((f, idx) => form.append(`photos[${idx}]`, f));
+        form.append("image_count", String(photoFiles.length));
+      } else if (mediaFile) {
+        form.append("media", mediaFile);
+      }
       if (thumbnailFile) form.append("thumbnail", thumbnailFile);
 
       const result = await new Promise<{ success: boolean; error?: string }>((resolve, reject) => {
