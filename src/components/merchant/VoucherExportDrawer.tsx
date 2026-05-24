@@ -32,6 +32,11 @@ interface PaperSpec {
 
 const VOUCHER_W_IN = 2.25; // landscape — wider than tall
 const VOUCHER_H_IN = 1.25;
+// Cutting gutters — extra blank space between vouchers so guillotine/scissors
+// have room to cut without shaving content. Horizontal rows get more space
+// because most cutters slice along horizontal lines first.
+const GUTTER_X_IN = 0.08; // ~2mm between columns
+const GUTTER_Y_IN = 0.20; // ~5mm between rows (generous for horizontal cuts)
 
 const PAPER_SPECS: PaperSpec[] = [
   { key: "a4",     label: "A4 — 3 × 7 (21/page)",   format: "a4",     orientation: "portrait", cols: 3, rows: 7,  perPage: 21 },
