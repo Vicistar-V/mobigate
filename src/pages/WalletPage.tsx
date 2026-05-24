@@ -148,6 +148,46 @@ export default function WalletPage() {
   const [processingMsg, setProcessingMsg] = useState("");
   const [selectedGateway, setSelectedGateway] = useState<PaymentGateway | null>(null);
 
+  // Manage Local Wallet drawer + Withdraw Local Wallet flow
+  const [manageLocalOpen, setManageLocalOpen] = useState(false);
+  const [withdrawDrawerOpen, setWithdrawDrawerOpen] = useState(false);
+  type WithdrawStep = "input" | "processing" | "success";
+  const [withdrawStep, setWithdrawStep] = useState<WithdrawStep>("input");
+  const [withdrawAmount, setWithdrawAmount] = useState<string>("");
+  const [withdrawBank, setWithdrawBank] = useState<string>("");
+  const [withdrawAccount, setWithdrawAccount] = useState<string>("");
+  const [withdrawProcessingMsg, setWithdrawProcessingMsg] = useState("");
+  const withdrawAmountNum = parseFloat(withdrawAmount) || 0;
+  const WITHDRAW_FEE_RATE = 0.01; // 1% processing fee
+  const withdrawFee = withdrawAmountNum * WITHDRAW_FEE_RATE;
+  const withdrawNet = Math.max(0, withdrawAmountNum - withdrawFee);
+
+  const resetWithdrawDrawer = () => {
+    setWithdrawStep("input");
+    setWithdrawAmount("");
+    setWithdrawBank("");
+    setWithdrawAccount("");
+    setWithdrawProcessingMsg("");
+    setWithdrawDrawerOpen(false);
+  };
+
+  const handleProcessWithdraw = useCallback(() => {
+    setWithdrawStep("processing");
+    const msgs = [
+      "Verifying Local Wallet balance...",
+      "Validating bank account...",
+      "Initiating bank transfer...",
+      "Finalising payout...",
+    ];
+    setWithdrawProcessingMsg(msgs[0]);
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      if (i < msgs.length) setWithdrawProcessingMsg(msgs[i]);
+      else { clearInterval(interval); setWithdrawStep("success"); }
+    }, 650);
+  }, []);
+
   // Fund Mobi wallet drawer
   const [fundMobiDrawerOpen, setFundMobiDrawerOpen] = useState(false);
   type MobiFundStep = "options" | "voucher" | "processing" | "success";
