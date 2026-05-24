@@ -1618,6 +1618,73 @@ export default function WalletPage() {
         </DrawerContent>
       </Drawer>
       {/* Fund Wallet Selection Drawer */}
+      {/* ── Manage Sundry Wallet drawer ── */}
+      <Drawer open={manageSundryOpen} onOpenChange={setManageSundryOpen}>
+        <DrawerContent className="max-h-[70vh]">
+          <DrawerHeader>
+            <DrawerTitle className="text-center">Manage Sundry Wallet</DrawerTitle>
+            <p className="text-sm text-muted-foreground text-center">Choose an action for your Sundry Wallet</p>
+          </DrawerHeader>
+          <div className="px-4 pb-6 flex flex-col gap-3">
+            {/* Liquidate */}
+            <button
+              onClick={() => { setManageSundryOpen(false); setTimeout(() => setLiquidateDrawerOpen(true), 220); }}
+              className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-border/50 bg-card hover:border-fuchsia-500/40 transition-all touch-manipulation active:scale-[0.98]"
+            >
+              <div className="h-12 w-12 rounded-xl bg-fuchsia-500/10 flex items-center justify-center shrink-0">
+                <ArrowUpRight className="h-6 w-6 text-fuchsia-600" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-semibold text-foreground">Liquidate to Local Currency</p>
+                <p className="text-xs text-muted-foreground">Convert earned Mobi into your Local Wallet</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </button>
+
+            {/* View Exchange Rates */}
+            <button
+              onClick={() => {
+                setManageSundryOpen(false);
+                setConverterOpen(true);
+                setTimeout(() => {
+                  document.getElementById("exchange-rates-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }, 220);
+              }}
+              className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-border/50 bg-card hover:border-indigo-500/40 transition-all touch-manipulation active:scale-[0.98]"
+            >
+              <div className="h-12 w-12 rounded-xl bg-indigo-500/10 flex items-center justify-center shrink-0">
+                <ArrowRightLeft className="h-6 w-6 text-indigo-600" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-semibold text-foreground">View Mobi Exchange Rates</p>
+                <p className="text-xs text-muted-foreground">Selling & Buying rates (Mobi ↔ Local)</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </button>
+
+            {/* View Transactions */}
+            <button
+              onClick={() => {
+                setManageSundryOpen(false);
+                setTimeout(() => {
+                  document.getElementById("transactions-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }, 220);
+              }}
+              className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-border/50 bg-card hover:border-amber-500/40 transition-all touch-manipulation active:scale-[0.98]"
+            >
+              <div className="h-12 w-12 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                <Clock className="h-6 w-6 text-amber-600" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-semibold text-foreground">View Transaction History</p>
+                <p className="text-xs text-muted-foreground">All Sundry earnings & liquidations</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </button>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
       {/* ── Manage Local Wallet drawer ── */}
       <Drawer open={manageLocalOpen} onOpenChange={setManageLocalOpen}>
         <DrawerContent className="max-h-[70vh]">
