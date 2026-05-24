@@ -69,7 +69,8 @@ const MyProfile = () => {
   const API_BASE = (import.meta.env.VITE_API_URL as string) || "/api";
   
   // Always use the logged-in user's ID for own profile
-  const currentUserId = user?.id || useCurrentUserId() || "";
+  const fallbackUserId = useCurrentUserId();
+  const currentUserId = user?.id || fallbackUserId || "";
   
   // Ref for tabs section to enable auto-scroll
   const tabsSectionRef = useRef<HTMLDivElement>(null);
