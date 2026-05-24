@@ -399,7 +399,7 @@ export const CreatePostDialog = ({
                   </p>
                 )}
 
-                <p className="text-[11px] text-muted-foreground leading-snug">
+                <p className="text-[13px] text-muted-foreground leading-relaxed">
                   Attach up to {MAX_IMAGES_PER_POST} images to one post. First image is the cover.
                   Each extra image adds <span className="font-semibold text-foreground">M{EXTRA_IMAGE_FEE}</span> to the posting fee. (Max 20 MB each)
                 </p>
