@@ -150,7 +150,18 @@ const Index = () => {
   // Reset pagination when filter changes
   useEffect(() => {
     setVisiblePostCount(20);
-  }, [contentFilter]);
+  }, [contentFilter, labelFilter]);
+
+  // Listen for label-filter requests from the homepage section buttons
+  // ("Vibes & Flexing", "Breaking News") inside GreetingCard.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ label?: string }>).detail;
+      if (detail?.label) setLabelFilter(detail.label);
+    };
+    window.addEventListener("elibrary:applyLabel", handler as EventListener);
+    return () => window.removeEventListener("elibrary:applyLabel", handler as EventListener);
+  }, []);
 
   // Convert wall status posts to Post format for WallStatusCarousel
   const wallStatusPostsForCarousel = activeWallStatusPosts.map(post => ({
