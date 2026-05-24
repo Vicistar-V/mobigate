@@ -336,10 +336,10 @@ export function AdminExchangeRateTab() {
         <div className="rounded-xl border-2 border-fuchsia-500/30 bg-gradient-to-br from-fuchsia-500/10 to-purple-500/5 p-3.5 space-y-2.5">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
-              <TrendingDown className="h-4 w-4 text-fuchsia-600 shrink-0" />
+              <TrendingDown className="h-5 w-5 text-fuchsia-600 shrink-0" />
               <div className="min-w-0">
-                <p className="text-sm font-bold text-foreground">Selling Spread</p>
-                <p className="text-[10px] text-muted-foreground leading-tight">
+                <p className="text-base font-bold text-foreground">Selling Spread</p>
+                <p className="text-[13px] text-muted-foreground leading-snug">
                   % discount applied below Buying Rate when users Liquidate Mobi → Local
                 </p>
               </div>
@@ -347,7 +347,7 @@ export function AdminExchangeRateTab() {
             <Button
               size="icon"
               variant={spreadLocked ? "outline" : "default"}
-              className="h-9 w-9 shrink-0 touch-manipulation active:scale-95"
+              className="h-10 w-10 shrink-0 touch-manipulation active:scale-95"
               onClick={() => {
                 if (!spreadLocked) {
                   // Saving: apply draft
@@ -364,8 +364,8 @@ export function AdminExchangeRateTab() {
               aria-label={spreadLocked ? "Unlock spread" : "Save & lock spread"}
             >
               {spreadLocked
-                ? <span className="text-xs">🔒</span>
-                : <Check className="h-4 w-4" />}
+                ? <span className="text-sm">🔒</span>
+                : <Check className="h-5 w-5" />}
             </Button>
           </div>
           <div className="flex items-center gap-2">
@@ -377,21 +377,22 @@ export function AdminExchangeRateTab() {
               step="0.1"
               min="0"
               max="25"
-              className="h-10 text-base font-bold tabular-nums text-right"
+              className="h-11 text-lg font-bold tabular-nums text-right"
             />
-            <span className="text-sm font-semibold text-muted-foreground shrink-0">%</span>
+            <span className="text-base font-semibold text-muted-foreground shrink-0">%</span>
           </div>
-          <div className="flex items-center justify-between text-[11px] pt-1 border-t border-fuchsia-500/15">
+          <div className="flex items-center justify-between text-sm pt-1 border-t border-fuchsia-500/15">
             <span className="text-muted-foreground">Buy Rate (Recharge)</span>
             <span className="font-mono font-semibold text-emerald-700 dark:text-emerald-400">₦{formatRate(baseRate?.ratePerMobi || 1)} / Mobi</span>
           </div>
-          <div className="flex items-center justify-between text-[11px]">
+          <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Sell Rate (Liquidate)</span>
             <span className="font-mono font-semibold text-fuchsia-700 dark:text-fuchsia-400">
               ₦{formatRate((baseRate?.ratePerMobi || 1) * (1 - sellingSpreadPct / 100))} / Mobi
             </span>
           </div>
         </div>
+
 
         {/* Search */}
         <div className="relative">
