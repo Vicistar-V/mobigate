@@ -164,8 +164,12 @@ export default function WalletPage() {
   const [liquidateProcessingMsg, setLiquidateProcessingMsg] = useState("");
 
   const liquidateMobiNum = parseFloat(liquidateMobi) || 0;
-  const liquidatePayoutNGN = liquidateMobiNum * SELLING_RATE_NGN_PER_MOBI;
-  const liquidateSpread = liquidateMobiNum - liquidatePayoutNGN;
+  const liquidateGrossNGN = liquidateMobiNum * SELLING_RATE_NGN_PER_MOBI;
+  const liquidateSpread = liquidateMobiNum - liquidateGrossNGN;
+  const LIQUIDATION_SERVICE_CHARGE_RATE = 0.05;
+  const liquidateServiceCharge = liquidateGrossNGN * LIQUIDATION_SERVICE_CHARGE_RATE;
+  const liquidatePayoutNGN = liquidateGrossNGN - liquidateServiceCharge;
+  const liquidateMaxAmount = Math.floor(SUNDRY_WALLET.balance * 0.9);
 
   const handleProcessLiquidate = useCallback(() => {
     setLiquidateStep("processing");
@@ -1549,16 +1553,19 @@ export default function WalletPage() {
                       />
                     </div>
                     <div className="flex flex-wrap gap-1.5 mt-2.5">
-                      {[5000, 10000, 25000, 50000, SUNDRY_WALLET.balance].map((amt, idx) => (
+                      {[5000, 10000, 25000, 50000, liquidateMaxAmount].map((amt, idx) => (
                         <button
                           key={idx}
                           onClick={() => setLiquidateMobi(String(amt))}
                           className="px-3 py-1.5 rounded-lg bg-muted/50 text-xs font-semibold hover:bg-muted touch-manipulation active:scale-95 transition-all"
                         >
-                          {idx === 4 ? "Max" : `M${formatNumberFull(amt)}`}
+                          {idx === 4 ? "Max (90%)" : `M${formatNumberFull(amt)}`}
                         </button>
                       ))}
                     </div>
+                    <p className="text-[10px] text-muted-foreground mt-1.5 pl-1">
+                      Max. Liquidation: 90% of available Wallet Balance (M{formatNumberFull(liquidateMaxAmount)})
+                    </p>
                   </div>
 
                   {liquidateMobiNum > 0 && (
@@ -1573,9 +1580,13 @@ export default function WalletPage() {
                         <span className="text-xs text-muted-foreground">You Sell</span>
                         <span className="text-sm font-bold text-fuchsia-700 dark:text-fuchsia-400">−M{formatNumberFull(liquidateMobiNum)}</span>
                       </div>
-                      <div className="flex items-center justify-between">
+                       <div className="flex items-center justify-between">
                         <span className="text-xs text-muted-foreground">Platform Spread (4%)</span>
                         <span className="text-xs font-medium text-amber-600">₦{formatNumberFull(liquidateSpread)}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">Service Charge (5%)</span>
+                        <span className="text-xs font-medium text-rose-600">−₦{formatNumberFull(liquidateServiceCharge)}</span>
                       </div>
                       <div className="flex items-center justify-between pt-2 border-t border-border/40">
                         <span className="text-sm font-bold text-foreground">You Receive</span>
@@ -1588,11 +1599,11 @@ export default function WalletPage() {
 
                   <Button
                     className="w-full h-12 rounded-xl font-bold text-sm bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white touch-manipulation active:scale-[0.97] disabled:opacity-50"
-                    disabled={liquidateMobiNum <= 0 || liquidateMobiNum > SUNDRY_WALLET.balance}
+                    disabled={liquidateMobiNum <= 0 || liquidateMobiNum > liquidateMaxAmount}
                     onClick={() => setLiquidateStep("confirm")}
                   >
                     <ArrowUpRight className="h-4 w-4 mr-2" />
-                    {liquidateMobiNum > SUNDRY_WALLET.balance ? "Exceeds Balance" : "Continue"}
+                    {liquidateMobiNum > liquidateMaxAmount ? "Exceeds 90% Max" : "Continue"}
                   </Button>
                 </>
               )}
@@ -1608,6 +1619,8 @@ export default function WalletPage() {
                     <div className="flex justify-between"><span className="text-xs text-muted-foreground">To</span><span className="text-xs font-semibold text-foreground">Local Currency Wallet</span></div>
                     <div className="flex justify-between"><span className="text-xs text-muted-foreground">Mobi Sold</span><span className="text-sm font-bold text-fuchsia-700 dark:text-fuchsia-400">M{formatNumberFull(liquidateMobiNum)}</span></div>
                     <div className="flex justify-between"><span className="text-xs text-muted-foreground">Rate Applied</span><span className="text-xs font-mono text-foreground">₦{SELLING_RATE_NGN_PER_MOBI.toFixed(2)}/Mobi</span></div>
+                    <div className="flex justify-between"><span className="text-xs text-muted-foreground">Gross Payout</span><span className="text-xs font-semibold text-foreground">₦{formatNumberFull(liquidateGrossNGN)}</span></div>
+                    <div className="flex justify-between"><span className="text-xs text-muted-foreground">Service Charge (5%)</span><span className="text-xs font-semibold text-rose-600">−₦{formatNumberFull(liquidateServiceCharge)}</span></div>
                     <div className="flex justify-between pt-2 border-t border-border/40"><span className="text-sm font-bold text-foreground">Payout</span><span className="text-lg font-black text-emerald-700 dark:text-emerald-400">₦{formatNumberFull(liquidatePayoutNGN)}</span></div>
                   </div>
 
