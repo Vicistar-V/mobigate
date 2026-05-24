@@ -101,21 +101,89 @@ export const CreatePostDialog = ({
     URL:     "image/*",
   };
 
-  const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const readAsDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+
+  const handleMediaChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileList = e.target.files;
+    if (!fileList || fileList.length === 0) return;
+    const incoming = Array.from(fileList);
+
+    // Photo posts: support up to MAX_IMAGES_PER_POST images
+    if (type === "Photo") {
+      const room = MAX_IMAGES_PER_POST - photoFiles.length;
+      if (room <= 0) {
+        toast({
+          title: `Maximum ${MAX_IMAGES_PER_POST} images per post`,
+          description: "Remove an image to add a different one.",
+          variant: "destructive",
+        });
+        if (mediaRef.current) mediaRef.current.value = "";
+        return;
+      }
+      const accepted: File[] = [];
+      for (const file of incoming.slice(0, room)) {
+        if (!file.type.startsWith("image/")) {
+          toast({ title: "Images only for Photo posts", description: file.name, variant: "destructive" });
+          continue;
+        }
+        if (file.size > 20 * 1024 * 1024) {
+          toast({ title: "File too large", description: `${file.name} exceeds 20 MB`, variant: "destructive" });
+          continue;
+        }
+        accepted.push(file);
+      }
+      if (accepted.length === 0) {
+        if (mediaRef.current) mediaRef.current.value = "";
+        return;
+      }
+      const previews = await Promise.all(accepted.map(readAsDataUrl));
+      const nextFiles = [...photoFiles, ...accepted];
+      const nextPreviews = [...photoPreviews, ...previews];
+      setPhotoFiles(nextFiles);
+      setPhotoPreviews(nextPreviews);
+      // Mirror the first file into mediaFile/mediaPreview for backwards compatibility
+      setMediaFile(nextFiles[0] ?? null);
+      setMediaPreview(nextPreviews[0] ?? null);
+      if (incoming.length > room) {
+        toast({
+          title: `Only added ${room} image${room === 1 ? "" : "s"}`,
+          description: `Maximum ${MAX_IMAGES_PER_POST} images per post.`,
+        });
+      }
+      if (mediaRef.current) mediaRef.current.value = "";
+      return;
+    }
+
+    // Non-photo types: keep single-file behaviour
+    const file = incoming[0];
     if (file.size > 100 * 1024 * 1024) {
       toast({ title: "File too large", description: "Max 100 MB", variant: "destructive" }); return;
     }
     setMediaFile(file);
     if (file.type.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onloadend = () => setMediaPreview(reader.result as string);
-      reader.readAsDataURL(file);
+      const preview = await readAsDataUrl(file);
+      setMediaPreview(preview);
     } else {
       setMediaPreview(null);
     }
   };
+
+  const removePhotoAt = (idx: number) => {
+    const nextFiles = photoFiles.filter((_, i) => i !== idx);
+    const nextPreviews = photoPreviews.filter((_, i) => i !== idx);
+    setPhotoFiles(nextFiles);
+    setPhotoPreviews(nextPreviews);
+    setMediaFile(nextFiles[0] ?? null);
+    setMediaPreview(nextPreviews[0] ?? null);
+    if (mediaRef.current) mediaRef.current.value = "";
+  };
+
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
