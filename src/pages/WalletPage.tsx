@@ -672,7 +672,7 @@ export default function WalletPage() {
       </div>
 
       {/* ── Transaction Section ── */}
-      <div className="px-4 mt-6">
+      <div id="transactions-section" className="px-4 mt-6 scroll-mt-20">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-bold text-foreground">Transactions</h2>
           <Badge variant="secondary" className="text-xs font-medium">
