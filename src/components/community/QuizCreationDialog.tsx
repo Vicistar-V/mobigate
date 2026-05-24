@@ -546,12 +546,13 @@ export function QuizCreationDialog({ open, onOpenChange }: QuizCreationDialogPro
         </ScrollArea>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t bg-background sticky bottom-0">
+        <div className="p-4 border-t bg-background sticky bottom-0 space-y-3">
+          <LegalCopyrightAcceptance accepted={legalAccepted} onAcceptedChange={setLegalAccepted} />
           <div className="flex gap-2">
             <Button onClick={handleSaveDraft} variant="outline" className="flex-1">
               Save Draft
             </Button>
-            <Button onClick={handlePublish} className="flex-1">
+            <Button onClick={handlePublish} disabled={!legalAccepted} className="flex-1">
               <Award className="h-4 w-4 mr-2" />
               Publish Quiz
             </Button>
