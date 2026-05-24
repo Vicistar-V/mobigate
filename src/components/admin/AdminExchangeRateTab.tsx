@@ -317,19 +317,20 @@ export function AdminExchangeRateTab() {
         <div className="flex gap-2">
           <div className="flex-1 rounded-lg border border-border bg-card px-3 py-2.5">
             <div className="flex items-center gap-1.5">
-              <Globe className="h-3.5 w-3.5 text-primary" />
-              <span className="text-sm font-bold">{totalCurrencies}</span>
-              <span className="text-xs text-muted-foreground">pairs</span>
+              <Globe className="h-4 w-4 text-primary" />
+              <span className="text-base font-bold">{totalCurrencies}</span>
+              <span className="text-sm text-muted-foreground">pairs</span>
             </div>
           </div>
           <div className="flex-1 rounded-lg border border-border bg-card px-3 py-2.5">
             <div className="flex items-center gap-1.5">
-              <RotateCcw className="h-3.5 w-3.5 text-blue-500" />
-              <span className="text-sm font-bold">Today</span>
-              <span className="text-xs text-muted-foreground">synced</span>
+              <RotateCcw className="h-4 w-4 text-blue-500" />
+              <span className="text-base font-bold">Today</span>
+              <span className="text-sm text-muted-foreground">synced</span>
             </div>
           </div>
         </div>
+
 
         {/* Selling Spread (Buy/Sell margin) — global, lockable */}
         <div className="rounded-xl border-2 border-fuchsia-500/30 bg-gradient-to-br from-fuchsia-500/10 to-purple-500/5 p-3.5 space-y-2.5">
