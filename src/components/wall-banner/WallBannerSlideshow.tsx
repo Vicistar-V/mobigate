@@ -216,12 +216,21 @@ export function WallBannerSlideshow({
           </div>
         )}
         {isOwner && (
-          <WallBannerEditDialog
-            open={createOpen}
-            onOpenChange={setCreateOpen}
-            ownerId={ownerId}
-            scope={scope}
-          />
+          <>
+            <WallBannerEditDialog
+              open={createOpen}
+              onOpenChange={setCreateOpen}
+              ownerId={ownerId}
+              scope={scope}
+            />
+            <WallBannerEditDialog
+              open={bulkOpen}
+              onOpenChange={setBulkOpen}
+              ownerId={ownerId}
+              scope={scope}
+              bulkMode
+            />
+          </>
         )}
       </div>
     );
