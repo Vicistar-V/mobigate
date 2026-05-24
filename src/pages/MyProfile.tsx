@@ -1018,6 +1018,13 @@ const MyProfile = () => {
         recipientName={userProfile.name}
         onSendGift={handleSendGift}
       />
+
+      <WallBannerManagerDialog
+        open={wallBannerManagerOpen}
+        onOpenChange={setWallBannerManagerOpen}
+        ownerId={currentUserId}
+        scope="profile"
+      />
     </div>
   );
 };
