@@ -39,8 +39,11 @@ const App = () => {
                       <Route path="/"              element={<Index />} />
                       <Route path="/profile"       element={<MyProfile />} />
                       <Route path="/profile/:id"   element={<UserProfile />} />
+                      <Route path="/vibes"         element={<VibesFlexingPage />} />
+                      <Route path="/breaking-news" element={<BreakingNewsPage />} />
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<Navigate to="/" replace />} />
+
                     </Routes>
                   </div>
                 </div>
