@@ -219,8 +219,10 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
       const pageHmm = pdfMM.internal.pageSize.getHeight();
       const vW = VOUCHER_W_IN * IN_TO_MM;
       const vH = VOUCHER_H_IN * IN_TO_MM;
-      const gridWmm = spec.cols * vW;
-      const gridHmm = spec.rows * vH;
+      const gutterXmm = GUTTER_X_IN * IN_TO_MM;
+      const gutterYmm = GUTTER_Y_IN * IN_TO_MM;
+      const gridWmm = spec.cols * vW + (spec.cols - 1) * gutterXmm;
+      const gridHmm = spec.rows * vH + (spec.rows - 1) * gutterYmm;
       const marginXmm = Math.max(0, (pageWmm - gridWmm) / 2);
       const marginYmm = Math.max(0, (pageHmm - gridHmm) / 2);
 
@@ -233,8 +235,8 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
         }
         const row = Math.floor(slot / spec.cols);
         const col = slot % spec.cols;
-        const x = marginXmm + col * vW;
-        const y = marginYmm + row * vH;
+        const x = marginXmm + col * (vW + gutterXmm);
+        const y = marginYmm + row * (vH + gutterYmm);
         drawVoucher(pdfMM, selectedCards[i], x, y, vW, vH);
       }
 
