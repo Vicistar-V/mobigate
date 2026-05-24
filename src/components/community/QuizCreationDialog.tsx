@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { quizCategories, ANSWER_LABELS } from "@/data/quizGameData";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
 
 interface QuizCreationDialogProps {
   open: boolean;
