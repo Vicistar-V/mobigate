@@ -81,7 +81,7 @@ export const GreetingSection = () => {
 
 
 
-  const [friendsMenuView, setFriendsMenuView] = useState<"main" | "requests">("main");
+  const [friendsMenuView, setFriendsMenuView] = useState<"main" | "requests" | "birthdays">("main");
   const [createPostOpen, setCreatePostOpen] = useState(false);
   const [activeFeedTab, setActiveFeedTab] = useState<"Stories" | "Vibes & Flexing" | "Breaking News">("Stories");
   const [presetMediaUrl, setPresetMediaUrl] = useState<string | null>(null);
@@ -326,8 +326,18 @@ export const GreetingSection = () => {
                           Referred Friends
                         </Link>
                       </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-base font-medium text-primary cursor-pointer flex justify-between items-center"
+                        onSelect={(e) => {
+                          e.preventDefault();
+                          setFriendsMenuView("birthdays");
+                        }}
+                      >
+                        Friends' Birthdays
+                        <span className="ml-auto">&gt;</span>
+                      </DropdownMenuItem>
                     </>
-                  ) : (
+                  ) : friendsMenuView === "requests" ? (
                     <>
                       <DropdownMenuItem
                         className="text-base font-medium text-primary cursor-pointer"
@@ -347,6 +357,59 @@ export const GreetingSection = () => {
                       <DropdownMenuItem asChild className="text-base font-medium text-primary">
                         <Link to="/friends/requests/sent" className="cursor-pointer">
                           Sent Requests
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <>
+                      <DropdownMenuItem
+                        className="text-base font-medium text-primary cursor-pointer"
+                        onSelect={(e) => {
+                          e.preventDefault();
+                          setFriendsMenuView("main");
+                        }}
+                      >
+                        <ChevronLeft className="h-4 w-4 mr-2" />
+                        Back
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                        <Link to="/friends/birthdays?range=all" className="cursor-pointer">
+                          All Birthdays
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                        <Link to="/friends/birthdays?range=today" className="cursor-pointer">
+                          Today
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                        <Link to="/friends/birthdays?range=tomorrow" className="cursor-pointer">
+                          Tomorrow
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                        <Link to="/friends/birthdays?range=yesterday" className="cursor-pointer">
+                          Yesterday
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                        <Link to="/friends/birthdays?range=next-week" className="cursor-pointer">
+                          Next Week
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                        <Link to="/friends/birthdays?range=last-week" className="cursor-pointer">
+                          Last Week
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                        <Link to="/friends/birthdays?range=next-month" className="cursor-pointer">
+                          Next Month
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className="text-base font-medium text-primary">
+                        <Link to="/friends/birthdays?range=last-month" className="cursor-pointer">
+                          Last Month
                         </Link>
                       </DropdownMenuItem>
                     </>
