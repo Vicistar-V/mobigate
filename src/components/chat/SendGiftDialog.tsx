@@ -53,7 +53,9 @@ interface SendGiftDialogProps {
 export const SendGiftDialog = ({
   isOpen, onClose, recipientName, recipientId, onSendGift,
 }: SendGiftDialogProps) => {
-  const { toast } = useToast();
+  const { toast }  = useToast();
+  const navigate   = useNavigate();
+  const location   = useLocation();
 
   const [wallet,         setWallet]         = useState<{ mobi: number; credit: number } | null>(null);
   const [walletLoading,  setWalletLoading]  = useState(false);
@@ -62,6 +64,7 @@ export const SendGiftDialog = ({
   const [specialOpen,    setSpecialOpen]    = useState(false);
   const [classicOpen,    setClassicOpen]    = useState(false);
   const [sending,        setSending]        = useState(false);
+  const [fundPanelOpen,  setFundPanelOpen]  = useState(false);
 
   // ── Fetch wallet balance ───────────────────────────────────────────────────
   const fetchWallet = useCallback(async () => {
