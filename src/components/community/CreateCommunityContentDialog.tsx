@@ -37,6 +37,7 @@ export function CreateCommunityContentDialog({
   onOpenChange 
 }: CreateCommunityContentDialogProps) {
   const { toast } = useToast();
+  const [legalAccepted, setLegalAccepted] = useState(false);
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [description, setDescription] = useState("");
