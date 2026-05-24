@@ -473,7 +473,12 @@ const Index = () => {
             {/* Feed Posts with Filter */}
             <div className="space-y-0">
               <div id="recommended-elibrary" style={{ scrollMarginTop: 96 }}>
-                <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} />
+                <ELibrarySection
+                  activeFilter={contentFilter}
+                  onFilterChange={setContentFilter}
+                  labelFilter={labelFilter}
+                  onClearLabel={() => setLabelFilter(null)}
+                />
               </div>
               <div className="space-y-6 mt-6">
                 {displayedPosts.map((post, index) => {
