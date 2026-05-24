@@ -327,6 +327,7 @@ export const CreatePostDialog = ({
             <Label>Content Type</Label>
             <Select value={type} onValueChange={(v: any) => {
               setType(v); setMediaFile(null); setMediaPreview(null);
+              setPhotoFiles([]); setPhotoPreviews([]);
               if (mediaRef.current) mediaRef.current.value = "";
             }}>
               <SelectTrigger><SelectValue /></SelectTrigger>
