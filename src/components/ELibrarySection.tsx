@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -6,7 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Play, Image, FileText, Headphones, FileIcon, Link, MoreHorizontal, Settings } from "lucide-react";
+import { Play, Image, FileText, Headphones, FileIcon, Link, MoreHorizontal, Settings, X, Tag } from "lucide-react";
 import { FilterDialog } from "./FilterDialog";
 import { ManageELibraryDialog } from "./ManageELibraryDialog";
 import { useState } from "react";
@@ -15,6 +16,10 @@ interface ELibrarySectionProps {
   activeFilter: string;
   onFilterChange: (filter: string) => void;
   title?: string;
+  /** Optional label filter applied from the homepage section buttons. */
+  labelFilter?: string | null;
+  /** Called when the user clicks the X on the label filter chip. */
+  onClearLabel?: () => void;
 }
 
 const primaryFilters = [
