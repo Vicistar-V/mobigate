@@ -1,17 +1,29 @@
 // WallBannerSlideshow — public display surface
 // Rotates active slides at their configured display interval. Handles
 // click actions (url/email/whatsapp/viewer), shows optional "Sponsored"
-// chip, and exposes an optional owner overlay (Manage / pause indicator).
+// chip, and exposes an owner overlay: a "+" button that opens a quick
+// menu (Create New / Edit / Delete / Pause).
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Camera, Pause, Play, Settings2 } from "lucide-react";
+import { Plus, Pause, Play, Pencil, Trash2, FilePlus2, Settings2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WallBannerSlide } from "@/types/wallBanner";
 import {
   getActiveSlidesFor,
   onSlidesChanged,
   resolveClickHref,
+  togglePauseSlide,
+  deleteSlide,
 } from "@/lib/wallBannerStorage";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
+import { WallBannerEditDialog } from "./WallBannerEditDialog";
 
 interface WallBannerSlideshowProps {
   ownerId: string;
