@@ -317,28 +317,29 @@ export function AdminExchangeRateTab() {
         <div className="flex gap-2">
           <div className="flex-1 rounded-lg border border-border bg-card px-3 py-2.5">
             <div className="flex items-center gap-1.5">
-              <Globe className="h-3.5 w-3.5 text-primary" />
-              <span className="text-sm font-bold">{totalCurrencies}</span>
-              <span className="text-xs text-muted-foreground">pairs</span>
+              <Globe className="h-4 w-4 text-primary" />
+              <span className="text-base font-bold">{totalCurrencies}</span>
+              <span className="text-sm text-muted-foreground">pairs</span>
             </div>
           </div>
           <div className="flex-1 rounded-lg border border-border bg-card px-3 py-2.5">
             <div className="flex items-center gap-1.5">
-              <RotateCcw className="h-3.5 w-3.5 text-blue-500" />
-              <span className="text-sm font-bold">Today</span>
-              <span className="text-xs text-muted-foreground">synced</span>
+              <RotateCcw className="h-4 w-4 text-blue-500" />
+              <span className="text-base font-bold">Today</span>
+              <span className="text-sm text-muted-foreground">synced</span>
             </div>
           </div>
         </div>
+
 
         {/* Selling Spread (Buy/Sell margin) — global, lockable */}
         <div className="rounded-xl border-2 border-fuchsia-500/30 bg-gradient-to-br from-fuchsia-500/10 to-purple-500/5 p-3.5 space-y-2.5">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
-              <TrendingDown className="h-4 w-4 text-fuchsia-600 shrink-0" />
+              <TrendingDown className="h-5 w-5 text-fuchsia-600 shrink-0" />
               <div className="min-w-0">
-                <p className="text-sm font-bold text-foreground">Selling Spread</p>
-                <p className="text-[10px] text-muted-foreground leading-tight">
+                <p className="text-base font-bold text-foreground">Selling Spread</p>
+                <p className="text-[13px] text-muted-foreground leading-snug">
                   % discount applied below Buying Rate when users Liquidate Mobi → Local
                 </p>
               </div>
@@ -346,7 +347,7 @@ export function AdminExchangeRateTab() {
             <Button
               size="icon"
               variant={spreadLocked ? "outline" : "default"}
-              className="h-9 w-9 shrink-0 touch-manipulation active:scale-95"
+              className="h-10 w-10 shrink-0 touch-manipulation active:scale-95"
               onClick={() => {
                 if (!spreadLocked) {
                   // Saving: apply draft
@@ -363,8 +364,8 @@ export function AdminExchangeRateTab() {
               aria-label={spreadLocked ? "Unlock spread" : "Save & lock spread"}
             >
               {spreadLocked
-                ? <span className="text-xs">🔒</span>
-                : <Check className="h-4 w-4" />}
+                ? <span className="text-sm">🔒</span>
+                : <Check className="h-5 w-5" />}
             </Button>
           </div>
           <div className="flex items-center gap-2">
@@ -376,21 +377,22 @@ export function AdminExchangeRateTab() {
               step="0.1"
               min="0"
               max="25"
-              className="h-10 text-base font-bold tabular-nums text-right"
+              className="h-11 text-lg font-bold tabular-nums text-right"
             />
-            <span className="text-sm font-semibold text-muted-foreground shrink-0">%</span>
+            <span className="text-base font-semibold text-muted-foreground shrink-0">%</span>
           </div>
-          <div className="flex items-center justify-between text-[11px] pt-1 border-t border-fuchsia-500/15">
+          <div className="flex items-center justify-between text-sm pt-1 border-t border-fuchsia-500/15">
             <span className="text-muted-foreground">Buy Rate (Recharge)</span>
             <span className="font-mono font-semibold text-emerald-700 dark:text-emerald-400">₦{formatRate(baseRate?.ratePerMobi || 1)} / Mobi</span>
           </div>
-          <div className="flex items-center justify-between text-[11px]">
+          <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Sell Rate (Liquidate)</span>
             <span className="font-mono font-semibold text-fuchsia-700 dark:text-fuchsia-400">
               ₦{formatRate((baseRate?.ratePerMobi || 1) * (1 - sellingSpreadPct / 100))} / Mobi
             </span>
           </div>
         </div>
+
 
         {/* Search */}
         <div className="relative">
@@ -420,14 +422,14 @@ export function AdminExchangeRateTab() {
               >
                 {/* Row 1: Flag + Code + Name */}
                 <div className="flex items-center gap-2.5 mb-2">
-                  <span className="text-2xl leading-none">{rate.flag}</span>
+                  <span className="text-3xl leading-none">{rate.flag}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-bold text-sm">{rate.code}</span>
-                      <span className="text-xs text-muted-foreground">—</span>
-                      <span className="text-xs text-muted-foreground truncate">{rate.name}</span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="font-bold text-base">{rate.code}</span>
+                      <span className="text-sm text-muted-foreground">—</span>
+                      <span className="text-sm text-muted-foreground truncate">{rate.name}</span>
                     </div>
-                    <p className="text-xs text-muted-foreground/70">{rate.country}</p>
+                    <p className="text-sm text-muted-foreground/80">{rate.country}</p>
                   </div>
                 </div>
 
@@ -438,7 +440,7 @@ export function AdminExchangeRateTab() {
                       type="number"
                       value={editValue}
                       onChange={(e) => setEditValue(e.target.value)}
-                      className="flex-1 h-11 text-sm text-right touch-manipulation"
+                      className="flex-1 h-11 text-base text-right touch-manipulation"
                       step="any"
                       autoFocus
                     />
@@ -461,14 +463,14 @@ export function AdminExchangeRateTab() {
                 ) : (
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="text-lg font-bold tabular-nums">{formatRate(rate.ratePerMobi)}</span>
-                      <span className="text-xs text-muted-foreground">per Mobi</span>
+                      <span className="text-xl font-bold tabular-nums">{formatRate(rate.ratePerMobi)}</span>
+                      <span className="text-sm text-muted-foreground">per Mobi</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="flex items-center gap-1">
                         {getTrendIcon(rate.ratePerMobi, rate.previousRate)}
                         <span
-                          className={`text-xs font-medium ${
+                          className={`text-sm font-semibold ${
                             isPositive ? "text-emerald-500" : isNegative ? "text-red-500" : "text-muted-foreground"
                           }`}
                         >
@@ -489,24 +491,25 @@ export function AdminExchangeRateTab() {
 
                 {/* Row 3: Buy / Sell rate + conversion preview */}
                 {!isEditing && (
-                  <div className="mt-2 pt-2 border-t border-border/40 space-y-1">
+                  <div className="mt-2 pt-2 border-t border-border/40 space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] uppercase tracking-wider text-emerald-600 font-semibold">Buy</span>
-                      <span className="text-xs font-mono font-semibold text-foreground">
+                      <span className="text-xs uppercase tracking-wider text-emerald-600 font-semibold">Buy</span>
+                      <span className="text-sm font-mono font-semibold text-foreground">
                         {formatRate(rate.ratePerMobi)} {rate.code} / Mobi
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] uppercase tracking-wider text-fuchsia-600 font-semibold">Sell</span>
-                      <span className="text-xs font-mono font-semibold text-fuchsia-700 dark:text-fuchsia-400">
+                      <span className="text-xs uppercase tracking-wider text-fuchsia-600 font-semibold">Sell</span>
+                      <span className="text-sm font-mono font-semibold text-fuchsia-700 dark:text-fuchsia-400">
                         {formatRate(rate.sellingRatePerMobi)} {rate.code} / Mobi
                       </span>
                     </div>
-                    <p className="text-[10px] text-muted-foreground pt-1">
+                    <p className="text-xs text-muted-foreground pt-1 leading-relaxed">
                       M1,000 → buy {(rate.ratePerMobi * 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {rate.code} · sell {(rate.sellingRatePerMobi * 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {rate.code}
                     </p>
                   </div>
                 )}
+
               </div>
             );
           })}
