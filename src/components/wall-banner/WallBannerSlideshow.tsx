@@ -5,7 +5,8 @@
 // menu (Create New / Edit / Delete / Pause).
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Plus, Pause, Play, Pencil, Trash2, FilePlus2, Settings2 } from "lucide-react";
+import { Plus, Pause, Play, Pencil, Trash2, FilePlus2, Settings2, Images } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 import { WallBannerSlide } from "@/types/wallBanner";
 import {
