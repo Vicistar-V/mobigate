@@ -207,6 +207,14 @@ export function WallBannerSlideshow({
             <OwnerPlusMenu slide={null} />
           </div>
         )}
+        {isOwner && (
+          <WallBannerEditDialog
+            open={createOpen}
+            onOpenChange={setCreateOpen}
+            ownerId={ownerId}
+            scope={scope}
+          />
+        )}
       </div>
     );
   }
