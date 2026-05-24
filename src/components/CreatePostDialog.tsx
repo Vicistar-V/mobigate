@@ -133,6 +133,7 @@ export const CreatePostDialog = ({
     setThumbnailFile(null); setThumbnailPreview(null);
     setSelectedAlbum(null); setProgress(0);
     setIsMonetized(false); setAccessFee("10");
+    setLegalAccepted(false);
     if (mediaRef.current)  mediaRef.current.value  = "";
     if (thumbRef.current)  thumbRef.current.value  = "";
   };
