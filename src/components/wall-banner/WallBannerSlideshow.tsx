@@ -203,27 +203,8 @@ export function WallBannerSlideshow({
           />
         )}
         {isOwner && (
-          <div className="absolute bottom-3 right-3 flex gap-2 z-20">
-            {onChangeFallback && (
-              <button
-                type="button"
-                onClick={onChangeFallback}
-                className="bg-black/55 hover:bg-black/70 text-white backdrop-blur-sm text-[11px] px-2 py-1 rounded flex items-center gap-1"
-              >
-                <Camera className="h-3 w-3" />
-                Change
-              </button>
-            )}
-            {onManage && (
-              <button
-                type="button"
-                onClick={onManage}
-                className="bg-primary/90 hover:bg-primary text-primary-foreground text-[11px] px-2 py-1 rounded flex items-center gap-1"
-              >
-                <Settings2 className="h-3 w-3" />
-                Manage Banner
-              </button>
-            )}
+          <div className="absolute bottom-3 right-3 z-20">
+            <OwnerPlusMenu slide={null} />
           </div>
         )}
       </div>
