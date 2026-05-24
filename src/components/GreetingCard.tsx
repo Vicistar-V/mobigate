@@ -618,6 +618,14 @@ export const GreetingSection = () => {
           type: (p as any).type?.toLowerCase() === "video" ? "video" : (p as any).type?.toLowerCase() === "audio" ? "audio" : "photo",
           title: p.title,
           author: (p as any).author,
+          authorImage: (p as any).authorProfileImage,
+          authorUserId: (p as any).userId,
+          description: (p as any).description,
+          timestamp: (p as any).timestamp,
+          likes: Number((p as any).likes) || 0,
+          comments: Number((p as any).comments) || 0,
+          followers: (p as any).followers,
+          isOwner: (p as any).userId === currentUserId,
         }))}
         initialIndex={safeFeaturedIdx}
       />
