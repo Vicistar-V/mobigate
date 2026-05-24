@@ -62,6 +62,9 @@ export const CreatePostDialog = ({
   const [type,             setType]             = useState<PostType>("Photo");
   const [mediaFile,        setMediaFile]        = useState<File | null>(null);
   const [mediaPreview,     setMediaPreview]     = useState<string | null>(null);
+  // Photo posts support multiple images (up to MAX_IMAGES_PER_POST). First entry mirrors mediaFile.
+  const [photoFiles,       setPhotoFiles]       = useState<File[]>([]);
+  const [photoPreviews,    setPhotoPreviews]    = useState<string[]>([]);
   const [thumbnailFile,    setThumbnailFile]    = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [selectedAlbum,    setSelectedAlbum]    = useState<string | null>(null);
