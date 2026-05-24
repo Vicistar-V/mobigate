@@ -8,6 +8,8 @@ import { AppSidebar } from "@/components/AppSidebar";
 import Index from "./pages/Index";
 import MyProfile   from "./pages/MyProfile";
 import UserProfile from "./pages/UserProfile";
+import VibesFlexingPage from "./pages/VibesFlexingPage";
+import BreakingNewsPage from "./pages/BreakingNewsPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { BackToTopButton } from "./components/BackToTopButton";
