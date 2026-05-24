@@ -8,9 +8,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, MoreHorizontal, ChevronLeft, ImagePlus, BadgeCheck, Images, Plus, Maximize2 } from "lucide-react";
+import { Search, MoreHorizontal, ChevronLeft, ImagePlus, BadgeCheck, Images, Plus, Maximize2, PenSquare, FilePlus2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { CreatePostDialog } from "./CreatePostDialog";
+import { EditPostDialog } from "./EditPostDialog";
+import {
+  Dialog as ActionDialog,
+  DialogContent as ActionDialogContent,
+  DialogHeader as ActionDialogHeader,
+  DialogTitle as ActionDialogTitle,
+  DialogDescription as ActionDialogDescription,
+} from "@/components/ui/dialog";
 import { PeopleYouMayKnow } from "./PeopleYouMayKnow";
 import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
 import { useState, useEffect, useRef } from "react";
@@ -55,6 +63,9 @@ export const GreetingSection = () => {
   // The SECOND big space rotates based on which thumbnail was tapped (any thumb, own or public)
   const [featuredPublicIdx, setFeaturedPublicIdx] = useState(0);
   const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerStartIndex, setViewerStartIndex] = useState(0);
+  const [ownActionsOpen, setOwnActionsOpen] = useState(false);
+  const [editPostOpen, setEditPostOpen] = useState(false);
   const safeFeaturedIdx = Math.min(featuredPublicIdx, Math.max(0, thumbnailPosts.length - 1));
   const featuredPublicPost = thumbnailPosts[safeFeaturedIdx] || thumbnailPosts[0] || myLatestOwnPost;
   // Keep legacy names so the rest of the file keeps compiling unchanged
@@ -408,46 +419,49 @@ export const GreetingSection = () => {
             </div>
             <div className="h-px bg-green-500/40 mt-1 mb-3" />
 
-            {/* Featured post card — image left, [Post & Share button] + [storyline] stacked right */}
+            {/* Featured post card — image left, [Post & Share button] + [storyline] stacked right.
+                Image X + Storyline 1 are READ-ONLY; tapping either opens an action sheet
+                with Edit Post / Create New Post. */}
             {featuredPost && (
               <div className="rounded-lg overflow-hidden">
                 <div className="grid grid-cols-[40%_1fr] gap-2 items-stretch">
-                  {/* Left: featured big image — tap to open in bigger viewer; "+" opens composer */}
-                  <div className="relative bg-muted rounded-lg overflow-hidden border-[3px] border-green-500/80 shadow-sm">
-                    <button
-                      type="button"
-                      onClick={() => setViewerOpen(true)}
-                      className="block w-full h-full active:scale-[0.98] transition-transform touch-manipulation"
-                      aria-label="Open this media in a bigger window"
-                    >
-                      <img
-                        key={featuredPost.id || safeFeaturedIdx}
-                        src={featuredPost.imageUrl}
-                        alt={featuredPost.title}
-                        className="w-full h-full object-cover aspect-[4/5] transition-opacity duration-300"
-                        loading="lazy"
-                      />
-                      <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded-md bg-black/55 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
-                        <Maximize2 className="h-3 w-3" />
-                        Tap to enlarge
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openComposerWithImage(featuredPost.imageUrl, featuredPost.title);
-                      }}
-                      className="absolute bottom-1.5 right-1.5 h-7 w-7 rounded-full bg-foreground/80 text-background flex items-center justify-center shadow active:scale-95"
-                      aria-label="Use this image to create a new post"
+                  {/* Left: own image — opens Edit / Create New action sheet */}
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setOwnActionsOpen(true)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setOwnActionsOpen(true);
+                      }
+                    }}
+                    className="relative bg-muted rounded-lg overflow-hidden border-[3px] border-green-500/80 shadow-sm cursor-pointer active:scale-[0.98] transition-transform touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                    aria-label="Open post options: Edit Post or Create New Post"
+                  >
+                    <img
+                      key={featuredPost.id || safeFeaturedIdx}
+                      src={featuredPost.imageUrl}
+                      alt={featuredPost.title}
+                      className="w-full h-full object-cover aspect-[4/5] transition-opacity duration-300 pointer-events-none"
+                      loading="lazy"
+                    />
+                    <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded-md bg-black/55 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm pointer-events-none">
+                      <PenSquare className="h-3 w-3" />
+                      Tap to edit
+                    </span>
+                    {/* Persistent (+) badge as a visual affordance — non-interactive */}
+                    <span
+                      aria-hidden="true"
+                      className="absolute bottom-1.5 right-1.5 h-7 w-7 rounded-full bg-foreground/85 text-background flex items-center justify-center shadow ring-2 ring-card pointer-events-none"
                     >
                       <Plus className="h-4 w-4" />
-                    </button>
+                    </span>
                   </div>
 
-                  {/* Right column: stacked button + storyline */}
+                  {/* Right column: stacked button + storyline (storyline is read-only opener) */}
                   <div className="flex flex-col gap-2 min-w-0">
-                    {/* Post & Share button */}
+                    {/* Post & Share button — quick shortcut to blank composer */}
                     <button
                       type="button"
                       onClick={openComposerBlank}
@@ -455,54 +469,67 @@ export const GreetingSection = () => {
                     >
                       Post &amp; Share something now
                     </button>
-                    {/* Storyline card */}
-                    <button
-                      type="button"
-                      onClick={() =>
-                        openComposerWithImage(featuredPost.imageUrl, featuredPost.title)
-                      }
-                      className="flex-1 bg-lime-200/70 text-foreground p-2.5 text-left rounded-md active:opacity-90 touch-manipulation"
+                    {/* Storyline 1 — read-only div opener for Edit / Create New */}
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => setOwnActionsOpen(true)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setOwnActionsOpen(true);
+                        }
+                      }}
+                      className="flex-1 bg-lime-200/70 text-foreground p-2.5 text-left rounded-md active:opacity-90 touch-manipulation cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 select-none"
+                      aria-label="Open post options: Edit Post or Create New Post"
                     >
                       <p className="text-[15px] font-bold leading-snug">
-                        Your Post or Content Description or Storyline here.
+                        {featuredPost.title || "Your Post or Content Description or Storyline here."}
                       </p>
                       <p className="text-[14px] leading-snug mt-1">
-                        However, the storyline may not just exceed certain word-counts or be made to be unnecessary
+                        {(featuredPost as any).description ||
+                          "However, the storyline may not just exceed certain word-counts or be made to be unnecessary"}
                         <span className="font-extrabold italic">…More</span>
                       </p>
-                    </button>
+                    </div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Public/Connection post — driven by thumbnail selection below */}
+
+            {/* Public/Connection post — driven by thumbnail selection below.
+                Image Y + Storyline 2 form ONE read-only click area that opens the
+                bigger MediaGalleryViewer window. Not editable. */}
             {featuredPublicPost && (
-              <div className="mt-2 rounded-lg overflow-hidden bg-purple-200/60 p-1.5">
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => setViewerOpen(true)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setViewerOpen(true);
+                  }
+                }}
+                className="mt-2 rounded-lg overflow-hidden bg-purple-200/60 p-1.5 cursor-pointer active:opacity-95 active:scale-[0.997] transition-transform touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                aria-label="Open this public post in a bigger window"
+              >
                 <div className="grid grid-cols-[40%_1fr] gap-2 items-stretch">
-                  <button
-                    type="button"
-                    onClick={() => setViewerOpen(true)}
-                    className="relative bg-muted active:scale-[0.98] transition-transform touch-manipulation rounded-md overflow-hidden border-2 border-red-500"
-                    aria-label="Open this public post in a bigger window"
-                  >
+                  <div className="relative bg-muted rounded-md overflow-hidden border-2 border-red-500">
                     <img
                       key={featuredPublicPost.id || `pub-${safeFeaturedIdx}`}
                       src={featuredPublicPost.imageUrl}
                       alt={featuredPublicPost.title}
-                      className="w-full h-full object-cover aspect-[4/5] transition-opacity duration-300"
+                      className="w-full h-full object-cover aspect-[4/5] transition-opacity duration-300 pointer-events-none"
                       loading="lazy"
                     />
-                    <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded-md bg-black/55 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
+                    <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded-md bg-black/55 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm pointer-events-none">
                       <Maximize2 className="h-3 w-3" />
                       Tap to enlarge
                     </span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={openComposerBlank}
-                    className="text-foreground p-2.5 text-left active:opacity-90 touch-manipulation"
-                  >
+                  </div>
+                  <div className="text-foreground p-2.5 text-left select-none">
                     <p className="text-[15px] font-bold leading-snug">
                       {featuredPublicPost.title || "Public Post or Content Description or Storyline here."}
                     </p>
@@ -514,10 +541,11 @@ export const GreetingSection = () => {
                     <p className="text-[11px] text-muted-foreground mt-1 italic">
                       by {(featuredPublicPost as any).author || "Public User"} · {featuredPublicPost.userId === currentUserId ? "Your post" : "Public / Connection"}
                     </p>
-                  </button>
+                  </div>
                 </div>
               </div>
             )}
+
 
 
             {/* RTL auto-scrolling thumbnail strip — click to load into the big featured panel above */}
@@ -629,6 +657,73 @@ export const GreetingSection = () => {
         }))}
         initialIndex={safeFeaturedIdx}
       />
+
+      {/* ── Own Post action sheet (Edit / Create New) ── */}
+      <ActionDialog open={ownActionsOpen} onOpenChange={setOwnActionsOpen}>
+        <ActionDialogContent className="sm:max-w-sm rounded-2xl p-5">
+          <ActionDialogHeader>
+            <ActionDialogTitle className="text-lg">Post Options</ActionDialogTitle>
+            <ActionDialogDescription>
+              Choose what you want to do with your latest post.
+            </ActionDialogDescription>
+          </ActionDialogHeader>
+
+          <div className="mt-2 flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setOwnActionsOpen(false);
+                setEditPostOpen(true);
+              }}
+              disabled={!featuredPost}
+              className="w-full flex items-center gap-3 p-3 rounded-xl border-2 border-primary/30 bg-primary/5 hover:bg-primary/10 active:scale-[0.99] transition-all touch-manipulation text-left disabled:opacity-50"
+            >
+              <span className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0">
+                <PenSquare className="h-5 w-5" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[15px] font-bold text-foreground">Edit Post</span>
+                <span className="block text-[12px] text-muted-foreground leading-snug">
+                  Modify the images and/or text of this post.
+                </span>
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setOwnActionsOpen(false);
+                openComposerBlank();
+              }}
+              className="w-full flex items-center gap-3 p-3 rounded-xl border-2 border-green-500/30 bg-green-500/5 hover:bg-green-500/10 active:scale-[0.99] transition-all touch-manipulation text-left"
+            >
+              <span className="h-10 w-10 rounded-full bg-green-600 text-white flex items-center justify-center shrink-0">
+                <FilePlus2 className="h-5 w-5" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[15px] font-bold text-foreground">Create New Post</span>
+                <span className="block text-[12px] text-muted-foreground leading-snug">
+                  Start a fresh post — images, video, audio, article or PDF.
+                </span>
+              </span>
+            </button>
+          </div>
+        </ActionDialogContent>
+      </ActionDialog>
+
+      {/* ── Edit existing own post dialog ── */}
+      {featuredPost && (
+        <EditPostDialog
+          post={featuredPost as any}
+          open={editPostOpen}
+          onOpenChange={setEditPostOpen}
+          onSave={() => {
+            setEditPostOpen(false);
+            window.dispatchEvent(new CustomEvent("postUpdated"));
+          }}
+        />
+      )}
+
 
       {/* Service Unavailable Dialog */}
       <Dialog />
