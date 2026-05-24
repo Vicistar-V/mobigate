@@ -362,14 +362,12 @@ const UserProfile = () => {
               </div>
 
               {/* Birthday line — bold "Birthday" + light textured date */}
-              {(profile.birthday || "August 25") && (
-                <p className="text-base flex flex-wrap items-baseline gap-1.5 -mt-1">
-                  <span className="font-extrabold text-foreground">Birthday</span>
-                  <span className="font-light italic text-muted-foreground/80 tracking-wide">
-                    {profile.birthday || "August 25"}
-                  </span>
-                </p>
-              )}
+              <p className="text-base flex flex-wrap items-baseline gap-1.5 -mt-1">
+                <span className="font-extrabold text-foreground">Birthday</span>
+                <span className="font-light italic text-muted-foreground/80 tracking-wide">
+                  {(profile as { birthday?: string }).birthday || "August 25"}
+                </span>
+              </p>
 
               {/* Action buttons */}
               <div className="flex flex-wrap gap-2">
