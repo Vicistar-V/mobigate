@@ -471,9 +471,11 @@ export const CreateNewsForm = ({ onNewsCreated, canPost = true, className }: Cre
                       </Button>
                     </div>
                     
+                    <LegalCopyrightAcceptance accepted={legalAccepted} onAcceptedChange={setLegalAccepted} />
                     <Button
                       type="button"
                       onClick={handlePublish}
+                      disabled={!legalAccepted}
                       className="w-full gap-2"
                     >
                       <Send className="w-4 h-4" />
