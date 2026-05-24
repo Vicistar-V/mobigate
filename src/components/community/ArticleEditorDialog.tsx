@@ -72,6 +72,7 @@ export function ArticleEditorDialog({ open, onOpenChange }: ArticleEditorDialogP
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
   const [showMediaUpload, setShowMediaUpload] = useState(false);
   const [isDraggingCover, setIsDraggingCover] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
   
   const coverInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
