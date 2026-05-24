@@ -102,7 +102,9 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
       });
       return;
     }
-    setShowCampaignSettings(true);
+    // Close drawer first so the settings sheet isn't blocked by drawer overlay/focus trap
+    onOpenChange(false);
+    setTimeout(() => setShowCampaignSettings(true), 50);
   };
 
   const handleCampaignLaunched = (data: CampaignFormData) => {
