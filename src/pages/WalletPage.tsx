@@ -1599,11 +1599,11 @@ export default function WalletPage() {
 
                   <Button
                     className="w-full h-12 rounded-xl font-bold text-sm bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white touch-manipulation active:scale-[0.97] disabled:opacity-50"
-                    disabled={liquidateMobiNum <= 0 || liquidateMobiNum > SUNDRY_WALLET.balance}
+                    disabled={liquidateMobiNum <= 0 || liquidateMobiNum > liquidateMaxAmount}
                     onClick={() => setLiquidateStep("confirm")}
                   >
                     <ArrowUpRight className="h-4 w-4 mr-2" />
-                    {liquidateMobiNum > SUNDRY_WALLET.balance ? "Exceeds Balance" : "Continue"}
+                    {liquidateMobiNum > liquidateMaxAmount ? "Exceeds 90% Max" : "Continue"}
                   </Button>
                 </>
               )}
