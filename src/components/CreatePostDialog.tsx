@@ -12,13 +12,15 @@ import {
   Select, SelectContent, SelectItem,
   SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Plus, Upload, X, Image, Lock, DollarSign, Info } from "lucide-react";
+import { Plus, Upload, X, Image, Lock, DollarSign, Info, ImagePlus } from "lucide-react";
 import { useToast }          from "@/hooks/use-toast";
 import { AlbumSelector }     from "./AlbumSelector";
 import { CreateAlbumDialog } from "./CreateAlbumDialog";
 import { useUserAlbums }     from "@/hooks/useWindowData";
 import { mockAlbums }        from "@/data/posts";
 import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
+import { ContentFeeNotice } from "@/components/media/ContentFeeNotice";
+import { MAX_IMAGES_PER_POST, EXTRA_IMAGE_FEE } from "@/data/platformSettingsData";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string) || "/api";
 
@@ -60,6 +62,9 @@ export const CreatePostDialog = ({
   const [type,             setType]             = useState<PostType>("Photo");
   const [mediaFile,        setMediaFile]        = useState<File | null>(null);
   const [mediaPreview,     setMediaPreview]     = useState<string | null>(null);
+  // Photo posts support multiple images (up to MAX_IMAGES_PER_POST). First entry mirrors mediaFile.
+  const [photoFiles,       setPhotoFiles]       = useState<File[]>([]);
+  const [photoPreviews,    setPhotoPreviews]    = useState<string[]>([]);
   const [thumbnailFile,    setThumbnailFile]    = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [selectedAlbum,    setSelectedAlbum]    = useState<string | null>(null);
@@ -96,21 +101,89 @@ export const CreatePostDialog = ({
     URL:     "image/*",
   };
 
-  const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const readAsDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+
+  const handleMediaChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileList = e.target.files;
+    if (!fileList || fileList.length === 0) return;
+    const incoming = Array.from(fileList);
+
+    // Photo posts: support up to MAX_IMAGES_PER_POST images
+    if (type === "Photo") {
+      const room = MAX_IMAGES_PER_POST - photoFiles.length;
+      if (room <= 0) {
+        toast({
+          title: `Maximum ${MAX_IMAGES_PER_POST} images per post`,
+          description: "Remove an image to add a different one.",
+          variant: "destructive",
+        });
+        if (mediaRef.current) mediaRef.current.value = "";
+        return;
+      }
+      const accepted: File[] = [];
+      for (const file of incoming.slice(0, room)) {
+        if (!file.type.startsWith("image/")) {
+          toast({ title: "Images only for Photo posts", description: file.name, variant: "destructive" });
+          continue;
+        }
+        if (file.size > 20 * 1024 * 1024) {
+          toast({ title: "File too large", description: `${file.name} exceeds 20 MB`, variant: "destructive" });
+          continue;
+        }
+        accepted.push(file);
+      }
+      if (accepted.length === 0) {
+        if (mediaRef.current) mediaRef.current.value = "";
+        return;
+      }
+      const previews = await Promise.all(accepted.map(readAsDataUrl));
+      const nextFiles = [...photoFiles, ...accepted];
+      const nextPreviews = [...photoPreviews, ...previews];
+      setPhotoFiles(nextFiles);
+      setPhotoPreviews(nextPreviews);
+      // Mirror the first file into mediaFile/mediaPreview for backwards compatibility
+      setMediaFile(nextFiles[0] ?? null);
+      setMediaPreview(nextPreviews[0] ?? null);
+      if (incoming.length > room) {
+        toast({
+          title: `Only added ${room} image${room === 1 ? "" : "s"}`,
+          description: `Maximum ${MAX_IMAGES_PER_POST} images per post.`,
+        });
+      }
+      if (mediaRef.current) mediaRef.current.value = "";
+      return;
+    }
+
+    // Non-photo types: keep single-file behaviour
+    const file = incoming[0];
     if (file.size > 100 * 1024 * 1024) {
       toast({ title: "File too large", description: "Max 100 MB", variant: "destructive" }); return;
     }
     setMediaFile(file);
     if (file.type.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onloadend = () => setMediaPreview(reader.result as string);
-      reader.readAsDataURL(file);
+      const preview = await readAsDataUrl(file);
+      setMediaPreview(preview);
     } else {
       setMediaPreview(null);
     }
   };
+
+  const removePhotoAt = (idx: number) => {
+    const nextFiles = photoFiles.filter((_, i) => i !== idx);
+    const nextPreviews = photoPreviews.filter((_, i) => i !== idx);
+    setPhotoFiles(nextFiles);
+    setPhotoPreviews(nextPreviews);
+    setMediaFile(nextFiles[0] ?? null);
+    setMediaPreview(nextPreviews[0] ?? null);
+    if (mediaRef.current) mediaRef.current.value = "";
+  };
+
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -130,6 +203,7 @@ export const CreatePostDialog = ({
   const resetForm = () => {
     setTitle(""); setSubtitle(""); setDescription(""); setType("Photo");
     setMediaFile(null); setMediaPreview(null);
+    setPhotoFiles([]); setPhotoPreviews([]);
     setThumbnailFile(null); setThumbnailPreview(null);
     setSelectedAlbum(null); setProgress(0);
     setIsMonetized(false); setAccessFee("10");
@@ -137,6 +211,9 @@ export const CreatePostDialog = ({
     if (mediaRef.current)  mediaRef.current.value  = "";
     if (thumbRef.current)  thumbRef.current.value  = "";
   };
+
+  const imageCount = type === "Photo" ? Math.max(1, photoFiles.length || (mediaFile ? 1 : 1)) : 1;
+
 
   const feeValue = Math.max(0, parseFloat(accessFee) || 0);
   const isValidFee = !isMonetized || (feeValue > 0 && feeValue <= 10000);
@@ -159,7 +236,14 @@ export const CreatePostDialog = ({
       form.append("is_monetized", isMonetized ? "1" : "0");
       form.append("access_fee",   isMonetized ? String(feeValue) : "0");
       if (selectedAlbum) form.append("album_id", selectedAlbum);
-      if (mediaFile)     form.append("media",    mediaFile);
+      if (type === "Photo" && photoFiles.length > 0) {
+        // First image is primary, remaining are extras (for backwards-compatible PHP endpoint)
+        form.append("media", photoFiles[0]);
+        photoFiles.forEach((f, idx) => form.append(`photos[${idx}]`, f));
+        form.append("image_count", String(photoFiles.length));
+      } else if (mediaFile) {
+        form.append("media", mediaFile);
+      }
       if (thumbnailFile) form.append("thumbnail", thumbnailFile);
 
       const result = await new Promise<{ success: boolean; error?: string }>((resolve, reject) => {
@@ -243,6 +327,7 @@ export const CreatePostDialog = ({
             <Label>Content Type</Label>
             <Select value={type} onValueChange={(v: any) => {
               setType(v); setMediaFile(null); setMediaPreview(null);
+              setPhotoFiles([]); setPhotoPreviews([]);
               if (mediaRef.current) mediaRef.current.value = "";
             }}>
               <SelectTrigger><SelectValue /></SelectTrigger>
@@ -257,32 +342,105 @@ export const CreatePostDialog = ({
             </Select>
           </div>
 
-          {/* Main Media File */}
-          <div className="space-y-1.5">
-            <Label>{type === "Photo" ? "Photo *" : `${type} File`}</Label>
-            {mediaPreview && (
-              <div className="relative rounded-lg border overflow-hidden bg-muted">
-                <img src={mediaPreview} alt="Preview" className="w-full h-44 object-cover" />
-                <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2"
-                  onClick={() => { setMediaFile(null); setMediaPreview(null); if (mediaRef.current) mediaRef.current.value = ""; }}>
-                  <X className="h-4 w-4" />
+          {/* Content Posting Fee notice (scales with image count for Photo posts) */}
+          <ContentFeeNotice mediaType={type} imageCount={imageCount} compact />
+
+          {/* Main Media File(s) */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="mb-0">
+                {type === "Photo" ? "Media Files *" : `${type} File`}
+              </Label>
+              {type === "Photo" && (
+                <span className="text-xs text-muted-foreground">
+                  {photoFiles.length} of {MAX_IMAGES_PER_POST} attached
+                </span>
+              )}
+            </div>
+
+            {type === "Photo" ? (
+              <>
+                {photoPreviews.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2">
+                    {photoPreviews.map((src, idx) => (
+                      <div key={idx} className="relative rounded-lg border overflow-hidden bg-muted aspect-square">
+                        <img src={src} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover" />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-1 right-1 h-7 w-7 rounded-md shadow"
+                          onClick={() => removePhotoAt(idx)}
+                          aria-label={`Remove image ${idx + 1}`}
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </Button>
+                        <span className="absolute bottom-1 left-1 text-[10px] font-semibold bg-black/60 text-white px-1.5 py-0.5 rounded">
+                          {idx + 1}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {photoFiles.length < MAX_IMAGES_PER_POST ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => mediaRef.current?.click()}
+                  >
+                    <ImagePlus className="h-4 w-4 mr-2" />
+                    {photoFiles.length === 0 ? "Upload Photo" : "Add More Files"}
+                  </Button>
+                ) : (
+                  <p className="text-xs text-center text-muted-foreground bg-muted/60 rounded-md py-2">
+                    Maximum {MAX_IMAGES_PER_POST} images reached. Remove one to add a different image.
+                  </p>
+                )}
+
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  Attach up to {MAX_IMAGES_PER_POST} images to one post. First image is the cover.
+                  Each extra image adds <span className="font-semibold text-foreground">M{EXTRA_IMAGE_FEE}</span> to the posting fee. (Max 20 MB each)
+                </p>
+
+                <input
+                  ref={mediaRef}
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleMediaChange}
+                  className="hidden"
+                />
+              </>
+            ) : (
+              <>
+                {mediaPreview && (
+                  <div className="relative rounded-lg border overflow-hidden bg-muted">
+                    <img src={mediaPreview} alt="Preview" className="w-full h-44 object-cover" />
+                    <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2"
+                      onClick={() => { setMediaFile(null); setMediaPreview(null); if (mediaRef.current) mediaRef.current.value = ""; }}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+                {mediaFile && !mediaPreview && (
+                  <div className="flex items-center justify-between rounded-lg border bg-muted px-3 py-2">
+                    <span className="text-sm truncate">{mediaFile.name}</span>
+                    <Button type="button" variant="ghost" size="icon" className="h-6 w-6 shrink-0"
+                      onClick={() => { setMediaFile(null); if (mediaRef.current) mediaRef.current.value = ""; }}>
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
+                <Button type="button" variant="outline" className="w-full" onClick={() => mediaRef.current?.click()}>
+                  <Upload className="h-4 w-4 mr-2" />{mediaFile ? "Change File" : `Upload ${type} File`}
                 </Button>
-              </div>
+                <input ref={mediaRef} type="file" accept={mediaAccept[type]} onChange={handleMediaChange} className="hidden" />
+              </>
             )}
-            {mediaFile && !mediaPreview && (
-              <div className="flex items-center justify-between rounded-lg border bg-muted px-3 py-2">
-                <span className="text-sm truncate">{mediaFile.name}</span>
-                <Button type="button" variant="ghost" size="icon" className="h-6 w-6 shrink-0"
-                  onClick={() => { setMediaFile(null); if (mediaRef.current) mediaRef.current.value = ""; }}>
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
-            )}
-            <Button type="button" variant="outline" className="w-full" onClick={() => mediaRef.current?.click()}>
-              <Upload className="h-4 w-4 mr-2" />{mediaFile ? "Change File" : `Upload ${type} File`}
-            </Button>
-            <input ref={mediaRef} type="file" accept={mediaAccept[type]} onChange={handleMediaChange} className="hidden" />
           </div>
+
 
           {/* Thumbnail for non-photo types */}
           {needsThumbnail && (
