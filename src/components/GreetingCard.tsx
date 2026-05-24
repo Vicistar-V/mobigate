@@ -27,6 +27,8 @@ import { useUserProfile, useCurrentUserId, useFeedPosts } from "@/hooks/useWindo
 import { feedPosts as fallbackFeedPosts } from "@/data/posts";
 import heroAdBanner from "@/assets/hero-ad-banner.jpg";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
+import { WallBannerSlideshow } from "@/components/wall-banner/WallBannerSlideshow";
+import { WallBannerManagerDialog } from "@/components/wall-banner/WallBannerManagerDialog";
 
 export const GreetingSection = () => {
   const profile = useUserProfile();
@@ -66,6 +68,9 @@ export const GreetingSection = () => {
   const [viewerStartIndex, setViewerStartIndex] = useState(0);
   const [ownActionsOpen, setOwnActionsOpen] = useState(false);
   const [editPostOpen, setEditPostOpen] = useState(false);
+  const [wallBannerManagerOpen, setWallBannerManagerOpen] = useState(false);
+  const [bannerViewerOpen, setBannerViewerOpen] = useState(false);
+  const [viewerItems, setViewerItems] = useState<MediaItem[]>([]);
   const safeFeaturedIdx = Math.min(featuredPublicIdx, Math.max(0, thumbnailPosts.length - 1));
   const featuredPublicPost = thumbnailPosts[safeFeaturedIdx] || thumbnailPosts[0] || myLatestOwnPost;
   // Keep legacy names so the rest of the file keeps compiling unchanged
