@@ -47,6 +47,7 @@ const initialQuestions: QuizQuestion[] = Array.from({ length: 10 }, (_, i) => cr
 
 export function QuizCreationDialog({ open, onOpenChange }: QuizCreationDialogProps) {
   const { toast } = useToast();
+  const [legalAccepted, setLegalAccepted] = useState(false);
   const [quizTitle, setQuizTitle] = useState("");
   const [quizDescription, setQuizDescription] = useState("");
   const [category, setCategory] = useState("");
