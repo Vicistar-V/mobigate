@@ -150,6 +150,7 @@ export default function WalletPage() {
 
   // Manage Local Wallet drawer + Withdraw Local Wallet flow
   const [manageLocalOpen, setManageLocalOpen] = useState(false);
+  const [manageSundryOpen, setManageSundryOpen] = useState(false);
   const [withdrawDrawerOpen, setWithdrawDrawerOpen] = useState(false);
   type WithdrawStep = "input" | "processing" | "success";
   const [withdrawStep, setWithdrawStep] = useState<WithdrawStep>("input");
