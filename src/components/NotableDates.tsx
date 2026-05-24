@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type MainTab   = "birthdays" | "events";
-type TimeRange = "today" | "tomorrow" | "others";
+type TimeRange = "today" | "tomorrow" | "others" | "yesterday" | "next-week" | "last-week" | "next-month" | "last-month";
 type EventType = "wedding" | "burial" | "others";
 
 interface NotablePerson {
