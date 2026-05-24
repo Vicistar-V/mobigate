@@ -11,6 +11,7 @@ import { ChevronDown, ChevronUp, Upload, X, Eye, Edit, Trash2, Send, Calendar, I
 import { cn } from "@/lib/utils";
 import type { EventItem } from "@/data/eventsData";
 import { MediaUploadDialog } from "./MediaUploadDialog";
+import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
 import { toast } from "sonner";
 
 interface CreateEventFormProps {
