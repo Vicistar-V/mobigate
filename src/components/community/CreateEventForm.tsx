@@ -519,10 +519,11 @@ export const CreateEventForm = ({ onEventCreated, canPost = true, className }: C
                       </Button>
                     </div>
                     
+                    <LegalCopyrightAcceptance accepted={legalAccepted} onAcceptedChange={setLegalAccepted} />
                     <Button
                       type="button"
                       onClick={handlePublish}
-                      disabled={!title || !description || !venue || !eventDate}
+                      disabled={!title || !description || !venue || !eventDate || !legalAccepted}
                       className="w-full gap-2"
                     >
                       <Send className="w-4 h-4" />
