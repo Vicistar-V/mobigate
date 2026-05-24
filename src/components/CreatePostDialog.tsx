@@ -203,6 +203,7 @@ export const CreatePostDialog = ({
   const resetForm = () => {
     setTitle(""); setSubtitle(""); setDescription(""); setType("Photo");
     setMediaFile(null); setMediaPreview(null);
+    setPhotoFiles([]); setPhotoPreviews([]);
     setThumbnailFile(null); setThumbnailPreview(null);
     setSelectedAlbum(null); setProgress(0);
     setIsMonetized(false); setAccessFee("10");
@@ -210,6 +211,9 @@ export const CreatePostDialog = ({
     if (mediaRef.current)  mediaRef.current.value  = "";
     if (thumbRef.current)  thumbRef.current.value  = "";
   };
+
+  const imageCount = type === "Photo" ? Math.max(1, photoFiles.length || (mediaFile ? 1 : 1)) : 1;
+
 
   const feeValue = Math.max(0, parseFloat(accessFee) || 0);
   const isValidFee = !isMonetized || (feeValue > 0 && feeValue <= 10000);
