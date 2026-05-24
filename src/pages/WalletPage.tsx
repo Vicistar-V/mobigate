@@ -561,7 +561,7 @@ export default function WalletPage() {
       </div>
 
       {/* ── Exchange Rate Converter ── */}
-      <div className="px-4 mt-5">
+      <div id="exchange-rates-section" className="px-4 mt-5 scroll-mt-24">
         <div className="rounded-2xl border-2 border-border/50 bg-card overflow-hidden">
           <button
             onClick={() => setConverterOpen(o => !o)}
