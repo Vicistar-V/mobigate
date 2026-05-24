@@ -219,6 +219,7 @@ export default function SubmitAdvert() {
   const [launchDate, setLaunchDate] = useState<Date>();
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [agreed, setAgreed] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
   const [contactPhone, setContactPhone] = useState("");
   const [contactMethod, setContactMethod] = useState<"whatsapp" | "call">("whatsapp");
   const [contactEmail, setContactEmail] = useState("");
