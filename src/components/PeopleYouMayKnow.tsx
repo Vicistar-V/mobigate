@@ -203,6 +203,8 @@ export const PeopleYouMayKnow = () => {
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <>
+      <NotableDates />
+      <div className="h-4" />
       <Card className="p-4 space-y-4 hover:shadow-md transition-shadow overflow-hidden">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-lg">People you may know</h3>
