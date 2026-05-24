@@ -309,13 +309,96 @@ export const MediaGalleryViewer = ({
         >
           {renderMedia()}
 
+          {/* Reader Mode overlay — text fills screen, media floats in corner */}
+          {viewMode === "reader" && currentItem.description && (
+            <>
+              {/* Backdrop dims the media behind so text is legible */}
+              <div className="absolute inset-0 bg-black/85 backdrop-blur-sm z-30" aria-hidden />
+
+              {/* Scrollable reader sheet */}
+              <div className="absolute inset-0 z-40 flex items-stretch justify-center overflow-y-auto overscroll-contain px-3 py-16 sm:py-20">
+                <article className="w-full max-w-2xl mx-auto bg-card text-card-foreground rounded-2xl shadow-2xl p-5 sm:p-8 my-auto">
+                  {currentItem.author && (
+                    <div className="flex items-center gap-2 mb-3 pb-3 border-b">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={currentItem.authorImage} alt={currentItem.author} />
+                        <AvatarFallback>{currentItem.author.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold truncate">{currentItem.author}</p>
+                        {currentItem.timestamp && (
+                          <p className="text-[11px] text-muted-foreground">{currentItem.timestamp}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {currentItem.title && (
+                    <h2 className="text-xl sm:text-2xl font-bold leading-tight mb-3">{currentItem.title}</h2>
+                  )}
+                  <div className="prose prose-sm sm:prose-base max-w-none text-foreground/90 leading-relaxed whitespace-pre-wrap">
+                    {currentItem.description}
+                  </div>
+                  <p className="mt-6 pt-4 border-t text-[11px] text-muted-foreground italic">
+                    Reader mode · tap the floating thumbnail to view the {currentItem.type}
+                  </p>
+                </article>
+              </div>
+
+              {/* Floating media thumbnail — tap to switch to media view */}
+              <button
+                type="button"
+                onClick={() => setViewMode("media")}
+                className="absolute bottom-24 right-3 sm:bottom-28 sm:right-5 z-50 h-20 w-20 sm:h-24 sm:w-24 rounded-xl overflow-hidden ring-2 ring-white shadow-2xl bg-black active:scale-95 transition-transform touch-manipulation"
+                aria-label={`View ${currentItem.type} in full size`}
+              >
+                {currentItem.type === "photo" && (
+                  <img src={currentItem.url} alt="" className="h-full w-full object-cover" />
+                )}
+                {currentItem.type === "video" && (
+                  <div className="relative h-full w-full bg-black">
+                    <video src={currentItem.url} className="h-full w-full object-cover" muted playsInline />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                      <Play className="h-7 w-7 text-white fill-white" />
+                    </div>
+                  </div>
+                )}
+                {currentItem.type === "audio" && (
+                  <div className="h-full w-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
+                    <Music className="h-8 w-8 text-white" />
+                  </div>
+                )}
+                <span className="absolute inset-x-0 bottom-0 bg-black/70 text-white text-[9px] font-bold text-center py-0.5 uppercase tracking-wider">
+                  Tap to view
+                </span>
+              </button>
+            </>
+          )}
+
+          {/* Floating text card when in MEDIA mode (mirror of reader's floating media) */}
+          {viewMode === "media" && currentItem.description && currentItem.description.trim().length > 40 && (
+            <button
+              type="button"
+              onClick={() => setViewMode("reader")}
+              className="absolute top-20 right-3 sm:top-24 sm:right-5 z-40 max-w-[180px] sm:max-w-[220px] text-left rounded-xl bg-card/95 backdrop-blur shadow-2xl ring-1 ring-white/20 p-2.5 active:scale-[0.97] transition-transform touch-manipulation"
+              aria-label="Open reader mode"
+            >
+              <div className="flex items-center gap-1.5 mb-1">
+                <BookOpen className="h-3.5 w-3.5 text-primary" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-primary">Read</span>
+              </div>
+              <p className="text-[11px] font-semibold leading-snug text-foreground line-clamp-3">
+                {currentItem.description}
+              </p>
+            </button>
+          )}
+
           {/* Navigation Buttons */}
           {items.length > 1 && (
             <>
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-black/50 hover:bg-black/70 text-white border-2 border-white/20"
+                className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-black/50 hover:bg-black/70 text-white border-2 border-white/20 z-50"
                 onClick={goToPrevious}
               >
                 <ChevronLeft className="h-6 w-6 sm:h-8 sm:w-8" />
@@ -323,7 +406,7 @@ export const MediaGalleryViewer = ({
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-black/50 hover:bg-black/70 text-white border-2 border-white/20"
+                className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-black/50 hover:bg-black/70 text-white border-2 border-white/20 z-50"
                 onClick={goToNext}
               >
                 <ChevronRight className="h-6 w-6 sm:h-8 sm:w-8" />
