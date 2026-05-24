@@ -11,6 +11,7 @@ import { ChevronDown, ChevronUp, Upload, X, Eye, Edit, Trash2, Send, Calendar, I
 import { cn } from "@/lib/utils";
 import type { EventItem } from "@/data/eventsData";
 import { MediaUploadDialog } from "./MediaUploadDialog";
+import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
 import { toast } from "sonner";
 
 interface CreateEventFormProps {
@@ -27,6 +28,8 @@ interface MediaFile {
 export const CreateEventForm = ({ onEventCreated, canPost = true, className }: CreateEventFormProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
+  
   
   // Form state
   const [title, setTitle] = useState("");
@@ -516,10 +519,11 @@ export const CreateEventForm = ({ onEventCreated, canPost = true, className }: C
                       </Button>
                     </div>
                     
+                    <LegalCopyrightAcceptance accepted={legalAccepted} onAcceptedChange={setLegalAccepted} />
                     <Button
                       type="button"
                       onClick={handlePublish}
-                      disabled={!title || !description || !venue || !eventDate}
+                      disabled={!title || !description || !venue || !eventDate || !legalAccepted}
                       className="w-full gap-2"
                     >
                       <Send className="w-4 h-4" />
@@ -641,9 +645,11 @@ export const CreateEventForm = ({ onEventCreated, canPost = true, className }: C
                       </Button>
                     </div>
                     
+                    <LegalCopyrightAcceptance accepted={legalAccepted} onAcceptedChange={setLegalAccepted} />
                     <Button
                       type="button"
                       onClick={handlePublish}
+                      disabled={!legalAccepted}
                       className="w-full gap-2"
                     >
                       <Send className="w-4 h-4" />

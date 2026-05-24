@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { quizCategories, ANSWER_LABELS } from "@/data/quizGameData";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
 
 interface QuizCreationDialogProps {
   open: boolean;
@@ -46,6 +47,7 @@ const initialQuestions: QuizQuestion[] = Array.from({ length: 10 }, (_, i) => cr
 
 export function QuizCreationDialog({ open, onOpenChange }: QuizCreationDialogProps) {
   const { toast } = useToast();
+  const [legalAccepted, setLegalAccepted] = useState(false);
   const [quizTitle, setQuizTitle] = useState("");
   const [quizDescription, setQuizDescription] = useState("");
   const [category, setCategory] = useState("");
@@ -544,12 +546,13 @@ export function QuizCreationDialog({ open, onOpenChange }: QuizCreationDialogPro
         </ScrollArea>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t bg-background sticky bottom-0">
+        <div className="p-4 border-t bg-background sticky bottom-0 space-y-3">
+          <LegalCopyrightAcceptance accepted={legalAccepted} onAcceptedChange={setLegalAccepted} />
           <div className="flex gap-2">
             <Button onClick={handleSaveDraft} variant="outline" className="flex-1">
               Save Draft
             </Button>
-            <Button onClick={handlePublish} className="flex-1">
+            <Button onClick={handlePublish} disabled={!legalAccepted} className="flex-1">
               <Award className="h-4 w-4 mr-2" />
               Publish Quiz
             </Button>

@@ -37,6 +37,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MediaUploadDialog } from "./MediaUploadDialog";
+import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
 
 interface ArticleEditorDialogProps {
   open: boolean;
@@ -71,6 +72,7 @@ export function ArticleEditorDialog({ open, onOpenChange }: ArticleEditorDialogP
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
   const [showMediaUpload, setShowMediaUpload] = useState(false);
   const [isDraggingCover, setIsDraggingCover] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
   
   const coverInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -607,7 +609,10 @@ Tips for great articles:
             </TabsContent>
           </Tabs>
 
-          <DialogFooter className="p-4 sm:p-6 pt-0 border-t flex-col-reverse sm:flex-row gap-2">
+          <div className="px-4 sm:px-6 pt-3 border-t">
+            <LegalCopyrightAcceptance accepted={legalAccepted} onAcceptedChange={setLegalAccepted} />
+          </div>
+          <DialogFooter className="p-4 sm:p-6 pt-3 border-t flex-col-reverse sm:flex-row gap-2">
             <Button
               variant="outline"
               onClick={handleSaveDraft}
@@ -616,7 +621,7 @@ Tips for great articles:
               <Save className="h-4 w-4 mr-2" />
               Save Draft
             </Button>
-            <Button onClick={handlePublish} className="w-full sm:w-auto">
+            <Button onClick={handlePublish} disabled={!legalAccepted} className="w-full sm:w-auto">
               <Send className="h-4 w-4 mr-2" />
               Publish Article
             </Button>

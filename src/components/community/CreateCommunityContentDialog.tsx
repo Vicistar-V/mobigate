@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
 import {
   MediaMonetizationFields,
   defaultMonetizationValue,
@@ -36,6 +37,7 @@ export function CreateCommunityContentDialog({
   onOpenChange 
 }: CreateCommunityContentDialogProps) {
   const { toast } = useToast();
+  const [legalAccepted, setLegalAccepted] = useState(false);
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [description, setDescription] = useState("");
@@ -222,8 +224,9 @@ export function CreateCommunityContentDialog({
         </ScrollArea>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t bg-background space-y-2">
-          <Button onClick={handleSubmit} className="w-full">
+        <div className="p-4 border-t bg-background space-y-3">
+          <LegalCopyrightAcceptance accepted={legalAccepted} onAcceptedChange={setLegalAccepted} />
+          <Button onClick={handleSubmit} disabled={!legalAccepted} className="w-full">
             Publish Monetized Content
           </Button>
         </div>

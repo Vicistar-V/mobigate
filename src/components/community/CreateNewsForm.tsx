@@ -10,6 +10,7 @@ import { ChevronDown, ChevronUp, Video, Image, FileText, Upload, X, Eye, Edit, T
 import { cn } from "@/lib/utils";
 import type { NewsItem } from "@/data/newsData";
 import { MediaUploadDialog } from "./MediaUploadDialog";
+import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
 import { toast } from "sonner";
 
 interface CreateNewsFormProps {
@@ -38,6 +39,8 @@ export const CreateNewsForm = ({ onNewsCreated, canPost = true, className }: Cre
   // Additional media state
   const [additionalMedia, setAdditionalMedia] = useState<MediaFile[]>([]);
   const [showMediaUpload, setShowMediaUpload] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
+
 
   if (!canPost) return null;
 
@@ -350,10 +353,11 @@ export const CreateNewsForm = ({ onNewsCreated, canPost = true, className }: Cre
                       </Button>
                     </div>
                     
+                    <LegalCopyrightAcceptance accepted={legalAccepted} onAcceptedChange={setLegalAccepted} />
                     <Button
                       type="button"
                       onClick={handlePublish}
-                      disabled={!title || !description}
+                      disabled={!title || !description || !legalAccepted}
                       className="w-full gap-2"
                     >
                       <Send className="w-4 h-4" />
@@ -467,9 +471,11 @@ export const CreateNewsForm = ({ onNewsCreated, canPost = true, className }: Cre
                       </Button>
                     </div>
                     
+                    <LegalCopyrightAcceptance accepted={legalAccepted} onAcceptedChange={setLegalAccepted} />
                     <Button
                       type="button"
                       onClick={handlePublish}
+                      disabled={!legalAccepted}
                       className="w-full gap-2"
                     >
                       <Send className="w-4 h-4" />

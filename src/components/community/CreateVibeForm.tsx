@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import type { VibeItem } from "@/data/communityVibesData";
 import { toast } from "sonner";
 import { MediaUploadDialog } from "./MediaUploadDialog";
+import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
 
 interface CreateVibeFormProps {
   onVibeCreated?: (vibe: VibeItem) => void;
@@ -27,6 +28,7 @@ interface MediaFile {
 export const CreateVibeForm = ({ onVibeCreated, canPost = true, className }: CreateVibeFormProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
   
   // Form state
   const [title, setTitle] = useState("");
@@ -357,10 +359,12 @@ export const CreateVibeForm = ({ onVibeCreated, canPost = true, className }: Cre
                       </Button>
                     </div>
                     
+                    <LegalCopyrightAcceptance accepted={legalAccepted} onAcceptedChange={setLegalAccepted} />
+
                     <Button
                       type="button"
                       onClick={handlePublish}
-                      disabled={!title || !description}
+                      disabled={!title || !description || !legalAccepted}
                       className="w-full gap-2"
                     >
                       <Send className="w-4 h-4" />

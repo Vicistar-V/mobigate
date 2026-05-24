@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import type { VibeItem } from "@/data/communityVibesData";
+import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
 
 interface CreateVibeDialogProps {
   open: boolean;
@@ -25,6 +26,7 @@ interface CreateVibeDialogProps {
 
 export function CreateVibeDialog({ open, onOpenChange, onVibeCreated }: CreateVibeDialogProps) {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [mediaType, setMediaType] = useState<VibeItem["mediaType"]>("photo");
@@ -276,16 +278,20 @@ export function CreateVibeDialog({ open, onOpenChange, onVibeCreated }: CreateVi
                   Clear
                 </Button>
               </div>
-              <Button onClick={handlePublish} disabled={!title || !description} className="w-full">
+              <LegalCopyrightAcceptance accepted={legalAccepted} onAcceptedChange={setLegalAccepted} />
+              <Button onClick={handlePublish} disabled={!title || !description || !legalAccepted} className="w-full">
                 <Send className="w-4 h-4 mr-1" />
                 Publish Vibe
               </Button>
             </>
           ) : (
-            <Button onClick={handlePublish} className="w-full">
-              <Send className="w-4 h-4 mr-1" />
-              Publish Vibe
-            </Button>
+            <>
+              <LegalCopyrightAcceptance accepted={legalAccepted} onAcceptedChange={setLegalAccepted} />
+              <Button onClick={handlePublish} disabled={!legalAccepted} className="w-full">
+                <Send className="w-4 h-4 mr-1" />
+                Publish Vibe
+              </Button>
+            </>
           )}
         </div>
       </DrawerContent>
