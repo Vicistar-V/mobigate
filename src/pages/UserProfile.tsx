@@ -361,6 +361,14 @@ const UserProfile = () => {
                 <span><span className="font-bold text-foreground">{fmt(profile.stats.contents)}</span> Contents</span>
               </div>
 
+              {/* Birthday line — bold "Birthday" + light textured date */}
+              <p className="text-base flex flex-wrap items-baseline gap-1.5 -mt-1">
+                <span className="font-extrabold text-foreground">Birthday</span>
+                <span className="font-light italic text-muted-foreground/80 tracking-wide">
+                  {(profile as { birthday?: string }).birthday || "August 25"}
+                </span>
+              </p>
+
               {/* Action buttons */}
               <div className="flex flex-wrap gap-2">
                 <Button variant="default" size="sm" className="gap-2 bg-black hover:bg-black/80"
