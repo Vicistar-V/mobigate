@@ -90,6 +90,11 @@ export function WallBannerSlideshow({
           <FilePlus2 className="h-4 w-4 mr-2" />
           Create New
         </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => setBulkOpen(true)}>
+          <Images className="h-4 w-4 mr-2" />
+          Bulk Upload…
+        </DropdownMenuItem>
+
         <DropdownMenuItem
           disabled={!slide}
           onSelect={() => slide && setEditSlide(slide)}
