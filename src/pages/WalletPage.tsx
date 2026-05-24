@@ -1619,6 +1619,8 @@ export default function WalletPage() {
                     <div className="flex justify-between"><span className="text-xs text-muted-foreground">To</span><span className="text-xs font-semibold text-foreground">Local Currency Wallet</span></div>
                     <div className="flex justify-between"><span className="text-xs text-muted-foreground">Mobi Sold</span><span className="text-sm font-bold text-fuchsia-700 dark:text-fuchsia-400">M{formatNumberFull(liquidateMobiNum)}</span></div>
                     <div className="flex justify-between"><span className="text-xs text-muted-foreground">Rate Applied</span><span className="text-xs font-mono text-foreground">₦{SELLING_RATE_NGN_PER_MOBI.toFixed(2)}/Mobi</span></div>
+                    <div className="flex justify-between"><span className="text-xs text-muted-foreground">Gross Payout</span><span className="text-xs font-semibold text-foreground">₦{formatNumberFull(liquidateGrossNGN)}</span></div>
+                    <div className="flex justify-between"><span className="text-xs text-muted-foreground">Service Charge (5%)</span><span className="text-xs font-semibold text-rose-600">−₦{formatNumberFull(liquidateServiceCharge)}</span></div>
                     <div className="flex justify-between pt-2 border-t border-border/40"><span className="text-sm font-bold text-foreground">Payout</span><span className="text-lg font-black text-emerald-700 dark:text-emerald-400">₦{formatNumberFull(liquidatePayoutNGN)}</span></div>
                   </div>
 
