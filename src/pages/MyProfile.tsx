@@ -620,25 +620,30 @@ const MyProfile = () => {
       <main className="container max-w-4xl mx-auto px-4 py-6 flex-1">
         {/* Profile Header Card */}
         <Card className="mb-6 overflow-hidden">
-          {/* Profile Banner */}
-          <div className="relative h-48 bg-muted group">
-            <img 
-              src={bannerImage} 
-              alt="Profile Banner"
-              className="w-full h-full object-cover cursor-pointer"
-              onClick={openBannerGallery}
-            />
-            <button
-              className="absolute bottom-3 right-3 z-20 bg-black/40 hover:bg-black/60 text-white backdrop-blur-sm md:opacity-0 md:group-hover:opacity-100 transition-opacity text-xs px-2 py-1 rounded flex items-center gap-1"
-              onClick={(e) => {
-                e.stopPropagation();
-                setEditingBanner(true);
-              }}
-            >
-              <Camera className="h-2.5 w-2.5" />
-              Change
-            </button>
-          </div>
+          {/* Profile Banner — rotating wall banner slideshow */}
+          <WallBannerSlideshow
+            ownerId={currentUserId}
+            scope="profile"
+            fallbackImage={bannerImage}
+            fallbackAlt="Profile Banner"
+            isOwner
+            onManage={() => setWallBannerManagerOpen(true)}
+            onChangeFallback={() => setWallBannerManagerOpen(true)}
+            onOpenViewer={(slide: WallBannerSlide) => {
+              setGalleryItems([
+                {
+                  id: slide.id,
+                  url: slide.mediaUrl,
+                  type: slide.mediaType,
+                  author: userProfile.name,
+                  title: slide.caption,
+                } as MediaItem,
+              ]);
+              setGalleryInitialIndex(0);
+              setGalleryType("banner");
+              setMediaGalleryOpen(true);
+            }}
+          />
           
           <div className="px-6 pb-6">
             {/* Profile Image and Name Row */}
