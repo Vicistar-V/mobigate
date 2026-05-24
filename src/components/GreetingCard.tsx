@@ -538,7 +538,7 @@ export const GreetingSection = () => {
                           onClick={() => setFeaturedIdx(realIdx)}
                           className={`relative shrink-0 h-16 w-16 rounded-md overflow-hidden bg-muted active:scale-95 transition-all touch-manipulation ${
                             isActive
-                              ? "ring-2 ring-green-500 border-2 border-green-500 shadow-md scale-[1.04]"
+                              ? "ring-2 ring-red-500 border-2 border-red-500 shadow-md scale-[1.04]"
                               : "border border-foreground/30 opacity-90 hover:opacity-100"
                           }`}
                           aria-label={`Show ${post.title} in big view`}
@@ -551,7 +551,7 @@ export const GreetingSection = () => {
                             loading="lazy"
                           />
                           {isActive && (
-                            <span className="absolute inset-x-0 bottom-0 bg-green-600 text-white text-[9px] font-bold text-center py-0.5">
+                            <span className="absolute inset-x-0 bottom-0 bg-red-600 text-white text-[9px] font-bold text-center py-0.5">
                               Showing
                             </span>
                           )}
