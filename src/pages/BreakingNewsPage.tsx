@@ -57,18 +57,11 @@ const BreakingNewsPage = () => {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return enriched.filter(({ post, category }) => {
-      if (activeCat !== "All" && category !== activeCat) {
-        if (!(activeCat === "Trending" && enriched.indexOf({ post, category, minutesAgo: 0, hot: true }) > -1)) {
-          // Trending = hot ones
-          if (activeCat === "Trending") return true; // handled below
-          return false;
-        }
-      }
+    return enriched.filter(({ post, category, hot }) => {
       if (activeCat === "Trending") {
-        // Override: only hot
-        const e = enriched.find((x) => x.post.id === post.id);
-        if (!e?.hot) return false;
+        if (!hot) return false;
+      } else if (activeCat !== "All" && category !== activeCat) {
+        return false;
       }
       if (!q) return true;
       return (
@@ -78,6 +71,7 @@ const BreakingNewsPage = () => {
       );
     });
   }, [enriched, query, activeCat]);
+
 
   const topStory = filtered[0];
   const rest = filtered.slice(1);
