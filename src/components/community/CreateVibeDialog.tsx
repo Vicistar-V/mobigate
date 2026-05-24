@@ -26,6 +26,7 @@ interface CreateVibeDialogProps {
 
 export function CreateVibeDialog({ open, onOpenChange, onVibeCreated }: CreateVibeDialogProps) {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [mediaType, setMediaType] = useState<VibeItem["mediaType"]>("photo");
