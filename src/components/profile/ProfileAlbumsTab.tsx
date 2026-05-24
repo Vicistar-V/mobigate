@@ -240,7 +240,7 @@ export const ProfileAlbumsTab = ({
       </div>
 
       {selectedAlbum && (
-        <AlbumDetailDialog open={albumDialogOpen} onOpenChange={setAlbumDialogOpen} album={selectedAlbum} items={getAlbumItems(selectedAlbum)} />
+        <AlbumDetailDialog open={albumDialogOpen} onOpenChange={setAlbumDialogOpen} album={selectedAlbum} items={getAlbumItems(selectedAlbum)} isOwner={isOwner} />
       )}
 
       {/* Rename Album */}
