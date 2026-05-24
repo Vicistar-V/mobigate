@@ -125,8 +125,9 @@ export const LoginModal = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4">
-      <div className="bg-card w-full max-w-md rounded-2xl shadow-2xl border overflow-hidden">
+    <div className="fixed inset-0 z-[9999] flex items-start sm:items-center justify-center bg-black/60 p-4 overflow-y-auto pointer-events-auto">
+      <div className="bg-card w-full max-w-md rounded-2xl shadow-2xl border overflow-hidden my-auto">
+
 
         {/* Header */}
         <div className="bg-primary px-6 py-6 text-center">
