@@ -40,6 +40,8 @@ import { ProfileCommunityTab } from "@/components/profile/ProfileCommunityTab";
 import { ProfileMobiQuizTab }  from "@/components/profile/ProfileMobiQuizTab";
 import { ProfileContentsTab }  from "@/components/profile/ProfileContentsTab";
 import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
+import { WallBannerSlideshow } from "@/components/wall-banner/WallBannerSlideshow";
+import type { WallBannerSlide } from "@/types/wallBanner";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
