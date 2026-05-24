@@ -28,12 +28,31 @@ const NEEDS_THUMBNAIL: PostType[] = ["Video", "Audio", "Article", "PDF", "URL"];
 // Suggested fee amounts
 const FEE_PRESETS = [5, 10, 20, 50, 100, 200, 500];
 
-export const CreatePostDialog = () => {
+interface CreatePostDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideTrigger?: boolean;
+  presetMediaUrl?: string;
+  presetTitle?: string;
+}
+
+export const CreatePostDialog = ({
+  open: openProp,
+  onOpenChange,
+  hideTrigger = false,
+  presetMediaUrl,
+  presetTitle,
+}: CreatePostDialogProps = {}) => {
   const { toast }   = useToast();
   const phpAlbums   = useUserAlbums();
   const albums      = phpAlbums || mockAlbums;
 
-  const [open,             setOpen]             = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = openProp ?? internalOpen;
+  const setOpen = (v: boolean) => {
+    if (onOpenChange) onOpenChange(v);
+    else setInternalOpen(v);
+  };
   const [title,            setTitle]            = useState("");
   const [subtitle,         setSubtitle]         = useState("");
   const [description,      setDescription]      = useState("");
@@ -171,21 +190,23 @@ export const CreatePostDialog = () => {
 
   return (
     <Dialog open={open} onOpenChange={v => { if (!v) resetForm(); setOpen(v); }}>
-      <DialogTrigger asChild>
-        <button className="w-full p-3 sm:p-5 bg-card border-2 border-success/30 rounded-lg shadow-sm hover:shadow-md hover:border-success/50 transition-all cursor-pointer group">
-          <div className="flex items-center gap-2 sm:gap-4">
-            <div className="flex-1 text-left min-w-0">
-              <p className="text-sm sm:text-base font-semibold text-foreground group-hover:text-primary transition-colors truncate">
-                Create a Monetized Status Post
-              </p>
-              <p className="text-xs sm:text-base text-muted-foreground mt-0.5 sm:mt-1 truncate">
-                Share your thoughts and earn
-              </p>
+      {!hideTrigger && (
+        <DialogTrigger asChild>
+          <button className="w-full p-3 sm:p-5 bg-card border-2 border-success/30 rounded-lg shadow-sm hover:shadow-md hover:border-success/50 transition-all cursor-pointer group">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="flex-1 text-left min-w-0">
+                <p className="text-sm sm:text-base font-semibold text-foreground group-hover:text-primary transition-colors truncate">
+                  Create a Monetized Status Post
+                </p>
+                <p className="text-xs sm:text-base text-muted-foreground mt-0.5 sm:mt-1 truncate">
+                  Share your thoughts and earn
+                </p>
+              </div>
+              <Plus className="h-5 w-5 sm:h-6 sm:w-6 text-primary group-hover:scale-110 transition-transform shrink-0" />
             </div>
-            <Plus className="h-5 w-5 sm:h-6 sm:w-6 text-primary group-hover:scale-110 transition-transform shrink-0" />
-          </div>
-        </button>
-      </DialogTrigger>
+          </button>
+        </DialogTrigger>
+      )}
 
       <DialogContent className="sm:max-w-[620px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>

@@ -27,7 +27,10 @@ export const AuthGuard = ({ children }: { children: ReactNode }) => {
 
   return (
     <>
-      <div className={!isAuthenticated ? "pointer-events-none select-none opacity-30" : ""}>
+      <div
+        className={!isAuthenticated ? "select-none opacity-30" : ""}
+        aria-hidden={!isAuthenticated}
+      >
         {children}
       </div>
       {!isAuthenticated && <LoginModal />}
