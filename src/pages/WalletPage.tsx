@@ -172,6 +172,19 @@ export default function WalletPage() {
   const liquidatePayoutNGN = liquidateGrossNGN - liquidateServiceCharge;
   const liquidateMaxAmount = Math.floor(SUNDRY_WALLET.balance * 0.9);
 
+  // Exchange Rate Converter — user-facing utility
+  const [converterOpen, setConverterOpen] = useState(false);
+  type ConvDirection = "mobi-to-local" | "local-to-mobi";
+  const [convDirection, setConvDirection] = useState<ConvDirection>("mobi-to-local");
+  const [convInput, setConvInput] = useState<string>("");
+  const convInputNum = parseFloat(convInput) || 0;
+  // Mobi → Local uses Selling Rate; Local → Mobi uses Buying Rate (1 Mobi = ₦1)
+  const convResult = convDirection === "mobi-to-local"
+    ? convInputNum * SELLING_RATE_NGN_PER_MOBI
+    : convInputNum / BUYING_RATE_NGN_PER_MOBI;
+  const flipConverter = () =>
+    setConvDirection(d => d === "mobi-to-local" ? "local-to-mobi" : "mobi-to-local");
+
   const handleProcessLiquidate = useCallback(() => {
     setLiquidateStep("processing");
     const msgs = [
