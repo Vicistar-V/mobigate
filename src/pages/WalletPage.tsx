@@ -150,6 +150,7 @@ export default function WalletPage() {
 
   // Manage Local Wallet drawer + Withdraw Local Wallet flow
   const [manageLocalOpen, setManageLocalOpen] = useState(false);
+  const [manageSundryOpen, setManageSundryOpen] = useState(false);
   const [withdrawDrawerOpen, setWithdrawDrawerOpen] = useState(false);
   type WithdrawStep = "input" | "processing" | "success";
   const [withdrawStep, setWithdrawStep] = useState<WithdrawStep>("input");
@@ -465,7 +466,7 @@ export default function WalletPage() {
 
   const wallets = [
     { ...MOBI_WALLET, label: "Mobi Wallet", sublabel: "Voucher Recharges • Network-spend only", icon: Coins, gradient: "from-[#1a1a2e] via-[#16213e] to-[#0f3460] dark:from-[#1a1a2e] dark:via-[#16213e] dark:to-[#0f3460]", accentBorder: "border-indigo-500/20", fundAction: () => setFundMobiDrawerOpen(true), fundLabel: "Fund Mobi Wallet", liquidatable: false },
-    { ...SUNDRY_WALLET, label: "Sundry Wallet", sublabel: "Earned Mobi • Liquidatable to Local", icon: Sparkles, gradient: "from-[#2e1a2e] via-[#3e1e3a] to-[#5a2d4a] dark:from-[#2e1a2e] dark:via-[#3e1e3a] dark:to-[#5a2d4a]", accentBorder: "border-fuchsia-500/20", fundAction: () => setLiquidateDrawerOpen(true), fundLabel: "Liquidate to Local Currency", liquidatable: true },
+    { ...SUNDRY_WALLET, label: "Sundry Wallet", sublabel: "Earned Mobi • Liquidatable to Local", icon: Sparkles, gradient: "from-[#2e1a2e] via-[#3e1e3a] to-[#5a2d4a] dark:from-[#2e1a2e] dark:via-[#3e1e3a] dark:to-[#5a2d4a]", accentBorder: "border-fuchsia-500/20", fundAction: () => setManageSundryOpen(true), fundLabel: "Manage Sundry Wallet", liquidatable: true },
     { ...LOCAL_WALLET, label: "Local Currency Wallet", sublabel: "Cash equivalence • Fund & spend", icon: Banknote, gradient: "from-[#1a2e1a] via-[#1e3a1e] to-[#2d4a2d] dark:from-[#1a2e1a] dark:via-[#1e3a1e] dark:to-[#2d4a2d]", accentBorder: "border-emerald-500/20", fundAction: () => setManageLocalOpen(true), fundLabel: "Manage Local Wallet", liquidatable: false },
   ];
   const currentWallet = wallets[activeWallet];
@@ -560,7 +561,7 @@ export default function WalletPage() {
       </div>
 
       {/* ── Exchange Rate Converter ── */}
-      <div className="px-4 mt-5">
+      <div id="exchange-rates-section" className="px-4 mt-5 scroll-mt-24">
         <div className="rounded-2xl border-2 border-border/50 bg-card overflow-hidden">
           <button
             onClick={() => setConverterOpen(o => !o)}
@@ -1617,6 +1618,73 @@ export default function WalletPage() {
         </DrawerContent>
       </Drawer>
       {/* Fund Wallet Selection Drawer */}
+      {/* ── Manage Sundry Wallet drawer ── */}
+      <Drawer open={manageSundryOpen} onOpenChange={setManageSundryOpen}>
+        <DrawerContent className="max-h-[70vh]">
+          <DrawerHeader>
+            <DrawerTitle className="text-center">Manage Sundry Wallet</DrawerTitle>
+            <p className="text-sm text-muted-foreground text-center">Choose an action for your Sundry Wallet</p>
+          </DrawerHeader>
+          <div className="px-4 pb-6 flex flex-col gap-3">
+            {/* Liquidate */}
+            <button
+              onClick={() => { setManageSundryOpen(false); setTimeout(() => setLiquidateDrawerOpen(true), 220); }}
+              className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-border/50 bg-card hover:border-fuchsia-500/40 transition-all touch-manipulation active:scale-[0.98]"
+            >
+              <div className="h-12 w-12 rounded-xl bg-fuchsia-500/10 flex items-center justify-center shrink-0">
+                <ArrowUpRight className="h-6 w-6 text-fuchsia-600" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-semibold text-foreground">Liquidate to Local Currency</p>
+                <p className="text-xs text-muted-foreground">Convert earned Mobi into your Local Wallet</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </button>
+
+            {/* View Exchange Rates */}
+            <button
+              onClick={() => {
+                setManageSundryOpen(false);
+                setConverterOpen(true);
+                setTimeout(() => {
+                  document.getElementById("exchange-rates-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }, 220);
+              }}
+              className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-border/50 bg-card hover:border-indigo-500/40 transition-all touch-manipulation active:scale-[0.98]"
+            >
+              <div className="h-12 w-12 rounded-xl bg-indigo-500/10 flex items-center justify-center shrink-0">
+                <ArrowRightLeft className="h-6 w-6 text-indigo-600" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-semibold text-foreground">View Mobi Exchange Rates</p>
+                <p className="text-xs text-muted-foreground">Selling & Buying rates (Mobi ↔ Local)</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </button>
+
+            {/* View Transactions */}
+            <button
+              onClick={() => {
+                setManageSundryOpen(false);
+                setTimeout(() => {
+                  document.getElementById("transactions-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }, 220);
+              }}
+              className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-border/50 bg-card hover:border-amber-500/40 transition-all touch-manipulation active:scale-[0.98]"
+            >
+              <div className="h-12 w-12 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                <Clock className="h-6 w-6 text-amber-600" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-semibold text-foreground">View Transaction History</p>
+                <p className="text-xs text-muted-foreground">All Sundry earnings & liquidations</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </button>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
       {/* ── Manage Local Wallet drawer ── */}
       <Drawer open={manageLocalOpen} onOpenChange={setManageLocalOpen}>
         <DrawerContent className="max-h-[70vh]">
