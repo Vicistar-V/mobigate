@@ -39,6 +39,8 @@ export const CreateNewsForm = ({ onNewsCreated, canPost = true, className }: Cre
   // Additional media state
   const [additionalMedia, setAdditionalMedia] = useState<MediaFile[]>([]);
   const [showMediaUpload, setShowMediaUpload] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
+
 
   if (!canPost) return null;
 
