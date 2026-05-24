@@ -739,21 +739,21 @@ export default function ManageUsersPage() {
                         { label: "Content removed", value: mh.contentRemoved, icon: Ban, tone: "text-red-700", bg: "bg-red-50", border: "border-red-200" },
                       ];
                       return (
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                           <div className="flex items-center justify-between">
-                            <p className="text-xs font-semibold text-muted-foreground uppercase">Moderation History</p>
-                            <span className="text-[10px] text-muted-foreground">Lifetime</span>
+                            <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Moderation History</p>
+                            <span className="text-xs text-muted-foreground">Lifetime</span>
                           </div>
-                          <div className="grid grid-cols-2 gap-2">
+                          <div className="grid grid-cols-2 gap-2.5">
                             {items.map((it) => (
-                              <div key={it.label} className={`rounded-lg border ${it.border} ${it.bg} p-2.5`}>
-                                <div className="flex items-center gap-1.5">
-                                  <it.icon className={`h-3.5 w-3.5 ${it.tone}`} />
-                                  <p className="text-[10px] text-muted-foreground leading-tight">{it.label}</p>
+                              <div key={it.label} className={`rounded-lg border ${it.border} ${it.bg} p-3`}>
+                                <div className="flex items-center gap-2">
+                                  <it.icon className={`h-4 w-4 ${it.tone}`} />
+                                  <p className="text-sm text-muted-foreground leading-tight">{it.label}</p>
                                 </div>
-                                <p className={`text-sm font-semibold mt-1 ${it.tone}`}>
+                                <p className={`text-lg font-bold mt-1.5 ${it.tone}`}>
                                   {it.value}
-                                  <span className="text-[10px] font-normal text-muted-foreground ml-1">
+                                  <span className="text-xs font-normal text-muted-foreground ml-1.5">
                                     {it.value === 1 ? "time" : "times"}
                                   </span>
                                 </p>
@@ -761,9 +761,9 @@ export default function ManageUsersPage() {
                             ))}
                           </div>
                           {mh.reported >= 10 && (
-                            <div className="flex items-start gap-1.5 rounded-md border border-orange-200 bg-orange-50 p-2">
-                              <AlertTriangle className="h-3.5 w-3.5 text-orange-600 mt-0.5 shrink-0" />
-                              <p className="text-[11px] text-orange-800 leading-snug">
+                            <div className="flex items-start gap-2 rounded-md border border-orange-200 bg-orange-50 p-2.5">
+                              <AlertTriangle className="h-4 w-4 text-orange-600 mt-0.5 shrink-0" />
+                              <p className="text-sm text-orange-800 leading-snug">
                                 Frequently reported user — consider reviewing recent activity before action.
                               </p>
                             </div>
