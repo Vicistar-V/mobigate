@@ -2192,6 +2192,13 @@ export default function SubmitAdvert() {
                   </label>
                 </div>
 
+                {/* Legal / Copyright acceptance */}
+                <LegalCopyrightAcceptance
+                  accepted={legalAccepted}
+                  onAcceptedChange={setLegalAccepted}
+                />
+
+
                 {/* Validation Status Alert */}
                 {!validateSlotForm(false) && (
                   <Alert variant="destructive" className="animate-in fade-in">
