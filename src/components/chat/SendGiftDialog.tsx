@@ -7,14 +7,15 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Button }   from "@/components/ui/button";
 import { Badge }    from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Gift, Wallet, Loader2, ChevronDown, ChevronUp, Send,
+  Plus, Ticket, CreditCard, Building2, ArrowRight,
 } from "lucide-react";
 import { useToast }  from "@/hooks/use-toast";
 import { cn }        from "@/lib/utils";
@@ -52,7 +53,9 @@ interface SendGiftDialogProps {
 export const SendGiftDialog = ({
   isOpen, onClose, recipientName, recipientId, onSendGift,
 }: SendGiftDialogProps) => {
-  const { toast } = useToast();
+  const { toast }  = useToast();
+  const navigate   = useNavigate();
+  const location   = useLocation();
 
   const [wallet,         setWallet]         = useState<{ mobi: number; credit: number } | null>(null);
   const [walletLoading,  setWalletLoading]  = useState(false);
@@ -61,6 +64,7 @@ export const SendGiftDialog = ({
   const [specialOpen,    setSpecialOpen]    = useState(false);
   const [classicOpen,    setClassicOpen]    = useState(false);
   const [sending,        setSending]        = useState(false);
+  const [fundPanelOpen,  setFundPanelOpen]  = useState(false);
 
   // ── Fetch wallet balance ───────────────────────────────────────────────────
   const fetchWallet = useCallback(async () => {
@@ -151,6 +155,51 @@ export const SendGiftDialog = ({
   };
 
   const insufficient = wallet !== null && selectedGift !== null && wallet.mobi < selectedGift.giftData.mobiValue;
+  const lowBalance   = wallet !== null && wallet.mobi < 10;
+  const showFundCta  = wallet !== null && (insufficient || lowBalance);
+
+  // Auto-expand the fund panel the moment we detect insufficient balance.
+  useEffect(() => {
+    if (insufficient) setFundPanelOpen(true);
+  }, [insufficient]);
+
+  // Navigate to a funding destination, remembering where to come back to.
+  const goFund = (path: string) => {
+    const returnTo = encodeURIComponent(location.pathname + location.search);
+    const sep = path.includes("?") ? "&" : "?";
+    onClose();
+    navigate(`${path}${sep}returnTo=${returnTo}`);
+  };
+
+  const fundMethods = [
+    {
+      id: "voucher",
+      label: "Buy Mobi Vouchers",
+      subtitle: "Top up instantly with a voucher PIN",
+      icon: Ticket,
+      accentBg: "bg-emerald-500/10",
+      accentText: "text-emerald-600",
+      path: "/buy-vouchers?source=fund-wallet",
+    },
+    {
+      id: "bank",
+      label: "Online Banking Transfer",
+      subtitle: "Direct bank transfer to your wallet",
+      icon: Building2,
+      accentBg: "bg-indigo-500/10",
+      accentText: "text-indigo-600",
+      path: "/wallet?action=fund&method=bank",
+    },
+    {
+      id: "card",
+      label: "Credit / Debit Card",
+      subtitle: "Visa, Mastercard, Verve",
+      icon: CreditCard,
+      accentBg: "bg-blue-500/10",
+      accentText: "text-blue-600",
+      path: "/wallet?action=fund&method=card",
+    },
+  ];
 
   return (
     <Dialog open={isOpen} onOpenChange={v => !v && onClose()}>
@@ -164,33 +213,84 @@ export const SendGiftDialog = ({
 
         {/* Wallet balance */}
         <div className="px-4 py-3 bg-muted/40 border-b shrink-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Wallet className="h-4 w-4 text-primary" />
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 min-w-0">
+              <Wallet className="h-4 w-4 text-primary shrink-0" />
               <span className="text-sm font-medium">Your Balance</span>
             </div>
             {walletLoading ? (
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
             ) : wallet !== null ? (
               <div className="text-right">
-                <p className={`font-bold text-lg ${wallet.mobi < 10 ? "text-destructive" : "text-primary"}`}>
+                <p className={`font-bold text-lg ${lowBalance ? "text-destructive" : "text-primary"}`}>
                   {wallet.mobi.toLocaleString()} Mobi
                 </p>
                 {wallet.credit > 0 && (
                   <p className="text-xs text-muted-foreground">₦{wallet.credit.toLocaleString()} Credit</p>
                 )}
-                {(wallet as any).gift_balance > 0 && (
-                  <p className="text-xs text-emerald-600">+{(wallet as any).gift_balance.toLocaleString()} Gift Balance</p>
-                )}
+                {(wallet as { gift_balance?: number }).gift_balance && (wallet as { gift_balance?: number }).gift_balance! > 0 ? (
+                  <p className="text-xs text-emerald-600">
+                    +{(wallet as { gift_balance?: number }).gift_balance!.toLocaleString()} Gift Balance
+                  </p>
+                ) : null}
               </div>
             ) : (
               <span className="text-sm text-muted-foreground">—</span>
             )}
           </div>
-          {wallet !== null && wallet.mobi < 10 && (
-            <p className="text-xs text-destructive mt-1">Low balance — top up to send gifts</p>
+
+          {/* Low / insufficient balance CTA */}
+          {showFundCta && (
+            <div className="mt-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-destructive">
+                    {insufficient ? "Insufficient balance to send this gift" : "Low balance — top up to send gifts"}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    Fund your Mobi Wallet to continue.
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  className="h-8 px-3 text-xs shrink-0"
+                  onClick={() => setFundPanelOpen(v => !v)}
+                >
+                  <Plus className="h-3.5 w-3.5 mr-1" />
+                  Fund Wallet
+                </Button>
+              </div>
+
+              {fundPanelOpen && (
+                <div className="mt-3 space-y-2">
+                  {fundMethods.map(m => {
+                    const Icon = m.icon;
+                    return (
+                      <button
+                        key={m.id}
+                        onClick={() => goFund(m.path)}
+                        className="w-full flex items-center gap-3 rounded-lg border bg-card px-3 py-2.5 text-left transition-colors hover:border-primary/40 hover:bg-primary/5 active:bg-primary/10"
+                      >
+                        <span className={cn("h-9 w-9 rounded-lg flex items-center justify-center shrink-0", m.accentBg)}>
+                          <Icon className={cn("h-4 w-4", m.accentText)} />
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-foreground truncate">{m.label}</p>
+                          <p className="text-[11px] text-muted-foreground truncate">{m.subtitle}</p>
+                        </div>
+                        <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                      </button>
+                    );
+                  })}
+                  <p className="text-[10px] text-muted-foreground text-center pt-1">
+                    You'll return to this conversation after funding.
+                  </p>
+                </div>
+              )}
+            </div>
           )}
         </div>
+
 
         {/* Selected gift preview */}
         {selectedGift && (
@@ -316,19 +416,30 @@ export const SendGiftDialog = ({
           <Button variant="outline" className="flex-1" onClick={onClose} disabled={sending}>
             Cancel
           </Button>
-          <Button
-            className="flex-1"
-            onClick={handleSend}
-            disabled={!selectedGift || sending || insufficient}
-          >
-            {sending ? (
-              <><Loader2 className="h-4 w-4 animate-spin mr-2" />Sending...</>
-            ) : selectedGift ? (
-              <><Send className="h-4 w-4 mr-2" />Send ({selectedGift.giftData.mobiValue.toLocaleString()} Mobi)</>
-            ) : (
-              <><Gift className="h-4 w-4 mr-2" />Select a Gift</>
-            )}
-          </Button>
+          {insufficient ? (
+            <Button
+              className="flex-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              onClick={() => goFund("/buy-vouchers?source=fund-wallet")}
+              disabled={sending}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Fund Wallet to Send
+            </Button>
+          ) : (
+            <Button
+              className="flex-1"
+              onClick={handleSend}
+              disabled={!selectedGift || sending}
+            >
+              {sending ? (
+                <><Loader2 className="h-4 w-4 animate-spin mr-2" />Sending...</>
+              ) : selectedGift ? (
+                <><Send className="h-4 w-4 mr-2" />Send ({selectedGift.giftData.mobiValue.toLocaleString()} Mobi)</>
+              ) : (
+                <><Gift className="h-4 w-4 mr-2" />Select a Gift</>
+              )}
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>
