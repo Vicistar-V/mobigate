@@ -8,6 +8,8 @@ import { AppSidebar } from "@/components/AppSidebar";
 import Index from "./pages/Index";
 import MyProfile   from "./pages/MyProfile";
 import UserProfile from "./pages/UserProfile";
+import VibesFlexingPage from "./pages/VibesFlexingPage";
+import BreakingNewsPage from "./pages/BreakingNewsPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { BackToTopButton } from "./components/BackToTopButton";
@@ -37,8 +39,11 @@ const App = () => {
                       <Route path="/"              element={<Index />} />
                       <Route path="/profile"       element={<MyProfile />} />
                       <Route path="/profile/:id"   element={<UserProfile />} />
+                      <Route path="/vibes"         element={<VibesFlexingPage />} />
+                      <Route path="/breaking-news" element={<BreakingNewsPage />} />
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<Navigate to="/" replace />} />
+
                     </Routes>
                   </div>
                 </div>

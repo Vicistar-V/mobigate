@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Search, MoreHorizontal, ChevronLeft, ChevronRight, ImagePlus, BadgeCheck, Images, Plus, Maximize2, PenSquare, FilePlus2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CreatePostDialog } from "./CreatePostDialog";
 import { EditPostDialog } from "./EditPostDialog";
 import {
@@ -84,6 +84,7 @@ export const GreetingSection = () => {
   const [friendsMenuView, setFriendsMenuView] = useState<"main" | "requests">("main");
   const [createPostOpen, setCreatePostOpen] = useState(false);
   const [activeFeedTab, setActiveFeedTab] = useState<"Stories" | "Vibes & Flexing" | "Breaking News">("Stories");
+  const navigate = useNavigate();
   const [presetMediaUrl, setPresetMediaUrl] = useState<string | null>(null);
   const [presetTitle, setPresetTitle] = useState<string>("");
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -421,7 +422,11 @@ export const GreetingSection = () => {
                   <button
                     key={t}
                     type="button"
-                    onClick={() => setActiveFeedTab(t)}
+                    onClick={() => {
+                      setActiveFeedTab(t);
+                      if (t === "Vibes & Flexing") navigate("/vibes");
+                      else if (t === "Breaking News") navigate("/breaking-news");
+                    }}
                     className={`shrink-0 h-9 px-3 rounded-md text-[13px] font-bold border-2 transition-colors touch-manipulation ${
                       active
                         ? "bg-green-600 text-white border-green-600 shadow-sm"
@@ -432,6 +437,7 @@ export const GreetingSection = () => {
                   </button>
                 );
               })}
+
             </div>
             <div className="h-px bg-green-500/40 mt-1 mb-3" />
 
