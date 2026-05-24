@@ -1,17 +1,29 @@
 // WallBannerSlideshow — public display surface
 // Rotates active slides at their configured display interval. Handles
 // click actions (url/email/whatsapp/viewer), shows optional "Sponsored"
-// chip, and exposes an optional owner overlay (Manage / pause indicator).
+// chip, and exposes an owner overlay: a "+" button that opens a quick
+// menu (Create New / Edit / Delete / Pause).
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Camera, Pause, Play, Settings2 } from "lucide-react";
+import { Plus, Pause, Play, Pencil, Trash2, FilePlus2, Settings2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WallBannerSlide } from "@/types/wallBanner";
 import {
   getActiveSlidesFor,
   onSlidesChanged,
   resolveClickHref,
+  togglePauseSlide,
+  deleteSlide,
 } from "@/lib/wallBannerStorage";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
+import { WallBannerEditDialog } from "./WallBannerEditDialog";
 
 interface WallBannerSlideshowProps {
   ownerId: string;
@@ -48,6 +60,89 @@ export function WallBannerSlideshow({
   );
   const [idx, setIdx] = useState(0);
   const timerRef = useRef<number | null>(null);
+  const { toast } = useToast();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editSlide, setEditSlide] = useState<WallBannerSlide | null>(null);
+
+  // The owner "+" quick-menu trigger and content (reused for both states)
+  const OwnerPlusMenu = ({ slide }: { slide?: WallBannerSlide | null }) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          onClick={(e) => e.stopPropagation()}
+          aria-label="Wall banner options"
+          className="h-9 w-9 rounded-full bg-black/55 hover:bg-black/75 text-white backdrop-blur-sm flex items-center justify-center shadow-md active:scale-95 transition-transform touch-manipulation"
+        >
+          <Plus className="h-5 w-5" strokeWidth={2.5} />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        side="top"
+        className="w-52 z-50"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <DropdownMenuItem onSelect={() => setCreateOpen(true)}>
+          <FilePlus2 className="h-4 w-4 mr-2" />
+          Create New
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={!slide}
+          onSelect={() => slide && setEditSlide(slide)}
+        >
+          <Pencil className="h-4 w-4 mr-2" />
+          Edit / Modify
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={!slide}
+          onSelect={() => {
+            if (!slide) return;
+            togglePauseSlide(slide.id);
+            toast({
+              title: slide.paused ? "Slide resumed" : "Slide paused",
+            });
+          }}
+        >
+          {slide?.paused ? (
+            <>
+              <Play className="h-4 w-4 mr-2" />
+              Resume
+            </>
+          ) : (
+            <>
+              <Pause className="h-4 w-4 mr-2" />
+              Pause / Suspend
+            </>
+          )}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          disabled={!slide}
+          className="text-destructive focus:text-destructive"
+          onSelect={() => {
+            if (!slide) return;
+            if (confirm("Delete this slide? This cannot be undone.")) {
+              deleteSlide(slide.id);
+              toast({ title: "Slide deleted" });
+            }
+          }}
+        >
+          <Trash2 className="h-4 w-4 mr-2" />
+          Delete / Remove
+        </DropdownMenuItem>
+        {onManage && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={() => onManage()}>
+              <Settings2 className="h-4 w-4 mr-2" />
+              Manage all slides…
+            </DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
 
   // Refresh slides when storage changes or owner/scope updates
   useEffect(() => {
@@ -108,28 +203,17 @@ export function WallBannerSlideshow({
           />
         )}
         {isOwner && (
-          <div className="absolute bottom-3 right-3 flex gap-2 z-20">
-            {onChangeFallback && (
-              <button
-                type="button"
-                onClick={onChangeFallback}
-                className="bg-black/55 hover:bg-black/70 text-white backdrop-blur-sm text-[11px] px-2 py-1 rounded flex items-center gap-1"
-              >
-                <Camera className="h-3 w-3" />
-                Change
-              </button>
-            )}
-            {onManage && (
-              <button
-                type="button"
-                onClick={onManage}
-                className="bg-primary/90 hover:bg-primary text-primary-foreground text-[11px] px-2 py-1 rounded flex items-center gap-1"
-              >
-                <Settings2 className="h-3 w-3" />
-                Manage Banner
-              </button>
-            )}
+          <div className="absolute bottom-3 right-3 z-20">
+            <OwnerPlusMenu slide={null} />
           </div>
+        )}
+        {isOwner && (
+          <WallBannerEditDialog
+            open={createOpen}
+            onOpenChange={setCreateOpen}
+            ownerId={ownerId}
+            scope={scope}
+          />
         )}
       </div>
     );
@@ -214,23 +298,32 @@ export function WallBannerSlideshow({
         </div>
       )}
 
-      {/* Owner overlay */}
+      {/* Owner overlay — "+" quick menu */}
       {isOwner && (
-        <div className="absolute bottom-3 right-3 z-20 flex gap-2">
-          {onManage && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onManage();
-              }}
-              className="bg-black/55 hover:bg-black/75 text-white backdrop-blur-sm text-[11px] px-2 py-1 rounded flex items-center gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
-            >
-              <Settings2 className="h-3 w-3" />
-              Manage
-            </button>
-          )}
+        <div className="absolute bottom-3 right-3 z-20">
+          <OwnerPlusMenu slide={current} />
         </div>
+      )}
+
+      {/* Owner-only edit dialogs (mounted inside slideshow so owner overlay is self-contained) */}
+      {isOwner && (
+        <>
+          <WallBannerEditDialog
+            open={createOpen}
+            onOpenChange={setCreateOpen}
+            ownerId={ownerId}
+            scope={scope}
+          />
+          <WallBannerEditDialog
+            open={!!editSlide}
+            onOpenChange={(o) => {
+              if (!o) setEditSlide(null);
+            }}
+            ownerId={ownerId}
+            scope={scope}
+            initial={editSlide}
+          />
+        </>
       )}
     </div>
   );
