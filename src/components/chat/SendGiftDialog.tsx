@@ -416,19 +416,30 @@ export const SendGiftDialog = ({
           <Button variant="outline" className="flex-1" onClick={onClose} disabled={sending}>
             Cancel
           </Button>
-          <Button
-            className="flex-1"
-            onClick={handleSend}
-            disabled={!selectedGift || sending || insufficient}
-          >
-            {sending ? (
-              <><Loader2 className="h-4 w-4 animate-spin mr-2" />Sending...</>
-            ) : selectedGift ? (
-              <><Send className="h-4 w-4 mr-2" />Send ({selectedGift.giftData.mobiValue.toLocaleString()} Mobi)</>
-            ) : (
-              <><Gift className="h-4 w-4 mr-2" />Select a Gift</>
-            )}
-          </Button>
+          {insufficient ? (
+            <Button
+              className="flex-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              onClick={() => goFund("/buy-vouchers?source=fund-wallet")}
+              disabled={sending}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Fund Wallet to Send
+            </Button>
+          ) : (
+            <Button
+              className="flex-1"
+              onClick={handleSend}
+              disabled={!selectedGift || sending}
+            >
+              {sending ? (
+                <><Loader2 className="h-4 w-4 animate-spin mr-2" />Sending...</>
+              ) : selectedGift ? (
+                <><Send className="h-4 w-4 mr-2" />Send ({selectedGift.giftData.mobiValue.toLocaleString()} Mobi)</>
+              ) : (
+                <><Gift className="h-4 w-4 mr-2" />Select a Gift</>
+              )}
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>
