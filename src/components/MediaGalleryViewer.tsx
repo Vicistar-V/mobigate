@@ -65,6 +65,9 @@ export const MediaGalleryViewer = ({
       setFollowerCount(
         currentItem.followers ? parseInt(currentItem.followers.replace(/[^0-9]/g, '')) || 0 : 0
       );
+      // Default to reader mode when there's substantive text; otherwise media-first
+      const hasText = !!(currentItem.description && currentItem.description.trim().length > 40);
+      setViewMode(hasText ? "reader" : "media");
     }
   }, [currentItem]);
 
