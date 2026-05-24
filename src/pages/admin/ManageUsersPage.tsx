@@ -345,7 +345,11 @@ export default function ManageUsersPage() {
     setDetailDrawerOpen(true);
   };
 
-  const openAuthDialog = (action: AdminAction) => setAuthAction(action);
+  const openAuthDialog = (action: AdminAction) => {
+    // Close the parent drawer first so the dialog receives focus/pointer events on mobile
+    setDetailDrawerOpen(false);
+    setTimeout(() => setAuthAction(action), 220);
+  };
 
   const handleAuthConfirm = (payload: { months?: number; authorisers: string[] }) => {
     if (!selectedUser || !authAction) return;
