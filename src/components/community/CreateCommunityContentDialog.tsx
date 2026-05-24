@@ -224,8 +224,9 @@ export function CreateCommunityContentDialog({
         </ScrollArea>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t bg-background space-y-2">
-          <Button onClick={handleSubmit} className="w-full">
+        <div className="p-4 border-t bg-background space-y-3">
+          <LegalCopyrightAcceptance accepted={legalAccepted} onAcceptedChange={setLegalAccepted} />
+          <Button onClick={handleSubmit} disabled={!legalAccepted} className="w-full">
             Publish Monetized Content
           </Button>
         </div>
