@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, MoreHorizontal, ChevronLeft, ImagePlus, BadgeCheck, Images, Plus, Maximize2, PenSquare, FilePlus2 } from "lucide-react";
+import { Search, MoreHorizontal, ChevronLeft, ChevronRight, ImagePlus, BadgeCheck, Images, Plus, Maximize2, PenSquare, FilePlus2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { CreatePostDialog } from "./CreatePostDialog";
 import { EditPostDialog } from "./EditPostDialog";
@@ -552,8 +552,30 @@ export const GreetingSection = () => {
             {myRecentPosts.length > 1 && (
               <div className="mt-2 rounded-lg border border-border bg-card/50 p-1.5 overflow-hidden">
                 <div className="group/strip relative">
+                  {/* Prev button */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFeaturedIdx((safeFeaturedIdx - 1 + myRecentPosts.length) % myRecentPosts.length)
+                    }
+                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background/90 border border-border shadow-md flex items-center justify-center active:scale-95 touch-manipulation"
+                    aria-label="Previous post"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+                  {/* Next button */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFeaturedIdx((safeFeaturedIdx + 1) % myRecentPosts.length)
+                    }
+                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background/90 border border-border shadow-md flex items-center justify-center active:scale-95 touch-manipulation"
+                    aria-label="Next post"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
                   <div
-                    className="flex gap-2 w-max animate-marquee-rtl group-hover/strip:[animation-play-state:paused]"
+                    className="flex gap-2 w-max animate-marquee-rtl group-hover/strip:[animation-play-state:paused] px-9"
                     style={{ animationDuration: `${Math.max(18, myRecentPosts.length * 3)}s` }}
                   >
                     {[...myRecentPosts, ...myRecentPosts].map((post, i) => {
@@ -589,7 +611,7 @@ export const GreetingSection = () => {
                   </div>
                 </div>
                 <p className="mt-1 text-[11px] text-muted-foreground text-center italic">
-                  Your posts + Public &amp; Connection posts · auto-scrolls right → left · tap any thumb to feature it in the lower image · tap the big image to enlarge
+                  Auto-scrolls right → left · tap any thumbnail to feature it above · tap ‹ › to step through posts · tap the big image to open larger
                 </p>
 
               </div>
