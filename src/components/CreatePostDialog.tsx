@@ -412,13 +412,21 @@ export const CreatePostDialog = ({
           )}
         </div>
 
+        {/* Legal / Copyright acceptance — required before publishing */}
+        <div className="px-1 pt-1">
+          <LegalCopyrightAcceptance
+            accepted={legalAccepted}
+            onAcceptedChange={setLegalAccepted}
+          />
+        </div>
+
         <div className="flex justify-end gap-3 pt-2">
           <Button variant="outline" onClick={() => { resetForm(); setOpen(false); }} disabled={submitting}>
             Cancel
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={submitting || !isValidFee}
+            disabled={submitting || !isValidFee || !legalAccepted}
             className={isMonetized ? "bg-amber-500 hover:bg-amber-600 text-white" : ""}
           >
             {submitting
@@ -429,6 +437,7 @@ export const CreatePostDialog = ({
             }
           </Button>
         </div>
+
       </DialogContent>
 
       <CreateAlbumDialog open={showNewAlbum} onOpenChange={setShowNewAlbum} onAlbumCreated={(id, name) => {
