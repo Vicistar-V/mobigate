@@ -63,8 +63,11 @@ export const CommunityStatusBanner = ({ community, className = "" }: CommunitySt
   const swipeHandlers = useSwipeable({
     onSwipedLeft: () => mediaList.length > 1 && goNext(),
     onSwipedRight: () => mediaList.length > 1 && goPrev(),
-    trackMouse: false,
-    preventScrollOnSwipe: true,
+    trackMouse: true,           // allow desktop click-drag to swipe
+    trackTouch: true,
+    preventScrollOnSwipe: false, // DO NOT block vertical page scroll
+    delta: 40,                   // require a real horizontal drag, not a tap
+    swipeDuration: 800,
   });
 
   // Build gallery items for the viewer
