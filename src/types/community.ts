@@ -13,9 +13,21 @@ export interface Community {
   location?: string;
 }
 
+export interface CommunityBannerMedia {
+  id?: string;
+  url: string;
+  type: "photo" | "video";
+  title?: string;
+  thumbnail?: string;
+}
+
 export interface CommunityProfile extends Community {
   motto?: string;
   bannerImage?: string;
+  /** Ordered list of photos/videos that play in the Status Banner */
+  bannerMedia?: CommunityBannerMedia[];
+  /** Auto-rotate interval (seconds). 0 / undefined = manual swipe only */
+  bannerRotateSeconds?: number;
   logoImage?: string;
   followers: number;
   likes: number;
