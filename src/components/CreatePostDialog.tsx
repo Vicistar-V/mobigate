@@ -212,7 +212,7 @@ export const CreatePostDialog = ({
         </DialogTrigger>
       )}
 
-      <DialogContent className="sm:max-w-[620px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[620px] max-h-[92dvh] overflow-y-auto overscroll-contain p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle>Create a Post</DialogTitle>
           <DialogDescription>Share your content with the community.</DialogDescription>
