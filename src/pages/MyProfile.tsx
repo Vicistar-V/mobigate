@@ -62,6 +62,7 @@ const MyProfile = () => {
   const [visiblePostCount, setVisiblePostCount] = useState(20);
   const [isGiftDialogOpen, setIsGiftDialogOpen] = useState(false);
   const [messagesSheetOpen, setMessagesSheetOpen] = useState(false);
+  const [wallBannerManagerOpen, setWallBannerManagerOpen] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
