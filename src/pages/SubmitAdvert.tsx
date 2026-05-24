@@ -43,6 +43,7 @@ import { FilePreviewGrid } from "@/components/advert/FilePreviewGrid";
 import { AdvertPreviewDialog } from "@/components/advert/AdvertPreviewDialog";
 import { DisplayModeSelector } from "@/components/advert/DisplayModeSelector";
 import { MultipleCountCard } from "@/components/advert/MultipleCountCard";
+import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
 import { AccreditedAdvertiserBadge } from "@/components/advert/AccreditedAdvertiserBadge";
 import { getUserDiscountProfile } from "@/data/discountData";
 import { useCurrentUserId, useWalletBalance } from "@/hooks/useWindowData";
