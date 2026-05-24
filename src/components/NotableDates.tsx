@@ -1,6 +1,8 @@
 import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { useMemo, useState } from "react";
+import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
+import { useToast } from "@/hooks/use-toast";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type MainTab   = "birthdays" | "events";
@@ -38,17 +40,27 @@ const OTHER_EVENT_TYPES = [
 ];
 
 // ─── Subcomponents (defined OUTSIDE parent to keep stable refs) ─────────────
-const PersonCard = ({ p, showViewDetails }: { p: NotablePerson; showViewDetails: boolean }) => (
-  <div className="flex-shrink-0 w-[148px] rounded-lg border border-border bg-card overflow-hidden">
+const PersonCard = ({
+  p, showViewDetails, onMessage, onGift,
+}: {
+  p: NotablePerson;
+  showViewDetails: boolean;
+  onMessage: (p: NotablePerson) => void;
+  onGift:    (p: NotablePerson) => void;
+}) => (
+  <div className="flex-shrink-0 w-[170px] rounded-lg border border-border bg-card overflow-hidden flex flex-col">
     <div className="w-full aspect-[3/4] bg-muted overflow-hidden">
       <img src={p.photo} alt={p.name} className="w-full h-full object-cover" loading="lazy" />
     </div>
-    <div className="p-2 space-y-1">
-      <p className="text-[13px] font-bold text-foreground leading-tight text-center line-clamp-2 min-h-[2.4em]">
+    <div className="p-2.5 space-y-1.5 flex-1 flex flex-col">
+      {/* Row 1 — full name (own line, may wrap) */}
+      <p className="text-[14px] font-bold text-foreground leading-tight text-center break-words">
         {p.name}
       </p>
-      <div className="flex items-center justify-center gap-1 text-[12px]">
-        <span className="text-red-600 font-bold">{p.dateLabel}</span>
+
+      {/* Row 2 — date · friend / add friend */}
+      <div className="flex items-center justify-center gap-1.5 text-[13px] flex-wrap">
+        <span className="text-red-600 font-bold whitespace-nowrap">{p.dateLabel}</span>
         <span className="text-muted-foreground">|</span>
         {p.isFriend ? (
           <span className="text-primary font-semibold">Friend</span>
@@ -58,14 +70,29 @@ const PersonCard = ({ p, showViewDetails }: { p: NotablePerson; showViewDetails:
           </Link>
         )}
       </div>
-      <div className="flex items-center justify-center gap-1 text-[12px]">
-        <Link to={`/messages/${p.id}`} className="text-primary font-semibold hover:underline">Message</Link>
+
+      {/* Row 3 — message · send gift (functional) */}
+      <div className="flex items-center justify-center gap-1.5 text-[13px] mt-auto pt-1">
+        <button
+          type="button"
+          onClick={() => onMessage(p)}
+          className="text-primary font-semibold hover:underline focus:outline-none focus:underline"
+        >
+          Message
+        </button>
         <span className="text-muted-foreground">|</span>
-        <Link to={`/gifts/send/${p.id}`} className="text-primary font-semibold hover:underline">Send Gift</Link>
+        <button
+          type="button"
+          onClick={() => onGift(p)}
+          className="text-primary font-semibold hover:underline focus:outline-none focus:underline"
+        >
+          Send Gift
+        </button>
       </div>
+
       {showViewDetails && (
-        <div className="text-center">
-          <Link to={`/events/${p.id}`} className="text-[12px] text-primary font-semibold hover:underline">
+        <div className="text-center pt-0.5 border-t border-border/60">
+          <Link to={`/events/${p.id}`} className="text-[13px] text-primary font-semibold hover:underline">
             View Details
           </Link>
         </div>
@@ -73,6 +100,7 @@ const PersonCard = ({ p, showViewDetails }: { p: NotablePerson; showViewDetails:
     </div>
   </div>
 );
+
 
 const TimeRangeChips = ({
   active, onChange, counts, basePath,
