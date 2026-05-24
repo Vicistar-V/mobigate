@@ -578,14 +578,15 @@ export const CreatePostDialog = ({
           />
         </div>
 
-        <div className="flex justify-end gap-3 pt-2">
-          <Button variant="outline" onClick={() => { resetForm(); setOpen(false); }} disabled={submitting}>
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-2">
+          <Button variant="outline" onClick={() => { resetForm(); setOpen(false); }} disabled={submitting}
+            className="w-full sm:w-auto">
             Cancel
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={submitting || !isValidFee || !legalAccepted}
-            className={isMonetized ? "bg-amber-500 hover:bg-amber-600 text-white" : ""}
+            className={`w-full sm:w-auto ${isMonetized ? "bg-amber-500 hover:bg-amber-600 text-white" : ""}`}
           >
             {submitting
               ? `Uploading ${progress}%...`
