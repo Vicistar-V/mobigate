@@ -679,21 +679,21 @@ export default function ManageUsersPage() {
                     <Separator />
 
                     {/* Account Info */}
-                    <div className="space-y-2">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase">Account</p>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="rounded-lg border p-2.5">
-                          <p className="text-[10px] text-muted-foreground">Role</p>
-                          <div className="flex items-center gap-1 mt-0.5">
+                    <div className="space-y-2.5">
+                      <p className="text-sm font-semibold text-muted-foreground uppercase">Account</p>
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <div className="rounded-lg border p-3">
+                          <p className="text-xs text-muted-foreground">Role</p>
+                          <div className="flex items-center gap-1.5 mt-1">
                             {React.createElement(roleConfig[selectedUser.role].icon, {
-                              className: "h-3.5 w-3.5 text-primary",
+                              className: "h-4 w-4 text-primary",
                             })}
-                            <p className="text-sm font-medium">{roleConfig[selectedUser.role].label}</p>
+                            <p className="text-base font-semibold">{roleConfig[selectedUser.role].label}</p>
                           </div>
                         </div>
-                        <div className="rounded-lg border p-2.5">
-                          <p className="text-[10px] text-muted-foreground">Joined</p>
-                          <p className="text-sm font-medium mt-0.5">
+                        <div className="rounded-lg border p-3">
+                          <p className="text-xs text-muted-foreground">Joined</p>
+                          <p className="text-base font-semibold mt-1">
                             {selectedUser.joinDate.toLocaleDateString("en-GB", {
                               day: "numeric",
                               month: "short",
@@ -701,18 +701,18 @@ export default function ManageUsersPage() {
                             })}
                           </p>
                         </div>
-                        <div className="rounded-lg border p-2.5">
-                          <p className="text-[10px] text-muted-foreground">Communities</p>
-                          <p className="text-sm font-medium mt-0.5">{selectedUser.communitiesJoined}</p>
+                        <div className="rounded-lg border p-3">
+                          <p className="text-xs text-muted-foreground">Communities</p>
+                          <p className="text-base font-semibold mt-1">{selectedUser.communitiesJoined}</p>
                         </div>
-                        <div className="rounded-lg border p-2.5">
-                          <p className="text-[10px] text-muted-foreground">Transactions</p>
-                          <p className="text-sm font-medium mt-0.5">{selectedUser.totalTransactions}</p>
+                        <div className="rounded-lg border p-3">
+                          <p className="text-xs text-muted-foreground">Transactions</p>
+                          <p className="text-base font-semibold mt-1">{selectedUser.totalTransactions}</p>
                         </div>
                       </div>
-                      <div className="rounded-lg border p-2.5">
-                        <p className="text-[10px] text-muted-foreground">Last Active</p>
-                        <p className="text-sm font-medium mt-0.5">
+                      <div className="rounded-lg border p-3">
+                        <p className="text-xs text-muted-foreground">Last Active</p>
+                        <p className="text-base font-semibold mt-1">
                           {selectedUser.lastActive.toLocaleDateString("en-GB", {
                             day: "numeric",
                             month: "short",
