@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import type { VibeItem } from "@/data/communityVibesData";
+import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
 
 interface CreateVibeDialogProps {
   open: boolean;
