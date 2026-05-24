@@ -290,23 +290,32 @@ export function WallBannerSlideshow({
         </div>
       )}
 
-      {/* Owner overlay */}
+      {/* Owner overlay — "+" quick menu */}
       {isOwner && (
-        <div className="absolute bottom-3 right-3 z-20 flex gap-2">
-          {onManage && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onManage();
-              }}
-              className="bg-black/55 hover:bg-black/75 text-white backdrop-blur-sm text-[11px] px-2 py-1 rounded flex items-center gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
-            >
-              <Settings2 className="h-3 w-3" />
-              Manage
-            </button>
-          )}
+        <div className="absolute bottom-3 right-3 z-20">
+          <OwnerPlusMenu slide={current} />
         </div>
+      )}
+
+      {/* Owner-only edit dialogs (mounted inside slideshow so owner overlay is self-contained) */}
+      {isOwner && (
+        <>
+          <WallBannerEditDialog
+            open={createOpen}
+            onOpenChange={setCreateOpen}
+            ownerId={ownerId}
+            scope={scope}
+          />
+          <WallBannerEditDialog
+            open={!!editSlide}
+            onOpenChange={(o) => {
+              if (!o) setEditSlide(null);
+            }}
+            ownerId={ownerId}
+            scope={scope}
+            initial={editSlide}
+          />
+        </>
       )}
     </div>
   );
