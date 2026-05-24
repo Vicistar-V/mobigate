@@ -66,6 +66,8 @@ export const CreatePostDialog = ({
   const [showNewAlbum,     setShowNewAlbum]     = useState(false);
   const [submitting,       setSubmitting]       = useState(false);
   const [progress,         setProgress]         = useState(0);
+  const [legalAccepted,    setLegalAccepted]    = useState(false);
+
 
   // Monetization
   const [isMonetized,  setIsMonetized]  = useState(false);
