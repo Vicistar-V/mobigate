@@ -466,7 +466,7 @@ export default function WalletPage() {
 
   const wallets = [
     { ...MOBI_WALLET, label: "Mobi Wallet", sublabel: "Voucher Recharges • Network-spend only", icon: Coins, gradient: "from-[#1a1a2e] via-[#16213e] to-[#0f3460] dark:from-[#1a1a2e] dark:via-[#16213e] dark:to-[#0f3460]", accentBorder: "border-indigo-500/20", fundAction: () => setFundMobiDrawerOpen(true), fundLabel: "Fund Mobi Wallet", liquidatable: false },
-    { ...SUNDRY_WALLET, label: "Sundry Wallet", sublabel: "Earned Mobi • Liquidatable to Local", icon: Sparkles, gradient: "from-[#2e1a2e] via-[#3e1e3a] to-[#5a2d4a] dark:from-[#2e1a2e] dark:via-[#3e1e3a] dark:to-[#5a2d4a]", accentBorder: "border-fuchsia-500/20", fundAction: () => setLiquidateDrawerOpen(true), fundLabel: "Liquidate to Local Currency", liquidatable: true },
+    { ...SUNDRY_WALLET, label: "Sundry Wallet", sublabel: "Earned Mobi • Liquidatable to Local", icon: Sparkles, gradient: "from-[#2e1a2e] via-[#3e1e3a] to-[#5a2d4a] dark:from-[#2e1a2e] dark:via-[#3e1e3a] dark:to-[#5a2d4a]", accentBorder: "border-fuchsia-500/20", fundAction: () => setManageSundryOpen(true), fundLabel: "Manage Sundry Wallet", liquidatable: true },
     { ...LOCAL_WALLET, label: "Local Currency Wallet", sublabel: "Cash equivalence • Fund & spend", icon: Banknote, gradient: "from-[#1a2e1a] via-[#1e3a1e] to-[#2d4a2d] dark:from-[#1a2e1a] dark:via-[#1e3a1e] dark:to-[#2d4a2d]", accentBorder: "border-emerald-500/20", fundAction: () => setManageLocalOpen(true), fundLabel: "Manage Local Wallet", liquidatable: false },
   ];
   const currentWallet = wallets[activeWallet];
