@@ -319,6 +319,19 @@ export const NotableDates = () => {
           ))}
         </p>
       )}
+
+
+      {/* Send Gift dialog — reuses the same component as PeopleYouMayKnow */}
+      <SendGiftDialog
+        isOpen={giftOpen}
+        onClose={() => { setGiftOpen(false); setGiftUser(null); }}
+        recipientName={giftUser?.name || ""}
+        recipientId={giftUser?.id}
+        onSendGift={(_gift: GiftSelection) => {
+          setGiftOpen(false);
+          setGiftUser(null);
+        }}
+      />
     </Card>
   );
 };
