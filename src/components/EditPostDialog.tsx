@@ -39,6 +39,7 @@ export const EditPostDialog = ({ post, open, onOpenChange, onSave }: EditPostDia
   const [newMediaFile, setNewMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
   const [submitting,   setSubmitting]   = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
