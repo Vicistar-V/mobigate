@@ -148,6 +148,46 @@ export default function WalletPage() {
   const [processingMsg, setProcessingMsg] = useState("");
   const [selectedGateway, setSelectedGateway] = useState<PaymentGateway | null>(null);
 
+  // Manage Local Wallet drawer + Withdraw Local Wallet flow
+  const [manageLocalOpen, setManageLocalOpen] = useState(false);
+  const [withdrawDrawerOpen, setWithdrawDrawerOpen] = useState(false);
+  type WithdrawStep = "input" | "processing" | "success";
+  const [withdrawStep, setWithdrawStep] = useState<WithdrawStep>("input");
+  const [withdrawAmount, setWithdrawAmount] = useState<string>("");
+  const [withdrawBank, setWithdrawBank] = useState<string>("");
+  const [withdrawAccount, setWithdrawAccount] = useState<string>("");
+  const [withdrawProcessingMsg, setWithdrawProcessingMsg] = useState("");
+  const withdrawAmountNum = parseFloat(withdrawAmount) || 0;
+  const WITHDRAW_FEE_RATE = 0.01; // 1% processing fee
+  const withdrawFee = withdrawAmountNum * WITHDRAW_FEE_RATE;
+  const withdrawNet = Math.max(0, withdrawAmountNum - withdrawFee);
+
+  const resetWithdrawDrawer = () => {
+    setWithdrawStep("input");
+    setWithdrawAmount("");
+    setWithdrawBank("");
+    setWithdrawAccount("");
+    setWithdrawProcessingMsg("");
+    setWithdrawDrawerOpen(false);
+  };
+
+  const handleProcessWithdraw = useCallback(() => {
+    setWithdrawStep("processing");
+    const msgs = [
+      "Verifying Local Wallet balance...",
+      "Validating bank account...",
+      "Initiating bank transfer...",
+      "Finalising payout...",
+    ];
+    setWithdrawProcessingMsg(msgs[0]);
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      if (i < msgs.length) setWithdrawProcessingMsg(msgs[i]);
+      else { clearInterval(interval); setWithdrawStep("success"); }
+    }, 650);
+  }, []);
+
   // Fund Mobi wallet drawer
   const [fundMobiDrawerOpen, setFundMobiDrawerOpen] = useState(false);
   type MobiFundStep = "options" | "voucher" | "processing" | "success";
@@ -426,7 +466,7 @@ export default function WalletPage() {
   const wallets = [
     { ...MOBI_WALLET, label: "Mobi Wallet", sublabel: "Voucher Recharges • Network-spend only", icon: Coins, gradient: "from-[#1a1a2e] via-[#16213e] to-[#0f3460] dark:from-[#1a1a2e] dark:via-[#16213e] dark:to-[#0f3460]", accentBorder: "border-indigo-500/20", fundAction: () => setFundMobiDrawerOpen(true), fundLabel: "Fund Mobi Wallet", liquidatable: false },
     { ...SUNDRY_WALLET, label: "Sundry Wallet", sublabel: "Earned Mobi • Liquidatable to Local", icon: Sparkles, gradient: "from-[#2e1a2e] via-[#3e1e3a] to-[#5a2d4a] dark:from-[#2e1a2e] dark:via-[#3e1e3a] dark:to-[#5a2d4a]", accentBorder: "border-fuchsia-500/20", fundAction: () => setLiquidateDrawerOpen(true), fundLabel: "Liquidate to Local Currency", liquidatable: true },
-    { ...LOCAL_WALLET, label: "Local Currency Wallet", sublabel: "Cash equivalence • Fund & spend", icon: Banknote, gradient: "from-[#1a2e1a] via-[#1e3a1e] to-[#2d4a2d] dark:from-[#1a2e1a] dark:via-[#1e3a1e] dark:to-[#2d4a2d]", accentBorder: "border-emerald-500/20", fundAction: () => setFundDrawerOpen(true), fundLabel: "Fund Local Wallet", liquidatable: false },
+    { ...LOCAL_WALLET, label: "Local Currency Wallet", sublabel: "Cash equivalence • Fund & spend", icon: Banknote, gradient: "from-[#1a2e1a] via-[#1e3a1e] to-[#2d4a2d] dark:from-[#1a2e1a] dark:via-[#1e3a1e] dark:to-[#2d4a2d]", accentBorder: "border-emerald-500/20", fundAction: () => setManageLocalOpen(true), fundLabel: "Manage Local Wallet", liquidatable: false },
   ];
   const currentWallet = wallets[activeWallet];
 
@@ -632,7 +672,7 @@ export default function WalletPage() {
       </div>
 
       {/* ── Transaction Section ── */}
-      <div className="px-4 mt-6">
+      <div id="transactions-section" className="px-4 mt-6 scroll-mt-20">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-bold text-foreground">Transactions</h2>
           <Badge variant="secondary" className="text-xs font-medium">
@@ -1577,6 +1617,213 @@ export default function WalletPage() {
         </DrawerContent>
       </Drawer>
       {/* Fund Wallet Selection Drawer */}
+      {/* ── Manage Local Wallet drawer ── */}
+      <Drawer open={manageLocalOpen} onOpenChange={setManageLocalOpen}>
+        <DrawerContent className="max-h-[70vh]">
+          <DrawerHeader>
+            <DrawerTitle className="text-center">Manage Local Wallet</DrawerTitle>
+            <p className="text-sm text-muted-foreground text-center">Choose an action for your Local Currency Wallet</p>
+          </DrawerHeader>
+          <div className="px-4 pb-6 flex flex-col gap-3">
+            {/* Fund */}
+            <button
+              onClick={() => { setManageLocalOpen(false); setTimeout(() => setFundDrawerOpen(true), 220); }}
+              className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-border/50 bg-card hover:border-emerald-500/40 transition-all touch-manipulation active:scale-[0.98]"
+            >
+              <div className="h-12 w-12 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                <Plus className="h-6 w-6 text-emerald-600" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-semibold text-foreground">Fund Local Wallet</p>
+                <p className="text-xs text-muted-foreground">Top up with Naira via card or bank</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </button>
+
+            {/* Withdraw */}
+            <button
+              onClick={() => { setManageLocalOpen(false); setTimeout(() => setWithdrawDrawerOpen(true), 220); }}
+              className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-border/50 bg-card hover:border-amber-500/40 transition-all touch-manipulation active:scale-[0.98]"
+            >
+              <div className="h-12 w-12 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                <ArrowUpRight className="h-6 w-6 text-amber-600" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-semibold text-foreground">Withdraw Local Fund</p>
+                <p className="text-xs text-muted-foreground">Cash out to your linked bank account</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </button>
+
+            {/* View Transactions */}
+            <button
+              onClick={() => {
+                setManageLocalOpen(false);
+                setTimeout(() => {
+                  document.getElementById("transactions-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }, 220);
+              }}
+              className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-border/50 bg-card hover:border-indigo-500/40 transition-all touch-manipulation active:scale-[0.98]"
+            >
+              <div className="h-12 w-12 rounded-xl bg-indigo-500/10 flex items-center justify-center shrink-0">
+                <Clock className="h-6 w-6 text-indigo-600" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-semibold text-foreground">View Transaction History</p>
+                <p className="text-xs text-muted-foreground">All funding, withdrawals & spend</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </button>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* ── Withdraw Local Wallet drawer ── */}
+      <Drawer open={withdrawDrawerOpen} onOpenChange={open => { if (!open) resetWithdrawDrawer(); }}>
+        <DrawerContent className="max-h-[92vh] flex flex-col overflow-hidden">
+          <div className="shrink-0 px-5 pt-3 pb-2 border-b border-border/30">
+            <p className="text-base font-bold text-foreground">Withdraw Local Fund</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {withdrawStep === "input" && "Cash out to your linked bank account"}
+              {withdrawStep === "processing" && "Processing your withdrawal..."}
+              {withdrawStep === "success" && "Withdrawal request submitted"}
+            </p>
+          </div>
+
+          <div className="flex-1 overflow-y-auto touch-auto overscroll-contain min-h-0 px-5 py-4 space-y-4">
+            {withdrawStep === "input" && (
+              <>
+                <div className="rounded-2xl p-3.5 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20">
+                  <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-medium uppercase tracking-wider">Available Local Balance</p>
+                  <p className="text-2xl font-black text-foreground tabular-nums mt-1">₦{formatNumberFull(LOCAL_WALLET.balance)}</p>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-foreground mb-1.5 block">Amount to Withdraw (₦)</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base font-bold text-muted-foreground pointer-events-none">₦</span>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      placeholder="0.00"
+                      value={withdrawAmount}
+                      onChange={e => setWithdrawAmount(e.target.value.replace(/[^\d.]/g, ""))}
+                      onPointerDown={e => e.stopPropagation()}
+                      className="w-full h-14 pl-8 pr-3 rounded-xl bg-card border-2 border-border/60 text-xl font-bold tabular-nums focus:border-primary focus:outline-none transition-all"
+                    />
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 mt-2.5">
+                    {[5000, 10000, 25000, 50000, LOCAL_WALLET.balance].map((amt, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setWithdrawAmount(String(amt))}
+                        className="px-3 py-1.5 rounded-lg bg-muted/50 text-xs font-semibold hover:bg-muted touch-manipulation active:scale-95 transition-all"
+                      >
+                        {idx === 4 ? "Max" : `₦${formatNumberFull(amt)}`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3">
+                  <div>
+                    <label className="text-xs font-semibold text-foreground mb-1.5 block">Destination Bank</label>
+                    <Select value={withdrawBank} onValueChange={setWithdrawBank}>
+                      <SelectTrigger className="h-12 rounded-xl bg-card border-2 border-border/60">
+                        <SelectValue placeholder="Select bank" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="gtb">GTBank</SelectItem>
+                        <SelectItem value="zenith">Zenith Bank</SelectItem>
+                        <SelectItem value="access">Access Bank</SelectItem>
+                        <SelectItem value="firstbank">First Bank</SelectItem>
+                        <SelectItem value="uba">UBA</SelectItem>
+                        <SelectItem value="opay">OPay</SelectItem>
+                        <SelectItem value="kuda">Kuda</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-foreground mb-1.5 block">Account Number</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={10}
+                      placeholder="10-digit NUBAN"
+                      value={withdrawAccount}
+                      onChange={e => setWithdrawAccount(e.target.value.replace(/[^\d]/g, ""))}
+                      onPointerDown={e => e.stopPropagation()}
+                      className="w-full h-12 px-3 rounded-xl bg-card border-2 border-border/60 text-sm font-mono tabular-nums focus:border-primary focus:outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                {withdrawAmountNum > 0 && (
+                  <div className="rounded-2xl border-2 border-emerald-500/30 bg-emerald-500/5 p-4 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">You Withdraw</span>
+                      <span className="text-sm font-bold text-foreground">₦{formatNumberFull(withdrawAmountNum)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">Processing Fee (1%)</span>
+                      <span className="text-xs font-medium text-rose-600">−₦{formatNumberFull(withdrawFee)}</span>
+                    </div>
+                    <div className="flex items-center justify-between pt-2 border-t border-border/40">
+                      <span className="text-sm font-bold text-foreground">Bank Receives</span>
+                      <span className="text-lg font-black text-emerald-700 dark:text-emerald-400">₦{formatNumberFull(withdrawNet)}</span>
+                    </div>
+                  </div>
+                )}
+
+                <Button
+                  className="w-full h-12 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-600 to-teal-600 text-white touch-manipulation active:scale-[0.97] disabled:opacity-50"
+                  disabled={
+                    withdrawAmountNum <= 0
+                    || withdrawAmountNum > LOCAL_WALLET.balance
+                    || !withdrawBank
+                    || withdrawAccount.length !== 10
+                  }
+                  onClick={handleProcessWithdraw}
+                >
+                  <ArrowUpRight className="h-4 w-4 mr-2" />
+                  {withdrawAmountNum > LOCAL_WALLET.balance ? "Exceeds Balance" : "Confirm Withdrawal"}
+                </Button>
+              </>
+            )}
+
+            {withdrawStep === "processing" && (
+              <div className="flex flex-col items-center justify-center py-10 gap-3">
+                <Loader2 className="h-10 w-10 text-emerald-600 animate-spin" />
+                <p className="text-sm font-bold text-foreground">Processing Withdrawal</p>
+                <p className="text-xs text-muted-foreground text-center">{withdrawProcessingMsg}</p>
+              </div>
+            )}
+
+            {withdrawStep === "success" && (
+              <>
+                <div className="flex flex-col items-center text-center gap-2 py-4">
+                  <div className="h-14 w-14 rounded-full bg-emerald-500/15 flex items-center justify-center">
+                    <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+                  </div>
+                  <p className="text-lg font-black text-foreground">Withdrawal Submitted!</p>
+                  <p className="text-xs text-muted-foreground">Funds typically arrive within minutes</p>
+                  <p className="text-2xl font-black text-emerald-600 mt-2">−₦{formatNumberFull(withdrawAmountNum)}</p>
+                </div>
+                <div className="rounded-xl bg-muted/40 p-3 space-y-1.5">
+                  <div className="flex justify-between"><span className="text-xs text-muted-foreground">Destination</span><span className="text-xs font-semibold text-foreground uppercase">{withdrawBank}</span></div>
+                  <div className="flex justify-between"><span className="text-xs text-muted-foreground">Account</span><span className="text-xs font-mono text-foreground">{withdrawAccount}</span></div>
+                  <div className="flex justify-between"><span className="text-xs text-muted-foreground">Bank Receives</span><span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">₦{formatNumberFull(withdrawNet)}</span></div>
+                  <div className="flex justify-between"><span className="text-xs text-muted-foreground">New Local Balance</span><span className="text-xs font-bold text-foreground">₦{formatNumberFull(LOCAL_WALLET.balance - withdrawAmountNum)}</span></div>
+                </div>
+                <Button className="w-full h-11 rounded-xl font-bold touch-manipulation active:scale-[0.97]" onClick={resetWithdrawDrawer}>
+                  Done
+                </Button>
+              </>
+            )}
+          </div>
+        </DrawerContent>
+      </Drawer>
+
       <Drawer open={fundSelectOpen} onOpenChange={setFundSelectOpen}>
         <DrawerContent className="max-h-[60vh]">
           <DrawerHeader>
