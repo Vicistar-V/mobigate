@@ -165,15 +165,22 @@ export const EditPostDialog = ({ post, open, onOpenChange, onSave }: EditPostDia
 
         </div>
 
-        <div className="flex justify-end gap-2">
+        <LegalCopyrightAcceptance
+          accepted={legalAccepted}
+          onAcceptedChange={setLegalAccepted}
+          className="mt-2"
+        />
+
+        <div className="flex justify-end gap-2 mt-3">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={submitting}>
+          <Button onClick={handleSave} disabled={submitting || !legalAccepted}>
             {submitting ? "Saving..." : "Save Changes"}
           </Button>
         </div>
       </DialogContent>
     </Dialog>
+
   );
 };
