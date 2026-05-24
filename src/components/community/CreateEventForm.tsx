@@ -28,6 +28,8 @@ interface MediaFile {
 export const CreateEventForm = ({ onEventCreated, canPost = true, className }: CreateEventFormProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
+  
   
   // Form state
   const [title, setTitle] = useState("");
