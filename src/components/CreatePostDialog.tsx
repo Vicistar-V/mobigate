@@ -296,10 +296,10 @@ export const CreatePostDialog = ({
         </DialogTrigger>
       )}
 
-      <DialogContent className="sm:max-w-[620px] max-h-[92dvh] overflow-y-auto overscroll-contain p-4 sm:p-6">
-        <DialogHeader>
-          <DialogTitle>Create a Post</DialogTitle>
-          <DialogDescription>Share your content with the community.</DialogDescription>
+      <DialogContent className="w-[calc(100vw-0.5rem)] sm:w-full sm:max-w-[620px] max-h-[92dvh] overflow-y-auto overscroll-contain px-3 py-4 sm:p-6 rounded-xl">
+        <DialogHeader className="text-left space-y-1 pr-6">
+          <DialogTitle className="text-base sm:text-lg leading-snug break-words">Create a Post</DialogTitle>
+          <DialogDescription className="text-sm leading-snug break-words">Share your content with the community.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
@@ -466,7 +466,7 @@ export const CreatePostDialog = ({
           )}
 
           {/* ── MONETIZATION SECTION ── */}
-          <div className={`rounded-xl border-2 p-4 transition-all ${isMonetized ? "border-amber-300 bg-amber-50" : "border-dashed border-muted"}`}>
+          <div className={`rounded-xl border-2 p-3 sm:p-4 transition-all ${isMonetized ? "border-amber-300 bg-amber-50" : "border-dashed border-muted"}`}>
             {/* Toggle */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -578,14 +578,15 @@ export const CreatePostDialog = ({
           />
         </div>
 
-        <div className="flex justify-end gap-3 pt-2">
-          <Button variant="outline" onClick={() => { resetForm(); setOpen(false); }} disabled={submitting}>
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-2">
+          <Button variant="outline" onClick={() => { resetForm(); setOpen(false); }} disabled={submitting}
+            className="w-full sm:w-auto">
             Cancel
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={submitting || !isValidFee || !legalAccepted}
-            className={isMonetized ? "bg-amber-500 hover:bg-amber-600 text-white" : ""}
+            className={`w-full sm:w-auto ${isMonetized ? "bg-amber-500 hover:bg-amber-600 text-white" : ""}`}
           >
             {submitting
               ? `Uploading ${progress}%...`
