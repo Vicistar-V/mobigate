@@ -27,6 +27,8 @@ import { useUserProfile, useCurrentUserId, useFeedPosts } from "@/hooks/useWindo
 import { feedPosts as fallbackFeedPosts } from "@/data/posts";
 import heroAdBanner from "@/assets/hero-ad-banner.jpg";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
+import { WallBannerSlideshow } from "@/components/wall-banner/WallBannerSlideshow";
+import { WallBannerManagerDialog } from "@/components/wall-banner/WallBannerManagerDialog";
 
 export const GreetingSection = () => {
   const profile = useUserProfile();
@@ -66,6 +68,9 @@ export const GreetingSection = () => {
   const [viewerStartIndex, setViewerStartIndex] = useState(0);
   const [ownActionsOpen, setOwnActionsOpen] = useState(false);
   const [editPostOpen, setEditPostOpen] = useState(false);
+  const [wallBannerManagerOpen, setWallBannerManagerOpen] = useState(false);
+  const [bannerViewerOpen, setBannerViewerOpen] = useState(false);
+  const [viewerItems, setViewerItems] = useState<MediaItem[]>([]);
   const safeFeaturedIdx = Math.min(featuredPublicIdx, Math.max(0, thumbnailPosts.length - 1));
   const featuredPublicPost = thumbnailPosts[safeFeaturedIdx] || thumbnailPosts[0] || myLatestOwnPost;
   // Keep legacy names so the rest of the file keeps compiling unchanged
@@ -190,21 +195,32 @@ export const GreetingSection = () => {
     <div className="space-y-3">
       {/* ============ HERO BLOCK ============ */}
       <Card className="overflow-hidden rounded-3xl shadow-[0_6px_20px_-8px_hsl(var(--primary)/0.45)]">
-        {/* Top Advert Banner — full image */}
-        <a
-          href={heroAd.ctaUrl}
-          className="block relative active:opacity-95 transition-opacity touch-manipulation border-[5px] border-[hsl(212_95%_50%)] rounded-2xl overflow-hidden m-2 mb-0"
-        >
-          <img
-            src={heroAdBanner}
-            alt={`${heroAd.advertiser} — ${heroAd.headline}`}
-            className="w-full h-[150px] sm:h-[180px] object-cover"
+        {/* Top Wall Banner — user-managed rotating slideshow */}
+        <div className="m-2 mb-0 border-[5px] border-[hsl(212_95%_50%)] rounded-2xl overflow-hidden">
+          <WallBannerSlideshow
+            ownerId={currentUserId}
+            scope="home"
+            fallbackImage={heroAdBanner}
+            fallbackAlt={`${heroAd.advertiser} — ${heroAd.headline}`}
+            isOwner
+            heightClass="h-[150px] sm:h-[180px]"
+            onManage={() => setWallBannerManagerOpen(true)}
+            onChangeFallback={() => setWallBannerManagerOpen(true)}
+            onOpenViewer={(slide) => {
+              setViewerItems([
+                {
+                  id: slide.id,
+                  url: slide.mediaUrl,
+                  type: slide.mediaType,
+                  author: profile.fullName,
+                  title: slide.caption,
+                } as MediaItem,
+              ]);
+              setViewerStartIndex(0);
+              setBannerViewerOpen(true);
+            }}
           />
-          {/* Sponsored chip */}
-          <span className="absolute top-1.5 right-1.5 bg-black/50 text-white text-[9px] font-semibold px-2 py-0.5 rounded-sm uppercase tracking-wider">
-            Sponsored
-          </span>
-        </a>
+        </div>
 
         {/* Identity Row — overlapping avatar */}
         <div className="px-3 pb-3 -mt-12 relative">
@@ -749,6 +765,24 @@ export const GreetingSection = () => {
 
       {/* Service Unavailable Dialog */}
       <Dialog />
+
+      {/* Wall Banner — owner manager */}
+      <WallBannerManagerDialog
+        open={wallBannerManagerOpen}
+        onOpenChange={setWallBannerManagerOpen}
+        ownerId={currentUserId}
+        scope="home"
+      />
+
+      {/* Wall Banner — big viewer for slides with "Open in viewer" action */}
+      <MediaGalleryViewer
+        open={bannerViewerOpen}
+        onOpenChange={setBannerViewerOpen}
+        items={viewerItems}
+        initialIndex={0}
+        showActions={false}
+        galleryType="banner"
+      />
     </div>
   );
 };

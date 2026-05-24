@@ -40,6 +40,8 @@ import { ProfileCommunityTab } from "@/components/profile/ProfileCommunityTab";
 import { ProfileMobiQuizTab }  from "@/components/profile/ProfileMobiQuizTab";
 import { ProfileContentsTab }  from "@/components/profile/ProfileContentsTab";
 import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
+import { WallBannerSlideshow } from "@/components/wall-banner/WallBannerSlideshow";
+import type { WallBannerSlide } from "@/types/wallBanner";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -275,18 +277,26 @@ const UserProfile = () => {
         {/* ── Profile Header Card ── */}
         <Card className="mb-6 overflow-hidden">
 
-          {/* Banner — click to view full size */}
-          <div className="relative h-48 bg-muted">
-            <img
-              src={displayBanner}
-              alt="Profile Banner"
-              className="w-full h-full object-cover cursor-pointer"
-              onClick={() => {
-                setGalleryItems([{ id: "banner", url: displayBanner as string, type: "photo", author: profile.name }]);
-                setGalleryIdx(0); setGalleryOpen(true);
-              }}
-            />
-          </div>
+          {/* Banner — rotating wall banner slideshow (public/read-only) */}
+          <WallBannerSlideshow
+            ownerId={profile.id}
+            scope="profile"
+            fallbackImage={displayBanner as string}
+            fallbackAlt="Profile Banner"
+            onOpenViewer={(slide: WallBannerSlide) => {
+              setGalleryItems([
+                {
+                  id: slide.id,
+                  url: slide.mediaUrl,
+                  type: slide.mediaType,
+                  author: profile.name,
+                  title: slide.caption,
+                } as MediaItem,
+              ]);
+              setGalleryIdx(0);
+              setGalleryOpen(true);
+            }}
+          />
 
           <div className="px-6 pb-6">
             {/* Avatar row */}
