@@ -11,7 +11,8 @@ import {
   Wallet, ArrowUpRight, ArrowDownLeft, Plus, ChevronRight, ChevronLeft,
   Search, Filter, ArrowUpDown, Clock, CheckCircle2,
   XCircle, AlertCircle, Coins, Banknote, Loader2, Sparkles, ShieldCheck,
-  CreditCard, Building2, Ticket, MoreHorizontal, ArrowLeft, Copy, Eye, EyeOff, Hash
+  CreditCard, Building2, Ticket, MoreHorizontal, ArrowLeft, Copy, Eye, EyeOff, Hash,
+  ArrowRightLeft, ChevronDown, ChevronUp
 } from "lucide-react";
 import { formatNumberFull } from "@/lib/financialDisplay";
 import { cn } from "@/lib/utils";
@@ -53,6 +54,7 @@ const SUNDRY_WALLET = {
 // platform margin and discouraging discount-arbitrage round-trips.
 // Base: 1 Mobi = 1 NGN (Buying), 1 Mobi = 0.96 NGN (Selling)  →  4% spread.
 const SELLING_RATE_NGN_PER_MOBI = 0.96;
+const BUYING_RATE_NGN_PER_MOBI = 1.0;
 
 interface WalletTransaction {
   id: string;
@@ -170,6 +172,19 @@ export default function WalletPage() {
   const liquidateServiceCharge = liquidateGrossNGN * LIQUIDATION_SERVICE_CHARGE_RATE;
   const liquidatePayoutNGN = liquidateGrossNGN - liquidateServiceCharge;
   const liquidateMaxAmount = Math.floor(SUNDRY_WALLET.balance * 0.9);
+
+  // Exchange Rate Converter — user-facing utility
+  const [converterOpen, setConverterOpen] = useState(false);
+  type ConvDirection = "mobi-to-local" | "local-to-mobi";
+  const [convDirection, setConvDirection] = useState<ConvDirection>("mobi-to-local");
+  const [convInput, setConvInput] = useState<string>("");
+  const convInputNum = parseFloat(convInput) || 0;
+  // Mobi → Local uses Selling Rate; Local → Mobi uses Buying Rate (1 Mobi = ₦1)
+  const convResult = convDirection === "mobi-to-local"
+    ? convInputNum * SELLING_RATE_NGN_PER_MOBI
+    : convInputNum / BUYING_RATE_NGN_PER_MOBI;
+  const flipConverter = () =>
+    setConvDirection(d => d === "mobi-to-local" ? "local-to-mobi" : "mobi-to-local");
 
   const handleProcessLiquidate = useCallback(() => {
     setLiquidateStep("processing");
@@ -502,6 +517,118 @@ export default function WalletPage() {
         <p className="text-center text-xs text-muted-foreground/50 mt-3 flex items-center justify-center gap-1">
           <ChevronLeft className="h-3 w-3" /> Swipe to switch <ChevronRight className="h-3 w-3" />
         </p>
+      </div>
+
+      {/* ── Exchange Rate Converter ── */}
+      <div className="px-4 mt-5">
+        <div className="rounded-2xl border-2 border-border/50 bg-card overflow-hidden">
+          <button
+            onClick={() => setConverterOpen(o => !o)}
+            className="w-full flex items-center justify-between gap-2 px-4 py-3 touch-manipulation active:bg-muted/40 transition-colors"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500/15 to-fuchsia-500/15 border border-indigo-500/20 flex items-center justify-center shrink-0">
+                <ArrowRightLeft className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <div className="text-left min-w-0">
+                <p className="text-sm font-bold text-foreground truncate">Exchange Rate Converter</p>
+                <p className="text-[10.5px] text-muted-foreground truncate">Mobi 💲 ↔ Local Currency 💲</p>
+              </div>
+            </div>
+            {converterOpen
+              ? <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" />
+              : <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />}
+          </button>
+
+          {converterOpen && (
+            <div className="px-4 pb-4 pt-1 space-y-3 border-t border-border/40">
+              {/* Direction pills */}
+              <div className="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-muted/40">
+                <button
+                  onClick={() => setConvDirection("mobi-to-local")}
+                  className={`py-2 rounded-lg text-[11px] font-semibold transition-all touch-manipulation ${
+                    convDirection === "mobi-to-local"
+                      ? "bg-card shadow-sm text-foreground"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  Mobi → Local 💲
+                </button>
+                <button
+                  onClick={() => setConvDirection("local-to-mobi")}
+                  className={`py-2 rounded-lg text-[11px] font-semibold transition-all touch-manipulation ${
+                    convDirection === "local-to-mobi"
+                      ? "bg-card shadow-sm text-foreground"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  Local 💲 → Mobi
+                </button>
+              </div>
+
+              {/* From input */}
+              <div>
+                <label className="text-[10.5px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  You enter ({convDirection === "mobi-to-local" ? "Mobi" : "Local Currency"})
+                </label>
+                <div className="relative mt-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base font-bold text-muted-foreground pointer-events-none">
+                    {convDirection === "mobi-to-local" ? "M" : "₦"}
+                  </span>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    placeholder="0.00"
+                    value={convInput}
+                    onChange={e => setConvInput(e.target.value.replace(/[^\d.]/g, ""))}
+                    className="w-full h-12 pl-8 pr-3 rounded-xl bg-muted/30 border-2 border-border/60 text-lg font-bold tabular-nums focus:border-primary focus:outline-none transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Flip */}
+              <div className="flex justify-center">
+                <button
+                  onClick={flipConverter}
+                  className="h-9 w-9 rounded-full bg-muted/60 hover:bg-muted flex items-center justify-center touch-manipulation active:scale-90 transition-all"
+                  aria-label="Flip conversion direction"
+                >
+                  <ArrowUpDown className="h-4 w-4 text-foreground" />
+                </button>
+              </div>
+
+              {/* Result */}
+              <div className="rounded-xl border-2 border-emerald-500/30 bg-emerald-500/5 p-3">
+                <p className="text-[10.5px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  You receive ({convDirection === "mobi-to-local" ? "Local Currency" : "Mobi"})
+                </p>
+                <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400 tabular-nums mt-0.5">
+                  {convDirection === "mobi-to-local" ? "₦" : "M"}{formatNumberFull(convResult)}
+                </p>
+              </div>
+
+              {/* Live rates */}
+              <div className="rounded-xl bg-muted/30 p-3 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] text-muted-foreground">Buying Rate (Local → Mobi)</span>
+                  <span className="text-[11px] font-mono font-semibold text-foreground">
+                    ₦{BUYING_RATE_NGN_PER_MOBI.toFixed(2)} = 1 Mobi
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] text-muted-foreground">Selling Rate (Mobi → Local)</span>
+                  <span className="text-[11px] font-mono font-semibold text-foreground">
+                    1 Mobi = ₦{SELLING_RATE_NGN_PER_MOBI.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-[10px] text-muted-foreground leading-relaxed">
+                Indicative quote only. Actual amounts on Recharge or Liquidation may differ slightly due to applicable fees.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ── Transaction Section ── */}
@@ -1579,10 +1706,6 @@ export default function WalletPage() {
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-muted-foreground">You Sell</span>
                         <span className="text-sm font-bold text-fuchsia-700 dark:text-fuchsia-400">−M{formatNumberFull(liquidateMobiNum)}</span>
-                      </div>
-                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">Platform Spread (4%)</span>
-                        <span className="text-xs font-medium text-amber-600">₦{formatNumberFull(liquidateSpread)}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-muted-foreground">Service Charge (5%)</span>
