@@ -384,6 +384,7 @@ export const useChat = () => {
     loadingConversations: loadingConvs,
     sendMessage,
     selectConversation,
+    openConversationWithUser,
     editMessage,
     deleteMessage,
     deleteSelectedMessages,
