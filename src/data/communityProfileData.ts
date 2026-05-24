@@ -11,6 +11,13 @@ const communityProfiles: CommunityProfile[] = [
     motto: "Innovation through collaboration",
     coverImage: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&q=80",
     bannerImage: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1200&q=80",
+    bannerMedia: [
+      { id: "lti-b1", url: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1600&q=80", type: "photo", title: "Tech Meetup 2024" },
+      { id: "lti-b2", url: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1600&q=80", type: "photo", title: "Innovation Hub" },
+      { id: "lti-b3", url: "https://images.unsplash.com/photo-1531497865144-0464ef8fb9a9?w=1600&q=80", type: "photo", title: "Hackathon Night" },
+      { id: "lti-b4", url: "https://cdn.coverr.co/videos/coverr-typing-on-laptop-4632/1080p.mp4", type: "video", title: "Welcome Reel", thumbnail: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1600&q=80" },
+    ],
+    bannerRotateSeconds: 8,
     logoImage: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&q=80",
     type: "Club",
     memberCount: 245,
