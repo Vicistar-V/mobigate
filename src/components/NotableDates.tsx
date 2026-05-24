@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type MainTab   = "birthdays" | "events";
-type TimeRange = "today" | "tomorrow" | "others";
+type TimeRange = "today" | "tomorrow" | "others" | "yesterday" | "next-week" | "last-week" | "next-month" | "last-month";
 type EventType = "wedding" | "burial" | "others";
 
 interface NotablePerson {
@@ -209,6 +209,10 @@ export const NotableDates = () => {
     return people.map(p => ({ ...p, eventType, eventLabel: eventType === "wedding" ? "Wedding" : eventType === "burial" ? "Burial" : "Event" }));
   }, [tab, bdayRange, eventRange, eventType, people]);
 
+  const activeRange = tab === "birthdays" ? bdayRange : eventRange;
+  const setActiveRange = (r: TimeRange) => (tab === "birthdays" ? setBdayRange(r) : setEventRange(r));
+  const rangeCounts = tab === "birthdays" ? BDAY_COUNTS : EVENT_COUNTS;
+
   return (
     <Card className="p-4 space-y-3 hover:shadow-md transition-shadow overflow-hidden">
       {/* Title */}
@@ -280,23 +284,26 @@ export const NotableDates = () => {
         )}
       </div>
 
-      {/* Others [Dates] inline links */}
+      {/* Others [Dates] inline filter buttons */}
       <p className="text-[13px] text-foreground leading-relaxed">
         <span className="font-bold">Others [Dates]:</span>{" "}
-        {[
-          { label: "Yesterday",  count: tab === "birthdays" ? BDAY_COUNTS.yesterday : EVENT_COUNTS.yesterday,  range: "yesterday" },
-          { label: "Next Week",  count: tab === "birthdays" ? BDAY_COUNTS.nextWeek  : EVENT_COUNTS.nextWeek,  range: "next-week" },
-          { label: "Last Week",  count: tab === "birthdays" ? BDAY_COUNTS.lastWeek  : EVENT_COUNTS.lastWeek,  range: "last-week" },
-          { label: "Next Month", count: tab === "birthdays" ? BDAY_COUNTS.nextMonth : EVENT_COUNTS.nextMonth, range: "next-month" },
-          { label: "Last Month", count: tab === "birthdays" ? BDAY_COUNTS.lastMonth : EVENT_COUNTS.lastMonth, range: "last-month" },
-        ].map((o, i, arr) => (
+        {([
+          { label: "Yesterday",  count: rangeCounts.yesterday,  range: "yesterday"   as TimeRange },
+          { label: "Next Week",  count: rangeCounts.nextWeek,   range: "next-week"   as TimeRange },
+          { label: "Last Week",  count: rangeCounts.lastWeek,   range: "last-week"   as TimeRange },
+          { label: "Next Month", count: rangeCounts.nextMonth,  range: "next-month"  as TimeRange },
+          { label: "Last Month", count: rangeCounts.lastMonth,  range: "last-month"  as TimeRange },
+        ]).map((o, i, arr) => (
           <span key={o.range}>
-            <Link
-              to={`/friends/${tab === "birthdays" ? "birthdays" : "events"}?range=${o.range}`}
-              className="text-primary font-semibold hover:underline"
+            <button
+              type="button"
+              onClick={() => setActiveRange(o.range)}
+              className={`font-semibold transition-colors ${
+                activeRange === o.range ? "text-primary underline" : "text-primary hover:underline"
+              }`}
             >
               {o.label} [{o.count}]
-            </Link>
+            </button>
             {i < arr.length - 1 ? ", " : ""}
           </span>
         ))}
