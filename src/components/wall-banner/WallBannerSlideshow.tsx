@@ -63,7 +63,9 @@ export function WallBannerSlideshow({
   const timerRef = useRef<number | null>(null);
   const { toast } = useToast();
   const [createOpen, setCreateOpen] = useState(false);
+  const [bulkOpen, setBulkOpen] = useState(false);
   const [editSlide, setEditSlide] = useState<WallBannerSlide | null>(null);
+
 
   // The owner "+" quick-menu trigger and content (reused for both states)
   const OwnerPlusMenu = ({ slide }: { slide?: WallBannerSlide | null }) => (
