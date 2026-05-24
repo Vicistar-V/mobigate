@@ -219,6 +219,33 @@ export const useChat = () => {
     }
   }, [markAsRead, fetchMessages]);
 
+  // Open (or create optimistically) a conversation with a given user
+  const openConversationWithUser = useCallback((userId: string, userName: string, avatar?: string) => {
+    let convId: string | null = null;
+    setConversations(prev => {
+      const existing = prev.find(c => c.user.id === userId);
+      if (existing) {
+        convId = existing.id;
+        return prev;
+      }
+      const tempId = `temp-conv-${userId}`;
+      convId = tempId;
+      const stub: Conversation = {
+        id: tempId,
+        user: { id: userId, name: userName, avatar: avatar || "", isOnline: false },
+        messages: [],
+        lastMessage: "",
+        lastMessageTime: new Date(),
+        unreadCount: 0,
+      };
+      return [stub, ...prev];
+    });
+    if (convId) {
+      setActiveConvId(convId);
+      setSelectedMessages(new Set());
+    }
+  }, []);
+
   // ── Edit message ────────────────────────────────────────────────────────────
   const editMessage = useCallback(async (messageId: string, newContent: string) => {
     if (!activeConvId) return;
@@ -357,6 +384,7 @@ export const useChat = () => {
     loadingConversations: loadingConvs,
     sendMessage,
     selectConversation,
+    openConversationWithUser,
     editMessage,
     deleteMessage,
     deleteSelectedMessages,

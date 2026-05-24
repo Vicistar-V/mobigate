@@ -26,6 +26,7 @@ export const MessagesSheet = () => {
     loadingConversations,
     sendMessage,
     selectConversation,
+    openConversationWithUser,
     editMessage,
     deleteMessage,
     deleteSelectedMessages,
@@ -46,22 +47,29 @@ export const MessagesSheet = () => {
   // Listen for openChatWithUser events (from ChatWithFriendsDialog)
   useEffect(() => {
     const handleOpenChat = (event: CustomEvent) => {
-      const { conversationId, userId, userName } = event.detail;
+      const { conversationId, userId, userName, userAvatar } = event.detail || {};
 
+      // Try existing conversation by id, then by user id, then fuzzy name match
       let conv = conversations.find(c => c.id === conversationId);
       if (!conv && userId)   conv = conversations.find(c => c.user.id === userId);
       if (!conv && userName) conv = conversations.find(c =>
         c.user.name.toLowerCase().includes(userName.toLowerCase())
       );
-      if (!conv && conversations.length > 0) conv = conversations[0];
 
-      if (conv) selectConversation(conv.id);
+      if (conv) {
+        selectConversation(conv.id);
+      } else if (userId && userName) {
+        // Optimistically open a new chat directly with this user
+        openConversationWithUser(userId, userName, userAvatar);
+      } else if (conversations.length > 0) {
+        selectConversation(conversations[0].id);
+      }
       setIsOpen(true);
     };
 
     window.addEventListener("openChatWithUser" as any, handleOpenChat);
     return () => window.removeEventListener("openChatWithUser" as any, handleOpenChat);
-  }, [conversations, selectConversation]);
+  }, [conversations, selectConversation, openConversationWithUser]);
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
