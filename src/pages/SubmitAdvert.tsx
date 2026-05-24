@@ -2245,7 +2245,9 @@ export default function SubmitAdvert() {
                           uploadedFiles.length === 0 || 
                           catchmentTotal !== 100 ||
                           !agreed || 
+                          !legalAccepted ||
                           isSubmitting
+
                         }
                         className="flex-1 h-14 px-6 py-4"
                         size="lg"
