@@ -422,7 +422,11 @@ export const GreetingSection = () => {
                   <button
                     key={t}
                     type="button"
-                    onClick={() => setActiveFeedTab(t)}
+                    onClick={() => {
+                      setActiveFeedTab(t);
+                      if (t === "Vibes & Flexing") navigate("/vibes");
+                      else if (t === "Breaking News") navigate("/breaking-news");
+                    }}
                     className={`shrink-0 h-9 px-3 rounded-md text-[13px] font-bold border-2 transition-colors touch-manipulation ${
                       active
                         ? "bg-green-600 text-white border-green-600 shadow-sm"
@@ -433,6 +437,7 @@ export const GreetingSection = () => {
                   </button>
                 );
               })}
+
             </div>
             <div className="h-px bg-green-500/40 mt-1 mb-3" />
 
