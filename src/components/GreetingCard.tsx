@@ -190,21 +190,32 @@ export const GreetingSection = () => {
     <div className="space-y-3">
       {/* ============ HERO BLOCK ============ */}
       <Card className="overflow-hidden rounded-3xl shadow-[0_6px_20px_-8px_hsl(var(--primary)/0.45)]">
-        {/* Top Advert Banner — full image */}
-        <a
-          href={heroAd.ctaUrl}
-          className="block relative active:opacity-95 transition-opacity touch-manipulation border-[5px] border-[hsl(212_95%_50%)] rounded-2xl overflow-hidden m-2 mb-0"
-        >
-          <img
-            src={heroAdBanner}
-            alt={`${heroAd.advertiser} — ${heroAd.headline}`}
-            className="w-full h-[150px] sm:h-[180px] object-cover"
+        {/* Top Wall Banner — user-managed rotating slideshow */}
+        <div className="m-2 mb-0 border-[5px] border-[hsl(212_95%_50%)] rounded-2xl overflow-hidden">
+          <WallBannerSlideshow
+            ownerId={currentUserId}
+            scope="home"
+            fallbackImage={heroAdBanner}
+            fallbackAlt={`${heroAd.advertiser} — ${heroAd.headline}`}
+            isOwner
+            heightClass="h-[150px] sm:h-[180px]"
+            onManage={() => setWallBannerManagerOpen(true)}
+            onChangeFallback={() => setWallBannerManagerOpen(true)}
+            onOpenViewer={(slide) => {
+              setViewerItems([
+                {
+                  id: slide.id,
+                  url: slide.mediaUrl,
+                  type: slide.mediaType,
+                  author: profile.fullName,
+                  title: slide.caption,
+                } as MediaItem,
+              ]);
+              setViewerStartIndex(0);
+              setBannerViewerOpen(true);
+            }}
           />
-          {/* Sponsored chip */}
-          <span className="absolute top-1.5 right-1.5 bg-black/50 text-white text-[9px] font-semibold px-2 py-0.5 rounded-sm uppercase tracking-wider">
-            Sponsored
-          </span>
-        </a>
+        </div>
 
         {/* Identity Row — overlapping avatar */}
         <div className="px-3 pb-3 -mt-12 relative">
