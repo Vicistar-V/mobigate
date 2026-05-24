@@ -907,6 +907,7 @@ export default function SubmitAdvert() {
     setLaunchDate(undefined);
     setUploadedFiles([]);
     setAgreed(false);
+    setLegalAccepted(false);
     setEditingSlotId(null);
   };
 
