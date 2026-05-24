@@ -278,16 +278,20 @@ export function CreateVibeDialog({ open, onOpenChange, onVibeCreated }: CreateVi
                   Clear
                 </Button>
               </div>
-              <Button onClick={handlePublish} disabled={!title || !description} className="w-full">
+              <LegalCopyrightAcceptance accepted={legalAccepted} onAcceptedChange={setLegalAccepted} />
+              <Button onClick={handlePublish} disabled={!title || !description || !legalAccepted} className="w-full">
                 <Send className="w-4 h-4 mr-1" />
                 Publish Vibe
               </Button>
             </>
           ) : (
-            <Button onClick={handlePublish} className="w-full">
-              <Send className="w-4 h-4 mr-1" />
-              Publish Vibe
-            </Button>
+            <>
+              <LegalCopyrightAcceptance accepted={legalAccepted} onAcceptedChange={setLegalAccepted} />
+              <Button onClick={handlePublish} disabled={!legalAccepted} className="w-full">
+                <Send className="w-4 h-4 mr-1" />
+                Publish Vibe
+              </Button>
+            </>
           )}
         </div>
       </DrawerContent>
