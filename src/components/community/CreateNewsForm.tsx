@@ -10,6 +10,7 @@ import { ChevronDown, ChevronUp, Video, Image, FileText, Upload, X, Eye, Edit, T
 import { cn } from "@/lib/utils";
 import type { NewsItem } from "@/data/newsData";
 import { MediaUploadDialog } from "./MediaUploadDialog";
+import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
 import { toast } from "sonner";
 
 interface CreateNewsFormProps {
