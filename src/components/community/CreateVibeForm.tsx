@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import type { VibeItem } from "@/data/communityVibesData";
 import { toast } from "sonner";
 import { MediaUploadDialog } from "./MediaUploadDialog";
+import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
 
 interface CreateVibeFormProps {
   onVibeCreated?: (vibe: VibeItem) => void;
