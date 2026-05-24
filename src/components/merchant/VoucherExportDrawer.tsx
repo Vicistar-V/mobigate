@@ -32,6 +32,11 @@ interface PaperSpec {
 
 const VOUCHER_W_IN = 2.25; // landscape — wider than tall
 const VOUCHER_H_IN = 1.25;
+// Cutting gutters — extra blank space between vouchers so guillotine/scissors
+// have room to cut without shaving content. Horizontal rows get more space
+// because most cutters slice along horizontal lines first.
+const GUTTER_X_IN = 0.08; // ~2mm between columns
+const GUTTER_Y_IN = 0.20; // ~5mm between rows (generous for horizontal cuts)
 
 const PAPER_SPECS: PaperSpec[] = [
   { key: "a4",     label: "A4 — 3 × 7 (21/page)",   format: "a4",     orientation: "portrait", cols: 3, rows: 7,  perPage: 21 },
@@ -113,10 +118,22 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
     // Header strip — brand + denomination
     pdf.setFillColor(15, 23, 42);
     pdf.rect(x, y, w, 5, "F");
+
+    // Mobigate logo icon — small rounded square with "M"
+    const logoSize = 3.6;
+    const logoX = x + pad;
+    const logoY = y + (5 - logoSize) / 2;
+    pdf.setFillColor(168, 85, 247); // fuchsia/purple accent
+    pdf.roundedRect(logoX, logoY, logoSize, logoSize, 0.6, 0.6, "F");
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(6);
+    pdf.text("M", logoX + logoSize / 2, logoY + logoSize / 2 + 1, { align: "center" });
+
     pdf.setTextColor(255, 255, 255);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(7);
-    pdf.text("MOBIGATE", x + pad, y + 3.5);
+    pdf.text("MOBIGATE", logoX + logoSize + 1.2, y + 3.5);
     pdf.setFontSize(8);
     pdf.text(`M${formatNum(card.denomination)}`, x + w - pad, y + 3.6, { align: "right" });
 
@@ -202,8 +219,10 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
       const pageHmm = pdfMM.internal.pageSize.getHeight();
       const vW = VOUCHER_W_IN * IN_TO_MM;
       const vH = VOUCHER_H_IN * IN_TO_MM;
-      const gridWmm = spec.cols * vW;
-      const gridHmm = spec.rows * vH;
+      const gutterXmm = GUTTER_X_IN * IN_TO_MM;
+      const gutterYmm = GUTTER_Y_IN * IN_TO_MM;
+      const gridWmm = spec.cols * vW + (spec.cols - 1) * gutterXmm;
+      const gridHmm = spec.rows * vH + (spec.rows - 1) * gutterYmm;
       const marginXmm = Math.max(0, (pageWmm - gridWmm) / 2);
       const marginYmm = Math.max(0, (pageHmm - gridHmm) / 2);
 
@@ -216,8 +235,8 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
         }
         const row = Math.floor(slot / spec.cols);
         const col = slot % spec.cols;
-        const x = marginXmm + col * vW;
-        const y = marginYmm + row * vH;
+        const x = marginXmm + col * (vW + gutterXmm);
+        const y = marginYmm + row * (vH + gutterYmm);
         drawVoucher(pdfMM, selectedCards[i], x, y, vW, vH);
       }
 
@@ -245,7 +264,7 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
             <p className="text-sm font-bold text-foreground">Print Voucher Cards</p>
           </div>
           <p className="text-[11px] text-muted-foreground leading-relaxed">
-            Vouchers print at exactly 1.25" × 2.25" with no cropping. Extra cards spill onto additional pages automatically.
+            Vouchers print at 1.25" × 2.25" with cutting gutters (~2mm horizontal, ~5mm vertical) so guillotine cuts won't shave content. Each card carries the Mobigate logo.
           </p>
         </div>
 
