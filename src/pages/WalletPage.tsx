@@ -1580,9 +1580,13 @@ export default function WalletPage() {
                         <span className="text-xs text-muted-foreground">You Sell</span>
                         <span className="text-sm font-bold text-fuchsia-700 dark:text-fuchsia-400">−M{formatNumberFull(liquidateMobiNum)}</span>
                       </div>
-                      <div className="flex items-center justify-between">
+                       <div className="flex items-center justify-between">
                         <span className="text-xs text-muted-foreground">Platform Spread (4%)</span>
                         <span className="text-xs font-medium text-amber-600">₦{formatNumberFull(liquidateSpread)}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">Service Charge (5%)</span>
+                        <span className="text-xs font-medium text-rose-600">−₦{formatNumberFull(liquidateServiceCharge)}</span>
                       </div>
                       <div className="flex items-center justify-between pt-2 border-t border-border/40">
                         <span className="text-sm font-bold text-foreground">You Receive</span>
