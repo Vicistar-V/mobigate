@@ -765,6 +765,24 @@ export const GreetingSection = () => {
 
       {/* Service Unavailable Dialog */}
       <Dialog />
+
+      {/* Wall Banner — owner manager */}
+      <WallBannerManagerDialog
+        open={wallBannerManagerOpen}
+        onOpenChange={setWallBannerManagerOpen}
+        ownerId={currentUserId}
+        scope="home"
+      />
+
+      {/* Wall Banner — big viewer for slides with "Open in viewer" action */}
+      <MediaGalleryViewer
+        open={bannerViewerOpen}
+        onOpenChange={setBannerViewerOpen}
+        items={viewerItems}
+        initialIndex={0}
+        showActions={false}
+        galleryType="banner"
+      />
     </div>
   );
 };
