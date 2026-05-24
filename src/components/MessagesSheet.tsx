@@ -26,6 +26,7 @@ export const MessagesSheet = () => {
     loadingConversations,
     sendMessage,
     selectConversation,
+    openConversationWithUser,
     editMessage,
     deleteMessage,
     deleteSelectedMessages,
