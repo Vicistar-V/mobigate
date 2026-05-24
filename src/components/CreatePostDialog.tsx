@@ -342,32 +342,105 @@ export const CreatePostDialog = ({
             </Select>
           </div>
 
-          {/* Main Media File */}
-          <div className="space-y-1.5">
-            <Label>{type === "Photo" ? "Photo *" : `${type} File`}</Label>
-            {mediaPreview && (
-              <div className="relative rounded-lg border overflow-hidden bg-muted">
-                <img src={mediaPreview} alt="Preview" className="w-full h-44 object-cover" />
-                <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2"
-                  onClick={() => { setMediaFile(null); setMediaPreview(null); if (mediaRef.current) mediaRef.current.value = ""; }}>
-                  <X className="h-4 w-4" />
+          {/* Content Posting Fee notice (scales with image count for Photo posts) */}
+          <ContentFeeNotice mediaType={type} imageCount={imageCount} compact />
+
+          {/* Main Media File(s) */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="mb-0">
+                {type === "Photo" ? "Media Files *" : `${type} File`}
+              </Label>
+              {type === "Photo" && (
+                <span className="text-xs text-muted-foreground">
+                  {photoFiles.length} of {MAX_IMAGES_PER_POST} attached
+                </span>
+              )}
+            </div>
+
+            {type === "Photo" ? (
+              <>
+                {photoPreviews.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2">
+                    {photoPreviews.map((src, idx) => (
+                      <div key={idx} className="relative rounded-lg border overflow-hidden bg-muted aspect-square">
+                        <img src={src} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover" />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-1 right-1 h-7 w-7 rounded-md shadow"
+                          onClick={() => removePhotoAt(idx)}
+                          aria-label={`Remove image ${idx + 1}`}
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </Button>
+                        <span className="absolute bottom-1 left-1 text-[10px] font-semibold bg-black/60 text-white px-1.5 py-0.5 rounded">
+                          {idx + 1}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {photoFiles.length < MAX_IMAGES_PER_POST ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => mediaRef.current?.click()}
+                  >
+                    <ImagePlus className="h-4 w-4 mr-2" />
+                    {photoFiles.length === 0 ? "Upload Photo" : "Add More Files"}
+                  </Button>
+                ) : (
+                  <p className="text-xs text-center text-muted-foreground bg-muted/60 rounded-md py-2">
+                    Maximum {MAX_IMAGES_PER_POST} images reached. Remove one to add a different image.
+                  </p>
+                )}
+
+                <p className="text-[11px] text-muted-foreground leading-snug">
+                  Attach up to {MAX_IMAGES_PER_POST} images to one post. First image is the cover.
+                  Each extra image adds <span className="font-semibold text-foreground">M{EXTRA_IMAGE_FEE}</span> to the posting fee. (Max 20 MB each)
+                </p>
+
+                <input
+                  ref={mediaRef}
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleMediaChange}
+                  className="hidden"
+                />
+              </>
+            ) : (
+              <>
+                {mediaPreview && (
+                  <div className="relative rounded-lg border overflow-hidden bg-muted">
+                    <img src={mediaPreview} alt="Preview" className="w-full h-44 object-cover" />
+                    <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2"
+                      onClick={() => { setMediaFile(null); setMediaPreview(null); if (mediaRef.current) mediaRef.current.value = ""; }}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+                {mediaFile && !mediaPreview && (
+                  <div className="flex items-center justify-between rounded-lg border bg-muted px-3 py-2">
+                    <span className="text-sm truncate">{mediaFile.name}</span>
+                    <Button type="button" variant="ghost" size="icon" className="h-6 w-6 shrink-0"
+                      onClick={() => { setMediaFile(null); if (mediaRef.current) mediaRef.current.value = ""; }}>
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
+                <Button type="button" variant="outline" className="w-full" onClick={() => mediaRef.current?.click()}>
+                  <Upload className="h-4 w-4 mr-2" />{mediaFile ? "Change File" : `Upload ${type} File`}
                 </Button>
-              </div>
+                <input ref={mediaRef} type="file" accept={mediaAccept[type]} onChange={handleMediaChange} className="hidden" />
+              </>
             )}
-            {mediaFile && !mediaPreview && (
-              <div className="flex items-center justify-between rounded-lg border bg-muted px-3 py-2">
-                <span className="text-sm truncate">{mediaFile.name}</span>
-                <Button type="button" variant="ghost" size="icon" className="h-6 w-6 shrink-0"
-                  onClick={() => { setMediaFile(null); if (mediaRef.current) mediaRef.current.value = ""; }}>
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
-            )}
-            <Button type="button" variant="outline" className="w-full" onClick={() => mediaRef.current?.click()}>
-              <Upload className="h-4 w-4 mr-2" />{mediaFile ? "Change File" : `Upload ${type} File`}
-            </Button>
-            <input ref={mediaRef} type="file" accept={mediaAccept[type]} onChange={handleMediaChange} className="hidden" />
           </div>
+
 
           {/* Thumbnail for non-photo types */}
           {needsThumbnail && (
