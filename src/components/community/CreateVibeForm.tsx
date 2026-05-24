@@ -359,10 +359,12 @@ export const CreateVibeForm = ({ onVibeCreated, canPost = true, className }: Cre
                       </Button>
                     </div>
                     
+                    <LegalCopyrightAcceptance accepted={legalAccepted} onAcceptedChange={setLegalAccepted} />
+
                     <Button
                       type="button"
                       onClick={handlePublish}
-                      disabled={!title || !description}
+                      disabled={!title || !description || !legalAccepted}
                       className="w-full gap-2"
                     >
                       <Send className="w-4 h-4" />
