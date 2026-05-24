@@ -332,6 +332,13 @@ export function WallBannerSlideshow({
             scope={scope}
           />
           <WallBannerEditDialog
+            open={bulkOpen}
+            onOpenChange={setBulkOpen}
+            ownerId={ownerId}
+            scope={scope}
+            bulkMode
+          />
+          <WallBannerEditDialog
             open={!!editSlide}
             onOpenChange={(o) => {
               if (!o) setEditSlide(null);
