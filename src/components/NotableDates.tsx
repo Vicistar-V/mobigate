@@ -174,6 +174,25 @@ export const NotableDates = () => {
   const [eventRange, setEventRange] = useState<TimeRange>("today");
   const [eventType,  setEventType]  = useState<EventType>("wedding");
 
+  // ── Message + Gift wiring (reuse existing app components/events) ─────────
+  const { toast } = useToast();
+  const [giftOpen, setGiftOpen] = useState(false);
+  const [giftUser, setGiftUser] = useState<{ id: string; name: string } | null>(null);
+
+  const handleMessage = (p: NotablePerson) => {
+    // Fires the global chat opener used by PeopleYouMayKnow + others
+    window.dispatchEvent(new CustomEvent("openChatWithUser", {
+      detail: { userId: p.id, userName: p.name },
+    }));
+    toast({ title: "Opening chat", description: `Starting a conversation with ${p.name}` });
+  };
+
+  const handleGift = (p: NotablePerson) => {
+    setGiftUser({ id: p.id, name: p.name });
+    setGiftOpen(true);
+  };
+
+
   const people = useMemo<NotablePerson[]>(() => {
     const fromWindow = (typeof window !== "undefined" && (window as any).__NOTABLE_DATES__) as NotablePerson[] | undefined;
     return fromWindow?.length ? fromWindow : SAMPLE_PEOPLE;
