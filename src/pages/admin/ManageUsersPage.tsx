@@ -775,19 +775,19 @@ export default function ManageUsersPage() {
                     <Separator />
 
                     {/* Quick Actions */}
-                    <div className="space-y-2">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase">Actions</p>
+                    <div className="space-y-2.5">
+                      <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Actions</p>
                       <div className="flex flex-col gap-2">
                         <Button
                           variant="outline"
                           size="sm"
-                          className="w-full justify-start text-xs"
+                          className="w-full justify-start text-sm h-11"
                           onClick={() => {
                             navigate(`/profile/${selectedUser.id}`);
                             setDetailDrawerOpen(false);
                           }}
                         >
-                          <Eye className="h-3.5 w-3.5 mr-2" />
+                          <Eye className="h-4 w-4 mr-2" />
                           View Full Profile
                         </Button>
 
@@ -796,19 +796,19 @@ export default function ManageUsersPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="w-full justify-start text-xs text-amber-600 border-amber-200 hover:bg-amber-50"
+                              className="w-full justify-start text-sm h-11 text-amber-600 border-amber-200 hover:bg-amber-50"
                               onClick={() => openAuthDialog("suspend")}
                             >
-                              <ShieldAlert className="h-3.5 w-3.5 mr-2" />
+                              <ShieldAlert className="h-4 w-4 mr-2" />
                               Suspend User
                             </Button>
                             <Button
                               variant="outline"
                               size="sm"
-                              className="w-full justify-start text-xs text-red-600 border-red-200 hover:bg-red-50"
+                              className="w-full justify-start text-sm h-11 text-red-600 border-red-200 hover:bg-red-50"
                               onClick={() => openAuthDialog("ban")}
                             >
-                              <ShieldBan className="h-3.5 w-3.5 mr-2" />
+                              <ShieldBan className="h-4 w-4 mr-2" />
                               Ban User
                             </Button>
                           </>
@@ -818,10 +818,10 @@ export default function ManageUsersPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="w-full justify-start text-xs text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+                            className="w-full justify-start text-sm h-11 text-emerald-600 border-emerald-200 hover:bg-emerald-50"
                             onClick={() => openAuthDialog("reactivate")}
                           >
-                            <UserCheck className="h-3.5 w-3.5 mr-2" />
+                            <UserCheck className="h-4 w-4 mr-2" />
                             Reactivate User
                           </Button>
                         )}
@@ -830,10 +830,10 @@ export default function ManageUsersPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            className="w-full justify-start text-xs text-red-700 border-red-300 hover:bg-red-50"
+                            className="w-full justify-start text-sm h-11 text-red-700 border-red-300 hover:bg-red-50"
                             onClick={() => openAuthDialog("deactivate")}
                           >
-                            <Trash2 className="h-3.5 w-3.5 mr-2" />
+                            <Trash2 className="h-4 w-4 mr-2" />
                             Deactivate User
                           </Button>
                         )}
