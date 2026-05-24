@@ -366,7 +366,7 @@ export const FeedPost = ({
             </div>
             {isOwner && onEdit && onDelete && (
               <div className="flex-shrink-0" onClick={e => e.stopPropagation()}>
-                <PostOptionsMenu onEdit={onEdit} onDelete={onDelete} />
+                <PostOptionsMenu onEdit={onEdit} onDelete={onDelete} publisherName={author} />
               </div>
             )}
           </div>
