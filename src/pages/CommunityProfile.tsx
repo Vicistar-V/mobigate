@@ -34,6 +34,8 @@ import { CommunityEventsSection } from "@/components/community/CommunityEventsSe
 import { CommunityQuickLinks } from "@/components/community/CommunityQuickLinks";
 import { CommunityMainMenu } from "@/components/community/CommunityMainMenu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { CommunityStatusBanner } from "@/components/community/CommunityStatusBanner";
+import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 
 import { OurPeopleCarousel } from "@/components/community/OurPeopleCarousel";
 import { CommunityVibesSection } from "@/components/community/CommunityVibesSection";
