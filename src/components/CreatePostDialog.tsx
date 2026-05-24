@@ -352,7 +352,7 @@ export const CreatePostDialog = ({
                 {type === "Photo" ? "Media Files *" : `${type} File`}
               </Label>
               {type === "Photo" && (
-                <span className="text-xs text-muted-foreground">
+                <span className="text-sm font-medium text-muted-foreground">
                   {photoFiles.length} of {MAX_IMAGES_PER_POST} attached
                 </span>
               )}
