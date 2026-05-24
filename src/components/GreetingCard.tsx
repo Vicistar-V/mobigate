@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Search, MoreHorizontal, ChevronLeft, ImagePlus, BadgeCheck, Images, Plus, Maximize2, PenSquare, FilePlus2 } from "lucide-react";
+import { Search, MoreHorizontal, ChevronLeft, ChevronRight, ImagePlus, BadgeCheck, Images, Plus, Maximize2, PenSquare, FilePlus2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { CreatePostDialog } from "./CreatePostDialog";
 import { EditPostDialog } from "./EditPostDialog";
