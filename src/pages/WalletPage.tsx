@@ -53,6 +53,7 @@ const SUNDRY_WALLET = {
 // platform margin and discouraging discount-arbitrage round-trips.
 // Base: 1 Mobi = 1 NGN (Buying), 1 Mobi = 0.96 NGN (Selling)  →  4% spread.
 const SELLING_RATE_NGN_PER_MOBI = 0.96;
+const BUYING_RATE_NGN_PER_MOBI = 1.0;
 
 interface WalletTransaction {
   id: string;
