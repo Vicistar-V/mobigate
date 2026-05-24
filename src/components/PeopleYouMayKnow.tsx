@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
 import { useAuth } from "@/contexts/AuthContext";
+import { NotableDates } from "./NotableDates";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string) || "/api";
 
