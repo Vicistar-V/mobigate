@@ -658,6 +658,73 @@ export const GreetingSection = () => {
         initialIndex={safeFeaturedIdx}
       />
 
+      {/* ── Own Post action sheet (Edit / Create New) ── */}
+      <ActionDialog open={ownActionsOpen} onOpenChange={setOwnActionsOpen}>
+        <ActionDialogContent className="sm:max-w-sm rounded-2xl p-5">
+          <ActionDialogHeader>
+            <ActionDialogTitle className="text-lg">Post Options</ActionDialogTitle>
+            <ActionDialogDescription>
+              Choose what you want to do with your latest post.
+            </ActionDialogDescription>
+          </ActionDialogHeader>
+
+          <div className="mt-2 flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setOwnActionsOpen(false);
+                setEditPostOpen(true);
+              }}
+              disabled={!featuredPost}
+              className="w-full flex items-center gap-3 p-3 rounded-xl border-2 border-primary/30 bg-primary/5 hover:bg-primary/10 active:scale-[0.99] transition-all touch-manipulation text-left disabled:opacity-50"
+            >
+              <span className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0">
+                <PenSquare className="h-5 w-5" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[15px] font-bold text-foreground">Edit Post</span>
+                <span className="block text-[12px] text-muted-foreground leading-snug">
+                  Modify the images and/or text of this post.
+                </span>
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setOwnActionsOpen(false);
+                openComposerBlank();
+              }}
+              className="w-full flex items-center gap-3 p-3 rounded-xl border-2 border-green-500/30 bg-green-500/5 hover:bg-green-500/10 active:scale-[0.99] transition-all touch-manipulation text-left"
+            >
+              <span className="h-10 w-10 rounded-full bg-green-600 text-white flex items-center justify-center shrink-0">
+                <FilePlus2 className="h-5 w-5" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[15px] font-bold text-foreground">Create New Post</span>
+                <span className="block text-[12px] text-muted-foreground leading-snug">
+                  Start a fresh post — images, video, audio, article or PDF.
+                </span>
+              </span>
+            </button>
+          </div>
+        </ActionDialogContent>
+      </ActionDialog>
+
+      {/* ── Edit existing own post dialog ── */}
+      {featuredPost && (
+        <EditPostDialog
+          post={featuredPost as any}
+          open={editPostOpen}
+          onOpenChange={setEditPostOpen}
+          onSave={() => {
+            setEditPostOpen(false);
+            window.dispatchEvent(new CustomEvent("postUpdated"));
+          }}
+        />
+      )}
+
+
       {/* Service Unavailable Dialog */}
       <Dialog />
     </div>
