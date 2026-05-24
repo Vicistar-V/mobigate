@@ -422,14 +422,14 @@ export function AdminExchangeRateTab() {
               >
                 {/* Row 1: Flag + Code + Name */}
                 <div className="flex items-center gap-2.5 mb-2">
-                  <span className="text-2xl leading-none">{rate.flag}</span>
+                  <span className="text-3xl leading-none">{rate.flag}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-bold text-sm">{rate.code}</span>
-                      <span className="text-xs text-muted-foreground">—</span>
-                      <span className="text-xs text-muted-foreground truncate">{rate.name}</span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="font-bold text-base">{rate.code}</span>
+                      <span className="text-sm text-muted-foreground">—</span>
+                      <span className="text-sm text-muted-foreground truncate">{rate.name}</span>
                     </div>
-                    <p className="text-xs text-muted-foreground/70">{rate.country}</p>
+                    <p className="text-sm text-muted-foreground/80">{rate.country}</p>
                   </div>
                 </div>
 
@@ -440,7 +440,7 @@ export function AdminExchangeRateTab() {
                       type="number"
                       value={editValue}
                       onChange={(e) => setEditValue(e.target.value)}
-                      className="flex-1 h-11 text-sm text-right touch-manipulation"
+                      className="flex-1 h-11 text-base text-right touch-manipulation"
                       step="any"
                       autoFocus
                     />
@@ -463,14 +463,14 @@ export function AdminExchangeRateTab() {
                 ) : (
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="text-lg font-bold tabular-nums">{formatRate(rate.ratePerMobi)}</span>
-                      <span className="text-xs text-muted-foreground">per Mobi</span>
+                      <span className="text-xl font-bold tabular-nums">{formatRate(rate.ratePerMobi)}</span>
+                      <span className="text-sm text-muted-foreground">per Mobi</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="flex items-center gap-1">
                         {getTrendIcon(rate.ratePerMobi, rate.previousRate)}
                         <span
-                          className={`text-xs font-medium ${
+                          className={`text-sm font-semibold ${
                             isPositive ? "text-emerald-500" : isNegative ? "text-red-500" : "text-muted-foreground"
                           }`}
                         >
@@ -491,24 +491,25 @@ export function AdminExchangeRateTab() {
 
                 {/* Row 3: Buy / Sell rate + conversion preview */}
                 {!isEditing && (
-                  <div className="mt-2 pt-2 border-t border-border/40 space-y-1">
+                  <div className="mt-2 pt-2 border-t border-border/40 space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] uppercase tracking-wider text-emerald-600 font-semibold">Buy</span>
-                      <span className="text-xs font-mono font-semibold text-foreground">
+                      <span className="text-xs uppercase tracking-wider text-emerald-600 font-semibold">Buy</span>
+                      <span className="text-sm font-mono font-semibold text-foreground">
                         {formatRate(rate.ratePerMobi)} {rate.code} / Mobi
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] uppercase tracking-wider text-fuchsia-600 font-semibold">Sell</span>
-                      <span className="text-xs font-mono font-semibold text-fuchsia-700 dark:text-fuchsia-400">
+                      <span className="text-xs uppercase tracking-wider text-fuchsia-600 font-semibold">Sell</span>
+                      <span className="text-sm font-mono font-semibold text-fuchsia-700 dark:text-fuchsia-400">
                         {formatRate(rate.sellingRatePerMobi)} {rate.code} / Mobi
                       </span>
                     </div>
-                    <p className="text-[10px] text-muted-foreground pt-1">
+                    <p className="text-xs text-muted-foreground pt-1 leading-relaxed">
                       M1,000 → buy {(rate.ratePerMobi * 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {rate.code} · sell {(rate.sellingRatePerMobi * 1000).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {rate.code}
                     </p>
                   </div>
                 )}
+
               </div>
             );
           })}
