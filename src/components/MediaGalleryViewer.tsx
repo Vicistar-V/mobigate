@@ -256,6 +256,29 @@ export const MediaGalleryViewer = ({
               )}
             </div>
             <div className="flex items-center gap-1">
+              {/* Reader Mode toggle — only when there's text to read */}
+              {currentItem.description && currentItem.description.trim().length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setViewMode(viewMode === "reader" ? "media" : "reader")}
+                  className={`h-9 px-2.5 gap-1.5 text-white hover:bg-white/20 ${viewMode === "reader" ? "bg-white/15" : ""}`}
+                  aria-pressed={viewMode === "reader"}
+                  aria-label="Toggle reader mode"
+                >
+                  {viewMode === "reader" ? (
+                    <>
+                      {currentItem.type === "video" ? <Play className="h-4 w-4" /> : currentItem.type === "audio" ? <Music className="h-4 w-4" /> : <ImageIcon className="h-4 w-4" />}
+                      <span className="text-xs font-semibold hidden sm:inline">View Media</span>
+                    </>
+                  ) : (
+                    <>
+                      <BookOpen className="h-4 w-4" />
+                      <span className="text-xs font-semibold hidden sm:inline">Reader</span>
+                    </>
+                  )}
+                </Button>
+              )}
               {currentItem?.isOwner && (
                 <MediaOwnerMenu
                   itemLabel={currentItem.type === "video" ? "Video" : currentItem.type === "audio" ? "Audio" : "Photo"}
