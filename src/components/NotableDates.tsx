@@ -1,114 +1,277 @@
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Cake, Gift, Heart, PartyPopper, CalendarDays, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
-type NotableKind = "birthday" | "anniversary" | "wedding" | "milestone";
+// ─── Types ──────────────────────────────────────────────────────────────────
+type MainTab   = "birthdays" | "events";
+type TimeRange = "today" | "tomorrow" | "others";
+type EventType = "wedding" | "burial" | "others";
 
-interface NotableDate {
+interface NotablePerson {
   id: string;
   name: string;
-  profileImage?: string;
-  kind: NotableKind;
-  date: string;        // human readable e.g. "Aug 25"
-  whenLabel: string;   // e.g. "Today", "Tomorrow", "In 3 days"
-  highlight?: boolean; // today
+  photo: string;
+  dateLabel: string;       // e.g. "August 25"
+  isFriend: boolean;
+  eventType?: EventType;   // only for events
+  eventLabel?: string;     // e.g. "Wedding"
 }
 
-const SAMPLE: NotableDate[] = [
-  { id: "1", name: "Amaka Jane",     kind: "birthday",    date: "Today",       whenLabel: "Today",      highlight: true,
-    profileImage: "https://api.dicebear.com/7.x/initials/svg?seed=Amaka%20Jane" },
-  { id: "2", name: "Chinedu Okafor", kind: "anniversary", date: "Tomorrow",    whenLabel: "Tomorrow",
-    profileImage: "https://api.dicebear.com/7.x/initials/svg?seed=Chinedu%20Okafor" },
-  { id: "3", name: "Sarah Johnson",  kind: "birthday",    date: "Aug 27",      whenLabel: "In 2 days",
-    profileImage: "https://api.dicebear.com/7.x/initials/svg?seed=Sarah%20Johnson" },
-  { id: "4", name: "Michael Chen",   kind: "wedding",     date: "Aug 30",      whenLabel: "In 5 days",
-    profileImage: "https://api.dicebear.com/7.x/initials/svg?seed=Michael%20Chen" },
-  { id: "5", name: "Emily Williams", kind: "birthday",    date: "Sep 02",      whenLabel: "Next week",
-    profileImage: "https://api.dicebear.com/7.x/initials/svg?seed=Emily%20Williams" },
-  { id: "6", name: "Peter Iprec",    kind: "milestone",   date: "Sep 10",      whenLabel: "Next week",
-    profileImage: "https://api.dicebear.com/7.x/initials/svg?seed=Peter%20Iprec" },
+// ─── Sample / window-bridge data ────────────────────────────────────────────
+const SAMPLE_PEOPLE: NotablePerson[] = [
+  { id: "a1", name: "Anthony Okafor Ejiro",  photo: "https://api.dicebear.com/7.x/initials/svg?seed=Anthony%20Okafor",  dateLabel: "August 25", isFriend: true  },
+  { id: "a2", name: "Emmanuel Maduako",      photo: "https://api.dicebear.com/7.x/initials/svg?seed=Emmanuel%20Maduako", dateLabel: "August 25", isFriend: false },
+  { id: "a3", name: "Michael Amaechi Ndukaku", photo: "https://api.dicebear.com/7.x/initials/svg?seed=Michael%20Amaechi", dateLabel: "August 25", isFriend: true  },
 ];
 
-const kindMeta: Record<NotableKind, { label: string; icon: typeof Cake; chip: string }> = {
-  birthday:    { label: "Birthday",    icon: Cake,         chip: "bg-pink-500/10    text-pink-600    border-pink-500/20"    },
-  anniversary: { label: "Anniversary", icon: Heart,        chip: "bg-rose-500/10    text-rose-600    border-rose-500/20"    },
-  wedding:     { label: "Wedding",     icon: PartyPopper,  chip: "bg-violet-500/10  text-violet-600  border-violet-500/20"  },
-  milestone:   { label: "Milestone",   icon: Gift,         chip: "bg-amber-500/10   text-amber-600   border-amber-500/20"   },
+// Counts for filter chips (would come from backend window vars)
+const BDAY_COUNTS  = { today: 3, tomorrow: 5, others: 84, yesterday: 2, nextWeek: 6, lastWeek: 4, nextMonth: 19, lastMonth: 27 };
+const EVENT_COUNTS = { today: 3, tomorrow: 5, others: 84, yesterday: 2, nextWeek: 6, lastWeek: 4, nextMonth: 19, lastMonth: 27 };
+const EVENT_TYPE_COUNTS = { wedding: 12, burial: 5, others: 84 };
+const OTHER_EVENT_TYPES = [
+  { label: "Graduation",      count: 2  },
+  { label: "Matriculation",   count: 6  },
+  { label: "Child Dedication",count: 4  },
+  { label: "House Warming",   count: 7  },
+  { label: "Naming Ceremony", count: 3  },
+  { label: "Coronation",      count: 1  },
+];
+
+// ─── Subcomponents (defined OUTSIDE parent to keep stable refs) ─────────────
+const PersonCard = ({ p, showViewDetails }: { p: NotablePerson; showViewDetails: boolean }) => (
+  <div className="flex-shrink-0 w-[148px] rounded-lg border border-border bg-card overflow-hidden">
+    <div className="w-full aspect-[3/4] bg-muted overflow-hidden">
+      <img src={p.photo} alt={p.name} className="w-full h-full object-cover" loading="lazy" />
+    </div>
+    <div className="p-2 space-y-1">
+      <p className="text-[13px] font-bold text-foreground leading-tight text-center line-clamp-2 min-h-[2.4em]">
+        {p.name}
+      </p>
+      <div className="flex items-center justify-center gap-1 text-[12px]">
+        <span className="text-red-600 font-bold">{p.dateLabel}</span>
+        <span className="text-muted-foreground">|</span>
+        {p.isFriend ? (
+          <span className="text-primary font-semibold">Friend</span>
+        ) : (
+          <Link to={`/friends/add/${p.id}`} className="text-primary font-semibold hover:underline">
+            Add Friend
+          </Link>
+        )}
+      </div>
+      <div className="flex items-center justify-center gap-1 text-[12px]">
+        <Link to={`/messages/${p.id}`} className="text-primary font-semibold hover:underline">Message</Link>
+        <span className="text-muted-foreground">|</span>
+        <Link to={`/gifts/send/${p.id}`} className="text-primary font-semibold hover:underline">Send Gift</Link>
+      </div>
+      {showViewDetails && (
+        <div className="text-center">
+          <Link to={`/events/${p.id}`} className="text-[12px] text-primary font-semibold hover:underline">
+            View Details
+          </Link>
+        </div>
+      )}
+    </div>
+  </div>
+);
+
+const TimeRangeChips = ({
+  active, onChange, counts, basePath,
+}: {
+  active: TimeRange;
+  onChange: (r: TimeRange) => void;
+  counts: { today: number; tomorrow: number; others: number };
+  basePath: string;
+}) => {
+  const items: { key: TimeRange; label: string; count: number }[] = [
+    { key: "today",    label: "Today",    count: counts.today    },
+    { key: "tomorrow", label: "Tomorrow", count: counts.tomorrow },
+    { key: "others",   label: "Others",   count: counts.others   },
+  ];
+  return (
+    <div className="flex items-center flex-wrap gap-x-1 gap-y-1 text-[13px]">
+      <span className="text-muted-foreground font-bold">|</span>
+      {items.map((it, i) => (
+        <span key={it.key} className="flex items-center gap-1">
+          <button
+            onClick={() => onChange(it.key)}
+            className={`font-semibold transition-colors ${
+              active === it.key ? "text-primary underline" : "text-foreground hover:text-primary"
+            }`}
+          >
+            {it.label} [{it.count}]
+          </button>
+          <span className="text-muted-foreground font-bold">|</span>
+        </span>
+      ))}
+    </div>
+  );
 };
 
+const EventTypeChips = ({
+  active, onChange, counts,
+}: {
+  active: EventType;
+  onChange: (e: EventType) => void;
+  counts: { wedding: number; burial: number; others: number };
+}) => {
+  const items: { key: EventType; label: string; count: number }[] = [
+    { key: "wedding", label: "Wedding/Marriage", count: counts.wedding },
+    { key: "burial",  label: "Burial",           count: counts.burial  },
+    { key: "others",  label: "Others",           count: counts.others  },
+  ];
+  return (
+    <div className="flex items-center flex-wrap gap-x-1 gap-y-1 text-[13px]">
+      <span className="text-muted-foreground font-bold">|</span>
+      {items.map((it) => (
+        <span key={it.key} className="flex items-center gap-1">
+          <button
+            onClick={() => onChange(it.key)}
+            className={`font-semibold transition-colors ${
+              active === it.key ? "text-primary underline" : "text-foreground hover:text-primary"
+            }`}
+          >
+            {it.label} [{it.count}]
+          </button>
+          <span className="text-muted-foreground font-bold">|</span>
+        </span>
+      ))}
+    </div>
+  );
+};
+
+// ─── Main component ────────────────────────────────────────────────────────
 export const NotableDates = () => {
-  // PHP bridge: window.__NOTABLE_DATES__ (when available)
-  const items = useMemo<NotableDate[]>(() => {
-    const fromWindow = (typeof window !== "undefined" && (window as any).__NOTABLE_DATES__) as NotableDate[] | undefined;
-    return fromWindow?.length ? fromWindow : SAMPLE;
+  const [tab,        setTab]        = useState<MainTab>("birthdays");
+  const [bdayRange,  setBdayRange]  = useState<TimeRange>("today");
+  const [eventRange, setEventRange] = useState<TimeRange>("today");
+  const [eventType,  setEventType]  = useState<EventType>("wedding");
+
+  const people = useMemo<NotablePerson[]>(() => {
+    const fromWindow = (typeof window !== "undefined" && (window as any).__NOTABLE_DATES__) as NotablePerson[] | undefined;
+    return fromWindow?.length ? fromWindow : SAMPLE_PEOPLE;
   }, []);
 
-  if (!items.length) return null;
+  // Filter cards (optimistic; backend can return pre-filtered slices later)
+  const filtered = useMemo(() => {
+    // For demo, all sample cards represent "today" entries. Other ranges show empty state.
+    if (tab === "birthdays") {
+      return bdayRange === "today" ? people : [];
+    }
+    // events tab — also filter by selected event type
+    if (eventRange !== "today") return [];
+    return people.map(p => ({ ...p, eventType, eventLabel: eventType === "wedding" ? "Wedding" : eventType === "burial" ? "Burial" : "Event" }));
+  }, [tab, bdayRange, eventRange, eventType, people]);
 
   return (
-    <Card className="p-4 space-y-4 hover:shadow-md transition-shadow overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <CalendarDays className="h-5 w-5 text-primary" />
-          <h3 className="text-base font-bold text-foreground">Notable Dates</h3>
-        </div>
-        <Button asChild variant="ghost" size="sm" className="text-primary hover:text-primary h-8 px-2 text-sm font-semibold">
-          <Link to="/friends/birthdays?range=all" className="flex items-center gap-1">
-            See all
-            <ChevronRight className="h-4 w-4" />
-          </Link>
-        </Button>
+    <Card className="p-4 space-y-3 hover:shadow-md transition-shadow overflow-hidden">
+      {/* Title */}
+      <h3 className="text-base font-bold text-foreground">Notable Dates</h3>
+
+      {/* Main tabs */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <button
+          onClick={() => setTab("birthdays")}
+          className={`px-4 py-1.5 rounded-md text-sm font-bold transition-colors ${
+            tab === "birthdays"
+              ? "bg-primary text-primary-foreground"
+              : "bg-transparent text-foreground hover:bg-muted"
+          }`}
+        >
+          Birthdays
+        </button>
+        <button
+          onClick={() => setTab("events")}
+          className={`px-4 py-1.5 rounded-md text-sm font-bold transition-colors flex items-center gap-2 ${
+            tab === "events"
+              ? "bg-primary text-primary-foreground"
+              : "bg-transparent text-foreground hover:bg-muted"
+          }`}
+        >
+          Notable Events
+          {tab === "events" && (
+            <span className="inline-flex items-center justify-center h-5 w-5 rounded-sm bg-primary-foreground/20 text-primary-foreground text-xs font-bold">
+              +
+            </span>
+          )}
+        </button>
       </div>
 
-      {/* Horizontal scroll */}
+      {/* Event-type chips (events tab only) */}
+      {tab === "events" && (
+        <EventTypeChips active={eventType} onChange={setEventType} counts={EVENT_TYPE_COUNTS} />
+      )}
+
+      {/* Time-range chips */}
+      {tab === "birthdays" ? (
+        <TimeRangeChips
+          active={bdayRange}
+          onChange={setBdayRange}
+          counts={{ today: BDAY_COUNTS.today, tomorrow: BDAY_COUNTS.tomorrow, others: BDAY_COUNTS.others }}
+          basePath="/friends/birthdays"
+        />
+      ) : (
+        <TimeRangeChips
+          active={eventRange}
+          onChange={setEventRange}
+          counts={{ today: EVENT_COUNTS.today, tomorrow: EVENT_COUNTS.tomorrow, others: EVENT_COUNTS.others }}
+          basePath="/friends/events"
+        />
+      )}
+
+      {/* Cards row — horizontal scroll on mobile */}
       <div className="-mx-4 px-4 overflow-x-auto touch-pan-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <div className="flex gap-3 pb-1">
-          {items.map((item) => {
-            const meta = kindMeta[item.kind];
-            const Icon = meta.icon;
-            return (
-              <div
-                key={item.id}
-                className={`flex-shrink-0 w-[150px] rounded-xl border bg-card p-3 flex flex-col items-center text-center gap-2 ${
-                  item.highlight ? "ring-2 ring-primary/40 border-primary/40" : "border-border"
-                }`}
-              >
-                <div className="relative">
-                  <Avatar className="h-16 w-16 ring-2 ring-background">
-                    <AvatarImage src={item.profileImage} alt={item.name} />
-                    <AvatarFallback className="text-sm font-semibold">
-                      {item.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-card border border-border flex items-center justify-center shadow-sm">
-                    <Icon className="h-4 w-4 text-primary" />
-                  </span>
-                </div>
-
-                <div className="w-full">
-                  <p className="text-sm font-semibold text-foreground truncate">{item.name}</p>
-                  <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[11px] font-medium border ${meta.chip}`}>
-                    {meta.label}
-                  </span>
-                  <p className={`mt-1 text-xs font-semibold ${item.highlight ? "text-primary" : "text-muted-foreground"}`}>
-                    {item.whenLabel}{item.whenLabel !== item.date ? ` · ${item.date}` : ""}
-                  </p>
-                </div>
-
-                <Button asChild size="sm" className="w-full h-8 text-xs font-semibold">
-                  <Link to={`/profile/${item.id}`}>
-                    {item.kind === "birthday" ? "Wish & Gift" : "Send Wishes"}
-                  </Link>
-                </Button>
-              </div>
-            );
-          })}
-        </div>
+        {filtered.length > 0 ? (
+          <div className="flex gap-3 pb-1">
+            {filtered.map(p => (
+              <PersonCard key={p.id} p={p} showViewDetails={tab === "events"} />
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-muted-foreground italic py-4">
+            No entries in this range. Try another filter above.
+          </p>
+        )}
       </div>
+
+      {/* Others [Dates] inline links */}
+      <p className="text-[13px] text-foreground leading-relaxed">
+        <span className="font-bold">Others [Dates]:</span>{" "}
+        {[
+          { label: "Yesterday",  count: tab === "birthdays" ? BDAY_COUNTS.yesterday : EVENT_COUNTS.yesterday,  range: "yesterday" },
+          { label: "Next Week",  count: tab === "birthdays" ? BDAY_COUNTS.nextWeek  : EVENT_COUNTS.nextWeek,  range: "next-week" },
+          { label: "Last Week",  count: tab === "birthdays" ? BDAY_COUNTS.lastWeek  : EVENT_COUNTS.lastWeek,  range: "last-week" },
+          { label: "Next Month", count: tab === "birthdays" ? BDAY_COUNTS.nextMonth : EVENT_COUNTS.nextMonth, range: "next-month" },
+          { label: "Last Month", count: tab === "birthdays" ? BDAY_COUNTS.lastMonth : EVENT_COUNTS.lastMonth, range: "last-month" },
+        ].map((o, i, arr) => (
+          <span key={o.range}>
+            <Link
+              to={`/friends/${tab === "birthdays" ? "birthdays" : "events"}?range=${o.range}`}
+              className="text-primary font-semibold hover:underline"
+            >
+              {o.label} [{o.count}]
+            </Link>
+            {i < arr.length - 1 ? ", " : ""}
+          </span>
+        ))}
+      </p>
+
+      {/* Others [Events] – events tab only */}
+      {tab === "events" && (
+        <p className="text-[13px] text-foreground leading-relaxed">
+          <span className="font-bold">Others [Events]:</span>{" "}
+          {OTHER_EVENT_TYPES.map((e, i, arr) => (
+            <span key={e.label}>
+              <Link
+                to={`/friends/events?type=${encodeURIComponent(e.label.toLowerCase())}`}
+                className="text-primary font-semibold hover:underline"
+              >
+                {e.label} [{e.count}]
+              </Link>
+              {i < arr.length - 1 ? ", " : ""}
+            </span>
+          ))}
+        </p>
+      )}
     </Card>
   );
 };
