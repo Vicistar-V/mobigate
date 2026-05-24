@@ -1553,16 +1553,19 @@ export default function WalletPage() {
                       />
                     </div>
                     <div className="flex flex-wrap gap-1.5 mt-2.5">
-                      {[5000, 10000, 25000, 50000, SUNDRY_WALLET.balance].map((amt, idx) => (
+                      {[5000, 10000, 25000, 50000, liquidateMaxAmount].map((amt, idx) => (
                         <button
                           key={idx}
                           onClick={() => setLiquidateMobi(String(amt))}
                           className="px-3 py-1.5 rounded-lg bg-muted/50 text-xs font-semibold hover:bg-muted touch-manipulation active:scale-95 transition-all"
                         >
-                          {idx === 4 ? "Max" : `M${formatNumberFull(amt)}`}
+                          {idx === 4 ? "Max (90%)" : `M${formatNumberFull(amt)}`}
                         </button>
                       ))}
                     </div>
+                    <p className="text-[10px] text-muted-foreground mt-1.5 pl-1">
+                      Max. Liquidation: 90% of available Wallet Balance (M{formatNumberFull(liquidateMaxAmount)})
+                    </p>
                   </div>
 
                   {liquidateMobiNum > 0 && (
