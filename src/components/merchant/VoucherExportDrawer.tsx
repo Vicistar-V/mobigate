@@ -264,7 +264,7 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
             <p className="text-sm font-bold text-foreground">Print Voucher Cards</p>
           </div>
           <p className="text-[11px] text-muted-foreground leading-relaxed">
-            Vouchers print at exactly 1.25" × 2.25" with no cropping. Extra cards spill onto additional pages automatically.
+            Vouchers print at 1.25" × 2.25" with cutting gutters (~2mm horizontal, ~5mm vertical) so guillotine cuts won't shave content. Each card carries the Mobigate logo.
           </p>
         </div>
 
