@@ -421,7 +421,21 @@ export const GreetingSection = () => {
                   <button
                     key={t}
                     type="button"
-                    onClick={() => setActiveFeedTab(t)}
+                    onClick={() => {
+                      setActiveFeedTab(t);
+                      // "Stories" is the default tab — no jump / no label filter
+                      if (t === "Stories") return;
+                      // Jump instantly to the Recommended E-Library section and
+                      // apply a removable label filter for the clicked button.
+                      window.dispatchEvent(
+                        new CustomEvent("elibrary:applyLabel", { detail: { label: t } }),
+                      );
+                      const el = document.getElementById("recommended-elibrary");
+                      if (el) {
+                        // instant — no smooth scroll
+                        el.scrollIntoView({ behavior: "auto", block: "start" });
+                      }
+                    }}
                     className={`shrink-0 h-9 px-3 rounded-md text-[13px] font-bold border-2 transition-colors touch-manipulation ${
                       active
                         ? "bg-green-600 text-white border-green-600 shadow-sm"

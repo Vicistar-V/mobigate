@@ -74,6 +74,7 @@ const Index = () => {
   const activeFeedPosts = apiFeedPosts;
 
   const [contentFilter, setContentFilter] = useState<string>("all");
+  const [labelFilter, setLabelFilter] = useState<string | null>(null);
   const [wallStatusFilter, setWallStatusFilter] = useState<string>("all");
   const [wallStatusView, setWallStatusView] = useState<"normal" | "large">("normal");
   const [editingPost, setEditingPost] = useState<Post | null>(null);
@@ -149,7 +150,18 @@ const Index = () => {
   // Reset pagination when filter changes
   useEffect(() => {
     setVisiblePostCount(20);
-  }, [contentFilter]);
+  }, [contentFilter, labelFilter]);
+
+  // Listen for label-filter requests from the homepage section buttons
+  // ("Vibes & Flexing", "Breaking News") inside GreetingCard.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ label?: string }>).detail;
+      if (detail?.label) setLabelFilter(detail.label);
+    };
+    window.addEventListener("elibrary:applyLabel", handler as EventListener);
+    return () => window.removeEventListener("elibrary:applyLabel", handler as EventListener);
+  }, []);
 
   // Convert wall status posts to Post format for WallStatusCarousel
   const wallStatusPostsForCarousel = activeWallStatusPosts.map(post => ({
@@ -373,9 +385,22 @@ const Index = () => {
     },
   ];
 
-  const filteredPosts = contentFilter === "all"
-    ? activeFeedPosts 
+  const typeFilteredPosts = contentFilter === "all"
+    ? activeFeedPosts
     : activeFeedPosts.filter(post => post.type.toLowerCase() === contentFilter);
+
+  // Label filter narrows to posts matching the clicked section label
+  // ("Vibes & Flexing" / "Breaking News"). We match against an optional
+  // `label`/`category` field first, then fall back to title/subtitle text.
+  const filteredPosts = !labelFilter
+    ? typeFilteredPosts
+    : typeFilteredPosts.filter((post) => {
+        const needle = labelFilter.toLowerCase();
+        const tagged = ((post as any).label || (post as any).category || "").toString().toLowerCase();
+        if (tagged && tagged === needle) return true;
+        const hay = `${post.title || ""} ${post.subtitle || ""} ${post.description || ""}`.toLowerCase();
+        return hay.includes(needle);
+      });
   
   const displayedPosts = filteredPosts.slice(0, visiblePostCount);
   const hasMorePosts = visiblePostCount < filteredPosts.length;
@@ -448,7 +473,12 @@ const Index = () => {
             {/* Feed Posts with Filter */}
             <div className="space-y-0">
               <div id="recommended-elibrary" style={{ scrollMarginTop: 96 }}>
-                <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} />
+                <ELibrarySection
+                  activeFilter={contentFilter}
+                  onFilterChange={setContentFilter}
+                  labelFilter={labelFilter}
+                  onClearLabel={() => setLabelFilter(null)}
+                />
               </div>
               <div className="space-y-6 mt-6">
                 {displayedPosts.map((post, index) => {
