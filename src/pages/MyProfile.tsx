@@ -34,6 +34,9 @@ import { ProfileMobiQuizTab } from "@/components/profile/ProfileMobiQuizTab";
 import { ProfileContentsTab } from "@/components/profile/ProfileContentsTab";
 import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
 import { useCurrentUserId, useUserPosts } from "@/hooks/useWindowData";
+import { WallBannerSlideshow } from "@/components/wall-banner/WallBannerSlideshow";
+import { WallBannerManagerDialog } from "@/components/wall-banner/WallBannerManagerDialog";
+import type { WallBannerSlide } from "@/types/wallBanner";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
