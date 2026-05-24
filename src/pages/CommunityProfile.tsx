@@ -487,31 +487,27 @@ const CommunityProfile = () => {
       <main className="flex-1 container mx-auto px-2 sm:px-4 py-4 sm:py-6 max-w-5xl">
         {/* Banner and Logo Section */}
         <Card className="overflow-hidden mb-4">
-          {/* Banner */}
-          <div className="relative h-48 sm:h-64 bg-gradient-to-br from-primary/20 to-primary/5 overflow-hidden">
-            {community.bannerImage ? (
-              <img
-                src={community.bannerImage}
-                alt="Community Banner"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <Camera className="h-16 w-16 text-primary/40" />
-              </div>
-            )}
-          </div>
+          {/* Banner — multi-media carousel (photos + videos) */}
+          <CommunityStatusBanner community={community} />
 
           {/* Logo and Info */}
           <div className="px-4 sm:px-6 pb-4">
             <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-12 sm:-mt-16">
-              {/* Logo */}
-              <Avatar className="h-24 w-24 sm:h-32 sm:w-32 border-4 border-background">
-                <AvatarImage src={community.logoImage || community.coverImage} alt={community.name} />
-                <AvatarFallback className="text-2xl sm:text-3xl">
-                  {community.name.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
+              {/* Logo — tap to open in full-screen viewer */}
+              <button
+                type="button"
+                onClick={() => setShowLogoViewer(true)}
+                className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary touch-manipulation active:scale-95 transition-transform self-start"
+                aria-label={`Open ${community.name} profile picture`}
+              >
+                <Avatar className="h-24 w-24 sm:h-32 sm:w-32 border-4 border-background cursor-zoom-in shadow-lg">
+                  <AvatarImage src={community.logoImage || community.coverImage} alt={community.name} />
+                  <AvatarFallback className="text-2xl sm:text-3xl">
+                    {community.name.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+              </button>
+
 
               {/* Name and Stats */}
               <div className="flex-1">
