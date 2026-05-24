@@ -164,8 +164,12 @@ export default function WalletPage() {
   const [liquidateProcessingMsg, setLiquidateProcessingMsg] = useState("");
 
   const liquidateMobiNum = parseFloat(liquidateMobi) || 0;
-  const liquidatePayoutNGN = liquidateMobiNum * SELLING_RATE_NGN_PER_MOBI;
-  const liquidateSpread = liquidateMobiNum - liquidatePayoutNGN;
+  const liquidateGrossNGN = liquidateMobiNum * SELLING_RATE_NGN_PER_MOBI;
+  const liquidateSpread = liquidateMobiNum - liquidateGrossNGN;
+  const LIQUIDATION_SERVICE_CHARGE_RATE = 0.05;
+  const liquidateServiceCharge = liquidateGrossNGN * LIQUIDATION_SERVICE_CHARGE_RATE;
+  const liquidatePayoutNGN = liquidateGrossNGN - liquidateServiceCharge;
+  const liquidateMaxAmount = Math.floor(SUNDRY_WALLET.balance * 0.9);
 
   const handleProcessLiquidate = useCallback(() => {
     setLiquidateStep("processing");
