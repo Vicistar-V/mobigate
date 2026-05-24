@@ -466,7 +466,7 @@ export const CreatePostDialog = ({
           )}
 
           {/* ── MONETIZATION SECTION ── */}
-          <div className={`rounded-xl border-2 p-4 transition-all ${isMonetized ? "border-amber-300 bg-amber-50" : "border-dashed border-muted"}`}>
+          <div className={`rounded-xl border-2 p-3 sm:p-4 transition-all ${isMonetized ? "border-amber-300 bg-amber-50" : "border-dashed border-muted"}`}>
             {/* Toggle */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
