@@ -118,10 +118,22 @@ export function VoucherPrintDrawer({ open, onOpenChange, batch, onPrintComplete 
     // Header strip — brand + denomination
     pdf.setFillColor(15, 23, 42);
     pdf.rect(x, y, w, 5, "F");
+
+    // Mobigate logo icon — small rounded square with "M"
+    const logoSize = 3.6;
+    const logoX = x + pad;
+    const logoY = y + (5 - logoSize) / 2;
+    pdf.setFillColor(168, 85, 247); // fuchsia/purple accent
+    pdf.roundedRect(logoX, logoY, logoSize, logoSize, 0.6, 0.6, "F");
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(6);
+    pdf.text("M", logoX + logoSize / 2, logoY + logoSize / 2 + 1, { align: "center" });
+
     pdf.setTextColor(255, 255, 255);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(7);
-    pdf.text("MOBIGATE", x + pad, y + 3.5);
+    pdf.text("MOBIGATE", logoX + logoSize + 1.2, y + 3.5);
     pdf.setFontSize(8);
     pdf.text(`M${formatNum(card.denomination)}`, x + w - pad, y + 3.6, { align: "right" });
 
