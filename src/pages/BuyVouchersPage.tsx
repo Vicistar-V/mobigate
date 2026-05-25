@@ -944,14 +944,17 @@ export default function BuyVouchersPage() {
           <div className="w-full space-y-3 animate-fade-in">
             <Button onClick={handleUseForSelf} className="w-full h-14 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-700 touch-manipulation active:scale-[0.97]">
               <CheckCircle2 className="h-5 w-5 mr-2" />
-              Use for Myself
+              {isFundWallet ? "Credit My Wallet & Resume" : "Use for Myself"}
             </Button>
-            <Button onClick={handleSendToSomeone} variant="outline" className="w-full h-14 rounded-xl text-sm font-bold border-2 touch-manipulation active:scale-[0.97]">
-              <Send className="h-5 w-5 mr-2" />
-              Send to Someone
-            </Button>
+            {!isFundWallet && (
+              <Button onClick={handleSendToSomeone} variant="outline" className="w-full h-14 rounded-xl text-sm font-bold border-2 touch-manipulation active:scale-[0.97]">
+                <Send className="h-5 w-5 mr-2" />
+                Send to Someone
+              </Button>
+            )}
           </div>
         )}
+
       </div>
     );
   };
