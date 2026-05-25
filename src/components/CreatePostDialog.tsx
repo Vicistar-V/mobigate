@@ -16,11 +16,15 @@ import { Plus, Upload, X, Image, Lock, DollarSign, Info, ImagePlus } from "lucid
 import { useToast }          from "@/hooks/use-toast";
 import { AlbumSelector }     from "./AlbumSelector";
 import { CreateAlbumDialog } from "./CreateAlbumDialog";
-import { useUserAlbums }     from "@/hooks/useWindowData";
+import { useUserAlbums, useUserProfile } from "@/hooks/useWindowData";
 import { mockAlbums }        from "@/data/posts";
 import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
 import { ContentFeeNotice } from "@/components/media/ContentFeeNotice";
+import { NonMonetizedPostFeeNotice } from "@/components/monetization/NonMonetizedPostFeeNotice";
+import { MonetizationEligibilityCard } from "@/components/monetization/MonetizationEligibilityCard";
+import { checkPostMonetizationEligibility } from "@/data/monetizationPolicy";
 import { MAX_IMAGES_PER_POST, EXTRA_IMAGE_FEE } from "@/data/platformSettingsData";
+
 
 const API_BASE = (import.meta.env.VITE_API_URL as string) || "/api";
 
@@ -49,6 +53,18 @@ export const CreatePostDialog = ({
   const { toast }   = useToast();
   const phpAlbums   = useUserAlbums();
   const albums      = phpAlbums || mockAlbums;
+  const userProfile = useUserProfile();
+
+  // ── Monetization eligibility (admin-gated thresholds) ──
+  const monetizationProfile = {
+    friendsCount:   userProfile?.stats?.friends   ?? 0,
+    followersCount: userProfile?.stats?.followers ?? 0,
+    followingCount: userProfile?.stats?.following ?? 0,
+    verified:       userProfile?.verified         ?? false,
+  };
+  const eligibility = checkPostMonetizationEligibility(monetizationProfile);
+  const canMonetize = eligibility.eligible;
+
 
   const [internalOpen, setInternalOpen] = useState(false);
   const open = openProp ?? internalOpen;
@@ -86,6 +102,12 @@ export const CreatePostDialog = ({
       .then(d => { if (d?.pct) setCreatorPct(Number(d.pct)); })
       .catch(() => {});
   }, []);
+
+  // Force monetization OFF when eligibility is lost
+  useEffect(() => {
+    if (!canMonetize && isMonetized) setIsMonetized(false);
+  }, [canMonetize, isMonetized]);
+
 
   const mediaRef = useRef<HTMLInputElement>(null);
   const thumbRef = useRef<HTMLInputElement>(null);
@@ -342,8 +364,13 @@ export const CreatePostDialog = ({
             </Select>
           </div>
 
-          {/* Content Posting Fee notice (scales with image count for Photo posts) */}
-          <ContentFeeNotice mediaType={type} imageCount={imageCount} compact />
+          {/* Posting Fee notice — non-monetized posts use the lower per-type rate */}
+          {isMonetized ? (
+            <ContentFeeNotice mediaType={type} imageCount={imageCount} compact />
+          ) : (
+            <NonMonetizedPostFeeNotice mediaType={type} compact />
+          )}
+
 
           {/* Main Media File(s) */}
           <div className="space-y-2">
@@ -466,6 +493,9 @@ export const CreatePostDialog = ({
           )}
 
           {/* ── MONETIZATION SECTION ── */}
+          {!canMonetize ? (
+            <MonetizationEligibilityCard profile={monetizationProfile} hideWhenEligible={false} />
+          ) : (
           <div className={`rounded-xl border-2 p-3 sm:p-4 transition-all ${isMonetized ? "border-amber-300 bg-amber-50" : "border-dashed border-muted"}`}>
             {/* Toggle */}
             <div className="flex items-center justify-between">
@@ -483,6 +513,7 @@ export const CreatePostDialog = ({
                 onCheckedChange={setIsMonetized}
               />
             </div>
+
 
             {/* Fee settings — shown when monetized */}
             {isMonetized && (
@@ -550,6 +581,9 @@ export const CreatePostDialog = ({
               </p>
             )}
           </div>
+          )}
+
+
 
           {/* Album */}
           <div className="space-y-1.5">
