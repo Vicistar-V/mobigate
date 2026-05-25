@@ -92,8 +92,18 @@ export const CreatePostDialog = ({
 
   // Monetization
   const [isMonetized,  setIsMonetized]  = useState(false);
-  const [accessFee,    setAccessFee]    = useState("10");
+  const minFee = getMonetizedPostMinFee(type);
+  const maxFee = monetizedPostMinFeeSettings.absoluteMaxMobi;
+  const [accessFee,    setAccessFee]    = useState(String(minFee));
   const [creatorPct,   setCreatorPct]   = useState(60);
+
+  // Whenever post type changes, bump the access fee up to the new minimum
+  // (never downwards — respect user's existing higher value).
+  useEffect(() => {
+    const current = parseFloat(accessFee) || 0;
+    if (current < minFee) setAccessFee(String(minFee));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [type]);
 
   // Fetch creator earning % from admin settings
   useEffect(() => {
