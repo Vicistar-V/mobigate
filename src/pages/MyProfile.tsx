@@ -908,7 +908,7 @@ const MyProfile = () => {
             />
 
             {/* Feed Posts with Filter */}
-            <div className="space-y-0">
+            <div id="e-library-section" className="space-y-0 scroll-mt-24">
               <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} />
               
               <div className="space-y-6 mt-6">
