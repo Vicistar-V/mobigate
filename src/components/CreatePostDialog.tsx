@@ -581,6 +581,9 @@ export const CreatePostDialog = ({
               </p>
             )}
           </div>
+          )}
+
+
 
           {/* Album */}
           <div className="space-y-1.5">
