@@ -246,3 +246,37 @@ export function getNonMonetizedPostFee(type: NonMonetizedPostType | string): num
   const entry = (nonMonetizedPostFeeSettings.fees as Record<string, { feeMobi: number }>)[type];
   return entry?.feeMobi ?? 1;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 5.  MONETIZED POST — SYSTEM DEFAULT MINIMUM ACCESS FEES (per type)
+//     Content Creators may set their Access Fee at or ABOVE these minimums.
+//     They cannot publish below the system default minimum. Admin-tunable.
+// ─────────────────────────────────────────────────────────────────────────────
+export type MonetizedPostType = NonMonetizedPostType;
+
+export interface MonetizedPostMinFeeSettings {
+  minFees: Record<MonetizedPostType, { minMobi: number; feeRange: [number, number] }>;
+  absoluteMaxMobi: number;
+  lastUpdatedAt: Date;
+  lastUpdatedBy: string;
+}
+
+export const monetizedPostMinFeeSettings: MonetizedPostMinFeeSettings = {
+  minFees: {
+    Video:   { minMobi: 10, feeRange: [5, 100] },
+    Audio:   { minMobi: 5,  feeRange: [2, 50]  },
+    Photo:   { minMobi: 5,  feeRange: [2, 50]  },
+    Article: { minMobi: 5,  feeRange: [2, 50]  },
+    PDF:     { minMobi: 5,  feeRange: [2, 50]  },
+    URL:     { minMobi: 2,  feeRange: [1, 20]  },
+  },
+  absoluteMaxMobi: 10000,
+  lastUpdatedAt: new Date(),
+  lastUpdatedBy: "Mobigate Admin",
+};
+
+export function getMonetizedPostMinFee(type: MonetizedPostType | string): number {
+  const entry = (monetizedPostMinFeeSettings.minFees as Record<string, { minMobi: number }>)[type];
+  return entry?.minMobi ?? 5;
+}
+
