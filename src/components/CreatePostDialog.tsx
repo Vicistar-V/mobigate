@@ -244,6 +244,7 @@ export const CreatePostDialog = ({
     setSelectedAlbum(null); setProgress(0);
     setIsMonetized(false); setAccessFee(String(minFee));
     setLegalAccepted(false);
+    setAudience(DEFAULT_AUDIENCE_VALUE);
     if (mediaRef.current)  mediaRef.current.value  = "";
     if (thumbRef.current)  thumbRef.current.value  = "";
   };
