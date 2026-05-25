@@ -19,6 +19,7 @@ import { CreateAlbumDialog } from "./CreateAlbumDialog";
 import { useUserAlbums, useUserProfile } from "@/hooks/useWindowData";
 import { mockAlbums }        from "@/data/posts";
 import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
+import { AudiencePrivacySelector, DEFAULT_AUDIENCE_VALUE, appendAudienceToFormData, type AudienceValue } from "@/components/common/AudiencePrivacySelector";
 import { ContentFeeNotice } from "@/components/media/ContentFeeNotice";
 import { NonMonetizedPostFeeNotice } from "@/components/monetization/NonMonetizedPostFeeNotice";
 import { MonetizationEligibilityCard } from "@/components/monetization/MonetizationEligibilityCard";
