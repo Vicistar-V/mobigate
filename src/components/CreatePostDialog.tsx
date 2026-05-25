@@ -616,11 +616,17 @@ export const CreatePostDialog = ({
 
 
 
+          {/* Audience Privacy */}
+          <div className="rounded-xl border border-border bg-muted/30 p-3">
+            <AudiencePrivacySelector value={audience} onChange={setAudience} />
+          </div>
+
           {/* Album */}
           <div className="space-y-1.5">
             <Label>Album (Optional)</Label>
             <AlbumSelector value={selectedAlbum} onChange={setSelectedAlbum} onCreateNew={() => setShowNewAlbum(true)} />
           </div>
+
 
           {/* Progress */}
           {submitting && progress > 0 && (
