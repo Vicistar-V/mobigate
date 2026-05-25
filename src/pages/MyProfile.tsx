@@ -741,20 +741,104 @@ const MyProfile = () => {
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-60 max-h-[70vh] overflow-y-auto"
+                  >
+                    {/* People */}
                     <DropdownMenuItem onClick={() => setActiveTab("friends")}>
-                      <Users className="h-4 w-4 mr-2" />
-                      View My Friends
+                      <Users className="h-4 w-4 mr-2 text-primary" />
+                      My Friends
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setActiveTab("followers")}>
+                      <UserPlus className="h-4 w-4 mr-2 text-primary" />
+                      My Followers
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setActiveTab("following")}>
+                      <UserCheck className="h-4 w-4 mr-2 text-primary" />
+                      My Following
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+
+                    {/* Content */}
                     <DropdownMenuItem onClick={() => setActiveTab("contents")}>
-                      <Share2 className="h-4 w-4 mr-2" />
+                      <FileText className="h-4 w-4 mr-2 text-primary" />
                       My Contents
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setActiveTab("albums")}>
-                      <Share2 className="h-4 w-4 mr-2" />
+                      <ImageIcon className="h-4 w-4 mr-2 text-primary" />
                       My Albums
                     </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+
+                    {/* Engagement */}
+                    <DropdownMenuItem onClick={() => setActiveTab("gifts")}>
+                      <Gift className="h-4 w-4 mr-2 text-rose-500" />
+                      My Gifts <span className="ml-auto text-[10px] text-muted-foreground">Sent · Rec'd · Vault</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setActiveTab("likes")}>
+                      <ThumbsUp className="h-4 w-4 mr-2 text-rose-500" />
+                      My Likes <span className="ml-auto text-[10px] text-muted-foreground">Sent · Rec'd</span>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+
+                    {/* Games & Library */}
+                    <DropdownMenuItem onClick={() => setActiveTab("mobi-quiz")}>
+                      <Gamepad2 className="h-4 w-4 mr-2 text-amber-500" />
+                      My Games <span className="ml-auto text-[10px] text-muted-foreground">Played · Liked</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setActiveTab("status");
+                        setTimeout(() => {
+                          document.getElementById("e-library-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }, 80);
+                      }}
+                    >
+                      <BookOpen className="h-4 w-4 mr-2 text-amber-500" />
+                      My E-Library
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+
+                    {/* Networks */}
+                    <DropdownMenuItem onClick={() => setActiveTab("mobi-circle")}>
+                      <Network className="h-4 w-4 mr-2 text-indigo-500" />
+                      My Mobi-Circle
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setActiveTab("mobi-shop")}>
+                      <Store className="h-4 w-4 mr-2 text-indigo-500" />
+                      My Mobi-Shop
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setActiveTab("biz-catalogue")}>
+                      <Briefcase className="h-4 w-4 mr-2 text-indigo-500" />
+                      My Biz-Catalogue
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setActiveTab("community")}>
+                      <Building2 className="h-4 w-4 mr-2 text-indigo-500" />
+                      My Communities
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+
+                    {/* Life-Mates (not yet wired — placeholder) */}
+                    <DropdownMenuItem
+                      onClick={() =>
+                        toast({
+                          title: "My Life-Mates",
+                          description: "Age-Mates, School-Mates, Class-Mates & Work Colleagues — coming soon.",
+                        })
+                      }
+                    >
+                      <GraduationCap className="h-4 w-4 mr-2 text-emerald-600" />
+                      My Life-Mates
+                      <span className="ml-auto text-[10px] text-muted-foreground">Soon</span>
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
+
                 </DropdownMenu>
               </div>
 
