@@ -102,20 +102,44 @@ export const MediaGalleryViewer = ({
     }
   };
 
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: currentItem?.title || "Check this out!",
-        text: currentItem?.description || "",
-        url: window.location.href,
-      }).catch(() => {
-        // User cancelled or error occurred
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      toast({ description: "Link copied to clipboard" });
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    const shareData = {
+      title: currentItem?.title || "Check this out!",
+      text: currentItem?.description?.slice(0, 200) || currentItem?.title || "",
+      url: shareUrl,
+    };
+
+    // Try native share first (mobile)
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch (err: unknown) {
+        // User cancelled — bail silently
+        if (err instanceof Error && err.name === "AbortError") return;
+        // Permission denied (e.g. iframe) → fall through to clipboard
+      }
+    }
+
+    // Fallback: copy link
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast({ title: "Link copied", description: "Share it anywhere you like." });
+    } catch {
+      // Last-resort fallback for older browsers
+      const ta = document.createElement("textarea");
+      ta.value = shareUrl;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); toast({ title: "Link copied" }); }
+      catch { toast({ title: "Could not share", description: "Copy this link manually: " + shareUrl, variant: "destructive" }); }
+      finally { document.body.removeChild(ta); }
     }
   };
+
 
   const handleComment = () => {
     setCommentDialogOpen(true);
