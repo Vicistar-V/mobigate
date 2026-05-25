@@ -786,14 +786,21 @@ export const ProfileAboutTab = ({
           </Button>
         </div>
         <div className="space-y-4">
-          {work.map((workItem, index) => <div key={workItem.id}>
+          {work.map((workItem, index) => (
+            <div key={workItem.id}>
               {index > 0 && <Separator className="mb-4" />}
-                <div>
-                  <p className="font-medium">{workItem.workplaceName}</p>
+              <div className="flex items-start gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 ring-1 ring-primary/20">
+                  <Building2 className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium break-words">{workItem.workplaceName}</p>
                   <p className="text-base">{workItem.position}</p>
                   <p className="text-base text-muted-foreground">{workItem.period}</p>
                 </div>
-            </div>)}
+              </div>
+            </div>
+          ))}
         </div>
       </Card>
 
