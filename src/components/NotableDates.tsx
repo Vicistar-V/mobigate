@@ -1,7 +1,9 @@
 import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Plus } from "lucide-react";
 import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
+import { CreateEventDialog, CreatedEvent } from "@/components/CreateEventDialog";
 import { useToast } from "@/hooks/use-toast";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
