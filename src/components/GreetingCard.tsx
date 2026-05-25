@@ -67,6 +67,7 @@ export const GreetingSection = () => {
   const [featuredPublicIdx, setFeaturedPublicIdx] = useState(0);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerStartIndex, setViewerStartIndex] = useState(0);
+  const [storyDetailOpen, setStoryDetailOpen] = useState(false);
   const [ownActionsOpen, setOwnActionsOpen] = useState(false);
   const [editPostOpen, setEditPostOpen] = useState(false);
   const [wallBannerManagerOpen, setWallBannerManagerOpen] = useState(false);
