@@ -19,6 +19,7 @@ import { CreateAlbumDialog } from "./CreateAlbumDialog";
 import { useUserAlbums, useUserProfile } from "@/hooks/useWindowData";
 import { mockAlbums }        from "@/data/posts";
 import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
+import { AudiencePrivacySelector, DEFAULT_AUDIENCE_VALUE, appendAudienceToFormData, type AudienceValue } from "@/components/common/AudiencePrivacySelector";
 import { ContentFeeNotice } from "@/components/media/ContentFeeNotice";
 import { NonMonetizedPostFeeNotice } from "@/components/monetization/NonMonetizedPostFeeNotice";
 import { MonetizationEligibilityCard } from "@/components/monetization/MonetizationEligibilityCard";
@@ -88,6 +89,9 @@ export const CreatePostDialog = ({
   const [submitting,       setSubmitting]       = useState(false);
   const [progress,         setProgress]         = useState(0);
   const [legalAccepted,    setLegalAccepted]    = useState(false);
+
+  // Audience privacy
+  const [audience, setAudience] = useState<AudienceValue>(DEFAULT_AUDIENCE_VALUE);
 
 
   // Monetization
@@ -240,6 +244,7 @@ export const CreatePostDialog = ({
     setSelectedAlbum(null); setProgress(0);
     setIsMonetized(false); setAccessFee(String(minFee));
     setLegalAccepted(false);
+    setAudience(DEFAULT_AUDIENCE_VALUE);
     if (mediaRef.current)  mediaRef.current.value  = "";
     if (thumbRef.current)  thumbRef.current.value  = "";
   };
@@ -268,6 +273,7 @@ export const CreatePostDialog = ({
       form.append("is_monetized", isMonetized ? "1" : "0");
       form.append("access_fee",   isMonetized ? String(feeValue) : "0");
       if (selectedAlbum) form.append("album_id", selectedAlbum);
+      appendAudienceToFormData(form, audience);
       if (type === "Photo" && photoFiles.length > 0) {
         // First image is primary, remaining are extras (for backwards-compatible PHP endpoint)
         form.append("media", photoFiles[0]);
@@ -610,11 +616,17 @@ export const CreatePostDialog = ({
 
 
 
+          {/* Audience Privacy */}
+          <div className="rounded-xl border border-border bg-muted/30 p-3">
+            <AudiencePrivacySelector value={audience} onChange={setAudience} />
+          </div>
+
           {/* Album */}
           <div className="space-y-1.5">
             <Label>Album (Optional)</Label>
             <AlbumSelector value={selectedAlbum} onChange={setSelectedAlbum} onCreateNew={() => setShowNewAlbum(true)} />
           </div>
+
 
           {/* Progress */}
           {submitting && progress > 0 && (
