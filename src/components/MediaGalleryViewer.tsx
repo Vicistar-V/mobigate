@@ -361,19 +361,25 @@ export const MediaGalleryViewer = ({
               <div className="absolute inset-0 z-40 flex items-stretch justify-center overflow-y-auto overscroll-contain px-3 py-16 sm:py-20">
                 <article className="w-full max-w-2xl mx-auto bg-card text-card-foreground rounded-2xl shadow-2xl p-5 sm:p-8 my-auto">
                   {currentItem.author && (
-                    <div className="flex items-center gap-2 mb-3 pb-3 border-b">
+                    <button
+                      type="button"
+                      onClick={openAuthorProfile}
+                      className="w-full flex items-center gap-2 mb-3 pb-3 border-b text-left hover:bg-muted/40 rounded-md -mx-1 px-1 py-1 transition-colors touch-manipulation"
+                      aria-label={`Open ${currentItem.author}'s profile`}
+                    >
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={currentItem.authorImage} alt={currentItem.author} />
                         <AvatarFallback>{currentItem.author.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold truncate">{currentItem.author}</p>
+                        <p className="text-sm font-semibold truncate hover:underline">{currentItem.author}</p>
                         {currentItem.timestamp && (
                           <p className="text-[11px] text-muted-foreground">{currentItem.timestamp}</p>
                         )}
                       </div>
-                    </div>
+                    </button>
                   )}
+
                   {currentItem.title && (
                     <h2 className="text-xl sm:text-2xl font-bold leading-tight mb-3">{currentItem.title}</h2>
                   )}
