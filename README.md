@@ -1,73 +1,93 @@
-# Welcome to your Lovable project
+# Mobigate
 
-## Project info
+Mobigate is a mobile-first social, commerce and rewards platform built around the **Mobi** in-app currency. It blends social networking (Posts, Wall Status, Gifts, Communities), a merchant ecosystem (Bulk & Retail Merchants, Vouchers), quizzes and games, advertising, and an admin control plane — all in one Progressive Web experience designed for phones first.
 
-**URL**: https://lovable.dev/projects/c51c4fc1-cea3-4045-9b36-bf5f3e8a8497
+---
 
-## How can I edit this code?
+## Tech Stack
 
-There are several ways of editing your application.
+- **React 18** + **TypeScript 5**
+- **Vite 5** for builds and dev server
+- **Tailwind CSS v3** with a semantic design-token system (HSL tokens in `src/index.css` + `tailwind.config.ts`)
+- **shadcn/ui** primitives (Radix UI under the hood)
+- **React Router** for client-side routing
+- **TanStack Query** for async state
+- **PHP backend** (existing) — the React app integrates with PHP-rendered data via `window.*` bridge variables (e.g. `window.__USER_PROFILE__`)
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/c51c4fc1-cea3-4045-9b36-bf5f3e8a8497) and start prompting.
+## Project Structure
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+src/
+  components/      Reusable UI (cards, dialogs, drawers, selectors)
+    admin/         Admin-only controls (multi-sig protected actions)
+    chat/          Messaging UI
+    common/        Cross-cutting widgets (AudiencePrivacySelector, LegalCopyrightAcceptance, …)
+    media/         Media gallery, player, viewer
+    merchant/      Bulk & Retail merchant flows
+    monetization/  Eligibility cards, fee notices
+    profile/       Profile sections, edit dialogs
+  data/            Static config & policy modules (monetizationPolicy, platformSettings, …)
+  hooks/           Custom React hooks (useWindowData, useChat, …)
+  pages/           Route-level screens
+  types/           Global TS types (window bridge, posts, …)
+public/            Static assets served as-is
 ```
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Key Domain Concepts
 
-**Use GitHub Codespaces**
+- **Currency**: `Mobi` (M) — base rate 1 Mobi = 1 NGN (₦). All money is shown with full figures and 2 decimals (e.g. `₦150,000.00`).
+- **Merchants**: *Bulk Merchants* (major) and *Retail Merchants* (sub-merchants).
+- **Wallets**: 3-wallet model — Mobi Wallet, NGN Wallet, Sundry Wallet — with Buy/Sell spreads to block voucher arbitrage.
+- **Security**: 4-admin multi-signature protocol for sensitive actions (Admin-1 solo, or 2 + 3 + 4 together).
+- **Monetisation gating**: Posts can be monetised only when a user meets Friend/Follower/Following thresholds and is Verified.
+- **Audience privacy**: Posts can target Public, Friends, Other Connections, Private, or a Custom allow-list, with an optional exclude-list.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+---
 
-## What technologies are used for this project?
+## UI / UX Guidelines
 
-This project is built with:
+- **Mobile-first**: target 360px viewport. Sheets/drawers use `92dvh` instead of desktop layouts. Metadata restacks vertically on small screens.
+- **Design tokens**: never hard-code colors — always use semantic tokens from `index.css` / `tailwind.config.ts` (HSL).
+- **Form UX**: numeric inputs clamp on `onBlur`, never `onChange`.
+- **Performance**: define sub-components outside main functions to prevent mobile keyboard focus loss.
+- **Printing**: never use `window.print()` on mobile — use jsPDF + html2canvas.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+---
 
-## How can I deploy this project?
+## Local Development
 
-Simply open [Lovable](https://lovable.dev/projects/c51c4fc1-cea3-4045-9b36-bf5f3e8a8497) and click on Share -> Publish.
+Requires **Node 18+** (Node 20 recommended).
 
-## Can I connect a custom domain to my Lovable project?
+```sh
+# 1. Install dependencies
+npm install
 
-Yes, you can!
+# 2. Start the dev server (http://localhost:5173)
+npm run dev
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+# 3. Production build
+npm run build
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+# 4. Preview the production build locally
+npm run preview
+```
+
+### Environment
+
+The React app reads the PHP API base URL from `VITE_API_URL` (defaults to `/api` when unset). Most pages additionally hydrate from `window.__*__` variables injected server-side by PHP — when running in pure dev mode, mock fallbacks in `src/data/*` are used.
+
+---
+
+## Deployment
+
+The frontend is built into static assets (`dist/`) and served by the existing PHP backend. Build with `npm run build` and ship the `dist/` directory alongside the PHP application.
+
+---
+
+## License
+
+Proprietary — © Mobigate. All rights reserved.
