@@ -103,6 +103,12 @@ export const CreatePostDialog = ({
       .catch(() => {});
   }, []);
 
+  // Force monetization OFF when eligibility is lost
+  useEffect(() => {
+    if (!canMonetize && isMonetized) setIsMonetized(false);
+  }, [canMonetize, isMonetized]);
+
+
   const mediaRef = useRef<HTMLInputElement>(null);
   const thumbRef = useRef<HTMLInputElement>(null);
 
