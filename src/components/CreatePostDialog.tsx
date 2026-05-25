@@ -22,7 +22,7 @@ import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcce
 import { ContentFeeNotice } from "@/components/media/ContentFeeNotice";
 import { NonMonetizedPostFeeNotice } from "@/components/monetization/NonMonetizedPostFeeNotice";
 import { MonetizationEligibilityCard } from "@/components/monetization/MonetizationEligibilityCard";
-import { checkPostMonetizationEligibility } from "@/data/monetizationPolicy";
+import { checkPostMonetizationEligibility, getMonetizedPostMinFee, monetizedPostMinFeeSettings } from "@/data/monetizationPolicy";
 import { MAX_IMAGES_PER_POST, EXTRA_IMAGE_FEE } from "@/data/platformSettingsData";
 
 
@@ -92,8 +92,18 @@ export const CreatePostDialog = ({
 
   // Monetization
   const [isMonetized,  setIsMonetized]  = useState(false);
-  const [accessFee,    setAccessFee]    = useState("10");
+  const minFee = getMonetizedPostMinFee(type);
+  const maxFee = monetizedPostMinFeeSettings.absoluteMaxMobi;
+  const [accessFee,    setAccessFee]    = useState(String(minFee));
   const [creatorPct,   setCreatorPct]   = useState(60);
+
+  // Whenever post type changes, bump the access fee up to the new minimum
+  // (never downwards — respect user's existing higher value).
+  useEffect(() => {
+    const current = parseFloat(accessFee) || 0;
+    if (current < minFee) setAccessFee(String(minFee));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [type]);
 
   // Fetch creator earning % from admin settings
   useEffect(() => {
@@ -228,7 +238,7 @@ export const CreatePostDialog = ({
     setPhotoFiles([]); setPhotoPreviews([]);
     setThumbnailFile(null); setThumbnailPreview(null);
     setSelectedAlbum(null); setProgress(0);
-    setIsMonetized(false); setAccessFee("10");
+    setIsMonetized(false); setAccessFee(String(minFee));
     setLegalAccepted(false);
     if (mediaRef.current)  mediaRef.current.value  = "";
     if (thumbRef.current)  thumbRef.current.value  = "";
@@ -238,14 +248,14 @@ export const CreatePostDialog = ({
 
 
   const feeValue = Math.max(0, parseFloat(accessFee) || 0);
-  const isValidFee = !isMonetized || (feeValue > 0 && feeValue <= 10000);
+  const isValidFee = !isMonetized || (feeValue >= minFee && feeValue <= maxFee);
 
   const handleSubmit = async () => {
     if (!title.trim()) {
       toast({ title: "Title is required", variant: "destructive" }); return;
     }
     if (isMonetized && !isValidFee) {
-      toast({ title: "Invalid fee", description: "Fee must be between 1 and 10,000 Mobi", variant: "destructive" }); return;
+      toast({ title: "Access Fee too low", description: `Minimum Access Fee for ${type} posts is ${minFee} Mobi (max ${maxFee.toLocaleString()}).`, variant: "destructive" }); return;
     }
     setSubmitting(true); setProgress(0);
 
@@ -522,29 +532,43 @@ export const CreatePostDialog = ({
                   <Label className="flex items-center gap-2">
                     <Lock className="h-3.5 w-3.5 text-amber-500" />
                     Access Fee (Mobi) *
+                    <span className="ml-auto text-[10px] font-semibold uppercase tracking-wide text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
+                      Min {minFee} Mobi
+                    </span>
                   </Label>
                   <div className="flex items-center gap-2">
                     <div className="relative flex-1">
                       <Input
                         type="number"
-                        min="1"
-                        max="10000"
+                        min={minFee}
+                        max={maxFee}
                         step="1"
                         value={accessFee}
                         onChange={e => setAccessFee(e.target.value)}
-                        placeholder="e.g. 50"
+                        onBlur={() => {
+                          const v = parseFloat(accessFee) || 0;
+                          if (v < minFee) setAccessFee(String(minFee));
+                          else if (v > maxFee) setAccessFee(String(maxFee));
+                        }}
+                        placeholder={`Min ${minFee}`}
                         className={`pr-16 ${!isValidFee ? "border-red-400 focus:ring-red-400" : "border-amber-300 focus:ring-amber-400"}`}
                       />
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold text-amber-600">Mobi</span>
                     </div>
                   </div>
-                  {!isValidFee && (
-                    <p className="text-xs text-red-500">Fee must be between 1 and 10,000 Mobi</p>
+                  {!isValidFee ? (
+                    <p className="text-xs text-red-500">
+                      Access Fee for {type} posts must be at least <strong>{minFee} Mobi</strong> (max {maxFee.toLocaleString()}).
+                    </p>
+                  ) : (
+                    <p className="text-[11px] text-amber-700/80">
+                      System minimum for {type}: <strong>{minFee} Mobi</strong>. You can set this higher, but not lower.
+                    </p>
                   )}
 
-                  {/* Preset amounts */}
+                  {/* Preset amounts — only those at or above the system minimum */}
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {FEE_PRESETS.map(p => (
+                    {FEE_PRESETS.filter(p => p >= minFee).map(p => (
                       <button
                         key={p}
                         type="button"
@@ -560,6 +584,7 @@ export const CreatePostDialog = ({
                     ))}
                   </div>
                 </div>
+
 
                 {/* Info box */}
                 <div className="flex gap-2 bg-amber-100/70 rounded-lg p-3">
