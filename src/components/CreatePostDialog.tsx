@@ -16,11 +16,15 @@ import { Plus, Upload, X, Image, Lock, DollarSign, Info, ImagePlus } from "lucid
 import { useToast }          from "@/hooks/use-toast";
 import { AlbumSelector }     from "./AlbumSelector";
 import { CreateAlbumDialog } from "./CreateAlbumDialog";
-import { useUserAlbums }     from "@/hooks/useWindowData";
+import { useUserAlbums, useUserProfile } from "@/hooks/useWindowData";
 import { mockAlbums }        from "@/data/posts";
 import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
 import { ContentFeeNotice } from "@/components/media/ContentFeeNotice";
+import { NonMonetizedPostFeeNotice } from "@/components/monetization/NonMonetizedPostFeeNotice";
+import { MonetizationEligibilityCard } from "@/components/monetization/MonetizationEligibilityCard";
+import { checkPostMonetizationEligibility } from "@/data/monetizationPolicy";
 import { MAX_IMAGES_PER_POST, EXTRA_IMAGE_FEE } from "@/data/platformSettingsData";
+
 
 const API_BASE = (import.meta.env.VITE_API_URL as string) || "/api";
 
