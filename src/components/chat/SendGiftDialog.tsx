@@ -432,12 +432,13 @@ export const SendGiftDialog = ({
           {insufficient ? (
             <Button
               className="flex-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-              onClick={() => goFund("/buy-vouchers?source=fund-wallet")}
+              onClick={() => goFund(primaryFundPath)}
               disabled={sending}
             >
               <Plus className="h-4 w-4 mr-2" />
               Fund Wallet to Send
             </Button>
+
           ) : (
             <Button
               className="flex-1"
