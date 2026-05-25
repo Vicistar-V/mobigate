@@ -53,6 +53,18 @@ export const CreatePostDialog = ({
   const { toast }   = useToast();
   const phpAlbums   = useUserAlbums();
   const albums      = phpAlbums || mockAlbums;
+  const userProfile = useUserProfile();
+
+  // ── Monetization eligibility (admin-gated thresholds) ──
+  const monetizationProfile = {
+    friendsCount:   userProfile?.stats?.friends   ?? 0,
+    followersCount: userProfile?.stats?.followers ?? 0,
+    followingCount: userProfile?.stats?.following ?? 0,
+    verified:       userProfile?.verified         ?? false,
+  };
+  const eligibility = checkPostMonetizationEligibility(monetizationProfile);
+  const canMonetize = eligibility.eligible;
+
 
   const [internalOpen, setInternalOpen] = useState(false);
   const open = openProp ?? internalOpen;
