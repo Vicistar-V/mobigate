@@ -235,8 +235,16 @@ export default function BuyVouchersPage() {
   };
 
   const handleSelfDone = () => {
+    const returnTo = searchParams.get("returnTo");
+    if (returnTo) {
+      try {
+        navigate(decodeURIComponent(returnTo));
+        return;
+      } catch {}
+    }
     navigate("/");
   };
+
 
   const handleSendToSomeone = () => {
     setStep("distribute");
