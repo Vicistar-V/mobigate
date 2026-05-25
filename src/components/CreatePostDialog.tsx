@@ -532,29 +532,43 @@ export const CreatePostDialog = ({
                   <Label className="flex items-center gap-2">
                     <Lock className="h-3.5 w-3.5 text-amber-500" />
                     Access Fee (Mobi) *
+                    <span className="ml-auto text-[10px] font-semibold uppercase tracking-wide text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
+                      Min {minFee} Mobi
+                    </span>
                   </Label>
                   <div className="flex items-center gap-2">
                     <div className="relative flex-1">
                       <Input
                         type="number"
-                        min="1"
-                        max="10000"
+                        min={minFee}
+                        max={maxFee}
                         step="1"
                         value={accessFee}
                         onChange={e => setAccessFee(e.target.value)}
-                        placeholder="e.g. 50"
+                        onBlur={() => {
+                          const v = parseFloat(accessFee) || 0;
+                          if (v < minFee) setAccessFee(String(minFee));
+                          else if (v > maxFee) setAccessFee(String(maxFee));
+                        }}
+                        placeholder={`Min ${minFee}`}
                         className={`pr-16 ${!isValidFee ? "border-red-400 focus:ring-red-400" : "border-amber-300 focus:ring-amber-400"}`}
                       />
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold text-amber-600">Mobi</span>
                     </div>
                   </div>
-                  {!isValidFee && (
-                    <p className="text-xs text-red-500">Fee must be between 1 and 10,000 Mobi</p>
+                  {!isValidFee ? (
+                    <p className="text-xs text-red-500">
+                      Access Fee for {type} posts must be at least <strong>{minFee} Mobi</strong> (max {maxFee.toLocaleString()}).
+                    </p>
+                  ) : (
+                    <p className="text-[11px] text-amber-700/80">
+                      System minimum for {type}: <strong>{minFee} Mobi</strong>. You can set this higher, but not lower.
+                    </p>
                   )}
 
-                  {/* Preset amounts */}
+                  {/* Preset amounts — only those at or above the system minimum */}
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {FEE_PRESETS.map(p => (
+                    {FEE_PRESETS.filter(p => p >= minFee).map(p => (
                       <button
                         key={p}
                         type="button"
@@ -570,6 +584,7 @@ export const CreatePostDialog = ({
                     ))}
                   </div>
                 </div>
+
 
                 {/* Info box */}
                 <div className="flex gap-2 bg-amber-100/70 rounded-lg p-3">
