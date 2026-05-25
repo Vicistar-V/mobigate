@@ -593,25 +593,23 @@ export const GreetingSection = () => {
             )}
 
 
-            {/* Public/Connection post — driven by thumbnail selection below.
-                Image Y + Storyline 2 form ONE read-only click area that opens the
-                bigger MediaGalleryViewer window. Not editable. */}
+            {/* Public/Connection post — view-only wrapper.
+                Inside it: the IMAGE opens the media viewer (enlarge),
+                the STORYLINE text opens the full story details dialog.
+                The outer card itself is NOT clickable. */}
             {featuredPublicPost && (
               <div
-                role="button"
-                tabIndex={0}
-                onClick={() => setViewerOpen(true)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setViewerOpen(true);
-                  }
-                }}
-                className="mt-2 rounded-lg overflow-hidden bg-purple-200/60 p-1.5 cursor-pointer active:opacity-95 active:scale-[0.997] transition-transform touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-                aria-label="Open this public post in a bigger window"
+                className="mt-2 rounded-lg overflow-hidden bg-purple-200/60 p-1.5"
+                aria-label="Public post preview"
               >
                 <div className="grid grid-cols-[40%_1fr] gap-2 items-stretch">
-                  <div className="relative bg-muted rounded-md overflow-hidden border-2 border-red-500">
+                  {/* IMAGE → opens MediaGalleryViewer */}
+                  <button
+                    type="button"
+                    onClick={() => setViewerOpen(true)}
+                    className="relative bg-muted rounded-md overflow-hidden border-2 border-red-500 cursor-pointer active:opacity-95 active:scale-[0.997] transition-transform touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                    aria-label="Enlarge this post's media"
+                  >
                     <img
                       key={featuredPublicPost.id || `pub-${safeFeaturedIdx}`}
                       src={featuredPublicPost.imageUrl}
@@ -623,20 +621,27 @@ export const GreetingSection = () => {
                       <Maximize2 className="h-3 w-3" />
                       Tap to enlarge
                     </span>
-                  </div>
-                  <div className="text-foreground p-2.5 text-left select-none">
+                  </button>
+
+                  {/* STORYLINE → opens enlarged story details */}
+                  <button
+                    type="button"
+                    onClick={() => setStoryDetailOpen(true)}
+                    className="text-foreground p-2.5 text-left select-none cursor-pointer rounded-md hover:bg-purple-300/40 active:bg-purple-300/60 active:scale-[0.997] transition-all touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                    aria-label="Read full story details"
+                  >
                     <p className="text-[15px] font-bold leading-snug">
                       {featuredPublicPost.title || "Public Post or Content Description or Storyline here."}
                     </p>
                     <p className="text-[14px] leading-snug mt-1">
                       {(featuredPublicPost as any).description ||
                         "However, the storyline may not just exceed certain word-counts or be made to be unnecessarily bulky or voluminous in any case, or"}
-                      <span className="font-extrabold italic">…More</span>
+                      <span className="font-extrabold italic text-primary">…More</span>
                     </p>
                     <p className="text-[11px] text-muted-foreground mt-1 italic">
                       by {(featuredPublicPost as any).author || "Public User"} · {featuredPublicPost.userId === currentUserId ? "Your post" : "Public / Connection"}
                     </p>
-                  </div>
+                  </button>
                 </div>
               </div>
             )}
