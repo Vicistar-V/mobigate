@@ -780,6 +780,37 @@ export const GreetingSection = () => {
         initialIndex={safeFeaturedIdx}
       />
 
+      {/* Enlarged story details — opens when the storyline TEXT is tapped */}
+      {featuredPublicPost && (
+        <PostDetailDialog
+          open={storyDetailOpen}
+          onOpenChange={setStoryDetailOpen}
+          post={{
+            id:                 featuredPublicPost.id,
+            title:              featuredPublicPost.title || "Public Post",
+            subtitle:           (featuredPublicPost as any).subtitle,
+            description:        (featuredPublicPost as any).description ||
+                                "However, the storyline may not just exceed certain word-counts or be made to be unnecessarily bulky or voluminous in any case.",
+            author:             (featuredPublicPost as any).author || "Public User",
+            authorProfileImage: (featuredPublicPost as any).authorProfileImage,
+            userId:             (featuredPublicPost as any).userId,
+            status:             ((featuredPublicPost as any).status as "Online" | "Offline") || "Online",
+            views:              String((featuredPublicPost as any).views ?? 0),
+            comments:           String((featuredPublicPost as any).comments ?? 0),
+            likes:              String((featuredPublicPost as any).likes ?? 0),
+            followers:          (featuredPublicPost as any).followers,
+            type:               (((featuredPublicPost as any).type as string)?.toLowerCase() === "video"   ? "Video"
+                               : ((featuredPublicPost as any).type as string)?.toLowerCase() === "audio"   ? "Audio"
+                               : ((featuredPublicPost as any).type as string)?.toLowerCase() === "pdf"     ? "PDF"
+                               : ((featuredPublicPost as any).type as string)?.toLowerCase() === "url"     ? "URL"
+                               : ((featuredPublicPost as any).type as string)?.toLowerCase() === "article" ? "Article"
+                               : "Photo") as "Video" | "Article" | "Photo" | "Audio" | "PDF" | "URL",
+            imageUrl:           featuredPublicPost.imageUrl,
+            fee:                (featuredPublicPost as any).fee,
+          }}
+        />
+      )}
+
       {/* ── Own Post action sheet (Edit / Create New) ── */}
       <ActionDialog open={ownActionsOpen} onOpenChange={setOwnActionsOpen}>
         <ActionDialogContent className="sm:max-w-sm rounded-2xl p-5">
