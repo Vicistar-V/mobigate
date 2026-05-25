@@ -433,6 +433,13 @@ export const NotableDates = () => {
           setGiftUser(null);
         }}
       />
+
+      {/* Create Event dialog */}
+      <CreateEventDialog
+        isOpen={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreated={handleCreated}
+      />
     </Card>
   );
 };
