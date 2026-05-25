@@ -220,7 +220,7 @@ export const CommentDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-lg max-h-[85vh] flex flex-col p-0 gap-0">
+      <DialogContent className="max-w-lg max-h-[85vh] flex flex-col p-0 gap-0 !z-[300]" overlayClassName="!z-[300]">
         <DialogHeader className="px-4 pt-4 pb-3 border-b shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5 text-primary" />
