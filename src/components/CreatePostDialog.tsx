@@ -364,8 +364,13 @@ export const CreatePostDialog = ({
             </Select>
           </div>
 
-          {/* Content Posting Fee notice (scales with image count for Photo posts) */}
-          <ContentFeeNotice mediaType={type} imageCount={imageCount} compact />
+          {/* Posting Fee notice — non-monetized posts use the lower per-type rate */}
+          {isMonetized ? (
+            <ContentFeeNotice mediaType={type} imageCount={imageCount} compact />
+          ) : (
+            <NonMonetizedPostFeeNotice mediaType={type} compact />
+          )}
+
 
           {/* Main Media File(s) */}
           <div className="space-y-2">
