@@ -493,6 +493,9 @@ export const CreatePostDialog = ({
           )}
 
           {/* ── MONETIZATION SECTION ── */}
+          {!canMonetize ? (
+            <MonetizationEligibilityCard profile={monetizationProfile} hideWhenEligible={false} />
+          ) : (
           <div className={`rounded-xl border-2 p-3 sm:p-4 transition-all ${isMonetized ? "border-amber-300 bg-amber-50" : "border-dashed border-muted"}`}>
             {/* Toggle */}
             <div className="flex items-center justify-between">
@@ -510,6 +513,7 @@ export const CreatePostDialog = ({
                 onCheckedChange={setIsMonetized}
               />
             </div>
+
 
             {/* Fee settings — shown when monetized */}
             {isMonetized && (
