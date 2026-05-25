@@ -22,7 +22,7 @@ import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcce
 import { ContentFeeNotice } from "@/components/media/ContentFeeNotice";
 import { NonMonetizedPostFeeNotice } from "@/components/monetization/NonMonetizedPostFeeNotice";
 import { MonetizationEligibilityCard } from "@/components/monetization/MonetizationEligibilityCard";
-import { checkPostMonetizationEligibility } from "@/data/monetizationPolicy";
+import { checkPostMonetizationEligibility, getMonetizedPostMinFee, monetizedPostMinFeeSettings } from "@/data/monetizationPolicy";
 import { MAX_IMAGES_PER_POST, EXTRA_IMAGE_FEE } from "@/data/platformSettingsData";
 
 
