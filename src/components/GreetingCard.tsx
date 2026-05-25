@@ -29,6 +29,7 @@ import heroAdBanner from "@/assets/hero-ad-banner.jpg";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 import { WallBannerSlideshow } from "@/components/wall-banner/WallBannerSlideshow";
 import { WallBannerManagerDialog } from "@/components/wall-banner/WallBannerManagerDialog";
+import { PostDetailDialog } from "@/components/PostDetailDialog";
 
 export const GreetingSection = () => {
   const profile = useUserProfile();
@@ -66,6 +67,7 @@ export const GreetingSection = () => {
   const [featuredPublicIdx, setFeaturedPublicIdx] = useState(0);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerStartIndex, setViewerStartIndex] = useState(0);
+  const [storyDetailOpen, setStoryDetailOpen] = useState(false);
   const [ownActionsOpen, setOwnActionsOpen] = useState(false);
   const [editPostOpen, setEditPostOpen] = useState(false);
   const [wallBannerManagerOpen, setWallBannerManagerOpen] = useState(false);
@@ -591,25 +593,23 @@ export const GreetingSection = () => {
             )}
 
 
-            {/* Public/Connection post — driven by thumbnail selection below.
-                Image Y + Storyline 2 form ONE read-only click area that opens the
-                bigger MediaGalleryViewer window. Not editable. */}
+            {/* Public/Connection post — view-only wrapper.
+                Inside it: the IMAGE opens the media viewer (enlarge),
+                the STORYLINE text opens the full story details dialog.
+                The outer card itself is NOT clickable. */}
             {featuredPublicPost && (
               <div
-                role="button"
-                tabIndex={0}
-                onClick={() => setViewerOpen(true)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setViewerOpen(true);
-                  }
-                }}
-                className="mt-2 rounded-lg overflow-hidden bg-purple-200/60 p-1.5 cursor-pointer active:opacity-95 active:scale-[0.997] transition-transform touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
-                aria-label="Open this public post in a bigger window"
+                className="mt-2 rounded-lg overflow-hidden bg-purple-200/60 p-1.5"
+                aria-label="Public post preview"
               >
                 <div className="grid grid-cols-[40%_1fr] gap-2 items-stretch">
-                  <div className="relative bg-muted rounded-md overflow-hidden border-2 border-red-500">
+                  {/* IMAGE → opens MediaGalleryViewer */}
+                  <button
+                    type="button"
+                    onClick={() => setViewerOpen(true)}
+                    className="relative bg-muted rounded-md overflow-hidden border-2 border-red-500 cursor-pointer active:opacity-95 active:scale-[0.997] transition-transform touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                    aria-label="Enlarge this post's media"
+                  >
                     <img
                       key={featuredPublicPost.id || `pub-${safeFeaturedIdx}`}
                       src={featuredPublicPost.imageUrl}
@@ -621,20 +621,27 @@ export const GreetingSection = () => {
                       <Maximize2 className="h-3 w-3" />
                       Tap to enlarge
                     </span>
-                  </div>
-                  <div className="text-foreground p-2.5 text-left select-none">
+                  </button>
+
+                  {/* STORYLINE → opens enlarged story details */}
+                  <button
+                    type="button"
+                    onClick={() => setStoryDetailOpen(true)}
+                    className="text-foreground p-2.5 text-left select-none cursor-pointer rounded-md hover:bg-purple-300/40 active:bg-purple-300/60 active:scale-[0.997] transition-all touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                    aria-label="Read full story details"
+                  >
                     <p className="text-[15px] font-bold leading-snug">
                       {featuredPublicPost.title || "Public Post or Content Description or Storyline here."}
                     </p>
                     <p className="text-[14px] leading-snug mt-1">
                       {(featuredPublicPost as any).description ||
                         "However, the storyline may not just exceed certain word-counts or be made to be unnecessarily bulky or voluminous in any case, or"}
-                      <span className="font-extrabold italic">…More</span>
+                      <span className="font-extrabold italic text-primary">…More</span>
                     </p>
                     <p className="text-[11px] text-muted-foreground mt-1 italic">
                       by {(featuredPublicPost as any).author || "Public User"} · {featuredPublicPost.userId === currentUserId ? "Your post" : "Public / Connection"}
                     </p>
-                  </div>
+                  </button>
                 </div>
               </div>
             )}
@@ -772,6 +779,37 @@ export const GreetingSection = () => {
         }))}
         initialIndex={safeFeaturedIdx}
       />
+
+      {/* Enlarged story details — opens when the storyline TEXT is tapped */}
+      {featuredPublicPost && (
+        <PostDetailDialog
+          open={storyDetailOpen}
+          onOpenChange={setStoryDetailOpen}
+          post={{
+            id:                 featuredPublicPost.id,
+            title:              featuredPublicPost.title || "Public Post",
+            subtitle:           (featuredPublicPost as any).subtitle,
+            description:        (featuredPublicPost as any).description ||
+                                "However, the storyline may not just exceed certain word-counts or be made to be unnecessarily bulky or voluminous in any case.",
+            author:             (featuredPublicPost as any).author || "Public User",
+            authorProfileImage: (featuredPublicPost as any).authorProfileImage,
+            userId:             (featuredPublicPost as any).userId,
+            status:             ((featuredPublicPost as any).status as "Online" | "Offline") || "Online",
+            views:              String((featuredPublicPost as any).views ?? 0),
+            comments:           String((featuredPublicPost as any).comments ?? 0),
+            likes:              String((featuredPublicPost as any).likes ?? 0),
+            followers:          (featuredPublicPost as any).followers,
+            type:               (((featuredPublicPost as any).type as string)?.toLowerCase() === "video"   ? "Video"
+                               : ((featuredPublicPost as any).type as string)?.toLowerCase() === "audio"   ? "Audio"
+                               : ((featuredPublicPost as any).type as string)?.toLowerCase() === "pdf"     ? "PDF"
+                               : ((featuredPublicPost as any).type as string)?.toLowerCase() === "url"     ? "URL"
+                               : ((featuredPublicPost as any).type as string)?.toLowerCase() === "article" ? "Article"
+                               : "Photo") as "Video" | "Article" | "Photo" | "Audio" | "PDF" | "URL",
+            imageUrl:           featuredPublicPost.imageUrl,
+            fee:                (featuredPublicPost as any).fee,
+          }}
+        />
+      )}
 
       {/* ── Own Post action sheet (Edit / Create New) ── */}
       <ActionDialog open={ownActionsOpen} onOpenChange={setOwnActionsOpen}>
