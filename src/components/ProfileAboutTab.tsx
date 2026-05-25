@@ -6,7 +6,7 @@ import { useAboutData, useCurrentUserId } from "@/hooks/useWindowData";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, Briefcase, GraduationCap, User, Heart, Users, Mail, Phone, CheckCircle, Pencil, UserCog, Shield, Store, BookOpen, ExternalLink, Banknote, Eye, ArrowLeftRight, TrendingUp, Wallet, ArrowRightLeft } from "lucide-react";
+import { MapPin, Briefcase, GraduationCap, User, Heart, Users, Mail, Phone, CheckCircle, Pencil, UserCog, Shield, Store, BookOpen, ExternalLink, Banknote, Eye, ArrowLeftRight, TrendingUp, Wallet, ArrowRightLeft, Building2, Home } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -533,12 +533,28 @@ export const ProfileAboutTab = ({
         </div>
         <div className="space-y-2">
           <p className="text-sm sm:text-base text-muted-foreground">Referred by:</p>
-          <Button variant="link" className="h-auto p-0 text-sm sm:text-base font-medium text-primary hover:underline" onClick={() => navigate(`/profile/${refererUrl.refererId}`)}>
-            {refererUrl.refererName}
-          </Button>
-          <p className="text-sm sm:text-base text-muted-foreground break-all">
-            {refererUrl.url}
-          </p>
+          <div className="flex items-center gap-3">
+            <Avatar
+              className="h-11 w-11 shrink-0 ring-2 ring-border cursor-pointer hover:ring-primary transition-all"
+              onClick={() => navigate(`/profile/${refererUrl.refererId}`)}
+            >
+              <AvatarImage
+                src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(refererUrl.refererName)}`}
+                alt={refererUrl.refererName}
+              />
+              <AvatarFallback className="text-sm font-semibold">
+                {refererUrl.refererName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <Button variant="link" className="h-auto p-0 text-sm sm:text-base font-medium text-primary hover:underline" onClick={() => navigate(`/profile/${refererUrl.refererId}`)}>
+                {refererUrl.refererName}
+              </Button>
+              <p className="text-sm sm:text-base text-muted-foreground break-all">
+                {refererUrl.url}
+              </p>
+            </div>
+          </div>
         </div>
       </Card>
 
@@ -554,14 +570,26 @@ export const ProfileAboutTab = ({
           </Button>
         </div>
         <div className="space-y-4">
-          {locations.map((loc, index) => <div key={loc.id}>
-              {index > 0 && <Separator className="mb-4" />}
-              <div>
-                <p className="font-medium">{loc.place}</p>
-                <p className="text-base text-muted-foreground">{loc.description}</p>
-                {loc.period && <p className="text-base text-muted-foreground">{loc.period}</p>}
+          {locations.map((loc, index) => {
+            const isCurrent = /current/i.test(loc.description);
+            const isHometown = /hometown/i.test(loc.description);
+            const Icon = isCurrent ? MapPin : isHometown ? Home : Briefcase;
+            return (
+              <div key={loc.id}>
+                {index > 0 && <Separator className="mb-4" />}
+                <div className="flex items-start gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 ring-1 ring-primary/20">
+                    <Icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium break-words">{loc.place}</p>
+                    <p className="text-base text-muted-foreground">{loc.description}</p>
+                    {loc.period && <p className="text-base text-muted-foreground">{loc.period}</p>}
+                  </div>
+                </div>
               </div>
-            </div>)}
+            );
+          })}
         </div>
       </Card>
 
@@ -577,19 +605,30 @@ export const ProfileAboutTab = ({
           </Button>
         </div>
         <div className="space-y-4">
-          {education.map((edu, index) => <div key={edu.id}>
-              {index > 0 && <Separator className="mb-4" />}
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <p className="font-medium">{edu.school}</p>
-                  {edu.privacy && <PrivacyBadge level={edu.privacy as PrivacyLevel} exceptionsCount={edu.exceptions?.length} />}
+          {education.map((edu, index) => {
+            const isUniversity = /(university|college|polytechnic|institute)/i.test(edu.school);
+            const Icon = isUniversity ? Building2 : GraduationCap;
+            return (
+              <div key={edu.id}>
+                {index > 0 && <Separator className="mb-4" />}
+                <div className="flex items-start gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 ring-1 ring-primary/20">
+                    <Icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-medium break-words">{edu.school}</p>
+                      {edu.privacy && <PrivacyBadge level={edu.privacy as PrivacyLevel} exceptionsCount={edu.exceptions?.length} />}
+                    </div>
+                    {edu.faculty && <p className="text-base text-muted-foreground">{edu.faculty}</p>}
+                    {edu.department && <p className="text-base text-muted-foreground">{edu.department}</p>}
+                    <p className="text-base text-muted-foreground">{edu.period}</p>
+                    {edu.extraSkills && <p className="text-base text-muted-foreground">Skills: {edu.extraSkills}</p>}
+                  </div>
                 </div>
-                {edu.faculty && <p className="text-base text-muted-foreground">{edu.faculty}</p>}
-                {edu.department && <p className="text-base text-muted-foreground">{edu.department}</p>}
-                <p className="text-base text-muted-foreground">{edu.period}</p>
-                {edu.extraSkills && <p className="text-base text-muted-foreground">Skills: {edu.extraSkills}</p>}
               </div>
-            </div>)}
+            );
+          })}
         </div>
       </Card>
 
@@ -763,14 +802,21 @@ export const ProfileAboutTab = ({
           </Button>
         </div>
         <div className="space-y-4">
-          {work.map((workItem, index) => <div key={workItem.id}>
+          {work.map((workItem, index) => (
+            <div key={workItem.id}>
               {index > 0 && <Separator className="mb-4" />}
-                <div>
-                  <p className="font-medium">{workItem.workplaceName}</p>
+              <div className="flex items-start gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 ring-1 ring-primary/20">
+                  <Building2 className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium break-words">{workItem.workplaceName}</p>
                   <p className="text-base">{workItem.position}</p>
                   <p className="text-base text-muted-foreground">{workItem.period}</p>
                 </div>
-            </div>)}
+              </div>
+            </div>
+          ))}
         </div>
       </Card>
 
@@ -941,15 +987,30 @@ export const ProfileAboutTab = ({
           </Button>
         </div>
         <div className="space-y-4">
-          {family.map((member, index) => <div key={member.id}>
-              {index > 0 && <Separator className="mb-4" />}
-              <div>
-                <p className="font-medium text-primary hover:underline cursor-pointer" onClick={() => handleUserProfileClick(member.id)}>
-                  {member.name}
-                </p>
-                <p className="text-base text-muted-foreground">{member.relation}</p>
+          {family.map((member, index) => {
+            const initials = member.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
+            const dicebear = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(member.name)}`;
+            return (
+              <div key={member.id}>
+                {index > 0 && <Separator className="mb-4" />}
+                <div className="flex items-start gap-3">
+                  <Avatar
+                    className="h-11 w-11 shrink-0 ring-2 ring-border cursor-pointer hover:ring-primary transition-all"
+                    onClick={() => handleUserProfileClick(member.id)}
+                  >
+                    <AvatarImage src={dicebear} alt={member.name} />
+                    <AvatarFallback className="text-sm font-semibold">{initials}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-primary hover:underline cursor-pointer break-words" onClick={() => handleUserProfileClick(member.id)}>
+                      {member.name}
+                    </p>
+                    <p className="text-base text-muted-foreground">{member.relation}</p>
+                  </div>
+                </div>
               </div>
-            </div>)}
+            );
+          })}
         </div>
       </Card>
 
