@@ -171,16 +171,11 @@ export const SendGiftDialog = ({
     navigate(`${path}${sep}returnTo=${returnTo}`);
   };
 
-  const fundMethods = [
-    {
-      id: "voucher",
-      label: "Buy Mobi Vouchers",
-      subtitle: "Top up instantly with a voucher PIN",
-      icon: Ticket,
-      accentBg: "bg-emerald-500/10",
-      accentText: "text-emerald-600",
-      path: "/buy-vouchers?source=fund-wallet",
-    },
+  // Primary funding route: Retail Merchant (submerchant) voucher purchase.
+  // Returns user back to the gifting context after funding.
+  const primaryFundPath = "/buy-vouchers?source=fund-wallet&type=retail";
+
+  const altFundMethods = [
     {
       id: "bank",
       label: "Online Banking Transfer",
@@ -200,6 +195,7 @@ export const SendGiftDialog = ({
       path: "/wallet?action=fund&method=card",
     },
   ];
+
 
   return (
     <Dialog open={isOpen} onOpenChange={v => !v && onClose()}>
