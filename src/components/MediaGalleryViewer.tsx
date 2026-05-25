@@ -269,19 +269,25 @@ export const MediaGalleryViewer = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-3">
               {currentItem.author && (
-                <>
+                <button
+                  type="button"
+                  onClick={openAuthorProfile}
+                  className="flex items-center gap-2 sm:gap-3 rounded-full pr-2 sm:pr-3 -ml-1 pl-1 py-1 hover:bg-white/10 active:bg-white/20 transition-colors touch-manipulation"
+                  aria-label={`Open ${currentItem.author}'s profile`}
+                >
                   <Avatar className="h-8 w-8 sm:h-10 sm:w-10 border-2 border-white/20">
                     <AvatarImage src={currentItem.authorImage} alt={currentItem.author} />
                     <AvatarFallback>{currentItem.author.charAt(0)}</AvatarFallback>
                   </Avatar>
-                  <div className="text-white">
-                    <p className="text-base sm:text-lg font-semibold">{currentItem.author}</p>
+                  <div className="text-white text-left">
+                    <p className="text-base sm:text-lg font-semibold leading-tight hover:underline">{currentItem.author}</p>
                     {currentItem.timestamp && (
                       <p className="text-xs sm:text-sm text-white/70">{currentItem.timestamp}</p>
                     )}
                   </div>
-                </>
+                </button>
               )}
+
               {!currentItem.author && (
                 <div className="text-white">
                   <p className="text-base sm:text-lg font-semibold">{getGalleryTitle()}</p>
