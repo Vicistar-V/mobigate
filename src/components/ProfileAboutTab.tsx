@@ -533,12 +533,28 @@ export const ProfileAboutTab = ({
         </div>
         <div className="space-y-2">
           <p className="text-sm sm:text-base text-muted-foreground">Referred by:</p>
-          <Button variant="link" className="h-auto p-0 text-sm sm:text-base font-medium text-primary hover:underline" onClick={() => navigate(`/profile/${refererUrl.refererId}`)}>
-            {refererUrl.refererName}
-          </Button>
-          <p className="text-sm sm:text-base text-muted-foreground break-all">
-            {refererUrl.url}
-          </p>
+          <div className="flex items-center gap-3">
+            <Avatar
+              className="h-11 w-11 shrink-0 ring-2 ring-border cursor-pointer hover:ring-primary transition-all"
+              onClick={() => navigate(`/profile/${refererUrl.refererId}`)}
+            >
+              <AvatarImage
+                src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(refererUrl.refererName)}`}
+                alt={refererUrl.refererName}
+              />
+              <AvatarFallback className="text-sm font-semibold">
+                {refererUrl.refererName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <Button variant="link" className="h-auto p-0 text-sm sm:text-base font-medium text-primary hover:underline" onClick={() => navigate(`/profile/${refererUrl.refererId}`)}>
+                {refererUrl.refererName}
+              </Button>
+              <p className="text-sm sm:text-base text-muted-foreground break-all">
+                {refererUrl.url}
+              </p>
+            </div>
+          </div>
         </div>
       </Card>
 
