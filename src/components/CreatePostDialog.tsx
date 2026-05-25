@@ -238,7 +238,7 @@ export const CreatePostDialog = ({
     setPhotoFiles([]); setPhotoPreviews([]);
     setThumbnailFile(null); setThumbnailPreview(null);
     setSelectedAlbum(null); setProgress(0);
-    setIsMonetized(false); setAccessFee("10");
+    setIsMonetized(false); setAccessFee(String(minFee));
     setLegalAccepted(false);
     if (mediaRef.current)  mediaRef.current.value  = "";
     if (thumbRef.current)  thumbRef.current.value  = "";
@@ -248,14 +248,14 @@ export const CreatePostDialog = ({
 
 
   const feeValue = Math.max(0, parseFloat(accessFee) || 0);
-  const isValidFee = !isMonetized || (feeValue > 0 && feeValue <= 10000);
+  const isValidFee = !isMonetized || (feeValue >= minFee && feeValue <= maxFee);
 
   const handleSubmit = async () => {
     if (!title.trim()) {
       toast({ title: "Title is required", variant: "destructive" }); return;
     }
     if (isMonetized && !isValidFee) {
-      toast({ title: "Invalid fee", description: "Fee must be between 1 and 10,000 Mobi", variant: "destructive" }); return;
+      toast({ title: "Access Fee too low", description: `Minimum Access Fee for ${type} posts is ${minFee} Mobi (max ${maxFee.toLocaleString()}).`, variant: "destructive" }); return;
     }
     setSubmitting(true); setProgress(0);
 
