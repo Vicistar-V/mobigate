@@ -3,10 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { X, ChevronLeft, ChevronRight, Heart, Share2, MessageCircle, UserPlus, BookOpen, Image as ImageIcon, Play, Music } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { CommentDialog } from "@/components/CommentDialog";
 import { useSwipeable } from "react-swipeable";
 import { MediaOwnerMenu } from "@/components/media/MediaOwnerMenu";
+
 
 export interface MediaItem {
   id?: string;
@@ -50,6 +52,16 @@ export const MediaGalleryViewer = ({
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"media" | "reader">("media");
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const openAuthorProfile = () => {
+    if (!currentItem?.author) return;
+    const id = currentItem.authorUserId
+      || currentItem.author.toLowerCase().replace(/\s+/g, "-");
+    onOpenChange(false);
+    navigate(`/profile/${encodeURIComponent(id)}`);
+  };
+
 
   const currentItem = items[currentIndex];
 
@@ -90,20 +102,44 @@ export const MediaGalleryViewer = ({
     }
   };
 
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: currentItem?.title || "Check this out!",
-        text: currentItem?.description || "",
-        url: window.location.href,
-      }).catch(() => {
-        // User cancelled or error occurred
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      toast({ description: "Link copied to clipboard" });
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    const shareData = {
+      title: currentItem?.title || "Check this out!",
+      text: currentItem?.description?.slice(0, 200) || currentItem?.title || "",
+      url: shareUrl,
+    };
+
+    // Try native share first (mobile)
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch (err: unknown) {
+        // User cancelled — bail silently
+        if (err instanceof Error && err.name === "AbortError") return;
+        // Permission denied (e.g. iframe) → fall through to clipboard
+      }
+    }
+
+    // Fallback: copy link
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast({ title: "Link copied", description: "Share it anywhere you like." });
+    } catch {
+      // Last-resort fallback for older browsers
+      const ta = document.createElement("textarea");
+      ta.value = shareUrl;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); toast({ title: "Link copied" }); }
+      catch { toast({ title: "Could not share", description: "Copy this link manually: " + shareUrl, variant: "destructive" }); }
+      finally { document.body.removeChild(ta); }
     }
   };
+
 
   const handleComment = () => {
     setCommentDialogOpen(true);
@@ -233,19 +269,25 @@ export const MediaGalleryViewer = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-3">
               {currentItem.author && (
-                <>
+                <button
+                  type="button"
+                  onClick={openAuthorProfile}
+                  className="flex items-center gap-2 sm:gap-3 rounded-full pr-2 sm:pr-3 -ml-1 pl-1 py-1 hover:bg-white/10 active:bg-white/20 transition-colors touch-manipulation"
+                  aria-label={`Open ${currentItem.author}'s profile`}
+                >
                   <Avatar className="h-8 w-8 sm:h-10 sm:w-10 border-2 border-white/20">
                     <AvatarImage src={currentItem.authorImage} alt={currentItem.author} />
                     <AvatarFallback>{currentItem.author.charAt(0)}</AvatarFallback>
                   </Avatar>
-                  <div className="text-white">
-                    <p className="text-base sm:text-lg font-semibold">{currentItem.author}</p>
+                  <div className="text-white text-left">
+                    <p className="text-base sm:text-lg font-semibold leading-tight hover:underline">{currentItem.author}</p>
                     {currentItem.timestamp && (
                       <p className="text-xs sm:text-sm text-white/70">{currentItem.timestamp}</p>
                     )}
                   </div>
-                </>
+                </button>
               )}
+
               {!currentItem.author && (
                 <div className="text-white">
                   <p className="text-base sm:text-lg font-semibold">{getGalleryTitle()}</p>
@@ -319,19 +361,25 @@ export const MediaGalleryViewer = ({
               <div className="absolute inset-0 z-40 flex items-stretch justify-center overflow-y-auto overscroll-contain px-3 py-16 sm:py-20">
                 <article className="w-full max-w-2xl mx-auto bg-card text-card-foreground rounded-2xl shadow-2xl p-5 sm:p-8 my-auto">
                   {currentItem.author && (
-                    <div className="flex items-center gap-2 mb-3 pb-3 border-b">
+                    <button
+                      type="button"
+                      onClick={openAuthorProfile}
+                      className="w-full flex items-center gap-2 mb-3 pb-3 border-b text-left hover:bg-muted/40 rounded-md -mx-1 px-1 py-1 transition-colors touch-manipulation"
+                      aria-label={`Open ${currentItem.author}'s profile`}
+                    >
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={currentItem.authorImage} alt={currentItem.author} />
                         <AvatarFallback>{currentItem.author.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold truncate">{currentItem.author}</p>
+                        <p className="text-sm font-semibold truncate hover:underline">{currentItem.author}</p>
                         {currentItem.timestamp && (
                           <p className="text-[11px] text-muted-foreground">{currentItem.timestamp}</p>
                         )}
                       </div>
-                    </div>
+                    </button>
                   )}
+
                   {currentItem.title && (
                     <h2 className="text-xl sm:text-2xl font-bold leading-tight mb-3">{currentItem.title}</h2>
                   )}
