@@ -589,19 +589,30 @@ export const ProfileAboutTab = ({
           </Button>
         </div>
         <div className="space-y-4">
-          {education.map((edu, index) => <div key={edu.id}>
-              {index > 0 && <Separator className="mb-4" />}
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <p className="font-medium">{edu.school}</p>
-                  {edu.privacy && <PrivacyBadge level={edu.privacy as PrivacyLevel} exceptionsCount={edu.exceptions?.length} />}
+          {education.map((edu, index) => {
+            const isUniversity = /(university|college|polytechnic|institute)/i.test(edu.school);
+            const Icon = isUniversity ? Building2 : GraduationCap;
+            return (
+              <div key={edu.id}>
+                {index > 0 && <Separator className="mb-4" />}
+                <div className="flex items-start gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 ring-1 ring-primary/20">
+                    <Icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-medium break-words">{edu.school}</p>
+                      {edu.privacy && <PrivacyBadge level={edu.privacy as PrivacyLevel} exceptionsCount={edu.exceptions?.length} />}
+                    </div>
+                    {edu.faculty && <p className="text-base text-muted-foreground">{edu.faculty}</p>}
+                    {edu.department && <p className="text-base text-muted-foreground">{edu.department}</p>}
+                    <p className="text-base text-muted-foreground">{edu.period}</p>
+                    {edu.extraSkills && <p className="text-base text-muted-foreground">Skills: {edu.extraSkills}</p>}
+                  </div>
                 </div>
-                {edu.faculty && <p className="text-base text-muted-foreground">{edu.faculty}</p>}
-                {edu.department && <p className="text-base text-muted-foreground">{edu.department}</p>}
-                <p className="text-base text-muted-foreground">{edu.period}</p>
-                {edu.extraSkills && <p className="text-base text-muted-foreground">Skills: {edu.extraSkills}</p>}
               </div>
-            </div>)}
+            );
+          })}
         </div>
       </Card>
 
