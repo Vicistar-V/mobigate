@@ -298,7 +298,7 @@ export const NotableDates = () => {
       <h3 className="text-base font-bold text-foreground">Notable Dates</h3>
 
       {/* Main tabs */}
-      <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex items-center gap-2 flex-wrap">
         <button
           onClick={() => setTab("birthdays")}
           className={`px-4 py-1.5 rounded-md text-sm font-bold transition-colors ${
@@ -311,20 +311,35 @@ export const NotableDates = () => {
         </button>
         <button
           onClick={() => setTab("events")}
-          className={`px-4 py-1.5 rounded-md text-sm font-bold transition-colors flex items-center gap-2 ${
+          className={`px-4 py-1.5 rounded-md text-sm font-bold transition-colors ${
             tab === "events"
               ? "bg-primary text-primary-foreground"
               : "bg-transparent text-foreground hover:bg-muted"
           }`}
         >
           Notable Events
-          {tab === "events" && (
-            <span className="inline-flex items-center justify-center h-5 w-5 rounded-sm bg-primary-foreground/20 text-primary-foreground text-xs font-bold">
-              +
-            </span>
-          )}
         </button>
+
+        {/* Create Event — only relevant on the Events tab, but visible there always */}
+        {tab === "events" && (
+          <button
+            type="button"
+            onClick={() => setCreateOpen(true)}
+            className="ml-auto inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-[13px] font-bold bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-all shadow-sm"
+            aria-label="Create new notable event"
+          >
+            <Plus className="h-4 w-4" />
+            Create Event
+          </button>
+        )}
       </div>
+
+      {/* Birthdays helper — explains they're auto-generated */}
+      {tab === "birthdays" && (
+        <p className="text-[12px] text-muted-foreground leading-snug">
+          Birthdays are generated automatically from friends' profile information.
+        </p>
+      )}
 
       {/* Event-type chips (events tab only) */}
       {tab === "events" && (
