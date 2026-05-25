@@ -554,14 +554,26 @@ export const ProfileAboutTab = ({
           </Button>
         </div>
         <div className="space-y-4">
-          {locations.map((loc, index) => <div key={loc.id}>
-              {index > 0 && <Separator className="mb-4" />}
-              <div>
-                <p className="font-medium">{loc.place}</p>
-                <p className="text-base text-muted-foreground">{loc.description}</p>
-                {loc.period && <p className="text-base text-muted-foreground">{loc.period}</p>}
+          {locations.map((loc, index) => {
+            const isCurrent = /current/i.test(loc.description);
+            const isHometown = /hometown/i.test(loc.description);
+            const Icon = isCurrent ? MapPin : isHometown ? Home : Briefcase;
+            return (
+              <div key={loc.id}>
+                {index > 0 && <Separator className="mb-4" />}
+                <div className="flex items-start gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 ring-1 ring-primary/20">
+                    <Icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium break-words">{loc.place}</p>
+                    <p className="text-base text-muted-foreground">{loc.description}</p>
+                    {loc.period && <p className="text-base text-muted-foreground">{loc.period}</p>}
+                  </div>
+                </div>
               </div>
-            </div>)}
+            );
+          })}
         </div>
       </Card>
 
