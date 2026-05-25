@@ -181,8 +181,26 @@ export const NotableDates = () => {
   const [giftOpen, setGiftOpen] = useState(false);
   const [giftUser, setGiftUser] = useState<{ id: string; name: string } | null>(null);
 
+  // ── Create Event dialog + user-created events store ──────────────────────
+  const [createOpen, setCreateOpen] = useState(false);
+  const [userEvents, setUserEvents] = useState<CreatedEvent[]>(() => {
+    if (typeof window === "undefined") return [];
+    const w = window as any;
+    return Array.isArray(w.__NOTABLE_EVENTS__) ? (w.__NOTABLE_EVENTS__ as CreatedEvent[]) : [];
+  });
+
+  // Listen for events created elsewhere (e.g. another mounted instance)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const ev = (e as CustomEvent<CreatedEvent>).detail;
+      if (!ev) return;
+      setUserEvents(prev => (prev.some(p => p.id === ev.id) ? prev : [ev, ...prev]));
+    };
+    window.addEventListener("notableEventCreated", handler as any);
+    return () => window.removeEventListener("notableEventCreated", handler as any);
+  }, []);
+
   const handleMessage = (p: NotablePerson) => {
-    // Fires the global chat opener used by PeopleYouMayKnow + others
     window.dispatchEvent(new CustomEvent("openChatWithUser", {
       detail: { userId: p.id, userName: p.name },
     }));
@@ -194,26 +212,85 @@ export const NotableDates = () => {
     setGiftOpen(true);
   };
 
-
   const people = useMemo<NotablePerson[]>(() => {
     const fromWindow = (typeof window !== "undefined" && (window as any).__NOTABLE_DATES__) as NotablePerson[] | undefined;
     return fromWindow?.length ? fromWindow : SAMPLE_PEOPLE;
   }, []);
 
+  // Map a user-created event into the NotablePerson card shape
+  const userEventCards = useMemo<NotablePerson[]>(() => {
+    return userEvents.map(ev => ({
+      id:         ev.id,
+      name:       ev.name,
+      photo:      ev.photo,
+      dateLabel:  ev.dateLabel,
+      isFriend:   ev.isFriend,
+      eventType:  (ev.eventType === "wedding" || ev.eventType === "burial") ? ev.eventType : "others",
+      eventLabel: ev.eventLabel,
+    }));
+  }, [userEvents]);
+
+  // Range bucket calculator (today / tomorrow / etc.) — used to filter user events
+  const bucketOf = (iso: string): TimeRange => {
+    if (!iso) return "others";
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const target = new Date(iso); target.setHours(0, 0, 0, 0);
+    const diffDays = Math.round((target.getTime() - today.getTime()) / 86_400_000);
+    if (diffDays === 0)  return "today";
+    if (diffDays === 1)  return "tomorrow";
+    if (diffDays === -1) return "yesterday";
+    if (diffDays > 1  && diffDays <= 7)   return "next-week";
+    if (diffDays < -1 && diffDays >= -7)  return "last-week";
+    if (diffDays > 7  && diffDays <= 31)  return "next-month";
+    if (diffDays < -7 && diffDays >= -31) return "last-month";
+    return "others";
+  };
+
   // Filter cards (optimistic; backend can return pre-filtered slices later)
   const filtered = useMemo(() => {
-    // For demo, all sample cards represent "today" entries. Other ranges show empty state.
     if (tab === "birthdays") {
       return bdayRange === "today" ? people : [];
     }
-    // events tab — also filter by selected event type
-    if (eventRange !== "today") return [];
-    return people.map(p => ({ ...p, eventType, eventLabel: eventType === "wedding" ? "Wedding" : eventType === "burial" ? "Burial" : "Event" }));
-  }, [tab, bdayRange, eventRange, eventType, people]);
+    // events tab — combine demo "today" people with user-created events, then filter
+    const demoEvents = people.map(p => ({
+      ...p,
+      eventType,
+      eventLabel: eventType === "wedding" ? "Wedding" : eventType === "burial" ? "Burial" : "Event",
+      _bucket: "today" as TimeRange,
+      _typeKey: eventType as string,
+    }));
+    const created = userEvents.map(ev => ({
+      id: ev.id, name: ev.name, photo: ev.photo, dateLabel: ev.dateLabel, isFriend: ev.isFriend,
+      eventType: (ev.eventType === "wedding" || ev.eventType === "burial") ? ev.eventType : "others" as EventType,
+      eventLabel: ev.eventLabel,
+      _bucket: bucketOf(ev.dateISO),
+      _typeKey: ev.eventType as string,
+    }));
+    const wedKey = "wedding", burKey = "burial";
+    const matchesType = (k: string) =>
+      eventType === "wedding" ? k === wedKey
+      : eventType === "burial" ? k === burKey
+      : (k !== wedKey && k !== burKey);
+    return [...created, ...demoEvents].filter(c => c._bucket === eventRange && matchesType(c._typeKey));
+  }, [tab, bdayRange, eventRange, eventType, people, userEvents]);
 
   const activeRange = tab === "birthdays" ? bdayRange : eventRange;
   const setActiveRange = (r: TimeRange) => (tab === "birthdays" ? setBdayRange(r) : setEventRange(r));
   const rangeCounts = tab === "birthdays" ? BDAY_COUNTS : EVENT_COUNTS;
+
+  const handleCreated = (ev: CreatedEvent) => {
+    setUserEvents(prev => (prev.some(p => p.id === ev.id) ? prev : [ev, ...prev]));
+    // Jump the UI to where the new event will actually show
+    setTab("events");
+    setEventRange(bucketOf(ev.dateISO));
+    setEventType(
+      ev.eventType === "wedding" ? "wedding"
+      : ev.eventType === "burial" ? "burial"
+      : "others"
+    );
+  };
+
+
 
   return (
     <Card className="p-4 space-y-3 hover:shadow-md transition-shadow overflow-hidden">
