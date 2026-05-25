@@ -12,7 +12,11 @@ export interface UserProfile {
     likes: number;
     followers: number;
     following: number;
+    friendRequestsSent?: number;
   };
+  /** Whether the user has completed account verification (KYC / email + ID). */
+  verified?: boolean;
+
   // Discount profile fields for advertiser tiers
   accreditedTier?: "bronze" | "silver" | "gold" | "platinum" | null;
   totalCampaigns?: number;
