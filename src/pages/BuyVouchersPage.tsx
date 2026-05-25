@@ -235,8 +235,16 @@ export default function BuyVouchersPage() {
   };
 
   const handleSelfDone = () => {
+    const returnTo = searchParams.get("returnTo");
+    if (returnTo) {
+      try {
+        navigate(decodeURIComponent(returnTo));
+        return;
+      } catch {}
+    }
     navigate("/");
   };
+
 
   const handleSendToSomeone = () => {
     setStep("distribute");
@@ -891,10 +899,11 @@ export default function BuyVouchersPage() {
           </div>
           <h2 className="text-xl font-bold text-foreground mb-1 animate-fade-in">Wallet Credited!</h2>
           <p className="text-3xl font-black text-emerald-600 mb-2 animate-fade-in">M{formatNum(remainingMobi)}</p>
-          <p className="text-sm text-muted-foreground mb-8 animate-fade-in">Successfully added to your Mobi Wallet</p>
+          <p className="text-sm text-muted-foreground mb-8 animate-fade-in">{isFundWallet ? "Returning you to where you left off…" : "Successfully added to your Mobi Wallet"}</p>
           <Button onClick={handleSelfDone} className="w-full h-12 rounded-xl text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 touch-manipulation active:scale-[0.97] animate-fade-in">
-            Done
+            {isFundWallet ? "Resume Sending Gift" : "Done"}
           </Button>
+
         </div>
       );
     }
@@ -936,14 +945,17 @@ export default function BuyVouchersPage() {
           <div className="w-full space-y-3 animate-fade-in">
             <Button onClick={handleUseForSelf} className="w-full h-14 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-700 touch-manipulation active:scale-[0.97]">
               <CheckCircle2 className="h-5 w-5 mr-2" />
-              Use for Myself
+              {isFundWallet ? "Credit My Wallet & Resume" : "Use for Myself"}
             </Button>
-            <Button onClick={handleSendToSomeone} variant="outline" className="w-full h-14 rounded-xl text-sm font-bold border-2 touch-manipulation active:scale-[0.97]">
-              <Send className="h-5 w-5 mr-2" />
-              Send to Someone
-            </Button>
+            {!isFundWallet && (
+              <Button onClick={handleSendToSomeone} variant="outline" className="w-full h-14 rounded-xl text-sm font-bold border-2 touch-manipulation active:scale-[0.97]">
+                <Send className="h-5 w-5 mr-2" />
+                Send to Someone
+              </Button>
+            )}
           </div>
         )}
+
       </div>
     );
   };

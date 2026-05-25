@@ -171,16 +171,11 @@ export const SendGiftDialog = ({
     navigate(`${path}${sep}returnTo=${returnTo}`);
   };
 
-  const fundMethods = [
-    {
-      id: "voucher",
-      label: "Buy Mobi Vouchers",
-      subtitle: "Top up instantly with a voucher PIN",
-      icon: Ticket,
-      accentBg: "bg-emerald-500/10",
-      accentText: "text-emerald-600",
-      path: "/buy-vouchers?source=fund-wallet",
-    },
+  // Primary funding route: Retail Merchant (submerchant) voucher purchase.
+  // Returns user back to the gifting context after funding.
+  const primaryFundPath = "/buy-vouchers?source=fund-wallet&type=retail";
+
+  const altFundMethods = [
     {
       id: "bank",
       label: "Online Banking Transfer",
@@ -200,6 +195,7 @@ export const SendGiftDialog = ({
       path: "/wallet?action=fund&method=card",
     },
   ];
+
 
   return (
     <Dialog open={isOpen} onOpenChange={v => !v && onClose()}>
@@ -239,31 +235,47 @@ export const SendGiftDialog = ({
             )}
           </div>
 
-          {/* Low / insufficient balance CTA */}
+          {/* Low / insufficient balance CTA — Fund via Retail Merchant */}
           {showFundCta && (
             <div className="mt-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
+              <div className="flex items-start gap-2 mb-2.5">
+                <div className="min-w-0 flex-1">
                   <p className="text-xs font-semibold text-destructive">
                     {insufficient ? "Insufficient balance to send this gift" : "Low balance — top up to send gifts"}
                   </p>
                   <p className="text-[11px] text-muted-foreground mt-0.5">
-                    Fund your Mobi Wallet to continue.
+                    Fund your Mobi Wallet through a Retail Merchant and we'll bring you right back here.
                   </p>
                 </div>
-                <Button
-                  size="sm"
-                  className="h-8 px-3 text-xs shrink-0"
-                  onClick={() => setFundPanelOpen(v => !v)}
-                >
-                  <Plus className="h-3.5 w-3.5 mr-1" />
-                  Fund Wallet
-                </Button>
               </div>
 
+              {/* Primary: Retail Merchant */}
+              <button
+                onClick={() => goFund(primaryFundPath)}
+                className="w-full flex items-center gap-3 rounded-lg border-2 border-primary bg-primary px-3 py-3 text-left transition-all hover:bg-primary/90 active:scale-[0.98] shadow-sm"
+              >
+                <span className="h-10 w-10 rounded-lg bg-primary-foreground/15 flex items-center justify-center shrink-0">
+                  <Ticket className="h-5 w-5 text-primary-foreground" />
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-primary-foreground">Fund Wallet via Retail Merchant</p>
+                  <p className="text-[11px] text-primary-foreground/80">Instant top-up — voucher PIN credited immediately</p>
+                </div>
+                <ArrowRight className="h-5 w-5 text-primary-foreground shrink-0" />
+              </button>
+
+              {/* Toggle alt methods */}
+              <button
+                onClick={() => setFundPanelOpen(v => !v)}
+                className="w-full mt-2 text-[11px] text-muted-foreground hover:text-foreground flex items-center justify-center gap-1 py-1"
+              >
+                {fundPanelOpen ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                {fundPanelOpen ? "Hide other methods" : "Other funding methods"}
+              </button>
+
               {fundPanelOpen && (
-                <div className="mt-3 space-y-2">
-                  {fundMethods.map(m => {
+                <div className="mt-1 space-y-2">
+                  {altFundMethods.map(m => {
                     const Icon = m.icon;
                     return (
                       <button
@@ -289,6 +301,7 @@ export const SendGiftDialog = ({
               )}
             </div>
           )}
+
         </div>
 
 
@@ -419,12 +432,13 @@ export const SendGiftDialog = ({
           {insufficient ? (
             <Button
               className="flex-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-              onClick={() => goFund("/buy-vouchers?source=fund-wallet")}
+              onClick={() => goFund(primaryFundPath)}
               disabled={sending}
             >
               <Plus className="h-4 w-4 mr-2" />
               Fund Wallet to Send
             </Button>
+
           ) : (
             <Button
               className="flex-1"
