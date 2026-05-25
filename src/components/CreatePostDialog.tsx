@@ -90,6 +90,9 @@ export const CreatePostDialog = ({
   const [progress,         setProgress]         = useState(0);
   const [legalAccepted,    setLegalAccepted]    = useState(false);
 
+  // Audience privacy
+  const [audience, setAudience] = useState<AudienceValue>(DEFAULT_AUDIENCE_VALUE);
+
 
   // Monetization
   const [isMonetized,  setIsMonetized]  = useState(false);
