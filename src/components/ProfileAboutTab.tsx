@@ -971,15 +971,30 @@ export const ProfileAboutTab = ({
           </Button>
         </div>
         <div className="space-y-4">
-          {family.map((member, index) => <div key={member.id}>
-              {index > 0 && <Separator className="mb-4" />}
-              <div>
-                <p className="font-medium text-primary hover:underline cursor-pointer" onClick={() => handleUserProfileClick(member.id)}>
-                  {member.name}
-                </p>
-                <p className="text-base text-muted-foreground">{member.relation}</p>
+          {family.map((member, index) => {
+            const initials = member.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
+            const dicebear = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(member.name)}`;
+            return (
+              <div key={member.id}>
+                {index > 0 && <Separator className="mb-4" />}
+                <div className="flex items-start gap-3">
+                  <Avatar
+                    className="h-11 w-11 shrink-0 ring-2 ring-border cursor-pointer hover:ring-primary transition-all"
+                    onClick={() => handleUserProfileClick(member.id)}
+                  >
+                    <AvatarImage src={dicebear} alt={member.name} />
+                    <AvatarFallback className="text-sm font-semibold">{initials}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-primary hover:underline cursor-pointer break-words" onClick={() => handleUserProfileClick(member.id)}>
+                      {member.name}
+                    </p>
+                    <p className="text-base text-muted-foreground">{member.relation}</p>
+                  </div>
+                </div>
               </div>
-            </div>)}
+            );
+          })}
         </div>
       </Card>
 
