@@ -52,6 +52,16 @@ export const MediaGalleryViewer = ({
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"media" | "reader">("media");
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const openAuthorProfile = () => {
+    if (!currentItem?.author) return;
+    const id = currentItem.authorUserId
+      || currentItem.author.toLowerCase().replace(/\s+/g, "-");
+    onOpenChange(false);
+    navigate(`/profile/${encodeURIComponent(id)}`);
+  };
+
 
   const currentItem = items[currentIndex];
 
