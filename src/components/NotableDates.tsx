@@ -217,18 +217,9 @@ export const NotableDates = () => {
     return fromWindow?.length ? fromWindow : SAMPLE_PEOPLE;
   }, []);
 
-  // Map a user-created event into the NotablePerson card shape
-  const userEventCards = useMemo<NotablePerson[]>(() => {
-    return userEvents.map(ev => ({
-      id:         ev.id,
-      name:       ev.name,
-      photo:      ev.photo,
-      dateLabel:  ev.dateLabel,
-      isFriend:   ev.isFriend,
-      eventType:  (ev.eventType === "wedding" || ev.eventType === "burial") ? ev.eventType : "others",
-      eventLabel: ev.eventLabel,
-    }));
-  }, [userEvents]);
+  // (User-created events get merged directly into `filtered` below)
+
+
 
   // Range bucket calculator (today / tomorrow / etc.) — used to filter user events
   const bucketOf = (iso: string): TimeRange => {
