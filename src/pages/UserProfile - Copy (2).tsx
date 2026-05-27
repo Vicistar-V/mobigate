@@ -28,7 +28,6 @@ import { ELibrarySection }     from "@/components/ELibrarySection";
 import { FeedPost }            from "@/components/FeedPost";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 import { useToast }            from "@/hooks/use-toast";
-import { ShareProfileDialog }   from "@/components/ShareProfileDialog";
 import { PeopleYouMayKnow }   from "@/components/PeopleYouMayKnow";
 import { ProfileAlbumsTab }   from "@/components/profile/ProfileAlbumsTab";
 import { ProfileFriendsTab }  from "@/components/profile/ProfileFriendsTab";
@@ -40,8 +39,6 @@ import { ProfileCommunityTab } from "@/components/profile/ProfileCommunityTab";
 import { ProfileMobiQuizTab }  from "@/components/profile/ProfileMobiQuizTab";
 import { ProfileContentsTab }  from "@/components/profile/ProfileContentsTab";
 import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
-import { WallBannerSlideshow } from "@/components/wall-banner/WallBannerSlideshow";
-import type { WallBannerSlide } from "@/types/wallBanner";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -80,8 +77,7 @@ const UserProfile = () => {
   const [galleryItems,   setGalleryItems]   = useState<MediaItem[]>([]);
   const [galleryIdx,     setGalleryIdx]     = useState(0);
   // Unfriend confirmation state
-  const [unfriendConfirm,  setUnfriendConfirm]  = useState(false);
-  const [shareDialogOpen,  setShareDialogOpen]  = useState(false);
+  const [unfriendConfirm, setUnfriendConfirm] = useState(false);
   const [unfriendLoading, setUnfriendLoading] = useState(false);
 
   // ── Fetch profile ──────────────────────────────────────────────────────────
@@ -284,28 +280,6 @@ const UserProfile = () => {
         {/* ── Profile Header Card ── */}
         <Card className="mb-6 overflow-hidden">
 
-<<<<<<< Updated upstream
-          {/* Banner — rotating wall banner slideshow (public/read-only) */}
-          <WallBannerSlideshow
-            ownerId={profile.id}
-            scope="profile"
-            fallbackImage={displayBanner as string}
-            fallbackAlt="Profile Banner"
-            onOpenViewer={(slide: WallBannerSlide) => {
-              setGalleryItems([
-                {
-                  id: slide.id,
-                  url: slide.mediaUrl,
-                  type: slide.mediaType,
-                  author: profile.name,
-                  title: slide.caption,
-                } as MediaItem,
-              ]);
-              setGalleryIdx(0);
-              setGalleryOpen(true);
-            }}
-          />
-=======
           {/* Banner */}
           <div className="relative h-48 bg-muted">
             <img
@@ -318,7 +292,6 @@ const UserProfile = () => {
               }}
             />
           </div>
->>>>>>> Stashed changes
 
           <div className="px-6 pb-6">
             {/* Avatar row */}
@@ -383,14 +356,6 @@ const UserProfile = () => {
                 <span><span className="font-bold text-foreground">{fmt(profile.stats.contents)}</span> Contents</span>
               </div>
 
-              {/* Birthday line — bold "Birthday" + light textured date */}
-              <p className="text-base flex flex-wrap items-baseline gap-1.5 -mt-1">
-                <span className="font-extrabold text-foreground">Birthday</span>
-                <span className="font-light italic text-muted-foreground/80 tracking-wide">
-                  {(profile as { birthday?: string }).birthday || "August 25"}
-                </span>
-              </p>
-
               {/* Action buttons */}
               <div className="flex flex-wrap gap-2">
                 <Button variant="default" size="sm" className="gap-2 bg-black hover:bg-black/80"
@@ -441,14 +406,14 @@ const UserProfile = () => {
                       </Button>
                     </div>
                   ) : (
-                    /* Normal state — active clickable Unfriend button */
+                    /* Normal state — active clickable button */
                     <Button
                       size="sm"
-                      variant="outline"
-                      className="gap-1 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"
+                      variant="secondary"
+                      className="gap-1 hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors"
                       onClick={handleUnfriend}
                     >
-                      <UserX className="h-4 w-4" />Unfriend
+                      <UserCheck className="h-4 w-4" />Friends
                     </Button>
                   )
                 )}
@@ -468,7 +433,7 @@ const UserProfile = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem onClick={() => setShareDialogOpen(true)}>
+                    <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(window.location.href); toast({ title: "Profile link copied" }); }}>
                       <Share2 className="h-4 w-4 mr-2" />Share Profile
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => { setActiveTab("friends"); window.location.hash = "friends"; }}>
@@ -632,13 +597,6 @@ const UserProfile = () => {
           toast({ title: "Gift Sent! 🎁", description: `You sent ${g.giftData.name} to ${profile.name}` });
           setGiftOpen(false);
         }}
-      />
-
-      {/* Share Profile Dialog */}
-      <ShareProfileDialog
-        open={shareDialogOpen}
-        onClose={() => setShareDialogOpen(false)}
-        profileName={profile?.name || ""}
       />
     </div>
   );

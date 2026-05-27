@@ -96,6 +96,7 @@ export const CreatePostDialog = ({
 
   // Monetization
   const [isMonetized,  setIsMonetized]  = useState(false);
+<<<<<<< Updated upstream
   const minFee = getMonetizedPostMinFee(type);
   const maxFee = monetizedPostMinFeeSettings.absoluteMaxMobi;
   const [accessFee,    setAccessFee]    = useState(String(minFee));
@@ -110,10 +111,22 @@ export const CreatePostDialog = ({
   }, [type]);
 
   // Fetch creator earning % from admin settings
+=======
+  const [accessFee,    setAccessFee]    = useState("10");
+  const [creatorPct,    setCreatorPct]    = useState(60);
+  const [monoEligible,  setMonoEligible]  = useState<null | { eligible: boolean; reasons: string[] }>(null);
+
+  // Fetch creator earning % and monetisation eligibility
+>>>>>>> Stashed changes
   useEffect(() => {
     fetch(`${API_BASE}/settings/creator_pct.php`, { credentials: "include" })
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d?.pct) setCreatorPct(Number(d.pct)); })
+      .catch(() => {});
+
+    fetch(`${API_BASE}/posts/check_mono.php`, { credentials: "include" })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d) setMonoEligible(d); })
       .catch(() => {});
   }, []);
 
@@ -509,10 +522,32 @@ export const CreatePostDialog = ({
           )}
 
           {/* ── MONETIZATION SECTION ── */}
+<<<<<<< Updated upstream
           {!canMonetize ? (
             <MonetizationEligibilityCard profile={monetizationProfile} hideWhenEligible={false} />
           ) : (
           <div className={`rounded-xl border-2 p-3 sm:p-4 transition-all ${isMonetized ? "border-amber-300 bg-amber-50" : "border-dashed border-muted"}`}>
+=======
+          {/* Eligibility status */}
+          {monoEligible && !monoEligible.eligible && (
+            <div className="rounded-xl bg-gray-50 border border-gray-200 p-3 mb-2">
+              <p className="text-xs font-bold text-gray-700 mb-1.5">🔒 Monetisation not available yet</p>
+              {monoEligible.reasons.map((r, i) => (
+                <p key={i} className="text-xs text-gray-500 flex items-center gap-1.5">
+                  <span className="text-red-400">✗</span>{r}
+                </p>
+              ))}
+            </div>
+          )}
+          {monoEligible?.eligible && (
+            <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-2.5 mb-2">
+              <p className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
+                <span>✓</span> Your account is eligible for monetisation!
+              </p>
+            </div>
+          )}
+          <div className={`rounded-xl border-2 p-4 transition-all ${isMonetized ? "border-amber-300 bg-amber-50" : "border-dashed border-muted"}`}>
+>>>>>>> Stashed changes
             {/* Toggle */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -526,7 +561,8 @@ export const CreatePostDialog = ({
               </div>
               <Switch
                 checked={isMonetized}
-                onCheckedChange={setIsMonetized}
+                onCheckedChange={v => { if (monoEligible?.eligible !== false) setIsMonetized(v); }}
+                disabled={monoEligible?.eligible === false}
               />
             </div>
 

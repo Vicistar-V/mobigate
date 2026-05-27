@@ -1,7 +1,8 @@
 /**
  * UserProfile.tsx
  * Route: /profile/:id
- * Shows another user's profile. All data from API.
+ * Shows another user's profile. Read-only — no edit buttons.
+ * All data fetched from API using the :id URL param.
  */
 
 import { Header }              from "@/components/Header";
@@ -28,7 +29,6 @@ import { ELibrarySection }     from "@/components/ELibrarySection";
 import { FeedPost }            from "@/components/FeedPost";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 import { useToast }            from "@/hooks/use-toast";
-import { ShareProfileDialog }   from "@/components/ShareProfileDialog";
 import { PeopleYouMayKnow }   from "@/components/PeopleYouMayKnow";
 import { ProfileAlbumsTab }   from "@/components/profile/ProfileAlbumsTab";
 import { ProfileFriendsTab }  from "@/components/profile/ProfileFriendsTab";
@@ -40,8 +40,6 @@ import { ProfileCommunityTab } from "@/components/profile/ProfileCommunityTab";
 import { ProfileMobiQuizTab }  from "@/components/profile/ProfileMobiQuizTab";
 import { ProfileContentsTab }  from "@/components/profile/ProfileContentsTab";
 import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
-import { WallBannerSlideshow } from "@/components/wall-banner/WallBannerSlideshow";
-import type { WallBannerSlide } from "@/types/wallBanner";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -54,7 +52,7 @@ interface ProfileData {
   bio: string | null; website: string | null; location: string | null;
   profile_photo: string | null; banner_image: string | null;
   is_verified: boolean; is_online: boolean;
-  friendship_status: string; is_following: boolean;
+  friendship_status: string; is_following: boolean; is_liked: boolean;
   stats: { friends: number; followers: number; following: number; likes: number; gifts: number; contents: number };
 }
 
@@ -64,25 +62,21 @@ const UserProfile = () => {
   const { id: userId } = useParams<{ id: string }>();
   const { toast }      = useToast();
 
-  const [profile,        setProfile]        = useState<ProfileData | null>(null);
-  const [loading,        setLoading]        = useState(true);
-  const [friendStatus,   setFriendStatus]   = useState("none");
-  const [isFollowing,    setIsFollowing]    = useState(false);
-  const [isLiked,        setIsLiked]        = useState(false);
-  const [userPosts,      setUserPosts]      = useState<Post[]>([]);
-  const [activeTab,      setActiveTab]      = useState("status");
-  const [contentFilter,  setContentFilter]  = useState("all");
-  const [wallFilter,     setWallFilter]     = useState("all");
-  const [wallView,       setWallView]       = useState<"normal"|"large">("normal");
-  const [visibleCount,   setVisibleCount]   = useState(20);
-  const [giftOpen,       setGiftOpen]       = useState(false);
-  const [galleryOpen,    setGalleryOpen]    = useState(false);
-  const [galleryItems,   setGalleryItems]   = useState<MediaItem[]>([]);
-  const [galleryIdx,     setGalleryIdx]     = useState(0);
-  // Unfriend confirmation state
-  const [unfriendConfirm,  setUnfriendConfirm]  = useState(false);
-  const [shareDialogOpen,  setShareDialogOpen]  = useState(false);
-  const [unfriendLoading, setUnfriendLoading] = useState(false);
+  const [profile,       setProfile]       = useState<ProfileData | null>(null);
+  const [loading,       setLoading]       = useState(true);
+  const [friendStatus,  setFriendStatus]  = useState("none");
+  const [isFollowing,   setIsFollowing]   = useState(false);
+  const [isLiked,       setIsLiked]       = useState(false);
+  const [userPosts,     setUserPosts]     = useState<Post[]>([]);
+  const [activeTab,     setActiveTab]     = useState("status");
+  const [contentFilter, setContentFilter] = useState("all");
+  const [wallFilter,    setWallFilter]    = useState("all");
+  const [wallView,      setWallView]      = useState<"normal"|"large">("normal");
+  const [visibleCount,  setVisibleCount]  = useState(20);
+  const [giftOpen,      setGiftOpen]      = useState(false);
+  const [galleryOpen,   setGalleryOpen]   = useState(false);
+  const [galleryItems,  setGalleryItems]  = useState<MediaItem[]>([]);
+  const [galleryIdx,    setGalleryIdx]    = useState(0);
 
   // ── Fetch profile ──────────────────────────────────────────────────────────
   const loadProfile = useCallback(async () => {
@@ -96,6 +90,7 @@ const UserProfile = () => {
       setProfile(data);
       setFriendStatus(data.friendship_status || "none");
       setIsFollowing(data.is_following || false);
+      setIsLiked(data.is_liked || false);  // FIX: initialise from API, not always false
     } catch (e) {
       console.error("[UserProfile] fetch error:", e);
       setProfile(null);
@@ -147,47 +142,29 @@ const UserProfile = () => {
     } catch { toast({ title: "Error", description: "Cannot reach server", variant: "destructive" }); }
   };
 
-  const handleUnfriend = async () => {
-    if (!profile) return;
-    // First click: show confirmation
-    if (!unfriendConfirm) {
-      setUnfriendConfirm(true);
-      return;
-    }
-    // Second click: execute
-    setUnfriendLoading(true);
-    setUnfriendConfirm(false);
-    try {
-      const res  = await fetch(`${API_BASE}/friends/remove.php`, {
-        method: "POST", credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ friend_id: profile.id }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setFriendStatus("none");
-        toast({ title: "Unfriended", description: `You are no longer friends with ${profile.name}`, variant: "destructive" });
-      } else {
-        toast({ title: "Error", description: data.error || "Could not unfriend", variant: "destructive" });
-      }
-    } catch {
-      toast({ title: "Error", description: "Cannot reach server", variant: "destructive" });
-    } finally {
-      setUnfriendLoading(false);
-    }
-  };
-
   const handleToggleFollow = async () => {
     if (!profile) return;
     const was = isFollowing;
     setIsFollowing(!was);
     try {
-      await fetch(`${API_BASE}/friends/follow.php`, {
+      const res  = await fetch(`${API_BASE}/friends/follow.php`, {
         method: "POST", credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ following_id: profile.id }),
       });
-      toast({ title: was ? "Unfollowed" : `Now following ${profile.name}` });
+      const data = await res.json();
+      if (data.success) {
+        setIsFollowing(data.following);
+        // Update follower count in profile stats
+        setProfile(p => p ? {
+          ...p,
+          stats: { ...p.stats, followers: data.follower_count }
+        } : p);
+        toast({ title: data.following ? `Now following ${profile.name}` : "Unfollowed" });
+      } else {
+        setIsFollowing(was);
+        toast({ title: "Error", description: data.error, variant: "destructive" });
+      }
     } catch { setIsFollowing(was); }
   };
 
@@ -196,12 +173,24 @@ const UserProfile = () => {
     const was = isLiked;
     setIsLiked(!was);
     try {
-      await fetch(`${API_BASE}/profile/like_profile.php`, {
+      const res  = await fetch(`${API_BASE}/profile/like_profile.php`, {
         method: "POST", credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id: profile.id }),
       });
-      toast({ title: was ? "Unliked" : "Liked" });
+      const data = await res.json();
+      if (data.success) {
+        setIsLiked(data.liked);
+        // Update like count in profile stats
+        setProfile(p => p ? {
+          ...p,
+          stats: { ...p.stats, likes: data.like_count }
+        } : p);
+        toast({ title: data.liked ? "Liked!" : "Unliked" });
+      } else {
+        setIsLiked(was);
+        toast({ title: "Error", description: data.error, variant: "destructive" });
+      }
     } catch { setIsLiked(was); }
   };
 
@@ -224,19 +213,20 @@ const UserProfile = () => {
     }));
   };
 
+  // Wall posts from user's posts
   const wallPosts = userPosts.filter(p => ["Photo","Video"].includes(p.type)).map(p => ({
     ...p, url: p.imageUrl || "", isOwner: false,
   }));
 
-  const filteredFeed  = contentFilter === "all" ? feedPosts : feedPosts.filter(p => p.type.toLowerCase() === contentFilter);
-  const displayedFeed = filteredFeed.slice(0, visibleCount);
+  const filteredFeed    = contentFilter === "all" ? feedPosts : feedPosts.filter(p => p.type.toLowerCase() === contentFilter);
+  const displayedFeed   = filteredFeed.slice(0, visibleCount);
 
   const premiumAds: PremiumAdCardProps[] = [
     { id: "p1", advertiser: { name: "Professional Training Academy", verified: true }, content: { headline: "Advance Your Career", description: "Industry-recognized certifications", ctaText: "Browse Courses", ctaUrl: "https://example.com/training" }, media: { type: "image", items: [{ url: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1200&q=80" }] }, layout: "standard", duration: 15 },
     { id: "p2", advertiser: { name: "Global Marketplace", verified: true }, content: { headline: "Buy and Sell with Confidence", description: "Connect with millions worldwide. Secure payments.", ctaText: "Start Selling", ctaUrl: "https://example.com" }, media: { type: "carousel", items: [{ url: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&q=80", caption: "Electronics" }, { url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80", caption: "Fashion" }] }, layout: "standard", duration: 15 },
   ];
   const adSlots = [
-    { slotId: "up-slot-1", ads: [{ id: "a1", content: "Premium Content Upgrade!", image: "https://images.unsplash.com/photo-1557838923-2985c318be48?w=800&q=80", duration: 10 }] },
+    { slotId: "up-slot-1", ads: [{ id: "a1", content: "Premium Content Upgrade!", image: "https://images.unsplash.com/photo-1557838923-2985c318be48?w=800&q=80", duration: 10 }, { id: "a2", content: "New Features Available", image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&q=80", duration: 10 }] },
     { slotId: "up-slot-2", ads: [{ id: "a3", content: "Join Premium Now", image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80", duration: 10 }] },
   ];
   const wallPremiumSlots = [
@@ -275,6 +265,7 @@ const UserProfile = () => {
   const displayPhoto  = profile.profile_photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.name||"U")}&size=200&background=7c3aed&color=fff`;
   const displayBanner = profile.banner_image  || profileBanner;
 
+  // ─────────────────────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col w-full min-h-screen bg-background">
       <Header />
@@ -284,29 +275,7 @@ const UserProfile = () => {
         {/* ── Profile Header Card ── */}
         <Card className="mb-6 overflow-hidden">
 
-<<<<<<< Updated upstream
-          {/* Banner — rotating wall banner slideshow (public/read-only) */}
-          <WallBannerSlideshow
-            ownerId={profile.id}
-            scope="profile"
-            fallbackImage={displayBanner as string}
-            fallbackAlt="Profile Banner"
-            onOpenViewer={(slide: WallBannerSlide) => {
-              setGalleryItems([
-                {
-                  id: slide.id,
-                  url: slide.mediaUrl,
-                  type: slide.mediaType,
-                  author: profile.name,
-                  title: slide.caption,
-                } as MediaItem,
-              ]);
-              setGalleryIdx(0);
-              setGalleryOpen(true);
-            }}
-          />
-=======
-          {/* Banner */}
+          {/* Banner — click to view full size */}
           <div className="relative h-48 bg-muted">
             <img
               src={displayBanner}
@@ -318,7 +287,6 @@ const UserProfile = () => {
               }}
             />
           </div>
->>>>>>> Stashed changes
 
           <div className="px-6 pb-6">
             {/* Avatar row */}
@@ -383,14 +351,6 @@ const UserProfile = () => {
                 <span><span className="font-bold text-foreground">{fmt(profile.stats.contents)}</span> Contents</span>
               </div>
 
-              {/* Birthday line — bold "Birthday" + light textured date */}
-              <p className="text-base flex flex-wrap items-baseline gap-1.5 -mt-1">
-                <span className="font-extrabold text-foreground">Birthday</span>
-                <span className="font-light italic text-muted-foreground/80 tracking-wide">
-                  {(profile as { birthday?: string }).birthday || "August 25"}
-                </span>
-              </p>
-
               {/* Action buttons */}
               <div className="flex flex-wrap gap-2">
                 <Button variant="default" size="sm" className="gap-2 bg-black hover:bg-black/80"
@@ -400,7 +360,7 @@ const UserProfile = () => {
                 <Button size="sm"
                   className={isLiked ? "gap-2 bg-red-500 hover:bg-red-600 text-white" : "gap-2 bg-yellow-400 hover:bg-yellow-500 text-black"}
                   onClick={handleLike}>
-                  <Heart className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`} />Like
+                  <Heart className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`} />{isLiked ? "Unlike" : "Like"}
                 </Button>
                 <Button size="sm" className="gap-2 bg-emerald-500 hover:bg-emerald-600 text-white" onClick={handleChat}>
                   <MessageCircle className="h-4 w-4" />Chat
@@ -409,7 +369,7 @@ const UserProfile = () => {
                   <Gift className="h-4 w-4" />Gift
                 </Button>
 
-                {/* ── Friend status button — dynamic based on relationship ── */}
+                {/* Friend status button */}
                 {friendStatus === "none" && (
                   <Button size="sm" variant="default" onClick={handleAddFriend}>
                     <UserPlus className="h-4 w-4 mr-1" />Add Friend
@@ -421,39 +381,12 @@ const UserProfile = () => {
                   </Button>
                 )}
                 {friendStatus === "accepted" && (
-                  unfriendConfirm ? (
-                    /* Confirmation state */
-                    <div className="flex gap-1 items-center">
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        className="gap-1 animate-pulse"
-                        onClick={handleUnfriend}
-                        disabled={unfriendLoading}
-                      >
-                        {unfriendLoading
-                          ? <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" />
-                          : <UserX className="h-4 w-4" />}
-                        Confirm Unfriend
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => setUnfriendConfirm(false)}>
-                        Cancel
-                      </Button>
-                    </div>
-                  ) : (
-                    /* Normal state — active clickable Unfriend button */
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="gap-1 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"
-                      onClick={handleUnfriend}
-                    >
-                      <UserX className="h-4 w-4" />Unfriend
-                    </Button>
-                  )
+                  <Button size="sm" variant="secondary" disabled>
+                    <UserCheck className="h-4 w-4 mr-1" />Friends
+                  </Button>
                 )}
 
-                {/* Follow / Unfollow */}
+                {/* Follow button */}
                 <Button size="sm" variant={isFollowing ? "secondary" : "outline"} onClick={handleToggleFollow}>
                   {isFollowing
                     ? <><UserMinus className="h-4 w-4 mr-1" />Unfollow</>
@@ -468,7 +401,7 @@ const UserProfile = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem onClick={() => setShareDialogOpen(true)}>
+                    <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(window.location.href); toast({ title: "Profile link copied" }); }}>
                       <Share2 className="h-4 w-4 mr-2" />Share Profile
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => { setActiveTab("friends"); window.location.hash = "friends"; }}>
@@ -486,11 +419,8 @@ const UserProfile = () => {
               </div>
 
               {/* Friendship status message */}
-              {friendStatus === "accepted" && !unfriendConfirm && (
+              {friendStatus === "accepted" && (
                 <p className="text-emerald-600 font-medium text-base">You are Friends with {profile.name}</p>
-              )}
-              {unfriendConfirm && (
-                <p className="text-red-500 text-sm font-medium">Click "Confirm Unfriend" to remove {profile.name} as a friend.</p>
               )}
             </div>
           </div>
@@ -627,18 +557,12 @@ const UserProfile = () => {
         isOpen={giftOpen}
         onClose={() => setGiftOpen(false)}
         recipientName={profile.name}
+        recipientId={profile.id}
         onSendGift={(g: GiftSelection) => {
           if (!g) return;
-          toast({ title: "Gift Sent! 🎁", description: `You sent ${g.giftData.name} to ${profile.name}` });
-          setGiftOpen(false);
+          // Update gift count in stats
+          setProfile(p => p ? { ...p, stats: { ...p.stats, gifts: p.stats.gifts + 1 } } : p);
         }}
-      />
-
-      {/* Share Profile Dialog */}
-      <ShareProfileDialog
-        open={shareDialogOpen}
-        onClose={() => setShareDialogOpen(false)}
-        profileName={profile?.name || ""}
       />
     </div>
   );

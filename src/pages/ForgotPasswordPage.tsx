@@ -9,6 +9,7 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AppLogo } from "@/components/AppLogo";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input }  from "@/components/ui/input";
@@ -141,12 +142,21 @@ const ForgotPasswordPage = () => {
 
         {/* Logo */}
         <div className="text-center mb-6">
-          <button onClick={() => navigate("/")} className="inline-block">
-            <div className="bg-primary text-primary-foreground text-2xl font-bold px-6 py-3 rounded-xl">
-              Mobigate
-            </div>
+          <button onClick={async () => {
+              try { await fetch(`${API_BASE}/auth/logout.php`, { method: "POST", credentials: "include" }); } catch {}
+              window.location.href = "/";
+            }}
+            className="inline-block bg-transparent border-none cursor-pointer hover:opacity-80 transition-opacity">
+            <AppLogo
+              height={56}
+              maxWidth={200}
+              textClassName="font-black text-4xl tracking-tight text-gray-900"
+              showTagline={true}
+              taglineClassName="text-gray-400 text-sm mt-1"
+              className="flex flex-col items-center"
+            />
           </button>
-          <p className="text-muted-foreground text-sm mt-2">Password Recovery</p>
+          <p className="text-muted-foreground text-xs mt-3 font-semibold uppercase tracking-widest">Password Recovery</p>
         </div>
 
         <Card className="overflow-hidden shadow-xl">
