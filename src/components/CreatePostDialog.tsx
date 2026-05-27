@@ -96,11 +96,11 @@ export const CreatePostDialog = ({
 
   // Monetization
   const [isMonetized,  setIsMonetized]  = useState(false);
-<<<<<<< Updated upstream
   const minFee = getMonetizedPostMinFee(type);
   const maxFee = monetizedPostMinFeeSettings.absoluteMaxMobi;
   const [accessFee,    setAccessFee]    = useState(String(minFee));
   const [creatorPct,   setCreatorPct]   = useState(60);
+  const [monoEligible, setMonoEligible] = useState<null | { eligible: boolean; reasons: string[] }>(null);
 
   // Whenever post type changes, bump the access fee up to the new minimum
   // (never downwards — respect user's existing higher value).
@@ -110,14 +110,7 @@ export const CreatePostDialog = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type]);
 
-  // Fetch creator earning % from admin settings
-=======
-  const [accessFee,    setAccessFee]    = useState("10");
-  const [creatorPct,    setCreatorPct]    = useState(60);
-  const [monoEligible,  setMonoEligible]  = useState<null | { eligible: boolean; reasons: string[] }>(null);
-
   // Fetch creator earning % and monetisation eligibility
->>>>>>> Stashed changes
   useEffect(() => {
     fetch(`${API_BASE}/settings/creator_pct.php`, { credentials: "include" })
       .then(r => r.ok ? r.json() : null)
