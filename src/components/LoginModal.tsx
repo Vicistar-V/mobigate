@@ -220,14 +220,8 @@ export const LoginModal = () => {
     : "";
 
   return (
-<<<<<<< Updated upstream
     <div className="fixed inset-0 z-[9999] flex items-start sm:items-center justify-center bg-black/60 p-4 overflow-y-auto pointer-events-auto">
       <div className="bg-card w-full max-w-md rounded-2xl shadow-2xl border overflow-hidden my-auto">
-
-=======
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4">
-      <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-gray-100 max-h-[95vh] overflow-y-auto">
->>>>>>> Stashed changes
 
         {/* ── HEADER ── */}
         <div className="px-8 pt-10 pb-6 text-center bg-white">
