@@ -284,7 +284,6 @@ const UserProfile = () => {
         {/* ── Profile Header Card ── */}
         <Card className="mb-6 overflow-hidden">
 
-<<<<<<< Updated upstream
           {/* Banner — rotating wall banner slideshow (public/read-only) */}
           <WallBannerSlideshow
             ownerId={profile.id}
@@ -305,20 +304,6 @@ const UserProfile = () => {
               setGalleryOpen(true);
             }}
           />
-=======
-          {/* Banner */}
-          <div className="relative h-48 bg-muted">
-            <img
-              src={displayBanner}
-              alt="Profile Banner"
-              className="w-full h-full object-cover cursor-pointer"
-              onClick={() => {
-                setGalleryItems([{ id: "banner", url: displayBanner as string, type: "photo", author: profile.name }]);
-                setGalleryIdx(0); setGalleryOpen(true);
-              }}
-            />
-          </div>
->>>>>>> Stashed changes
 
           <div className="px-6 pb-6">
             {/* Avatar row */}
