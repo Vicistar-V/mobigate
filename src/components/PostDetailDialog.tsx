@@ -12,7 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Heart, MessageCircle, Share2, UserPlus, Eye, Coins, X, Gift } from "lucide-react";
+import { Heart, MessageCircle, Share2, UserPlus, Eye, Coins, X, Gift, ChevronLeft, ChevronRight } from "lucide-react";
 import { MediaViewer } from "./MediaViewer";
 import { CommentSection } from "./CommentSection";
 import { SendGiftDialog } from "@/components/chat/SendGiftDialog";
