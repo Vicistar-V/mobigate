@@ -147,6 +147,19 @@ export const InviteMembersDialog = ({
   const toggleLinkComm = (c: Community) =>
     setLinkComms(prev => prev.find(p => p.id === c.id) ? prev.filter(p => p.id !== c.id) : [...prev, c]);
 
+  // ── Build the full in-app invite message (text + community links) ────────
+  const buildMobiMessage = () => {
+    let body = mobiMessage.trim()
+      || "You've been invited to join our community on Mobigate! Click the link below to complete your membership application.";
+    if (selectedMobiComms.length > 0) {
+      body += selectedMobiComms.length > 1
+        ? "\n\nYou're invited to join these communities/groups:"
+        : "\n\nYou're invited to join this community/group:";
+      selectedMobiComms.forEach(c => { body += `\n• ${c.name}: ${APP_URL}/community/${c.id}`; });
+    }
+    return body;
+  };
+
   // ── Send in-app invites ─────────────────────────────────────────────────
   const sendMobiInvites = async () => {
     if (!selectedUsers.length) { toast({ title: "Select at least one user", variant: "destructive" }); return; }
@@ -155,13 +168,18 @@ export const InviteMembersDialog = ({
       await fetch(`${API_BASE}/notifications/invite.php`, {
         method: "POST", credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ recipient_ids: selectedUsers.map(u => u.id), message: mobiMessage }),
+        body: JSON.stringify({
+          recipient_ids: selectedUsers.map(u => u.id),
+          message: buildMobiMessage(),
+          community_ids: selectedMobiComms.map(c => c.id),
+        }),
       });
       toast({ title: `Invite sent to ${selectedUsers.length} user${selectedUsers.length > 1 ? "s" : ""}!` });
       onOpenChange(false);
     } catch { toast({ title: "Error sending invites", variant: "destructive" }); }
     finally { setSending(false); }
   };
+
 
   // ── Computed values ─────────────────────────────────────────────────────
   const extMessage = buildMessage(senderName, senderId, recipientName, selectedComms, customText);
