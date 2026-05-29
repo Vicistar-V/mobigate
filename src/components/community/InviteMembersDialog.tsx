@@ -78,6 +78,8 @@ export const InviteMembersDialog = ({
   const [selectedUsers,   setSelectedUsers]   = useState<MobiUser[]>([]);
   const [sending,         setSending]         = useState(false);
   const [mobiMessage,     setMobiMessage]     = useState("");
+  const [selectedMobiComms, setSelectedMobiComms] = useState<Community[]>([]);
+  const [mobiCommOpen,    setMobiCommOpen]    = useState(false);
   // External tab
   const [recipientName,   setRecipientName]   = useState("");
   const [communities,     setCommunities]     = useState<Community[]>([]);
