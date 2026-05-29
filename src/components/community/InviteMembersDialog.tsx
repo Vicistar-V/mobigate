@@ -106,7 +106,8 @@ export const InviteMembersDialog = ({
 
   // ── Fetch communities when external/link tab opens ──────────────────────
   useEffect(() => {
-    if (!open || (tab !== "external" && tab !== "link")) return;
+    if (!open) return;
+    if (tab !== "mobigate" && tab !== "external" && tab !== "link") return;
     if (communities.length > 0) return;
     setCommLoading(true);
     fetch(`${API_BASE}/community/my_communities.php`, { credentials: "include" })
