@@ -33,6 +33,7 @@ import { PostDetailDialog } from "@/components/PostDetailDialog";
 
 export const GreetingSection = () => {
   const profile = useUserProfile();
+  const navigate = useNavigate();
   const currentUserId = useCurrentUserId();
   const phpFeedPosts = useFeedPosts();
   const allPosts = phpFeedPosts || fallbackFeedPosts;
