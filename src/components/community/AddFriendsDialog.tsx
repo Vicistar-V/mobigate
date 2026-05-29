@@ -37,7 +37,16 @@ export function AddFriendsDialog({ open, onOpenChange }: AddFriendsDialogProps) 
     });
   };
 
+  const handleCancelRequest = (memberId: string, memberName: string) => {
+    setPendingRequests((prev) => prev.filter((id) => id !== memberId));
+    toast({
+      title: "Friend Request Cancelled",
+      description: `Your request to ${memberName} was unsent`,
+    });
+  };
+
   const isPending = (memberId: string) => pendingRequests.includes(memberId);
+
 
   const convertToExecutiveMember = (member: { id: string; name: string; avatar: string; role?: string; joinDate?: Date }): ExecutiveMember => ({
     id: member.id,
