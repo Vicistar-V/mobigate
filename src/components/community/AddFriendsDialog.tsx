@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Search, UserPlus, Clock } from "lucide-react";
+import { X, Search, UserPlus, Clock, XCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,7 +37,16 @@ export function AddFriendsDialog({ open, onOpenChange }: AddFriendsDialogProps) 
     });
   };
 
+  const handleCancelRequest = (memberId: string, memberName: string) => {
+    setPendingRequests((prev) => prev.filter((id) => id !== memberId));
+    toast({
+      title: "Friend Request Cancelled",
+      description: `Your request to ${memberName} was unsent`,
+    });
+  };
+
   const isPending = (memberId: string) => pendingRequests.includes(memberId);
+
 
   const convertToExecutiveMember = (member: { id: string; name: string; avatar: string; role?: string; joinDate?: Date }): ExecutiveMember => ({
     id: member.id,
@@ -127,14 +136,20 @@ export function AddFriendsDialog({ open, onOpenChange }: AddFriendsDialogProps) 
 
                           <Button
                             size="sm"
-                            className="w-full"
-                            disabled={isPending(friend.id)}
-                            onClick={() => handleSendRequest(friend.id, friend.name)}
+                            variant={isPending(friend.id) ? "outline" : "default"}
+                            className={`group w-full ${isPending(friend.id) ? "border-primary/40 text-primary hover:bg-destructive hover:text-destructive-foreground hover:border-destructive" : ""}`}
+                            onClick={() =>
+                              isPending(friend.id)
+                                ? handleCancelRequest(friend.id, friend.name)
+                                : handleSendRequest(friend.id, friend.name)
+                            }
                           >
                             {isPending(friend.id) ? (
                               <>
-                                <Clock className="h-3 w-3 mr-1" />
-                                Request Sent
+                                <Clock className="h-3 w-3 mr-1 group-hover:hidden" />
+                                <XCircle className="h-3 w-3 mr-1 hidden group-hover:inline" />
+                                <span className="group-hover:hidden">Request Sent</span>
+                                <span className="hidden group-hover:inline">Cancel Request</span>
                               </>
                             ) : (
                               <>
@@ -186,13 +201,20 @@ export function AddFriendsDialog({ open, onOpenChange }: AddFriendsDialogProps) 
 
                       <Button
                         size="sm"
-                        disabled={isPending(member.id)}
-                        onClick={() => handleSendRequest(member.id, member.name)}
+                        variant={isPending(member.id) ? "outline" : "default"}
+                        className={`group shrink-0 ${isPending(member.id) ? "border-primary/40 text-primary hover:bg-destructive hover:text-destructive-foreground hover:border-destructive" : ""}`}
+                        onClick={() =>
+                          isPending(member.id)
+                            ? handleCancelRequest(member.id, member.name)
+                            : handleSendRequest(member.id, member.name)
+                        }
                       >
                         {isPending(member.id) ? (
                           <>
-                            <Clock className="h-3 w-3 mr-1" />
-                            Sent
+                            <Clock className="h-3 w-3 mr-1 group-hover:hidden" />
+                            <XCircle className="h-3 w-3 mr-1 hidden group-hover:inline" />
+                            <span className="group-hover:hidden">Sent</span>
+                            <span className="hidden group-hover:inline">Cancel</span>
                           </>
                         ) : (
                           <>
@@ -251,9 +273,15 @@ export function AddFriendsDialog({ open, onOpenChange }: AddFriendsDialogProps) 
                                 </div>
                               </div>
 
-                              <Badge variant="secondary" className="text-xs">
-                                Pending
-                              </Badge>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="shrink-0 border-destructive/40 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                                onClick={() => handleCancelRequest(member.id, member.name)}
+                              >
+                                <XCircle className="h-3 w-3 mr-1" />
+                                Cancel
+                              </Button>
                             </div>
                           </CardContent>
                         </Card>
