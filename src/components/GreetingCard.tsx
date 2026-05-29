@@ -861,6 +861,25 @@ export const GreetingSection = () => {
                 </span>
               </span>
             </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setOwnActionsOpen(false);
+                navigate(`/profile/${currentUserId}#status`);
+              }}
+              className="w-full flex items-center gap-3 p-3 rounded-xl border-2 border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/10 active:scale-[0.99] transition-all touch-manipulation text-left"
+            >
+              <span className="h-10 w-10 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
+                <LayoutList className="h-5 w-5" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[15px] font-bold text-foreground">View my Posts</span>
+                <span className="block text-[12px] text-muted-foreground leading-snug">
+                  See all the posts you've shared so far.
+                </span>
+              </span>
+            </button>
           </div>
         </ActionDialogContent>
       </ActionDialog>
