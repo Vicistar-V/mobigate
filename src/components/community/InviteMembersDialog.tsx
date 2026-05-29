@@ -49,7 +49,7 @@ function buildMessage(
 ): string {
   const profileLink = `${APP_URL}/profile/${senderId}`;
   const greeting    = recipientName.trim() ? `Hi, ${recipientName.trim()}! ` : "Hi! ";
-  let body = `${greeting}${senderName} invites you to join the Mobigate community. Please click on the link below to Sign-Up Now.\n\n👉 ${APP_URL}/register`;
+  let body = `${greeting}${senderName} invites you to join Mobigate community. Please click on the link below to Sign-Up Now.\n\n👉 ${APP_URL}/register`;
   if (communities.length > 0) {
     body += "\n\nAfter joining, you can also connect with me here:";
     communities.forEach(c => { body += `\n• ${c.name}: ${APP_URL}/community/${c.id}`; });
