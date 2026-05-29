@@ -55,8 +55,14 @@ interface ProfileData {
   profile_photo: string | null; banner_image: string | null;
   is_verified: boolean; is_online: boolean;
   friendship_status: string; is_following: boolean;
-  stats: { friends: number; followers: number; following: number; likes: number; gifts: number; contents: number };
+  stats: { friends: number; followers: number; following: number; likes: number; gifts: number; contents: number; active_contents?: number; monetized_contents?: number };
 }
+
+// Verified Content Creator qualification thresholds.
+// The designation is reserved for verified users who maintain a qualifying
+// number of ACTIVE (published/live) and MONETIZED contents/posts.
+const CREATOR_MIN_ACTIVE_CONTENTS    = 5;
+const CREATOR_MIN_MONETIZED_CONTENTS = 1;
 
 const fmt = (n: number) => n >= 1000 ? `${(n/1000).toFixed(1)}k` : String(n);
 
