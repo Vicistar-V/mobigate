@@ -184,6 +184,68 @@ export const EditPostDialog = ({ post, open, onOpenChange, onSave }: EditPostDia
           className="mt-2"
         />
 
+        <div className="mt-3 rounded-lg border bg-muted/30 p-3 space-y-3">
+          <div className="flex items-start gap-3">
+            <Checkbox
+              id="copyright-toggle"
+              checked={copyrightEnabled}
+              onCheckedChange={(v) => {
+                const next = !!v;
+                setCopyrightEnabled(next);
+                if (!next) {
+                  setCopyrightFile(null);
+                  if (copyrightInputRef.current) copyrightInputRef.current.value = "";
+                }
+              }}
+              className="mt-0.5"
+            />
+            <Label htmlFor="copyright-toggle" className="text-base font-medium leading-snug cursor-pointer">
+              Upload Copyright Documents, if any
+            </Label>
+          </div>
+
+          {copyrightEnabled && (
+            <div className="space-y-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => copyrightInputRef.current?.click()}
+              >
+                {copyrightFile ? <FileCheck className="h-4 w-4 mr-2" /> : <Upload className="h-4 w-4 mr-2" />}
+                {copyrightFile ? "Change Document" : "Upload Document"}
+              </Button>
+              <input
+                ref={copyrightInputRef}
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.tiff,.tif,.png,.gif,application/pdf,image/jpeg,image/tiff,image/png,image/gif"
+                onChange={handleCopyrightFileChange}
+                className="hidden"
+              />
+              {copyrightFile && (
+                <div className="flex items-center justify-between gap-2 rounded-md border bg-background px-3 py-2">
+                  <span className="text-sm truncate">{copyrightFile.name}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 shrink-0"
+                    onClick={() => {
+                      setCopyrightFile(null);
+                      if (copyrightInputRef.current) copyrightInputRef.current.value = "";
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              <p className="text-sm text-muted-foreground">Supported formats: PDF, JPEG, TIFF, PNG, GIF</p>
+            </div>
+          )}
+        </div>
+
+
+
         <div className="flex justify-end gap-2 mt-3">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
             Cancel
