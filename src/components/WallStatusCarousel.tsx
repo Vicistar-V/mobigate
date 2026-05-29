@@ -476,7 +476,7 @@ export const WallStatusCarousel = ({
       )}
 
       {/* Post Detail Dialog */}
-      {selectedPost && (
+      {selectedPost && selectedIndex !== null && (
         <PostDetailDialog
           open={detailOpen}
           onOpenChange={setDetailOpen}
@@ -484,20 +484,26 @@ export const WallStatusCarousel = ({
             id: selectedPost.id,
             title: selectedPost.title,
             subtitle: selectedPost.author,
-            description: selectedPost.title,
+            description: selectedPost.description || selectedPost.title,
             imageUrl: selectedPost.imageUrl,
-            views: "0",
-            comments: "0",
-            likes: "0",
+            views: String(selectedPost.views ?? "0"),
+            comments: String(selectedPost.comments ?? "0"),
+            likes: String(selectedPost.likes ?? "0"),
             author: selectedPost.author,
-            authorProfileImage: "/placeholder.svg",
-            userId: currentUserId,
-            status: "Offline",
+            authorProfileImage: selectedPost.authorProfileImage || selectedPost.authorImage || "/placeholder.svg",
+            userId: selectedPost.userId || currentUserId,
+            status: selectedPost.status || "Offline",
             type: selectedPost.type as "Video" | "Article" | "Photo" | "Audio" | "PDF" | "URL",
-            fee: "0"
+            fee: selectedPost.fee || "0"
           }}
+          onPrev={goToPrev}
+          onNext={goToNext}
+          hasPrev={selectedIndex > 0}
+          hasNext={selectedIndex < displayedItems.length - 1}
+          positionLabel={`${selectedIndex + 1} / ${displayedItems.length}`}
         />
       )}
+
     </div>
   );
 };
