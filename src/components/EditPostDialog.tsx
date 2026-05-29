@@ -89,6 +89,7 @@ export const EditPostDialog = ({ post, open, onOpenChange, onSave }: EditPostDia
       form.append("content",   description.trim());
       form.append("post_type", type.toLowerCase());
       if (newMediaFile) form.append("media", newMediaFile);
+      if (copyrightEnabled && copyrightFile) form.append("copyright_document", copyrightFile);
 
       const xhr = new XMLHttpRequest();
       const result = await new Promise<{ success: boolean; error?: string }>((resolve, reject) => {
