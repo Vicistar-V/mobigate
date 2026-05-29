@@ -201,13 +201,20 @@ export function AddFriendsDialog({ open, onOpenChange }: AddFriendsDialogProps) 
 
                       <Button
                         size="sm"
-                        disabled={isPending(member.id)}
-                        onClick={() => handleSendRequest(member.id, member.name)}
+                        variant={isPending(member.id) ? "outline" : "default"}
+                        className={`group shrink-0 ${isPending(member.id) ? "border-primary/40 text-primary hover:bg-destructive hover:text-destructive-foreground hover:border-destructive" : ""}`}
+                        onClick={() =>
+                          isPending(member.id)
+                            ? handleCancelRequest(member.id, member.name)
+                            : handleSendRequest(member.id, member.name)
+                        }
                       >
                         {isPending(member.id) ? (
                           <>
-                            <Clock className="h-3 w-3 mr-1" />
-                            Sent
+                            <Clock className="h-3 w-3 mr-1 group-hover:hidden" />
+                            <XCircle className="h-3 w-3 mr-1 hidden group-hover:inline" />
+                            <span className="group-hover:hidden">Sent</span>
+                            <span className="hidden group-hover:inline">Cancel</span>
                           </>
                         ) : (
                           <>
