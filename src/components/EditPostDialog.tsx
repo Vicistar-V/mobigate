@@ -41,8 +41,19 @@ export const EditPostDialog = ({ post, open, onOpenChange, onSave }: EditPostDia
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
   const [submitting,   setSubmitting]   = useState(false);
   const [legalAccepted, setLegalAccepted] = useState(false);
+  const [copyrightEnabled, setCopyrightEnabled] = useState(false);
+  const [copyrightFile, setCopyrightFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const copyrightInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  const handleCopyrightFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCopyrightFile(file);
+      toast({ title: "Copyright document selected", description: `${file.name} ready to upload` });
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
