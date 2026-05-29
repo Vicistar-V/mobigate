@@ -84,7 +84,7 @@ export const WallStatusCarousel = ({
   showFilterCounts = true
 }: WallStatusCarouselProps) => {
   const currentUserId = useCurrentUserId();
-  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(15);
 
@@ -95,6 +95,8 @@ export const WallStatusCarousel = ({
   const displayedItems = filteredItems.slice(0, visibleCount);
   const hasMoreItems = visibleCount < filteredItems.length;
   const canCollapse = visibleCount > 15;
+
+  const selectedPost = selectedIndex !== null ? displayedItems[selectedIndex] : null;
 
   const handleLoadMore = () => {
     setVisibleCount(prev => Math.min(prev + 15, filteredItems.length));
@@ -109,14 +111,22 @@ export const WallStatusCarousel = ({
     if (onItemClick) {
       onItemClick(post);
     } else {
-      setSelectedPost({
-        ...post,
-        imageUrl: post.imageUrl,
-        authorProfileImage: post.authorImage,
-      });
+      const idx = displayedItems.findIndex(p => p === post);
+      setSelectedIndex(idx >= 0 ? idx : 0);
       setDetailOpen(true);
     }
   };
+
+  const goToPrev = () => {
+    setSelectedIndex(prev => (prev !== null && prev > 0 ? prev - 1 : prev));
+  };
+
+  const goToNext = () => {
+    setSelectedIndex(prev =>
+      prev !== null && prev < displayedItems.length - 1 ? prev + 1 : prev
+    );
+  };
+
 
   return (
     <div>
