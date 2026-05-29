@@ -315,6 +315,20 @@ export const InviteMembersDialog = ({
                 {searching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-purple-400"/>}
               </div>
 
+              {/* Select Community / Group */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5">
+                  Select Community <span className="text-gray-400 font-normal normal-case">(optional — multiple allowed)</span>
+                </label>
+                <CommDropdown selected={selectedMobiComms} onToggle={toggleMobiComm}
+                  isOpen={mobiCommOpen} setIsOpen={setMobiCommOpen}
+                  label="Select community/group to invite to..."/>
+                <p className="text-xs text-gray-400 mt-1">
+                  Each selected community/group adds its own join link to the invitation.
+                </p>
+              </div>
+
+
               {/* Personalized message */}
               <div>
                 <p className="text-sm font-bold text-gray-800 mb-2">Personalized Message</p>
