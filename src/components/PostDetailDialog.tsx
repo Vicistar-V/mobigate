@@ -40,12 +40,27 @@ interface PostDetailDialogProps {
     imageUrl?: string;
     fee?: string;
   };
+  /** Navigate to the previous post in the list (multiple-user feed). */
+  onPrev?: () => void;
+  /** Navigate to the next post in the list (multiple-user feed). */
+  onNext?: () => void;
+  /** Whether there is a previous post available. */
+  hasPrev?: boolean;
+  /** Whether there is a next post available. */
+  hasNext?: boolean;
+  /** 1-based position indicator e.g. "3 / 12". */
+  positionLabel?: string;
 }
 
 export const PostDetailDialog = ({
   open,
   onOpenChange,
   post,
+  onPrev,
+  onNext,
+  hasPrev = false,
+  hasNext = false,
+  positionLabel,
 }: PostDetailDialogProps) => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
