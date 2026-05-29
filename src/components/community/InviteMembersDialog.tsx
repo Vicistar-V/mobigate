@@ -140,6 +140,10 @@ export const InviteMembersDialog = ({
   const toggleComm = (c: Community) =>
     setSelectedComms(prev => prev.find(p => p.id === c.id) ? prev.filter(p => p.id !== c.id) : [...prev, c]);
 
+  const toggleMobiComm = (c: Community) =>
+    setSelectedMobiComms(prev => prev.find(p => p.id === c.id) ? prev.filter(p => p.id !== c.id) : [...prev, c]);
+
+
   const toggleLinkComm = (c: Community) =>
     setLinkComms(prev => prev.find(p => p.id === c.id) ? prev.filter(p => p.id !== c.id) : [...prev, c]);
 
