@@ -492,7 +492,7 @@ export const InviteMembersDialog = ({
         </div>
 
         {/* ── Footer ── */}
-        <div className="px-6 py-4 border-t border-gray-100 shrink-0 flex justify-between gap-3">
+        <div className="px-4 sm:px-6 py-4 border-t border-gray-100 shrink-0 flex justify-between gap-2 flex-wrap">
           {tab === "mobigate" && (
             <>
               <Button variant="outline" className="rounded-xl" onClick={() => onOpenChange(false)}>Cancel</Button>
