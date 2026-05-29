@@ -78,6 +78,8 @@ export const InviteMembersDialog = ({
   const [selectedUsers,   setSelectedUsers]   = useState<MobiUser[]>([]);
   const [sending,         setSending]         = useState(false);
   const [mobiMessage,     setMobiMessage]     = useState("");
+  const [selectedMobiComms, setSelectedMobiComms] = useState<Community[]>([]);
+  const [mobiCommOpen,    setMobiCommOpen]    = useState(false);
   // External tab
   const [recipientName,   setRecipientName]   = useState("");
   const [communities,     setCommunities]     = useState<Community[]>([]);
@@ -97,13 +99,15 @@ export const InviteMembersDialog = ({
       setTab("mobigate"); setUserSearch(""); setSearchResults([]);
       setSelectedUsers([]); setMobiMessage(""); setRecipientName("");
       setSelectedComms([]); setCustomText(""); setExtStep("compose");
+      setSelectedMobiComms([]); setMobiCommOpen(false);
       setLinkComms([]); setCopied(false); setCommOpen(false); setLinkCommOpen(false);
     }
   }, [open]);
 
   // ── Fetch communities when external/link tab opens ──────────────────────
   useEffect(() => {
-    if (!open || (tab !== "external" && tab !== "link")) return;
+    if (!open) return;
+    if (tab !== "mobigate" && tab !== "external" && tab !== "link") return;
     if (communities.length > 0) return;
     setCommLoading(true);
     fetch(`${API_BASE}/community/my_communities.php`, { credentials: "include" })
@@ -136,8 +140,25 @@ export const InviteMembersDialog = ({
   const toggleComm = (c: Community) =>
     setSelectedComms(prev => prev.find(p => p.id === c.id) ? prev.filter(p => p.id !== c.id) : [...prev, c]);
 
+  const toggleMobiComm = (c: Community) =>
+    setSelectedMobiComms(prev => prev.find(p => p.id === c.id) ? prev.filter(p => p.id !== c.id) : [...prev, c]);
+
+
   const toggleLinkComm = (c: Community) =>
     setLinkComms(prev => prev.find(p => p.id === c.id) ? prev.filter(p => p.id !== c.id) : [...prev, c]);
+
+  // ── Build the full in-app invite message (text + community links) ────────
+  const buildMobiMessage = () => {
+    let body = mobiMessage.trim()
+      || "You've been invited to join our community on Mobigate! Click the link below to complete your membership application.";
+    if (selectedMobiComms.length > 0) {
+      body += selectedMobiComms.length > 1
+        ? "\n\nYou're invited to join these communities/groups:"
+        : "\n\nYou're invited to join this community/group:";
+      selectedMobiComms.forEach(c => { body += `\n• ${c.name}: ${APP_URL}/community/${c.id}`; });
+    }
+    return body;
+  };
 
   // ── Send in-app invites ─────────────────────────────────────────────────
   const sendMobiInvites = async () => {
@@ -147,13 +168,18 @@ export const InviteMembersDialog = ({
       await fetch(`${API_BASE}/notifications/invite.php`, {
         method: "POST", credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ recipient_ids: selectedUsers.map(u => u.id), message: mobiMessage }),
+        body: JSON.stringify({
+          recipient_ids: selectedUsers.map(u => u.id),
+          message: buildMobiMessage(),
+          community_ids: selectedMobiComms.map(c => c.id),
+        }),
       });
       toast({ title: `Invite sent to ${selectedUsers.length} user${selectedUsers.length > 1 ? "s" : ""}!` });
       onOpenChange(false);
     } catch { toast({ title: "Error sending invites", variant: "destructive" }); }
     finally { setSending(false); }
   };
+
 
   // ── Computed values ─────────────────────────────────────────────────────
   const extMessage = buildMessage(senderName, senderId, recipientName, selectedComms, customText);
@@ -288,6 +314,20 @@ export const InviteMembersDialog = ({
                 />
                 {searching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-purple-400"/>}
               </div>
+
+              {/* Select Community / Group */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5">
+                  Select Community <span className="text-gray-400 font-normal normal-case">(optional — multiple allowed)</span>
+                </label>
+                <CommDropdown selected={selectedMobiComms} onToggle={toggleMobiComm}
+                  isOpen={mobiCommOpen} setIsOpen={setMobiCommOpen}
+                  label="Select community/group to invite to..."/>
+                <p className="text-xs text-gray-400 mt-1">
+                  Each selected community/group adds its own join link to the invitation.
+                </p>
+              </div>
+
 
               {/* Personalized message */}
               <div>
