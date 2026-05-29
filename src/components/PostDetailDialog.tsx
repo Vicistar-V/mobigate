@@ -375,13 +375,13 @@ export const PostDetailDialog = ({
       {isMobile ? (
         <Drawer open={open} onOpenChange={onOpenChange}>
           <DrawerContent className="max-h-[95vh] h-[95vh] flex flex-col overflow-hidden p-0 touch-auto">
-            <PostContent />
+            {PostContent()}
           </DrawerContent>
         </Drawer>
       ) : (
         <Dialog open={open} onOpenChange={onOpenChange}>
           <DialogContent className="max-w-2xl max-h-[85vh] p-0 gap-0 overflow-hidden rounded-xl">
-            <PostContent />
+            {PostContent()}
           </DialogContent>
         </Dialog>
       )}
