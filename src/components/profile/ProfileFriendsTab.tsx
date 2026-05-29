@@ -136,13 +136,14 @@ export const ProfileFriendsTab = ({ userName, userId }: ProfileFriendsTabProps) 
   return (
     <div className="space-y-4 pb-6">
       <div className="flex gap-2">
-        <Button onClick={() => setShowAddFriends(true)} className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 sm:py-5 shadow-md" size="lg">
-          <Search className="h-4 w-4 sm:h-5 sm:w-5" /><span className="ml-2">Find Friend</span>
+        <Button onClick={() => setShowAddFriends(true)} className="flex-1 min-w-0 px-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 sm:py-5 shadow-md" size="lg">
+          <Search className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" /><span className="ml-2 truncate">Find Friend</span>
         </Button>
-        <Button onClick={() => setShowInviteMembers(true)} className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 sm:py-5 shadow-md" size="lg">
-          <UserPlus className="h-4 w-4 sm:h-5 sm:w-5" /><span className="ml-2">Invite People</span>
+        <Button onClick={() => setShowInviteMembers(true)} className="flex-1 min-w-0 px-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 sm:py-5 shadow-md" size="lg">
+          <UserPlus className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" /><span className="ml-2 truncate">Invite People</span>
         </Button>
       </div>
+
 
       <div className="space-y-1">
         <h2 className="text-lg font-bold uppercase">{friends.length} FRIENDS OF {userName}</h2>
