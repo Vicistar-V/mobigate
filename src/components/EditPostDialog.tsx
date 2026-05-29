@@ -18,7 +18,8 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Post } from "@/data/posts";
-import { Upload, X } from "lucide-react";
+import { Upload, X, FileCheck } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string) || "https://angola-press.com/en/api";
