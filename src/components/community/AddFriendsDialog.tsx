@@ -273,9 +273,15 @@ export function AddFriendsDialog({ open, onOpenChange }: AddFriendsDialogProps) 
                                 </div>
                               </div>
 
-                              <Badge variant="secondary" className="text-xs">
-                                Pending
-                              </Badge>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="shrink-0 border-destructive/40 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                                onClick={() => handleCancelRequest(member.id, member.name)}
+                              >
+                                <XCircle className="h-3 w-3 mr-1" />
+                                Cancel
+                              </Button>
                             </div>
                           </CardContent>
                         </Card>
