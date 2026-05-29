@@ -119,17 +119,46 @@ export const PostDetailDialog = ({
     }
   };
 
+  const navEnabled = Boolean(onPrev || onNext);
+
   // Shared content component for both mobile and desktop
   const PostContent = () => (
     <div className="flex flex-col h-full">
       {/* Close button - top right */}
       <button
         onClick={() => onOpenChange(false)}
-        className="absolute top-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors md:hidden"
+        className="absolute top-3 right-3 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors md:hidden"
         aria-label="Close"
       >
         <X className="h-5 w-5" />
       </button>
+
+      {/* Prev / Next post navigation (multiple-user feed) */}
+      {navEnabled && (
+        <>
+          <button
+            onClick={() => hasPrev && onPrev?.()}
+            disabled={!hasPrev}
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-background/85 backdrop-blur-sm shadow-md border border-border transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-background"
+            aria-label="Previous post"
+          >
+            <ChevronLeft className="h-6 w-6 text-destructive" />
+          </button>
+          <button
+            onClick={() => hasNext && onNext?.()}
+            disabled={!hasNext}
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-background/85 backdrop-blur-sm shadow-md border border-border transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-background"
+            aria-label="Next post"
+          >
+            <ChevronRight className="h-6 w-6 text-destructive" />
+          </button>
+          {positionLabel && (
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 rounded-full bg-background/85 backdrop-blur-sm border border-border px-3 py-1 text-xs font-medium text-foreground shadow-sm">
+              {positionLabel}
+            </div>
+          )}
+        </>
+      )}
 
       <ScrollArea className="flex-1">
         <div className="pb-24 md:pb-6">
