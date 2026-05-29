@@ -337,8 +337,10 @@ const UserProfile = () => {
                   {profile.is_verified && <CheckCircle className="h-6 w-6 text-emerald-500 shrink-0" />}
                 </div>
                 <p className="text-sm text-muted-foreground">@{profile.username}</p>
-                {profile.is_verified && (
-                  <p className="text-emerald-600 font-bold italic text-base">Verified Content Creator</p>
+                {profile.is_verified
+                  && (profile.stats.active_contents ?? profile.stats.contents ?? 0) >= CREATOR_MIN_ACTIVE_CONTENTS
+                  && (profile.stats.monetized_contents ?? 0) >= CREATOR_MIN_MONETIZED_CONTENTS && (
+                  <p className="text-emerald-600 font-semibold italic text-xs mt-0.5">Verified Content Creator</p>
                 )}
                 {profile.bio && <p className="text-muted-foreground text-sm mt-1 max-w-md">{profile.bio}</p>}
                 <div className="flex flex-wrap items-center gap-3 mt-1">
