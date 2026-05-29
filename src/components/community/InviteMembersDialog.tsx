@@ -99,6 +99,7 @@ export const InviteMembersDialog = ({
       setTab("mobigate"); setUserSearch(""); setSearchResults([]);
       setSelectedUsers([]); setMobiMessage(""); setRecipientName("");
       setSelectedComms([]); setCustomText(""); setExtStep("compose");
+      setSelectedMobiComms([]); setMobiCommOpen(false);
       setLinkComms([]); setCopied(false); setCommOpen(false); setLinkCommOpen(false);
     }
   }, [open]);
