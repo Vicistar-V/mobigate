@@ -250,29 +250,29 @@ export const InviteMembersDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg w-full p-0 overflow-hidden rounded-2xl max-h-[90vh] flex flex-col">
+      <DialogContent className="w-[calc(100vw-1rem)] sm:w-full max-w-lg p-0 overflow-x-hidden rounded-2xl max-h-[92vh] flex flex-col">
 
-        <DialogHeader className="px-6 pt-5 pb-0 shrink-0">
-          <DialogTitle className="text-lg font-bold">Invite Members</DialogTitle>
+        <DialogHeader className="px-4 sm:px-6 pt-5 pb-0 shrink-0">
+          <DialogTitle className="text-lg font-bold pr-6">Invite Members</DialogTitle>
         </DialogHeader>
 
         {/* ── Tab switcher (matching screenshot) ── */}
-        <div className="flex gap-1 mx-6 mt-4 bg-gray-100 rounded-xl p-1 shrink-0">
+        <div className="flex gap-1 mx-4 sm:mx-6 mt-4 bg-gray-100 rounded-xl p-1 shrink-0">
           {([
-            ["mobigate","Mobigate Users", <UserPlus className="h-3.5 w-3.5"/>],
-            ["external","External",       <Send      className="h-3.5 w-3.5"/>],
-            ["link",    "Share Link",     <Link2     className="h-3.5 w-3.5"/>],
+            ["mobigate","Mobigate Users", <UserPlus className="h-3.5 w-3.5 shrink-0"/>],
+            ["external","External",       <Send      className="h-3.5 w-3.5 shrink-0"/>],
+            ["link",    "Share Link",     <Link2     className="h-3.5 w-3.5 shrink-0"/>],
           ] as [Tab, string, React.ReactNode][]).map(([t, label, icon]) => (
             <button key={t} onClick={() => setTab(t)}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all
+              className={`flex-1 min-w-0 flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-semibold transition-all
                 ${tab === t ? "bg-white text-purple-700 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
-              {icon}{label}
+              {icon}<span className="truncate">{label}</span>
             </button>
           ))}
         </div>
 
         {/* ── Tab content ── */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 py-4">
 
           {/* ══ TAB 1: MOBIGATE USERS ══ */}
           {tab === "mobigate" && (
