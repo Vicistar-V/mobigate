@@ -52,6 +52,11 @@ export const LoginModal = () => {
   const [usernameState,    setUsernameState]    = useState<UsernameState>("idle");
   const [usernameSuggestions, setUsernameSuggestions] = useState<string[]>([]);
   const usernameTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // ── Email / phone availability check
+  const [emailTaken,  setEmailTaken]  = useState(false);
+  const [phoneTaken,  setPhoneTaken]  = useState(false);
+  const emailTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const phoneTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── OTP
   const [otp,        setOtp]        = useState("");
@@ -94,6 +99,32 @@ export const LoginModal = () => {
       }
     }, 600);
   }, [regUser, screen]);
+
+  // ── Email availability check ───────────────────────────────────────────────
+  useEffect(() => {
+    if (screen !== "register" || !regEmail.includes("@")) { setEmailTaken(false); return; }
+    if (emailTimer.current) clearTimeout(emailTimer.current);
+    emailTimer.current = setTimeout(async () => {
+      try {
+        const res  = await fetch(`${API_BASE}/auth/check_username.php?email=${encodeURIComponent(regEmail)}`, { credentials: "include" });
+        const data = await res.json();
+        setEmailTaken(!data.available);
+      } catch { setEmailTaken(false); }
+    }, 700);
+  }, [regEmail, screen]);
+
+  // ── Phone availability check ────────────────────────────────────────────────
+  useEffect(() => {
+    if (screen !== "register" || !regPhone || regPhone.length < 7) { setPhoneTaken(false); return; }
+    if (phoneTimer.current) clearTimeout(phoneTimer.current);
+    phoneTimer.current = setTimeout(async () => {
+      try {
+        const res  = await fetch(`${API_BASE}/auth/check_username.php?phone=${encodeURIComponent(regPhone)}`, { credentials: "include" });
+        const data = await res.json();
+        setPhoneTaken(!data.available);
+      } catch { setPhoneTaken(false); }
+    }, 700);
+  }, [regPhone, screen]);
 
   // ── Login ──────────────────────────────────────────────────────────────────
   const handleLogin = async (e: React.FormEvent) => {
@@ -220,8 +251,8 @@ export const LoginModal = () => {
     : "";
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-start sm:items-center justify-center bg-black/60 p-4 overflow-y-auto pointer-events-auto">
-      <div className="bg-card w-full max-w-md rounded-2xl shadow-2xl border overflow-hidden my-auto">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4">
+      <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-gray-100 max-h-[95vh] overflow-y-auto">
 
         {/* ── HEADER ── */}
         <div className="px-8 pt-10 pb-6 text-center bg-white">
@@ -368,8 +399,19 @@ export const LoginModal = () => {
 
               <div className="space-y-1.5">
                 <Label className="font-semibold">Email Address *</Label>
-                <Input type="email" placeholder="you@example.com" value={regEmail}
-                  onChange={e => setRegEmail(e.target.value)} disabled={otpSending}/>
+                <div className="relative">
+                  <Input type="email" placeholder="you@example.com" value={regEmail}
+                    onChange={e => { setRegEmail(e.target.value); setEmailTaken(false); }}
+                    disabled={otpSending}
+                    className={emailTaken ? "border-red-400 focus-visible:ring-red-200" : ""}/>
+                  {emailTaken && <X className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-red-500"/>}
+                  {!emailTaken && regEmail.includes("@") && regEmail.length > 5 && <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-500"/>}
+                </div>
+                {emailTaken && (
+                  <p className="text-xs text-red-600 font-semibold flex items-center gap-1">
+                    <X className="h-3 w-3"/>This email is already linked to a Mobigate account.
+                  </p>
+                )}
               </div>
 
               <div className="space-y-1.5">
@@ -384,6 +426,16 @@ export const LoginModal = () => {
                     disabled={otpSending} className="pl-9"
                   />
                 </div>
+                {phoneTaken && (
+                  <p className="text-xs text-red-600 font-semibold flex items-center gap-1">
+                    <X className="h-3 w-3"/>This phone number is already linked to a Mobigate account.
+                  </p>
+                )}
+                {!phoneTaken && regPhone.length > 7 && (
+                  <p className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+                    <Check className="h-3 w-3"/>Phone number available
+                  </p>
+                )}
                 <p className="text-xs text-gray-400">Include country code. Enables phone number login.</p>
               </div>
 
@@ -400,7 +452,7 @@ export const LoginModal = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full mt-2" disabled={otpSending || usernameState === "taken" || usernameState === "checking"} size="lg">
+              <Button type="submit" className="w-full mt-2" disabled={otpSending || usernameState === "taken" || usernameState === "checking" || emailTaken || phoneTaken} size="lg">
                 {otpSending
                   ? <><Loader2 className="h-4 w-4 animate-spin mr-2"/>Sending code...</>
                   : <><Mail className="h-4 w-4 mr-2"/>Send Verification Code</>}
