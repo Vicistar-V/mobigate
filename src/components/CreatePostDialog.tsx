@@ -699,6 +699,18 @@ export const CreatePostDialog = ({
           />
         </div>
 
+        {/* Copyright protection — optional document upload + marker toggle */}
+        <div className="px-1 pt-1">
+          <CopyrightDocumentsField
+            enabled={copyrightEnabled}
+            onEnabledChange={setCopyrightEnabled}
+            file={copyrightFile}
+            onFileChange={setCopyrightFile}
+            marker={copyrightMarked}
+            onMarkerChange={setCopyrightMarked}
+          />
+        </div>
+
         <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-2">
           <Button variant="outline" onClick={() => { resetForm(); setOpen(false); }} disabled={submitting}
             className="w-full sm:w-auto">
