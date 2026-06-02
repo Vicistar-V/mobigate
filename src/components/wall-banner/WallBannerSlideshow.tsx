@@ -314,8 +314,28 @@ export function WallBannerSlideshow({
 
       {/* Caption */}
       {current.caption && (
-        <div className="absolute left-0 right-0 bottom-0 px-3 py-2 bg-gradient-to-t from-black/70 via-black/30 to-transparent text-white text-xs sm:text-sm font-medium pointer-events-none">
+        <div className={cn(
+          "absolute left-0 right-0 px-3 py-2 bg-gradient-to-t from-black/70 via-black/30 to-transparent text-white text-xs sm:text-sm font-medium pointer-events-none",
+          showSundryBar ? "bottom-11" : "bottom-0",
+        )}>
           <span className="line-clamp-2">{current.caption}</span>
+        </div>
+      )}
+
+      {/* Universal sundry tools overlay */}
+      {showSundryBar && (
+        <div className="absolute left-2 right-14 bottom-2 z-20">
+          <PostSundryBar
+            postId={current.id}
+            title={current.caption || fallbackAlt}
+            author={authorName}
+            authorId={ownerId}
+            authorImage={authorImage}
+            imageUrl={current.mediaUrl}
+            postType="Banner"
+            isOwner={isOwner}
+            variant="overlay"
+          />
         </div>
       )}
 
