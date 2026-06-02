@@ -102,6 +102,8 @@ export const EditPostDialog = ({ post, open, onOpenChange, onSave }: EditPostDia
           description: description.trim() || undefined,
           type,
           imageUrl:    mediaPreview || imageUrl || undefined,
+          copyrightMarked,
+          hasCopyrightDocs: copyrightEnabled && !!copyrightFile ? true : post.hasCopyrightDocs,
         };
         onSave(updatedPost);
         toast({ title: "Success", description: "Post updated successfully" });
