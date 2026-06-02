@@ -39,6 +39,10 @@ export const AGE_BANDS = [
   "10 - 17", "18 - 30", "31 - 40", "41 - 50", "51 - 60", "61 - 70", "70+",
 ] as const;
 
+export const LIFE_MATE_GROUPS = [
+  "Class-Mates", "School-Mates", "Age-Mates", "Work Colleagues",
+] as const;
+
 export interface AudienceValue {
   /** Multi-select list of granted audiences. 'public' overrides all others. */
   selected: AudienceKey[];
@@ -48,6 +52,8 @@ export interface AudienceValue {
   locations: { country: string; state: string; lga: string; city: string; town: string };
   /** Selected age bands (only meaningful when 'agelimits' is selected). */
   ageLimits: string[];
+  /** Selected Life-Mate groups (only meaningful when 'lifemates' is selected). */
+  lifeMates: string[];
 }
 
 export const DEFAULT_AUDIENCE_VALUE: AudienceValue = {
@@ -55,6 +61,7 @@ export const DEFAULT_AUDIENCE_VALUE: AudienceValue = {
   exclusions: {},
   locations: { country: "", state: "", lga: "", city: "", town: "" },
   ageLimits: [],
+  lifeMates: [],
 };
 
 interface OptionMeta {
