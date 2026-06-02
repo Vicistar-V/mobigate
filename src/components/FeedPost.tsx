@@ -12,6 +12,7 @@ import { ShareDialog } from "@/components/ShareDialog";
 import { generateShareUrl } from "@/lib/shareUtils";
 import { toast } from "sonner";
 import { PostSundryBar } from "@/components/feed/PostSundryBar";
+import { CopyrightBadge } from "@/components/common/CopyrightBadge";
 
 interface FeedPostProps {
   id?: string;
