@@ -27,6 +27,10 @@ export interface Post {
   isOwner?: boolean;
   albumId?: string;
   albumName?: string;
+  /** Show the "✓Copyright" designation marker on this post's media (default true) */
+  copyrightMarked?: boolean;
+  /** Whether copyright documents were submitted to Mobigate for this post */
+  hasCopyrightDocs?: boolean;
 }
 
 export const mockAlbums: Album[] = [
