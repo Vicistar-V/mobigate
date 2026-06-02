@@ -74,7 +74,6 @@ const Index = () => {
   const activeFeedPosts = apiFeedPosts;
 
   const [contentFilter, setContentFilter] = useState<string>("all");
-  const [labelFilter, setLabelFilter] = useState<string | null>(null);
   const [wallStatusFilter, setWallStatusFilter] = useState<string>("all");
   const [wallStatusView, setWallStatusView] = useState<"normal" | "large">("normal");
   const [editingPost, setEditingPost] = useState<Post | null>(null);
