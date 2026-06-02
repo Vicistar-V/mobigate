@@ -4,9 +4,10 @@ import {
   GraduationCap, MapPin, CalendarRange, ChevronDown, Check,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+
 import { cn } from "@/lib/utils";
 import { ExclusionPicker, type ExcludedUser } from "@/components/common/ExclusionPicker";
+import { CascadingLocationSelector } from "@/components/common/CascadingLocationSelector";
 
 /**
  * Audience Privacy Selector  (Expanded)
@@ -183,22 +184,14 @@ export const AudiencePrivacySelector = ({
               {/* Inline config + exclusion (only for active audiences) */}
               {active && (
                 <div className="rounded-xl border border-dashed border-rose-200 bg-rose-50/40 p-2.5 space-y-2.5">
-                  {/* Locations config */}
+                  {/* Locations config — cascading Country → Region → County → City */}
                   {opt.key === "locations" && (
-                    <div className="grid grid-cols-2 gap-1.5">
-                      {([
-                        ["country", "Country"], ["state", "State"], ["lga", "LGA"],
-                        ["city", "City"], ["town", "Town"],
-                      ] as [keyof AudienceValue["locations"], string][]).map(([field, ph]) => (
-                        <Input
-                          key={field}
-                          value={value.locations[field]}
-                          onChange={e => set({ locations: { ...value.locations, [field]: e.target.value } })}
-                          placeholder={ph}
-                          className="h-8 text-xs bg-white"
-                        />
-                      ))}
-                    </div>
+                    <CascadingLocationSelector
+                      value={value.locations}
+                      onChange={(loc) => set({ locations: loc })}
+                      compact
+                      hideHeader
+                    />
                   )}
 
                   {/* Age-limits config */}

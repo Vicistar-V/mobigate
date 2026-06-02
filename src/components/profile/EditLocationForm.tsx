@@ -15,6 +15,7 @@ import { Pencil, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { PrivacySelector } from "./PrivacySelector";
+import { CascadingLocationSelector, EMPTY_LOCATION, formatLocation, type LocationValue } from "@/components/common/CascadingLocationSelector";
 
 const locationSchema = z.object({
   place: z.string().min(1, "Place is required"),
@@ -60,16 +61,33 @@ export const EditLocationForm = ({ currentData, onSave, onClose }: EditLocationF
   const [privacy, setPrivacy] = useState("public");
   const [exceptions, setExceptions] = useState<string[]>([]);
   const [showCustomInput, setShowCustomInput] = useState(false);
+  const [locationValue, setLocationValue] = useState<LocationValue>(EMPTY_LOCATION);
 
   const form = useForm({
     resolver: zodResolver(locationSchema),
     defaultValues: { place: "", description: "", customDescription: "", period: "" },
   });
 
+  // Best-effort reverse of formatLocation ("City, LGA, State, Country").
+  const parseLocation = (place: string): LocationValue => {
+    const parts = (place || "").split(",").map((p) => p.trim()).filter(Boolean);
+    const country = parts.length > 0 ? parts[parts.length - 1] : "";
+    const state = parts.length > 1 ? parts[parts.length - 2] : "";
+    const lga = parts.length > 2 ? parts[parts.length - 3] : "";
+    const city = parts.length > 3 ? parts[parts.length - 4] : "";
+    return { ...EMPTY_LOCATION, country, state, lga, city };
+  };
+
+  const updateLocation = (loc: LocationValue) => {
+    setLocationValue(loc);
+    form.setValue("place", formatLocation(loc), { shouldValidate: true });
+  };
+
   const handleAdd = () => {
     setIsAdding(true);
     setShowCustomInput(false);
     setExceptions([]);
+    setLocationValue(EMPTY_LOCATION);
     form.reset({ place: "", description: "", customDescription: "", period: "" });
   };
 
@@ -78,6 +96,7 @@ export const EditLocationForm = ({ currentData, onSave, onClose }: EditLocationF
     const isCustom = !descriptionOptions.slice(0, -1).includes(location.description);
     setShowCustomInput(isCustom);
     setExceptions(location.exceptions || []);
+    setLocationValue(parseLocation(location.place));
     form.reset({ 
       place: location.place, 
       description: isCustom ? "Other" : location.description, 
@@ -156,11 +175,15 @@ export const EditLocationForm = ({ currentData, onSave, onClose }: EditLocationF
             <FormField
               control={form.control}
               name="place"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
                   <FormLabel>Place</FormLabel>
                   <FormControl>
-                    <Input placeholder="City, State, Country" {...field} />
+                    <CascadingLocationSelector
+                      value={locationValue}
+                      onChange={updateLocation}
+                      hideHeader
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
