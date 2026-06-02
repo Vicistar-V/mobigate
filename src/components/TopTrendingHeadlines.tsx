@@ -85,7 +85,7 @@ export const TopTrendingHeadlines = () => {
                 <a
                   key={link.label}
                   href={link.href}
-                  className="text-[11px] font-medium leading-tight text-primary underline-offset-2 hover:underline"
+                  className="text-[11px] font-medium leading-tight text-[hsl(212_95%_50%)] underline underline-offset-2 hover:opacity-80"
                 >
                   {link.label}
                 </a>
