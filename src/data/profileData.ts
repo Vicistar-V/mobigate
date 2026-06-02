@@ -558,42 +558,60 @@ export interface ClassicDigitalGift {
 }
 
 export const classicDigitalGifts: ClassicDigitalGift[] = [
-  { id: "cdg1", name: "Red Rose", icon: "🌹", category: "Sweet", mobiValue: 50, description: "A symbol of love" },
-  { id: "cdg2", name: "Chocolate Bar", icon: "🍫", category: "Sweet", mobiValue: 100, description: "Sweet treat" },
-  { id: "cdg3", name: "Teddy Bear", icon: "🧸", category: "Sweet", mobiValue: 150, description: "Cuddly companion" },
-  { id: "cdg4", name: "Cupcake", icon: "🧁", category: "Sweet", mobiValue: 75, description: "Delicious dessert" },
-  { id: "cdg5", name: "Ice Cream", icon: "🍦", category: "Sweet", mobiValue: 80, description: "Cool treat" },
-  
-  { id: "cdg6", name: "Breakfast Pack", icon: "🍳", category: "Meal-Ticket", mobiValue: 1500, description: "Start the day right" },
-  { id: "cdg7", name: "Lunch Pack", icon: "🍱", category: "Meal-Ticket", mobiValue: 3500, description: "Midday feast" },
-  { id: "cdg8", name: "Dinner Pack", icon: "🍽️", category: "Meal-Ticket", mobiValue: 2500, description: "Evening delight" },
-  { id: "cdg9", name: "Snack Pack", icon: "🍿", category: "Meal-Ticket", mobiValue: 1000, description: "Quick bite" },
-  
-  { id: "cdg10", name: "Champagne", icon: "🍾", category: "Special", mobiValue: 15000, description: "Celebrate in style" },
+  { id: "cdg1", name: "Red Rose", icon: "🌹", category: "Sweet", mobiValue: 1000, description: "A symbol of love" },
+  { id: "cdg2", name: "Chocolate Bar", icon: "🍫", category: "Sweet", mobiValue: 2000, description: "Sweet treat" },
+  { id: "cdg3", name: "Teddy Bear", icon: "🧸", category: "Sweet", mobiValue: 5000, description: "Cuddly companion" },
+  { id: "cdg4", name: "Cupcake", icon: "🧁", category: "Sweet", mobiValue: 1500, description: "Delicious dessert" },
+  { id: "cdg5", name: "Ice Cream", icon: "🍦", category: "Sweet", mobiValue: 1000, description: "Cool treat" },
+
+  { id: "cdg6", name: "Breakfast Pack", icon: "🥞", category: "Meal-Ticket", mobiValue: 3500, description: "Start the day right" },
+  { id: "cdg7", name: "Lunch Pack", icon: "🥝", category: "Meal-Ticket", mobiValue: 5000, description: "Midday feast" },
+  { id: "cdg8", name: "Dinner Pack", icon: "🍽️", category: "Meal-Ticket", mobiValue: 4000, description: "Evening delight" },
+  { id: "cdg9", name: "Snack Pack", icon: "🥨", category: "Meal-Ticket", mobiValue: 2500, description: "Quick bite" },
+
+  { id: "cdg10", name: "Champagne", icon: "🍾", category: "Special", mobiValue: 30000, description: "Celebrate in style" },
   { id: "cdg11", name: "Wine Bottle", icon: "🍷", category: "Special", mobiValue: 8000, description: "Fine wine" },
-  { id: "cdg12", name: "Cocktail", icon: "🍸", category: "Special", mobiValue: 5000, description: "Premium drink" },
-  
-  { id: "cdg13", name: "Perfume", icon: "💐", category: "Emotion", mobiValue: 5000, description: "Signature scent" },
-  { id: "cdg14", name: "Love Letter", icon: "💌", category: "Emotion", mobiValue: 3000, description: "Words from heart" },
-  { id: "cdg15", name: "Bouquet", icon: "💐", category: "Emotion", mobiValue: 4000, description: "Beautiful flowers" },
-  
-  { id: "cdg16", name: "Wrist Watch", icon: "⌚", category: "Premium", mobiValue: 10000, description: "Luxury timepiece" },
-  { id: "cdg17", name: "Diamond Ring", icon: "💍", category: "Premium", mobiValue: 50000, description: "Forever symbol" },
-  { id: "cdg18", name: "Gold Necklace", icon: "📿", category: "Premium", mobiValue: 35000, description: "Elegant jewelry" },
-  { id: "cdg19", name: "Designer Bag", icon: "👜", category: "Premium", mobiValue: 45000, description: "Fashion statement" },
-  
-  { id: "cdg20", name: "Mansion", icon: "🏰", category: "House", mobiValue: 500000, description: "Dream home" },
-  { id: "cdg21", name: "Villa", icon: "🏡", category: "House", mobiValue: 350000, description: "Luxury villa" },
-  { id: "cdg22", name: "Penthouse", icon: "🏢", category: "House", mobiValue: 450000, description: "Sky high living" },
-  
-  { id: "cdg23", name: "Sole Trip", icon: "✈️", category: "T-Fare", mobiValue: 10000, description: "Solo adventure" },
-  { id: "cdg24", name: "Couple Trip", icon: "🛫", category: "T-Fare", mobiValue: 20000, description: "Romantic getaway" },
-  { id: "cdg25", name: "Family Trip", icon: "🌍", category: "T-Fare", mobiValue: 15000, description: "Family vacation" },
-  
-  { id: "cdg26", name: "Sports Car", icon: "🏎️", category: "Luxury", mobiValue: 100000, description: "Speed demon" },
-  { id: "cdg27", name: "Yacht", icon: "🛥️", category: "Luxury", mobiValue: 250000, description: "Ocean luxury" },
-  { id: "cdg28", name: "Private Jet", icon: "🛩️", category: "Luxury", mobiValue: 500000, description: "Sky luxury" },
+  { id: "cdg12", name: "Cocktail", icon: "🍸", category: "Special", mobiValue: 20000, description: "Premium drink" },
+
+  { id: "cdg13", name: "Perfume", icon: "🧴", category: "Emotion", mobiValue: 10000, description: "Signature scent" },
+  { id: "cdg14", name: "Love Letter", icon: "💌", category: "Emotion", mobiValue: 5000, description: "Words from heart" },
+  { id: "cdg15", name: "Bouquet", icon: "💐", category: "Emotion", mobiValue: 15000, description: "Beautiful flowers" },
+
+  { id: "cdg16", name: "Wrist Watch", icon: "⌚", category: "Premium", mobiValue: 25000, description: "Luxury timepiece" },
+  { id: "cdg17", name: "Diamond Ring", icon: "💍", category: "Premium", mobiValue: 200000, description: "Forever symbol" },
+  { id: "cdg18", name: "Gold Necklace", icon: "📿", category: "Premium", mobiValue: 50000, description: "Elegant jewelry" },
+  { id: "cdg19", name: "Designer Handbag", icon: "👜", category: "Premium", mobiValue: 60000, description: "Fashion statement" },
+
+  { id: "cdg20", name: "Mansion Rent", icon: "🏠", category: "House", mobiValue: 5000000, description: "Mansion accommodation" },
+  { id: "cdg21", name: "Flat Rent (Premium)", icon: "🏠", category: "House", mobiValue: 2000000, description: "Premium flat accommodation" },
+  { id: "cdg22", name: "Flat Rent (Standard)", icon: "🏠", category: "House", mobiValue: 1500000, description: "Standard flat accommodation" },
+  { id: "cdg23", name: "Self-Con Rent (Premium)", icon: "🏠", category: "House", mobiValue: 1000000, description: "Premium self-contained" },
+  { id: "cdg24", name: "Self-Con Rent (Standard)", icon: "🏠", category: "House", mobiValue: 500000, description: "Standard self-contained" },
+
+  { id: "cdg25", name: "Sole Flight Ticket (Local)", icon: "✈️", category: "T-Fare", mobiValue: 250000, description: "Local single flight" },
+  { id: "cdg26", name: "Double Flight Ticket (Local)", icon: "✈️", category: "T-Fare", mobiValue: 450000, description: "Local double flight" },
+  { id: "cdg27", name: "Sole Flight Ticket (International)", icon: "🛫", category: "T-Fare", mobiValue: 3250000, description: "International single flight" },
+  { id: "cdg28", name: "Double Flight Ticket (International)", icon: "🛫", category: "T-Fare", mobiValue: 5450000, description: "International double flight" },
+  { id: "cdg29", name: "Cab Trip", icon: "🚕", category: "T-Fare", mobiValue: 30000, description: "Cab ride" },
+  { id: "cdg30", name: "Taxi Trip", icon: "🚖", category: "T-Fare", mobiValue: 20000, description: "Taxi ride" },
+
+  { id: "cdg31", name: "Yacht Cruise", icon: "⛵", category: "Luxury", mobiValue: 10000000, description: "Ocean luxury cruise" },
+  { id: "cdg32", name: "Private Jet Cruise", icon: "✈️", category: "Luxury", mobiValue: 25000000, description: "Sky luxury cruise" },
+
+  { id: "cdg33", name: "School Fees (Tier 1)", icon: "💰", category: "Education", mobiValue: 50000, description: "School fees support" },
+  { id: "cdg34", name: "School Fees (Tier 2)", icon: "💰", category: "Education", mobiValue: 150000, description: "School fees support" },
+  { id: "cdg35", name: "School Fees (Tier 3)", icon: "💰", category: "Education", mobiValue: 300000, description: "School fees support" },
+  { id: "cdg36", name: "School Fees (Tier 4)", icon: "💰", category: "Education", mobiValue: 500000, description: "School fees support" },
+
+  { id: "cdg37", name: "Medical Health Emergency (Tier 1)", icon: "💊", category: "Health", mobiValue: 50000, description: "Medical emergency support" },
+  { id: "cdg38", name: "Medical Health Emergency (Tier 2)", icon: "💊", category: "Health", mobiValue: 100000, description: "Medical emergency support" },
+  { id: "cdg39", name: "Medical Health Emergency (Tier 3)", icon: "💉", category: "Health", mobiValue: 200000, description: "Medical emergency support" },
+  { id: "cdg40", name: "Medical Health Emergency (Tier 4)", icon: "💉", category: "Health", mobiValue: 500000, description: "Medical emergency support" },
+  { id: "cdg41", name: "Medical Health Emergency (Tier 5)", icon: "💉", category: "Health", mobiValue: 1000000, description: "Medical emergency support" },
+
+  { id: "cdg42", name: "Personal Needs", icon: "🎁", category: "Personal", mobiValue: 100000, description: "Flexible personal support" },
 ];
+
 
 // Tangible Mobi-store Gifts
 export interface TangibleGift {
