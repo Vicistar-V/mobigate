@@ -545,7 +545,7 @@ export const GreetingSection = () => {
                 vibe thumbnails below it. Footer cycles vibes with ◄ / ► arrows. */}
             {activeFeedTab === "Vibes & Flexing" && featuredPublicPost && (
               <div className="rounded-lg overflow-hidden">
-                <div className="grid grid-cols-[42%_1fr] gap-2 items-stretch">
+                <div className="grid grid-cols-[48%_1fr] gap-2 items-stretch">
                   {/* Left: big featured vibe → enlarge in viewer */}
                   <button
                     type="button"
