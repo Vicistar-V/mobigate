@@ -38,8 +38,41 @@ export const GreetingSection = () => {
   const phpFeedPosts = useFeedPosts();
   const allPosts = phpFeedPosts || fallbackFeedPosts;
 
+  // Active posting-area tab — drives which slice of content is shown in place.
+  const [activeFeedTab, setActiveFeedTab] = useState<"Stories" | "Vibes & Flexing" | "Breaking News">("Stories");
+
+  // Per-tab metadata: contextual keywords used to surface relevant content,
+  // and the label shown on the "see more" footer link.
+  const TAB_META = {
+    "Stories": {
+      keywords: [] as string[],
+      moreLabel: "Enjoy more exciting stories",
+      composeCta: "Post & Share something now",
+    },
+    "Vibes & Flexing": {
+      keywords: ["vibe", "flex", "fun", "party", "weekend", "lifestyle", "style"],
+      moreLabel: "Flex with more exciting Vibes",
+      composeCta: "Post & Share your Vibe now",
+    },
+    "Breaking News": {
+      keywords: ["news", "breaking", "update", "alert", "report", "headline"],
+      moreLabel: "Catch up on more Breaking News",
+      composeCta: "Post & Share Breaking News now",
+    },
+  } as const;
+  const tabMeta = TAB_META[activeFeedTab];
+
+  const matchesTab = (p: typeof allPosts[number]) => {
+    if (!tabMeta.keywords.length) return true;
+    const hay = `${p.title || ""} ${(p as any).subtitle || ""} ${(p as any).description || ""} ${(p as any).label || ""} ${(p as any).category || ""}`.toLowerCase();
+    return tabMeta.keywords.some((k) => hay.includes(k));
+  };
+
   // The User's OWN most recent post — pinned to the TOP big image space (never changes via thumbs)
-  const myOwnPosts = allPosts.filter((p) => p.userId === currentUserId);
+  const myOwnPostsAll = allPosts.filter((p) => p.userId === currentUserId);
+  const myOwnTabMatches = myOwnPostsAll.filter(matchesTab);
+  // Keep the area populated even when a tab has no exact matches.
+  const myOwnPosts = myOwnTabMatches.length > 0 ? myOwnTabMatches : myOwnPostsAll;
   const myLatestOwnPost = myOwnPosts[0] || allPosts[0];
 
   // Public/connection posts from OTHER users — drive the SECOND big image space
@@ -47,8 +80,10 @@ export const GreetingSection = () => {
     const others = allPosts.filter(
       (p) => p.userId !== currentUserId && ((p as any).privacy ?? "Public") === "Public",
     );
+    const tabbed = others.filter(matchesTab);
+    const base = tabbed.length > 0 ? tabbed : others;
     // Fallback so the space is never empty
-    return others.length > 0 ? others.slice(0, 16) : allPosts.filter((p) => p.userId !== currentUserId).slice(0, 16);
+    return base.length > 0 ? base.slice(0, 16) : allPosts.filter((p) => p.userId !== currentUserId).slice(0, 16);
   })();
 
   // Thumbnail strip — User's own + Public connection posts, de-duped
