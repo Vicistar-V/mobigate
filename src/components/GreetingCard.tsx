@@ -598,7 +598,7 @@ export const GreetingSection = () => {
                     </button>
 
                     <div className="grid grid-cols-3 auto-rows-fr gap-1.5 flex-1 min-h-0">
-                      {myRecentPosts.slice(0, 9).map((post, i) => {
+                      {myRecentPosts.slice(0, 15).map((post, i) => {
                         const realIdx = myRecentPosts.findIndex(
                           (p) => (p.id || p.imageUrl) === (post.id || post.imageUrl),
                         );
