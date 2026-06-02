@@ -513,10 +513,12 @@ export const GreetingSection = () => {
 
           {/* ============ POSTING AREA ============ */}
           <div className="mt-3">
-            {/* Section tabs */}
-            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1 pb-1">
+            {/* Section tabs — Y2K nav: black "Stories" left, outlined green
+                "Vibes & Flexing" center, black "Breaking News" right. */}
+            <div className="flex items-end justify-between gap-2 pb-1">
               {(["Stories", "Vibes & Flexing", "Breaking News"] as const).map((t) => {
                 const active = activeFeedTab === t;
+                const isVibe = t === "Vibes & Flexing";
                 return (
                   <button
                     key={t}
@@ -526,10 +528,18 @@ export const GreetingSection = () => {
                       setActiveFeedTab(t);
                       setFeaturedPublicIdx(0);
                     }}
-                    className={`shrink-0 h-9 px-3 rounded-md text-[13px] font-bold border-2 transition-colors touch-manipulation ${
-                      active
-                        ? "bg-green-600 text-white border-green-600 shadow-sm"
-                        : "bg-card text-foreground border-border hover:border-green-500/60"
+                    className={`shrink-0 touch-manipulation transition-all leading-none ${
+                      isVibe
+                        ? "text-[15px] font-extrabold uppercase tracking-tight"
+                        : "text-[13px] font-bold"
+                    } ${
+                      isVibe
+                        ? active
+                          ? "text-green-500 [text-shadow:0_0_1px_#fff,1px_1px_0_#fff,-1px_-1px_0_#fff,1px_-1px_0_#fff,-1px_1px_0_#fff] scale-105"
+                          : "text-green-500/70 [text-shadow:0_0_1px_#fff,1px_1px_0_#fff,-1px_-1px_0_#fff]"
+                        : active
+                          ? "text-foreground underline underline-offset-4 decoration-2"
+                          : "text-muted-foreground"
                     }`}
                   >
                     {t}
