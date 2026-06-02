@@ -245,7 +245,7 @@ export function WallBannerSlideshow({
         )}
         {isOwner && (
           <div className="absolute bottom-3 right-3 z-20">
-            <OwnerPlusMenu slide={null} />
+            {renderOwnerPlusMenu(null)}
           </div>
         )}
         {isOwner && (
@@ -371,7 +371,7 @@ export function WallBannerSlideshow({
       {/* Owner overlay — "+" quick menu */}
       {isOwner && (
         <div className="absolute bottom-3 right-3 z-20">
-          <OwnerPlusMenu slide={current} />
+          {renderOwnerPlusMenu(current)}
         </div>
       )}
 
