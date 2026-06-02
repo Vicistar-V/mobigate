@@ -81,6 +81,10 @@ export const InviteMembersDialog = ({
   const [searching,       setSearching]       = useState(false);
   const [selectedUsers,   setSelectedUsers]   = useState<MobiUser[]>([]);
   const [sending,         setSending]         = useState(false);
+  // Connections picker (Friends / Followers / Suggested)
+  const [showConnections, setShowConnections] = useState(false);
+  const [connTab,         setConnTab]         = useState<ConnectionCategory>("friends");
+  const [connSearch,      setConnSearch]      = useState("");
   const [mobiMessage,     setMobiMessage]     = useState("");
   const [selectedMobiComms, setSelectedMobiComms] = useState<Community[]>([]);
   const [mobiCommOpen,    setMobiCommOpen]    = useState(false);
