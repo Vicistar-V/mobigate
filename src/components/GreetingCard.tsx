@@ -861,89 +861,22 @@ export const GreetingSection = () => {
 
 
 
-            {/* RTL auto-scrolling thumbnail strip — click to load into the big featured panel above */}
+            {/* Scrollable thumbnail strip with real Play-style scroll arrows.
+                Arrows scroll the media left/right and dim when nothing is left in
+                that direction; the center label opens the full media window. */}
             {activeFeedTab !== "Vibes & Flexing" && myRecentPosts.length > 1 && (
-              <div className="mt-2 rounded-lg border border-border bg-card/50 p-1.5 overflow-hidden">
-                <div className="group/strip relative">
-                  {/* Prev button */}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setFeaturedIdx((safeFeaturedIdx - 1 + myRecentPosts.length) % myRecentPosts.length)
-                    }
-                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background/90 border border-border shadow-md flex items-center justify-center active:scale-95 touch-manipulation"
-                    aria-label="Previous post"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </button>
-                  {/* Next button */}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setFeaturedIdx((safeFeaturedIdx + 1) % myRecentPosts.length)
-                    }
-                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background/90 border border-border shadow-md flex items-center justify-center active:scale-95 touch-manipulation"
-                    aria-label="Next post"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                  <div
-                    className="flex gap-2 w-max animate-marquee-rtl group-hover/strip:[animation-play-state:paused] px-9"
-                    style={{ animationDuration: `${Math.max(18, myRecentPosts.length * 3)}s` }}
-                  >
-                    {[...myRecentPosts, ...myRecentPosts].map((post, i) => {
-                      const realIdx = i % myRecentPosts.length;
-                      const isActive = realIdx === safeFeaturedIdx;
-                      return (
-                        <button
-                          key={`thumb-${i}-${post.id ?? realIdx}`}
-                          type="button"
-                          onClick={() => setFeaturedIdx(realIdx)}
-                          className={`relative shrink-0 h-16 w-16 rounded-md overflow-hidden bg-muted active:scale-95 transition-all touch-manipulation ${
-                            isActive
-                              ? "ring-2 ring-red-500 border-2 border-red-500 shadow-md scale-[1.04]"
-                              : "border border-foreground/30 opacity-90 hover:opacity-100"
-                          }`}
-                          aria-label={`Show ${post.title} in big view`}
-                          aria-pressed={isActive}
-                        >
-                          <img
-                            src={post.imageUrl}
-                            alt={post.title}
-                            className="h-full w-full object-cover"
-                            loading="lazy"
-                          />
-                          {isActive && (
-                            <span className="absolute inset-x-0 bottom-0 bg-red-600 text-white text-[9px] font-bold text-center py-0.5">
-                              Showing
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-                <p className="mt-1 text-[11px] text-muted-foreground text-center italic">
-                  Auto-scrolls right → left · tap any thumbnail to feature it above · tap ‹ › to step through posts · tap the big image to open larger
-                </p>
-
-              </div>
-            )}
-
-            {/* See-more link — scrolls down the feed for more of this tab's content */}
-            {activeFeedTab !== "Vibes & Flexing" && (
-              <button
-                type="button"
-                onClick={() => {
-                  window.scrollBy({ top: window.innerHeight * 0.8, behavior: "smooth" });
-                }}
-                className="mt-2 flex items-center gap-2 px-1 py-1.5 text-primary active:opacity-80 touch-manipulation"
-              >
-                <ChevronLeft className="h-4 w-4 shrink-0 rotate-[-90deg]" />
-                <span className="italic font-semibold underline underline-offset-2 text-[13px]">
-                  {tabMeta.moreLabel}
-                </span>
-              </button>
+              <ScrollableThumbStrip
+                items={myRecentPosts.map((p, i) => ({
+                  id: p.id || `thumb-${i}`,
+                  imageUrl: p.imageUrl,
+                  title: p.title,
+                }))}
+                activeIdx={safeFeaturedIdx}
+                onSelect={(idx) => setFeaturedIdx(idx)}
+                moreLabel={tabMeta.moreLabel}
+                onSeeAll={() => setViewerOpen(true)}
+                accent="0 84% 60%"
+              />
             )}
 
             {/* Hidden gallery input */}
