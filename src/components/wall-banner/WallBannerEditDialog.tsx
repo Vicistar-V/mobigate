@@ -544,12 +544,10 @@ export function WallBannerEditDialog({
         e.target.value = "";
         return;
       }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setMediaUrl(reader.result as string);
-        setMediaType(file.type.startsWith("video/") ? "video" : "photo");
-      };
-      reader.readAsDataURL(file);
+      // Use a lightweight object URL instead of a base64 data URL. Videos/images
+      // as base64 blow past the localStorage quota and make saving fail.
+      setMediaUrl(URL.createObjectURL(file));
+      setMediaType(file.type.startsWith("video/") ? "video" : "photo");
       e.target.value = "";
       return;
     }
