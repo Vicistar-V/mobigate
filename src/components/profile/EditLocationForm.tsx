@@ -71,17 +71,10 @@ export const EditLocationForm = ({ currentData, onSave, onClose }: EditLocationF
   // Best-effort reverse of formatLocation ("City, LGA, State, Country").
   const parseLocation = (place: string): LocationValue => {
     const parts = (place || "").split(",").map((p) => p.trim()).filter(Boolean);
-    const [city = "", lga = "", state = "", country = ""] = parts.length <= 4
-      ? [...parts].reverse().reverse() && (() => {
-          // map from the END so country is last
-          const rev = [...parts];
-          const ctry = rev.length > 0 ? rev[rev.length - 1] : "";
-          const st = rev.length > 1 ? rev[rev.length - 2] : "";
-          const lg = rev.length > 2 ? rev[rev.length - 3] : "";
-          const ct = rev.length > 3 ? rev[rev.length - 4] : (rev.length === 1 ? "" : rev[0]);
-          return [ct, lg, st, ctry];
-        })()
-      : ["", "", "", ""];
+    const country = parts.length > 0 ? parts[parts.length - 1] : "";
+    const state = parts.length > 1 ? parts[parts.length - 2] : "";
+    const lga = parts.length > 2 ? parts[parts.length - 3] : "";
+    const city = parts.length > 3 ? parts[parts.length - 4] : "";
     return { ...EMPTY_LOCATION, country, state, lga, city };
   };
 
