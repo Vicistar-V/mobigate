@@ -11,6 +11,7 @@ import UserProfile        from "./pages/UserProfile";
 import PostPage           from "./pages/PostPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import CopyrightDocumentsPage from "./pages/admin/CopyrightDocumentsPage";
+import AccountVerificationPage from "./pages/AccountVerificationPage";
 import { ScrollToTop }    from "./components/ScrollToTop";
 import { BackToTopButton } from "./components/BackToTopButton";
 
