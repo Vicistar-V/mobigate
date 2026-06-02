@@ -47,23 +47,12 @@ const PostPage = () => {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const setMetaTag = (property: string, content: string) => {
-    if (!content) return;
-    let el = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement
-          || document.querySelector(`meta[name="${property}"]`) as HTMLMetaElement;
-    if (!el) {
-      el = document.createElement("meta");
-      el.setAttribute(property.startsWith("twitter") ? "name" : "property", property);
-      document.head.appendChild(el);
-    }
-    el.setAttribute("content", content);
-  };
-
   const strip = (html: string) => html.replace(/<[^>]*>/g, "").substring(0, 180);
   const ucfirst = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
   if (loading) return (
     <div className="flex flex-col min-h-screen">
+      <MetaTags />
       <Header />
       <main className="flex-1 flex items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
