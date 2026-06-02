@@ -413,6 +413,8 @@ export interface WallStatusPost {
   status?: "Online" | "Offline";
   views?: string;
   fee?: string;
+  /** Show the "✓Copyright" designation marker on this status' media (author opt-in) */
+  copyrightMarked?: boolean;
 }
 
 export const wallStatusPosts: WallStatusPost[] = [
