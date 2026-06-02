@@ -866,18 +866,20 @@ export const GreetingSection = () => {
             )}
 
             {/* See-more link — scrolls down the feed for more of this tab's content */}
-            <button
-              type="button"
-              onClick={() => {
-                window.scrollBy({ top: window.innerHeight * 0.8, behavior: "smooth" });
-              }}
-              className="mt-2 flex items-center gap-2 px-1 py-1.5 text-primary active:opacity-80 touch-manipulation"
-            >
-              <ChevronLeft className="h-4 w-4 shrink-0 rotate-[-90deg]" />
-              <span className="italic font-semibold underline underline-offset-2 text-[13px]">
-                {tabMeta.moreLabel}
-              </span>
-            </button>
+            {activeFeedTab !== "Vibes & Flexing" && (
+              <button
+                type="button"
+                onClick={() => {
+                  window.scrollBy({ top: window.innerHeight * 0.8, behavior: "smooth" });
+                }}
+                className="mt-2 flex items-center gap-2 px-1 py-1.5 text-primary active:opacity-80 touch-manipulation"
+              >
+                <ChevronLeft className="h-4 w-4 shrink-0 rotate-[-90deg]" />
+                <span className="italic font-semibold underline underline-offset-2 text-[13px]">
+                  {tabMeta.moreLabel}
+                </span>
+              </button>
+            )}
 
             {/* Hidden gallery input */}
             <input
