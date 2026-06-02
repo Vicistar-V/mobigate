@@ -12,7 +12,8 @@ import {
   Select, SelectContent, SelectItem,
   SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Plus, Upload, X, Image, Lock, DollarSign, Info, ImagePlus } from "lucide-react";
+import { Plus, Upload, X, Image, Lock, DollarSign, Info, ImagePlus, ChevronDown, Shield } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useToast }          from "@/hooks/use-toast";
 import { AlbumSelector }     from "./AlbumSelector";
 import { CreateAlbumDialog } from "./CreateAlbumDialog";
