@@ -20,6 +20,8 @@ import {
   DialogDescription as ActionDialogDescription,
 } from "@/components/ui/dialog";
 import { PeopleYouMayKnow } from "./PeopleYouMayKnow";
+import { TopTrendingHeadlines } from "./TopTrendingHeadlines";
+import { HeadlinesYouDontWannaMiss } from "./HeadlinesYouDontWannaMiss";
 import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
 import { useState, useEffect, useRef } from "react";
 import { UserTagBadges } from "./UserTagBadges";
@@ -915,6 +917,14 @@ export const GreetingSection = () => {
 
       {/* People You May Know */}
       <PeopleYouMayKnow />
+
+      {/* Breaking News extras — Top Trending Headlines + Headlines you don't wanna miss */}
+      {activeFeedTab === "Breaking News" && (
+        <>
+          <TopTrendingHeadlines />
+          <HeadlinesYouDontWannaMiss />
+        </>
+      )}
 
       {/* Compose dialog */}
       <CreatePostDialog

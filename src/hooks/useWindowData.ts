@@ -393,3 +393,37 @@ export function useUserAdverts() {
 
   return adverts;
 }
+
+export function useTrendingHeadline() {
+  const [headline, setHeadline] = useState(() => {
+    if (typeof window !== 'undefined' && window.__TRENDING_HEADLINE__) {
+      return window.__TRENDING_HEADLINE__;
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (window.__TRENDING_HEADLINE__ && !headline) {
+      setHeadline(window.__TRENDING_HEADLINE__);
+    }
+  }, [headline]);
+
+  return headline;
+}
+
+export function useMissedHeadlines() {
+  const [headlines, setHeadlines] = useState(() => {
+    if (typeof window !== 'undefined' && window.__MISSED_HEADLINES__) {
+      return window.__MISSED_HEADLINES__;
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (window.__MISSED_HEADLINES__ && !headlines) {
+      setHeadlines(window.__MISSED_HEADLINES__);
+    }
+  }, [headlines]);
+
+  return headlines;
+}
