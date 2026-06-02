@@ -2,13 +2,13 @@
  * pages/PostPage.tsx
  * Route: /post/:id
  * Fetches a single post and renders it full-screen.
- * Also sets document meta tags for proper OG preview on re-share.
  */
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Header }  from "@/components/Header";
 import { Footer }  from "@/components/Footer";
 import { FeedPost } from "@/components/FeedPost";
+import { MetaTags } from "@/components/MetaTags";
 import { Loader2, AlertCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card }   from "@/components/ui/card";
@@ -39,14 +39,6 @@ const PostPage = () => {
       .then(data => {
         if (data?.id) {
           setPost(data);
-          // Set document title and meta for re-sharing
-          document.title = `${data.title} — Mobigate`;
-          setMetaTag("og:title",       `${data.title} — Mobigate`);
-          setMetaTag("og:description", strip(data.content || data.subtitle || "") || `${ucfirst(data.post_type)} by ${data.author_name}`);
-          setMetaTag("og:image",       data.thumbnail_url || data.media_url || "");
-          setMetaTag("og:url",         window.location.href);
-          setMetaTag("twitter:title",  `${data.title} — Mobigate`);
-          setMetaTag("twitter:image",  data.thumbnail_url || data.media_url || "");
         } else {
           setNotFound(true);
         }
@@ -55,23 +47,12 @@ const PostPage = () => {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const setMetaTag = (property: string, content: string) => {
-    if (!content) return;
-    let el = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement
-          || document.querySelector(`meta[name="${property}"]`) as HTMLMetaElement;
-    if (!el) {
-      el = document.createElement("meta");
-      el.setAttribute(property.startsWith("twitter") ? "name" : "property", property);
-      document.head.appendChild(el);
-    }
-    el.setAttribute("content", content);
-  };
-
   const strip = (html: string) => html.replace(/<[^>]*>/g, "").substring(0, 180);
   const ucfirst = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
   if (loading) return (
     <div className="flex flex-col min-h-screen">
+      <MetaTags />
       <Header />
       <main className="flex-1 flex items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -82,6 +63,7 @@ const PostPage = () => {
 
   if (notFound || !post) return (
     <div className="flex flex-col min-h-screen">
+      <MetaTags title="Post Not Found — MobiGate" />
       <Header />
       <main className="flex-1 flex items-center justify-center p-6">
         <Card className="p-8 text-center max-w-sm">
@@ -101,6 +83,12 @@ const PostPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <MetaTags
+        title={`${post.title} — MobiGate`}
+        description={strip(post.content || post.subtitle || "") || `${ucfirst(post.post_type)} by ${post.author_name}`}
+        image={post.thumbnail_url || post.media_url || undefined}
+        ogType="article"
+      />
       <Header />
       <main className="container max-w-2xl mx-auto px-4 py-6 flex-1">
         <button onClick={() => navigate(-1)}

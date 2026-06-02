@@ -14,6 +14,7 @@ import { PremiumAdCardProps } from "@/components/PremiumAdCard";
 import { ChatWithFriendsDialog } from "@/components/chat/ChatWithFriendsDialog";
 import { CampaignBannerRotation } from "@/components/community/elections/CampaignBannerRotation";
 import { UserStatusBanner } from "@/components/profile/UserStatusBanner";
+import { MetaTags } from "@/components/MetaTags";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MessageCircle } from "lucide-react";
@@ -386,6 +387,7 @@ const Index = () => {
 
   return (
     <div className="flex flex-col w-full min-h-screen bg-background">
+      <MetaTags />
       <Header />
       
       <main className="container max-w-7xl mx-auto px-4 py-6 flex-1">

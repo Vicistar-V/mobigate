@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AdCard } from "@/components/AdCard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ELibrarySection } from "@/components/ELibrarySection";
+import { MetaTags } from "@/components/MetaTags";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { getPostsByUserId, Post, mockProfilePictures, mockBannerImages, wallStatusPosts, feedPosts } from "@/data/posts";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
@@ -616,6 +617,7 @@ const MyProfile = () => {
 
   return (
     <div className="flex flex-col w-full min-h-screen bg-background">
+      <MetaTags title="My Profile — MobiGate" ogType="profile" />
       <Header />
       
       <main className="container max-w-4xl mx-auto px-4 py-6 flex-1">
