@@ -105,18 +105,26 @@ export const TopTrendingHeadlines = () => {
               </span>
             </div>
 
-            <div className="flex gap-2">
-              <button
-                type="button"
-                aria-label="Add reaction"
-                className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[hsl(142_71%_45%)] text-white shadow active:scale-95 touch-manipulation"
-              >
-                <Plus className="h-4 w-4" />
-              </button>
+            {/* Excerpt with float-left thumbnail so text wraps and fills the bottom gap.
+                The whole block opens the full article reader. */}
+            <button
+              type="button"
+              onClick={() => setReaderOpen(true)}
+              className="block w-full text-left active:opacity-90 touch-manipulation"
+              aria-label={`Read full story: ${headline.category}`}
+            >
+              <img
+                src={headline.thumbnail}
+                alt=""
+                className="float-left mr-2 mb-1 h-16 w-16 rounded-md border border-border object-cover"
+                loading="lazy"
+              />
               <p className="text-justify font-serif text-[13px] leading-snug text-foreground">
-                {headline.excerpt}
+                {headline.excerpt}{" "}
+                <span className="font-sans font-bold text-destructive">Read more...</span>
               </p>
-            </div>
+            </button>
+
 
             {/* Author row */}
             <div className="mt-3 flex items-center gap-2">
