@@ -38,8 +38,41 @@ export const GreetingSection = () => {
   const phpFeedPosts = useFeedPosts();
   const allPosts = phpFeedPosts || fallbackFeedPosts;
 
+  // Active posting-area tab — drives which slice of content is shown in place.
+  const [activeFeedTab, setActiveFeedTab] = useState<"Stories" | "Vibes & Flexing" | "Breaking News">("Stories");
+
+  // Per-tab metadata: contextual keywords used to surface relevant content,
+  // and the label shown on the "see more" footer link.
+  const TAB_META = {
+    "Stories": {
+      keywords: [] as string[],
+      moreLabel: "Enjoy more exciting stories",
+      composeCta: "Post & Share something now",
+    },
+    "Vibes & Flexing": {
+      keywords: ["vibe", "flex", "fun", "party", "weekend", "lifestyle", "style"],
+      moreLabel: "Flex with more exciting Vibes",
+      composeCta: "Post & Share your Vibe now",
+    },
+    "Breaking News": {
+      keywords: ["news", "breaking", "update", "alert", "report", "headline"],
+      moreLabel: "Catch up on more Breaking News",
+      composeCta: "Post & Share Breaking News now",
+    },
+  } as const;
+  const tabMeta = TAB_META[activeFeedTab];
+
+  const matchesTab = (p: typeof allPosts[number]) => {
+    if (!tabMeta.keywords.length) return true;
+    const hay = `${p.title || ""} ${(p as any).subtitle || ""} ${(p as any).description || ""} ${(p as any).label || ""} ${(p as any).category || ""}`.toLowerCase();
+    return tabMeta.keywords.some((k) => hay.includes(k));
+  };
+
   // The User's OWN most recent post — pinned to the TOP big image space (never changes via thumbs)
-  const myOwnPosts = allPosts.filter((p) => p.userId === currentUserId);
+  const myOwnPostsAll = allPosts.filter((p) => p.userId === currentUserId);
+  const myOwnTabMatches = myOwnPostsAll.filter(matchesTab);
+  // Keep the area populated even when a tab has no exact matches.
+  const myOwnPosts = myOwnTabMatches.length > 0 ? myOwnTabMatches : myOwnPostsAll;
   const myLatestOwnPost = myOwnPosts[0] || allPosts[0];
 
   // Public/connection posts from OTHER users — drive the SECOND big image space
@@ -47,8 +80,10 @@ export const GreetingSection = () => {
     const others = allPosts.filter(
       (p) => p.userId !== currentUserId && ((p as any).privacy ?? "Public") === "Public",
     );
+    const tabbed = others.filter(matchesTab);
+    const base = tabbed.length > 0 ? tabbed : others;
     // Fallback so the space is never empty
-    return others.length > 0 ? others.slice(0, 16) : allPosts.filter((p) => p.userId !== currentUserId).slice(0, 16);
+    return base.length > 0 ? base.slice(0, 16) : allPosts.filter((p) => p.userId !== currentUserId).slice(0, 16);
   })();
 
   // Thumbnail strip — User's own + Public connection posts, de-duped
@@ -86,7 +121,6 @@ export const GreetingSection = () => {
 
   const [friendsMenuView, setFriendsMenuView] = useState<"main" | "requests" | "birthdays">("main");
   const [createPostOpen, setCreatePostOpen] = useState(false);
-  const [activeFeedTab, setActiveFeedTab] = useState<"Stories" | "Vibes & Flexing" | "Breaking News">("Stories");
   const [presetMediaUrl, setPresetMediaUrl] = useState<string | null>(null);
   const [presetTitle, setPresetTitle] = useState<string>("");
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -488,19 +522,9 @@ export const GreetingSection = () => {
                     key={t}
                     type="button"
                     onClick={() => {
+                      // Switch the posting area content in place — no page jump.
                       setActiveFeedTab(t);
-                      // "Stories" is the default tab — no jump / no label filter
-                      if (t === "Stories") return;
-                      // Jump instantly to the Recommended E-Library section and
-                      // apply a removable label filter for the clicked button.
-                      window.dispatchEvent(
-                        new CustomEvent("elibrary:applyLabel", { detail: { label: t } }),
-                      );
-                      const el = document.getElementById("recommended-elibrary");
-                      if (el) {
-                        // instant — no smooth scroll
-                        el.scrollIntoView({ behavior: "auto", block: "start" });
-                      }
+                      setFeaturedPublicIdx(0);
                     }}
                     className={`shrink-0 h-9 px-3 rounded-md text-[13px] font-bold border-2 transition-colors touch-manipulation ${
                       active
@@ -563,7 +587,7 @@ export const GreetingSection = () => {
                       onClick={openComposerBlank}
                       className="bg-primary text-primary-foreground rounded-md px-2.5 py-2.5 text-center text-[15px] font-bold leading-tight truncate active:opacity-90 touch-manipulation shadow-sm"
                     >
-                      Post &amp; Share something now
+                      {tabMeta.composeCta}
                     </button>
                     {/* Storyline 1 — read-only div opener for Edit / Create New */}
                     <div
@@ -718,20 +742,17 @@ export const GreetingSection = () => {
               </div>
             )}
 
-            {/* Scroll-to-elibrary link */}
+            {/* See-more link — scrolls down the feed for more of this tab's content */}
             <button
               type="button"
               onClick={() => {
-                const el = document.getElementById("recommended-elibrary");
-                if (!el) return;
-                const top = el.getBoundingClientRect().top + window.pageYOffset - 88;
-                window.scrollTo({ top, behavior: "smooth" });
+                window.scrollBy({ top: window.innerHeight * 0.8, behavior: "smooth" });
               }}
               className="mt-2 flex items-center gap-2 px-1 py-1.5 text-primary active:opacity-80 touch-manipulation"
             >
               <ChevronLeft className="h-4 w-4 shrink-0 rotate-[-90deg]" />
               <span className="italic font-semibold underline underline-offset-2 text-[13px]">
-                Enjoy more exciting stories
+                {tabMeta.moreLabel}
               </span>
             </button>
 
