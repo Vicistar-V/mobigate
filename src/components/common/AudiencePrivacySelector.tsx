@@ -127,6 +127,13 @@ export const AudiencePrivacySelector = ({
     set({ ageLimits: next });
   };
 
+  const toggleLifeMate = (group: string) => {
+    const next = value.lifeMates.includes(group)
+      ? value.lifeMates.filter(g => g !== group)
+      : [...value.lifeMates, group];
+    set({ lifeMates: next });
+  };
+
   return (
     <div className={cn("space-y-2.5", className)}>
       <div className="space-y-0.5">
