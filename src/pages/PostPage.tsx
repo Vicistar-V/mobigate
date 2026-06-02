@@ -63,6 +63,7 @@ const PostPage = () => {
 
   if (notFound || !post) return (
     <div className="flex flex-col min-h-screen">
+      <MetaTags title="Post Not Found — MobiGate" />
       <Header />
       <main className="flex-1 flex items-center justify-center p-6">
         <Card className="p-8 text-center max-w-sm">
