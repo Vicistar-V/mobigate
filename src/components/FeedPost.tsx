@@ -31,6 +31,8 @@ interface FeedPostProps {
   imageUrl?: string;
   fee?: string;
   isOwner?: boolean;
+  /** Show the "✓Copyright" designation marker on this post's media */
+  copyrightMarked?: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
 }
