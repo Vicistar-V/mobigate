@@ -122,9 +122,6 @@ const PostPage = () => {
           fee={String(post.access_fee || 0)}
           status="Online"
           isOwner={false}
-          isLiked={post.is_liked}
-          isMonetized={post.is_monetized}
-          hasPaid={false}
           followers="0"
         />
       </main>

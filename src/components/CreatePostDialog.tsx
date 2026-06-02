@@ -12,7 +12,8 @@ import {
   Select, SelectContent, SelectItem,
   SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Plus, Upload, X, Image, Lock, DollarSign, Info, ImagePlus } from "lucide-react";
+import { Plus, Upload, X, Image, Lock, DollarSign, Info, ImagePlus, ChevronDown, Shield } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useToast }          from "@/hooks/use-toast";
 import { AlbumSelector }     from "./AlbumSelector";
 import { CreateAlbumDialog } from "./CreateAlbumDialog";
@@ -92,6 +93,10 @@ export const CreatePostDialog = ({
 
   // Audience privacy
   const [audience, setAudience] = useState<AudienceValue>(DEFAULT_AUDIENCE_VALUE);
+
+  // Collapsible sections (collapsed by default to save space)
+  const [monetizationOpen, setMonetizationOpen] = useState(false);
+  const [audienceOpen, setAudienceOpen] = useState(false);
 
 
   // Monetization
@@ -514,7 +519,23 @@ export const CreatePostDialog = ({
             </div>
           )}
 
-          {/* ── MONETIZATION SECTION ── */}
+          {/* ── MONETIZATION SECTION (collapsible) ── */}
+          <Collapsible open={monetizationOpen} onOpenChange={setMonetizationOpen} className="rounded-xl border border-border bg-card">
+            <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 p-3 sm:p-4 text-left">
+              <div className="flex items-center gap-3">
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${isMonetized ? "bg-amber-400" : "bg-muted"}`}>
+                  {isMonetized ? <Lock className="h-5 w-5 text-white" /> : <DollarSign className="h-5 w-5 text-muted-foreground" />}
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">Monetisation</p>
+                  <p className="text-xs text-muted-foreground">
+                    {isMonetized ? `Monetized · ${feeValue} Mobi to unlock` : "Tap to set up paid access"}
+                  </p>
+                </div>
+              </div>
+              <ChevronDown className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-300 ${monetizationOpen ? "rotate-180" : ""}`} />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-3 pb-3 sm:px-4 sm:pb-4">
           {!canMonetize ? (
             <MonetizationEligibilityCard profile={monetizationProfile} hideWhenEligible={false} />
           ) : (
@@ -620,13 +641,27 @@ export const CreatePostDialog = ({
             )}
           </div>
           )}
+            </CollapsibleContent>
+          </Collapsible>
 
-
-
-          {/* Audience Privacy */}
-          <div className="rounded-xl border border-border bg-muted/30 p-3">
-            <AudiencePrivacySelector value={audience} onChange={setAudience} />
-          </div>
+          {/* Audience Privacy (collapsible) */}
+          <Collapsible open={audienceOpen} onOpenChange={setAudienceOpen} className="rounded-xl border border-border bg-card">
+            <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 p-3 sm:p-4 text-left">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-muted">
+                  <Shield className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">Audience Privacy</p>
+                  <p className="text-xs text-muted-foreground">Choose who can see this content</p>
+                </div>
+              </div>
+              <ChevronDown className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-300 ${audienceOpen ? "rotate-180" : ""}`} />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-3 pb-3 sm:px-4 sm:pb-4">
+              <AudiencePrivacySelector value={audience} onChange={setAudience} />
+            </CollapsibleContent>
+          </Collapsible>
 
           {/* Album */}
           <div className="space-y-1.5">
