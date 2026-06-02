@@ -116,6 +116,17 @@ export const GreetingSection = () => {
   const [viewerItems, setViewerItems] = useState<MediaItem[]>([]);
   const safeFeaturedIdx = Math.min(featuredPublicIdx, Math.max(0, thumbnailPosts.length - 1));
   const featuredPublicPost = thumbnailPosts[safeFeaturedIdx] || thumbnailPosts[0] || myLatestOwnPost;
+
+  // Keep the selected vibe thumbnail scrolled into view (e.g. when using ◄ / ► arrows)
+  const vibeStripRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const strip = vibeStripRef.current;
+    if (!strip) return;
+    const activeEl = strip.querySelector<HTMLElement>('[data-vibe-active="true"]');
+    if (activeEl) {
+      activeEl.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    }
+  }, [safeFeaturedIdx]);
   // Keep legacy names so the rest of the file keeps compiling unchanged
   const featuredPost = myLatestOwnPost;
   const myRecentPosts = thumbnailPosts;
@@ -602,7 +613,10 @@ export const GreetingSection = () => {
                       <Images className="h-4 w-4 shrink-0" />
                     </button>
 
-                    <div className="flex flex-row gap-1.5 flex-1 min-h-0 overflow-x-auto touch-pan-x snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    <div
+                      ref={vibeStripRef}
+                      className="flex flex-row gap-1.5 flex-1 min-h-0 overflow-x-auto overflow-y-hidden touch-pan-x overscroll-x-contain snap-x snap-mandatory [-webkit-overflow-scrolling:touch] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                    >
                       {myRecentPosts.slice(0, 15).map((post, i) => {
                         const realIdx = myRecentPosts.findIndex(
                           (p) => (p.id || p.imageUrl) === (post.id || post.imageUrl),
@@ -613,6 +627,7 @@ export const GreetingSection = () => {
                             key={`vibe-thumb-${i}-${post.id ?? i}`}
                             type="button"
                             onClick={() => setFeaturedIdx(realIdx < 0 ? 0 : realIdx)}
+                            data-vibe-active={isActive}
                             className={`relative shrink-0 h-full w-[46%] snap-start rounded-md overflow-hidden bg-muted active:scale-95 transition-all touch-manipulation ${
                               isActive
                                 ? "ring-2 ring-[hsl(212_95%_50%)] border border-[hsl(212_95%_50%)]"
