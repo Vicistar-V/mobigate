@@ -160,109 +160,108 @@ export const PostDetailDialog = ({
         </>
       )}
 
-      <ScrollArea className="flex-1">
-        <div className="pb-24 md:pb-6">
-          {/* Hero Image */}
-          {post.imageUrl && (
-            <div 
-              className="relative w-full cursor-pointer group"
-              onClick={() => setMediaViewerOpen(true)}
+      {/* ===== STATIC TOP PANEL — media + owner name (never scrolls) ===== */}
+      <div className="shrink-0">
+        {/* Hero Image */}
+        {post.imageUrl && (
+          <div
+            className="relative w-full cursor-pointer group"
+            onClick={() => setMediaViewerOpen(true)}
+          >
+            <AspectRatio ratio={16 / 9}>
+              <img
+                src={post.imageUrl}
+                alt={post.title}
+                className="w-full h-full object-cover transition-opacity group-hover:opacity-90"
+              />
+            </AspectRatio>
+            <Badge
+              className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm text-foreground border-border hover:bg-background/95"
+              variant="outline"
             >
-              <AspectRatio ratio={16 / 9}>
-                <img
-                  src={post.imageUrl}
-                  alt={post.title}
-                  className="w-full h-full object-cover transition-opacity group-hover:opacity-90"
+              {post.type}
+            </Badge>
+          </div>
+        )}
+
+        {/* Author / Owner — stays fixed with the media */}
+        <div className="px-5 sm:px-6 pt-3 pb-3 border-b border-border">
+          <button
+            onClick={handleAuthorClick}
+            className="flex items-center gap-3 w-full hover:opacity-80 transition-opacity"
+          >
+            <Avatar className="h-12 w-12 border-2 border-border">
+              <AvatarImage src={post.authorProfileImage} alt={post.author} />
+              <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                {post.author.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 text-left">
+              <p className="font-semibold text-foreground">{post.author}</p>
+              <div className="flex items-center gap-1.5">
+                <div
+                  className={`h-2 w-2 rounded-full ${
+                    post.status === "Online" ? "bg-emerald-500" : "bg-muted-foreground"
+                  }`}
                 />
-              </AspectRatio>
-              <Badge 
-                className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm text-foreground border-border hover:bg-background/95"
-                variant="outline"
-              >
-                {post.type}
-              </Badge>
+                <p className="text-sm text-muted-foreground">{post.status}</p>
+              </div>
             </div>
+          </button>
+        </div>
+      </div>
+
+      {/* ===== SCROLLABLE BODY — title, description, stats & comments ===== */}
+      <ScrollArea className="flex-1 min-h-0">
+        <div className="px-5 sm:px-6 py-4 space-y-4 pb-24 md:pb-6">
+          {/* Title */}
+          <h2 className="text-lg font-semibold text-foreground leading-snug">
+            {post.title}
+          </h2>
+
+          {/* Description */}
+          {post.description && (
+            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+              {post.description}
+            </p>
           )}
 
-          {/* Content Container */}
-          <div className="px-5 sm:px-6 py-4 space-y-4">
-            {/* Author Section */}
-            <button
-              onClick={handleAuthorClick}
-              className="flex items-center gap-3 w-full hover:opacity-80 transition-opacity"
-            >
-              <Avatar className="h-12 w-12 border-2 border-border">
-                <AvatarImage src={post.authorProfileImage} alt={post.author} />
-                <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                  {post.author.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 text-left">
-                <p className="font-semibold text-foreground">{post.author}</p>
-                <div className="flex items-center gap-1.5">
-                  <div
-                    className={`h-2 w-2 rounded-full ${
-                      post.status === "Online" ? "bg-emerald-500" : "bg-muted-foreground"
-                    }`}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    {post.status}
-                  </p>
-                </div>
+          {/* Stats Row - Compact */}
+          <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+            {post.fee && (
+              <div className="flex items-center gap-1">
+                <Coins className="h-3.5 w-3.5" />
+                <span>{post.fee} Mobi</span>
               </div>
-            </button>
-
-            {/* Divider */}
-            <div className="border-t border-border" />
-
-            {/* Title */}
-            <h2 className="text-lg font-semibold text-foreground leading-snug">
-              {post.title}
-            </h2>
-
-            {/* Description */}
-            {post.description && (
-              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                {post.description}
-              </p>
             )}
-
-            {/* Stats Row - Compact */}
-            <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
-              {post.fee && (
-                <div className="flex items-center gap-1">
-                  <Coins className="h-3.5 w-3.5" />
-                  <span>{post.fee} Mobi</span>
-                </div>
-              )}
-              <div className="flex items-center gap-1">
-                <Eye className="h-3.5 w-3.5" />
-                <span>{post.views}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <MessageCircle className="h-3.5 w-3.5" />
-                <span>{post.comments}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Heart className="h-3.5 w-3.5" />
-                <span>{likeCount}</span>
-              </div>
+            <div className="flex items-center gap-1">
+              <Eye className="h-3.5 w-3.5" />
+              <span>{post.views}</span>
             </div>
-
-            {/* Divider */}
-            <div className="border-t border-border" />
-
-            {/* Comments Section - Always visible */}
-            <div className="space-y-2">
-              <h3 className="font-semibold text-foreground flex items-center gap-2 text-sm sm:text-base">
-                <MessageCircle className="h-4 w-4" />
-                Comments ({post.comments})
-              </h3>
-              <CommentSection postId={post.id || "unknown"} className="border-none p-0" showHeader={false} />
+            <div className="flex items-center gap-1">
+              <MessageCircle className="h-3.5 w-3.5" />
+              <span>{post.comments}</span>
             </div>
+            <div className="flex items-center gap-1">
+              <Heart className="h-3.5 w-3.5" />
+              <span>{likeCount}</span>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-border" />
+
+          {/* Comments Section - Always visible */}
+          <div className="space-y-2">
+            <h3 className="font-semibold text-foreground flex items-center gap-2 text-sm sm:text-base">
+              <MessageCircle className="h-4 w-4" />
+              Comments ({post.comments})
+            </h3>
+            <CommentSection postId={post.id || "unknown"} className="border-none p-0" showHeader={false} />
           </div>
         </div>
       </ScrollArea>
+
 
       {/* Fixed Bottom Action Bar - Mobile */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border px-3 py-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] z-50">
