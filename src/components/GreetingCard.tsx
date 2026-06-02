@@ -116,6 +116,17 @@ export const GreetingSection = () => {
   const [viewerItems, setViewerItems] = useState<MediaItem[]>([]);
   const safeFeaturedIdx = Math.min(featuredPublicIdx, Math.max(0, thumbnailPosts.length - 1));
   const featuredPublicPost = thumbnailPosts[safeFeaturedIdx] || thumbnailPosts[0] || myLatestOwnPost;
+
+  // Keep the selected vibe thumbnail scrolled into view (e.g. when using ◄ / ► arrows)
+  const vibeStripRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const strip = vibeStripRef.current;
+    if (!strip) return;
+    const activeEl = strip.querySelector<HTMLElement>('[data-vibe-active="true"]');
+    if (activeEl) {
+      activeEl.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    }
+  }, [safeFeaturedIdx]);
   // Keep legacy names so the rest of the file keeps compiling unchanged
   const featuredPost = myLatestOwnPost;
   const myRecentPosts = thumbnailPosts;
