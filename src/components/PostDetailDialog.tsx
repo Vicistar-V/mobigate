@@ -12,10 +12,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Heart, MessageCircle, Share2, UserPlus, Eye, Coins, X, Gift, ChevronLeft, ChevronRight } from "lucide-react";
+import { Heart, MessageCircle, Share2, UserPlus, Eye, Coins, X, Gift, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { MediaViewer } from "./MediaViewer";
 import { CommentSection } from "./CommentSection";
 import { SendGiftDialog } from "@/components/chat/SendGiftDialog";
+import { PostViewerOptionsMenu } from "@/components/PostViewerOptionsMenu";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
@@ -175,12 +176,23 @@ export const PostDetailDialog = ({
                 className="w-full h-full object-cover transition-opacity group-hover:opacity-90"
               />
             </AspectRatio>
+            {/* Play / View affordance — tap media to play/view */}
+            {(post.type === "Video" || post.type === "Audio") && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-black/55 backdrop-blur-sm transition-transform group-hover:scale-110 group-active:scale-95">
+                  <Play className="h-8 w-8 text-white fill-white translate-x-0.5" />
+                </div>
+              </div>
+            )}
             <Badge
               className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm text-foreground border-border hover:bg-background/95"
               variant="outline"
             >
               {post.type}
             </Badge>
+            <span className="absolute bottom-3 right-3 rounded-full bg-black/55 backdrop-blur-sm px-2.5 py-1 text-[11px] font-medium text-white pointer-events-none">
+              Tap to {post.type === "Video" || post.type === "Audio" ? "play" : "view"}
+            </span>
           </div>
         )}
 
@@ -262,6 +274,13 @@ export const PostDetailDialog = ({
         </div>
       </ScrollArea>
 
+      {/* Floating viewer options "..." — Rate / Hide / Report / Block */}
+      <div className="absolute right-3 bottom-[calc(env(safe-area-inset-bottom)+4.5rem)] md:bottom-20 z-50">
+        <PostViewerOptionsMenu
+          authorName={post.author}
+          onHide={() => onOpenChange(false)}
+        />
+      </div>
 
       {/* Fixed Bottom Action Bar - Mobile */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border px-3 py-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] z-50">
