@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { WallBannerEditDialog } from "./WallBannerEditDialog";
+import { PostSundryBar } from "@/components/feed/PostSundryBar";
 
 interface WallBannerSlideshowProps {
   ownerId: string;
@@ -42,6 +43,12 @@ interface WallBannerSlideshowProps {
   onOpenViewer?: (slide: WallBannerSlide) => void;
   className?: string;
   heightClass?: string; // tailwind height util — defaults to h-48
+  /** When true, overlay the universal sundry tools (Like/Comment/Share/Follow/Gift/Report). */
+  showSundryBar?: boolean;
+  /** Author/owner display name for sundry actions (Gift, Follow, Report). */
+  authorName?: string;
+  /** Author/owner avatar for sundry dialogs. */
+  authorImage?: string;
 }
 
 export function WallBannerSlideshow({
@@ -55,6 +62,9 @@ export function WallBannerSlideshow({
   onOpenViewer,
   className,
   heightClass = "h-48",
+  showSundryBar = false,
+  authorName = "this user",
+  authorImage,
 }: WallBannerSlideshowProps) {
   const [slides, setSlides] = useState<WallBannerSlide[]>(() =>
     getActiveSlidesFor(ownerId, scope),
