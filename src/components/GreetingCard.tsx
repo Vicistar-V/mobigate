@@ -916,6 +916,14 @@ export const GreetingSection = () => {
       {/* People You May Know */}
       <PeopleYouMayKnow />
 
+      {/* Breaking News extras — Top Trending Headlines + Headlines you don't wanna miss */}
+      {activeFeedTab === "Breaking News" && (
+        <>
+          <TopTrendingHeadlines />
+          <HeadlinesYouDontWannaMiss />
+        </>
+      )}
+
       {/* Compose dialog */}
       <CreatePostDialog
         open={createPostOpen}
