@@ -645,28 +645,28 @@ export const GreetingSection = () => {
                   </div>
                 </div>
 
-                {/* Footer — ◄ Flex with more exciting Vibes ► */}
-                <div className="mt-3 flex items-center justify-center gap-3">
+                {/* Footer — ◄ Flex with more exciting Vibes ► (Y2K teal bar) */}
+                <div className="mt-3 flex items-center justify-center gap-3 rounded-md bg-[hsl(180_35%_42%)] py-2 px-3 shadow-sm">
                   <button
                     type="button"
                     onClick={() =>
                       setFeaturedIdx((safeFeaturedIdx - 1 + myRecentPosts.length) % myRecentPosts.length)
                     }
-                    className="h-7 w-7 rounded-full bg-card border border-[hsl(212_95%_50%)]/40 shadow-sm flex items-center justify-center text-[hsl(212_95%_50%)] active:scale-95 touch-manipulation"
+                    className="h-7 w-7 rounded-full bg-white/20 flex items-center justify-center text-white/90 active:scale-95 touch-manipulation"
                     aria-label="Previous vibe"
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft className="h-5 w-5" />
                   </button>
-                  <span className="italic font-bold underline underline-offset-2 text-[13px] text-[hsl(212_95%_50%)]">
+                  <span className="italic font-bold text-[14px] text-white [text-shadow:1px_1px_2px_rgba(0,0,0,0.25)]">
                     Flex with more exciting Vibes
                   </span>
                   <button
                     type="button"
                     onClick={() => setFeaturedIdx((safeFeaturedIdx + 1) % myRecentPosts.length)}
-                    className="h-7 w-7 rounded-full bg-card border border-[hsl(212_95%_50%)]/40 shadow-sm flex items-center justify-center text-[hsl(212_95%_50%)] active:scale-95 touch-manipulation"
+                    className="h-7 w-7 rounded-full bg-white/20 flex items-center justify-center text-white/90 active:scale-95 touch-manipulation"
                     aria-label="Next vibe"
                   >
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-5 w-5" />
                   </button>
                 </div>
               </div>
