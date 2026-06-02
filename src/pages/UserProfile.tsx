@@ -296,6 +296,9 @@ const UserProfile = () => {
             scope="profile"
             fallbackImage={displayBanner as string}
             fallbackAlt="Profile Banner"
+            showSundryBar
+            authorName={profile.name}
+            authorImage={displayPhoto}
             onOpenViewer={(slide: WallBannerSlide) => {
               setGalleryItems([
                 {
