@@ -4,7 +4,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, Settings, CreditCard, LogOut, Loader2 } from "lucide-react";
+import { User, Settings, CreditCard, LogOut, Loader2, BadgeCheck } from "lucide-react";
 import { useAuth } from "@/contexts/useAuth";
 import { useState } from "react";
 
