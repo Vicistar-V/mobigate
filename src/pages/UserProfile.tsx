@@ -127,6 +127,7 @@ const UserProfile = () => {
         views: String(p.view_count||0), likes: String(p.like_count||0),
         comments: String(p.comment_count||0), followers: String(p.author_follower_count||0),
         fee: p.access_fee||"0", status: "Online" as const,
+        copyrightMarked: p.copyright_marked ?? p.copyrightMarked,
         isOwner: false, isLiked: p.is_liked,
       }))))
       .catch(() => setUserPosts([]));
