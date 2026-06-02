@@ -81,7 +81,12 @@ export const GreetingSection = () => {
       (p) => p.userId !== currentUserId && ((p as any).privacy ?? "Public") === "Public",
     );
     const tabbed = others.filter(matchesTab);
-    const base = tabbed.length > 0 ? tabbed : others;
+    // Surface tab-relevant posts first, but always keep the strip well-populated
+    // by appending the remaining public posts behind them.
+    const base =
+      tabbed.length > 0
+        ? [...tabbed, ...others.filter((o) => !tabbed.includes(o))]
+        : others;
     // Fallback so the space is never empty
     return base.length > 0 ? base.slice(0, 16) : allPosts.filter((p) => p.userId !== currentUserId).slice(0, 16);
   })();
