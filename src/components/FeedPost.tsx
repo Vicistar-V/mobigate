@@ -120,6 +120,7 @@ export const FeedPost = ({
     followers: followers,
     isLiked: isLiked,
     isOwner: isOwner,
+    copyrightMarked: copyrightMarked,
   };
 
   return (
