@@ -1,22 +1,26 @@
 import { useState } from "react";
-import { Plus, Heart, Share2, UserPlus, Check, Flame } from "lucide-react";
+import { Heart, Share2, UserPlus, Check, Flame } from "lucide-react";
 import {
   fallbackTrendingHeadline,
   trendingNavLinks,
+  trendingToArticle,
   type TrendingHeadline,
 } from "@/data/trendingHeadlines";
 import { useTrendingHeadline } from "@/hooks/useWindowData";
 import { useToast } from "@/hooks/use-toast";
+import { NewsArticleDrawer } from "./NewsArticleDrawer";
 
 export const TopTrendingHeadlines = () => {
   const phpHeadline = useTrendingHeadline() as TrendingHeadline | null;
   const headline = phpHeadline || fallbackTrendingHeadline;
   const { toast } = useToast();
+  const [readerOpen, setReaderOpen] = useState(false);
 
   // Optimistic UI — toggle instantly, no spinners.
   const [isFollowing, setIsFollowing] = useState(!!headline.isFollowing);
   const [isLiked, setIsLiked] = useState(!!headline.isLiked);
   const [likeCount, setLikeCount] = useState(headline.likes ?? 0);
+
 
   const handleFollow = () => {
     setIsFollowing((prev) => {
