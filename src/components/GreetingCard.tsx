@@ -20,6 +20,8 @@ import {
   DialogDescription as ActionDialogDescription,
 } from "@/components/ui/dialog";
 import { PeopleYouMayKnow } from "./PeopleYouMayKnow";
+import { TopTrendingHeadlines } from "./TopTrendingHeadlines";
+import { HeadlinesYouDontWannaMiss } from "./HeadlinesYouDontWannaMiss";
 import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
 import { useState, useEffect, useRef } from "react";
 import { UserTagBadges } from "./UserTagBadges";
