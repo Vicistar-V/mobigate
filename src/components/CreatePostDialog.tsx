@@ -298,6 +298,8 @@ export const CreatePostDialog = ({
         form.append("media", mediaFile);
       }
       if (thumbnailFile) form.append("thumbnail", thumbnailFile);
+      if (copyrightEnabled && copyrightFile) form.append("copyright_document", copyrightFile);
+      form.append("copyright_marked", copyrightMarked ? "1" : "0");
 
       const result = await new Promise<{ success: boolean; error?: string }>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
