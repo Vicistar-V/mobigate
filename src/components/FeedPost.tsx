@@ -194,63 +194,35 @@ export const FeedPost = ({
                     {status}
                   </p>
                 </div>
-                {/* Follow Button - now on same line as status */}
-                {!isOwner && followers && (
-                  <Button
-                    variant={isFollowing ? "secondary" : "default"}
-                    size="sm"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleFollow();
-                    }}
-                    className="gap-1.5 h-6 px-2 text-sm"
-                    aria-label={isFollowing ? "Unfollow" : "Follow"}
-                  >
-                    <UserPlus className="h-3 w-3" />
-                    <span className="hidden sm:inline">{isFollowing ? "Following" : "Follow"}</span>
-                    <span className="text-base opacity-80" onClick={(e) => e.stopPropagation()}>({formatFollowerCount(followerCount)})</span>
-                  </Button>
-                )}
               </div>
             </div>
           </Link>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleLike();
-                }}
-                className={`p-2 rounded-full transition-colors ${
-                  isLiked 
-                    ? "bg-red-100 text-red-600" 
-                    : "bg-muted hover:bg-muted/80"
-                }`}
-                aria-label={isLiked ? "Unlike post" : "Like post"}
-              >
-                <Heart 
-                  className="h-5 w-5" 
-                  fill={isLiked ? "currentColor" : "none"}
-                />
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShareDialogOpen(true);
-                }}
-                className="p-2 rounded-full bg-muted hover:bg-muted/80 transition-colors"
-                aria-label="Share post"
-              >
-                <Share2 className="h-5 w-5" />
-              </button>
-            </div>
-            {!imageUrl && (
-              <Badge variant={type === "Video" ? "destructive" : "secondary"}>
-                {type}
-              </Badge>
-            )}
-          </div>
+          {!imageUrl && (
+            <Badge variant={type === "Video" ? "destructive" : "secondary"}>
+              {type}
+            </Badge>
+          )}
+        </div>
+
+        {/* Universal sundry tools — Like, Comment, Share, Follow, Gift, Report */}
+        <div className="pt-2 border-t" onClick={(e) => e.stopPropagation()}>
+          <PostSundryBar
+            postId={id || "unknown"}
+            title={title}
+            description={subtitle || description}
+            author={author}
+            authorId={userId}
+            authorImage={authorProfileImage}
+            imageUrl={imageUrl}
+            postType={type}
+            likes={likeCount}
+            comments={parseInt(comments) || 0}
+            followers={followerCount}
+            isLiked={isLiked}
+            isFollowing={isFollowing}
+            isOwner={isOwner}
+            variant="bar"
+          />
         </div>
       </div>
     </Card>
