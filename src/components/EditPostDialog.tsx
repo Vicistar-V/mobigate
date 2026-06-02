@@ -18,9 +18,9 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Post } from "@/data/posts";
-import { Upload, X, FileCheck } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Upload, X } from "lucide-react";
 import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
+import { CopyrightDocumentsField } from "@/components/common/CopyrightDocumentsField";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string) || "https://angola-press.com/en/api";
 
