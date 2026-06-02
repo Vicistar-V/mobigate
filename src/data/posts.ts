@@ -91,7 +91,8 @@ export const feedPosts: Post[] = [
     type: "Photo",
     imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
     albumId: "alb_1",
-    albumName: "Travel Adventures"
+    albumName: "Travel Adventures",
+    copyrightMarked: true
   },
   {
     id: "post_3",
