@@ -546,6 +546,7 @@ const Profile = () => {
       comments: post.comments,
       followers: post.followers,
       isLiked: post.isLiked,
+      copyrightMarked: post.copyrightMarked,
       isOwner: true, // All wall status posts on this profile belong to the owner
     }));
     const initialIndex = wallStatusPosts.findIndex(p => p.id === initialPost.id);
@@ -570,6 +571,7 @@ const Profile = () => {
     likes: String(post.likes),
     type: post.type === "video" ? "Video" as const : "Photo" as const,
     imageUrl: post.url,
+    copyrightMarked: post.copyrightMarked,
     isOwner: true
   }));
 
