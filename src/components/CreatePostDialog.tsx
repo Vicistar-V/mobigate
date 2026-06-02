@@ -20,6 +20,7 @@ import { CreateAlbumDialog } from "./CreateAlbumDialog";
 import { useUserAlbums, useUserProfile } from "@/hooks/useWindowData";
 import { mockAlbums }        from "@/data/posts";
 import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
+import { CopyrightDocumentsField } from "@/components/common/CopyrightDocumentsField";
 import { AudiencePrivacySelector, DEFAULT_AUDIENCE_VALUE, appendAudienceToFormData, type AudienceValue } from "@/components/common/AudiencePrivacySelector";
 import { ContentFeeNotice } from "@/components/media/ContentFeeNotice";
 import { NonMonetizedPostFeeNotice } from "@/components/monetization/NonMonetizedPostFeeNotice";
@@ -90,6 +91,10 @@ export const CreatePostDialog = ({
   const [submitting,       setSubmitting]       = useState(false);
   const [progress,         setProgress]         = useState(0);
   const [legalAccepted,    setLegalAccepted]    = useState(false);
+  // Copyright protection
+  const [copyrightEnabled, setCopyrightEnabled] = useState(false);
+  const [copyrightFile,    setCopyrightFile]    = useState<File | null>(null);
+  const [copyrightMarked,  setCopyrightMarked]  = useState(true);
 
   // Audience privacy
   const [audience, setAudience] = useState<AudienceValue>(DEFAULT_AUDIENCE_VALUE);
@@ -255,6 +260,7 @@ export const CreatePostDialog = ({
     setSelectedAlbum(null); setProgress(0);
     setIsMonetized(false); setAccessFee(String(minFee));
     setLegalAccepted(false);
+    setCopyrightEnabled(false); setCopyrightFile(null); setCopyrightMarked(true);
     setAudience(DEFAULT_AUDIENCE_VALUE);
     if (mediaRef.current)  mediaRef.current.value  = "";
     if (thumbRef.current)  thumbRef.current.value  = "";
@@ -294,6 +300,8 @@ export const CreatePostDialog = ({
         form.append("media", mediaFile);
       }
       if (thumbnailFile) form.append("thumbnail", thumbnailFile);
+      if (copyrightEnabled && copyrightFile) form.append("copyright_document", copyrightFile);
+      form.append("copyright_marked", copyrightMarked ? "1" : "0");
 
       const result = await new Promise<{ success: boolean; error?: string }>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
@@ -688,6 +696,18 @@ export const CreatePostDialog = ({
           <LegalCopyrightAcceptance
             accepted={legalAccepted}
             onAcceptedChange={setLegalAccepted}
+          />
+        </div>
+
+        {/* Copyright protection — optional document upload + marker toggle */}
+        <div className="px-1 pt-1">
+          <CopyrightDocumentsField
+            enabled={copyrightEnabled}
+            onEnabledChange={setCopyrightEnabled}
+            file={copyrightFile}
+            onFileChange={setCopyrightFile}
+            marker={copyrightMarked}
+            onMarkerChange={setCopyrightMarked}
           />
         </div>
 

@@ -12,6 +12,7 @@ import { ShareDialog } from "@/components/ShareDialog";
 import { generateShareUrl } from "@/lib/shareUtils";
 import { toast } from "sonner";
 import { PostSundryBar } from "@/components/feed/PostSundryBar";
+import { CopyrightBadge } from "@/components/common/CopyrightBadge";
 
 interface FeedPostProps {
   id?: string;
@@ -30,6 +31,8 @@ interface FeedPostProps {
   imageUrl?: string;
   fee?: string;
   isOwner?: boolean;
+  /** Show the "✓Copyright" designation marker on this post's media */
+  copyrightMarked?: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
 }
@@ -51,6 +54,7 @@ export const FeedPost = ({
   imageUrl,
   fee = "6",
   isOwner = false,
+  copyrightMarked = false,
   onEdit,
   onDelete,
 }: FeedPostProps) => {
@@ -116,6 +120,7 @@ export const FeedPost = ({
     followers: followers,
     isLiked: isLiked,
     isOwner: isOwner,
+    copyrightMarked: copyrightMarked,
   };
 
   return (
@@ -130,6 +135,7 @@ export const FeedPost = ({
             <Badge className="absolute top-2 left-2" variant="destructive">
               {type}
             </Badge>
+            {copyrightMarked && <CopyrightBadge size="sm" />}
           </div>
         )}
       

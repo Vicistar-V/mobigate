@@ -27,6 +27,10 @@ export interface Post {
   isOwner?: boolean;
   albumId?: string;
   albumName?: string;
+  /** Show the "✓Copyright" designation marker on this post's media (default true) */
+  copyrightMarked?: boolean;
+  /** Whether copyright documents were submitted to Mobigate for this post */
+  hasCopyrightDocs?: boolean;
 }
 
 export const mockAlbums: Album[] = [
@@ -68,7 +72,9 @@ export const feedPosts: Post[] = [
     imageUrl: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&q=80",
     isOwner: true,
     albumId: "alb_2",
-    albumName: "Family Moments"
+    albumName: "Family Moments",
+    copyrightMarked: true,
+    hasCopyrightDocs: true
   },
   {
     id: "post_2",
@@ -85,7 +91,8 @@ export const feedPosts: Post[] = [
     type: "Photo",
     imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
     albumId: "alb_1",
-    albumName: "Travel Adventures"
+    albumName: "Travel Adventures",
+    copyrightMarked: true
   },
   {
     id: "post_3",

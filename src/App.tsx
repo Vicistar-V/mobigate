@@ -10,6 +10,7 @@ import MyProfile          from "./pages/MyProfile";
 import UserProfile        from "./pages/UserProfile";
 import PostPage           from "./pages/PostPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import CopyrightDocumentsPage from "./pages/admin/CopyrightDocumentsPage";
 import { ScrollToTop }    from "./components/ScrollToTop";
 import { BackToTopButton } from "./components/BackToTopButton";
 
@@ -39,6 +40,8 @@ const App = () => {
                       <Route path="/profile"       element={<MyProfile />} />
                       <Route path="/profile/:id"   element={<UserProfile />} />
                       <Route path="/post/:id"      element={<PostPage />} />
+                      <Route path="/admin/copyright-documents" element={<CopyrightDocumentsPage />} />
+
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>

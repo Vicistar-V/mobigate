@@ -50,7 +50,8 @@ const superadminMenuItems = [
       { title: "Set Personalized Content Duration", url: "/all_settings.php#personalized_elibrary_content_duration" },
       { title: "View Personalized Contents", url: "/personalized_elibrary_contents.php" },
       { title: "Create e-Library Categories", url: "/elibrary_categories.php" },
-      { title: "Post/Manage e-Library Contents", url: "/post_manage_elibrary_articles.php" }
+      { title: "Post/Manage e-Library Contents", url: "/post_manage_elibrary_articles.php" },
+      { title: "Manage Copyright Documents", url: "/admin/copyright-documents" }
     ]
   },
   {

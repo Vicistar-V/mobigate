@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { CommentDialog } from "@/components/CommentDialog";
 import { useSwipeable } from "react-swipeable";
 import { MediaOwnerMenu } from "@/components/media/MediaOwnerMenu";
+import { CopyrightBadge } from "@/components/common/CopyrightBadge";
 
 
 export interface MediaItem {
@@ -25,6 +26,8 @@ export interface MediaItem {
   followers?: string;
   isLiked?: boolean;
   isOwner?: boolean;
+  /** Show the "✓Copyright" designation marker on this media (default true) */
+  copyrightMarked?: boolean;
 }
 
 interface MediaGalleryViewerProps {
@@ -350,6 +353,11 @@ export const MediaGalleryViewer = ({
           className="relative w-full h-full flex items-center justify-center touch-pan-y"
         >
           {renderMedia()}
+
+          {/* "✓Copyright" designation marker — bottom-right of the media */}
+          {currentItem.copyrightMarked && currentItem.type !== "audio" && viewMode !== "reader" && (
+            <CopyrightBadge size="md" />
+          )}
 
           {/* Reader Mode overlay — text fills screen, media floats in corner */}
           {viewMode === "reader" && currentItem.description && (
