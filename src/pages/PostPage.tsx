@@ -2,13 +2,13 @@
  * pages/PostPage.tsx
  * Route: /post/:id
  * Fetches a single post and renders it full-screen.
- * Also sets document meta tags for proper OG preview on re-share.
  */
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Header }  from "@/components/Header";
 import { Footer }  from "@/components/Footer";
 import { FeedPost } from "@/components/FeedPost";
+import { MetaTags } from "@/components/MetaTags";
 import { Loader2, AlertCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card }   from "@/components/ui/card";
