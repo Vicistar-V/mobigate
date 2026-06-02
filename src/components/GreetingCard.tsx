@@ -742,20 +742,17 @@ export const GreetingSection = () => {
               </div>
             )}
 
-            {/* Scroll-to-elibrary link */}
+            {/* See-more link — scrolls down the feed for more of this tab's content */}
             <button
               type="button"
               onClick={() => {
-                const el = document.getElementById("recommended-elibrary");
-                if (!el) return;
-                const top = el.getBoundingClientRect().top + window.pageYOffset - 88;
-                window.scrollTo({ top, behavior: "smooth" });
+                window.scrollBy({ top: window.innerHeight * 0.8, behavior: "smooth" });
               }}
               className="mt-2 flex items-center gap-2 px-1 py-1.5 text-primary active:opacity-80 touch-manipulation"
             >
               <ChevronLeft className="h-4 w-4 shrink-0 rotate-[-90deg]" />
               <span className="italic font-semibold underline underline-offset-2 text-[13px]">
-                Enjoy more exciting stories
+                {tabMeta.moreLabel}
               </span>
             </button>
 
