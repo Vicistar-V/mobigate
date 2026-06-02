@@ -797,7 +797,7 @@ export const GreetingSection = () => {
 
 
             {/* RTL auto-scrolling thumbnail strip — click to load into the big featured panel above */}
-            {myRecentPosts.length > 1 && (
+            {activeFeedTab !== "Vibes & Flexing" && myRecentPosts.length > 1 && (
               <div className="mt-2 rounded-lg border border-border bg-card/50 p-1.5 overflow-hidden">
                 <div className="group/strip relative">
                   {/* Prev button */}
