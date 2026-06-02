@@ -69,21 +69,21 @@ export function getActiveSlidesFor(
   });
 }
 
-export function upsertSlide(slide: WallBannerSlide) {
+export function upsertSlide(slide: WallBannerSlide): boolean {
   const list = read();
   const idx = list.findIndex((s) => s.id === slide.id);
   const next = { ...slide, updatedAt: new Date().toISOString() };
   if (idx >= 0) list[idx] = next;
   else list.unshift(next);
-  write(list);
+  return write(list);
 }
 
 /** Insert many slides at once (used for bulk upload). */
-export function bulkInsertSlides(slides: WallBannerSlide[]) {
-  if (!slides.length) return;
+export function bulkInsertSlides(slides: WallBannerSlide[]): boolean {
+  if (!slides.length) return true;
   const now = new Date().toISOString();
   const stamped = slides.map((s) => ({ ...s, updatedAt: now }));
-  write([...stamped, ...read()]);
+  return write([...stamped, ...read()]);
 }
 
 export function deleteSlide(id: string) {
