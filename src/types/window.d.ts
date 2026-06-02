@@ -305,6 +305,8 @@ export interface WindowBridge {
   __FEED_POSTS__?: Post[];
   __WALL_STATUS_POSTS__?: any[];
   __USER_ADVERTS__?: SavedAdvert[];
+  __TRENDING_HEADLINE__?: any;
+  __MISSED_HEADLINES__?: any[];
   
   // User mapping for admin
   __USER_MAP__?: Record<string, { 
