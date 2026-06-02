@@ -41,6 +41,7 @@ const App = () => {
                       <Route path="/profile"       element={<MyProfile />} />
                       <Route path="/profile/:id"   element={<UserProfile />} />
                       <Route path="/post/:id"      element={<PostPage />} />
+                      <Route path="/verify-account" element={<AccountVerificationPage />} />
                       <Route path="/admin/copyright-documents" element={<CopyrightDocumentsPage />} />
 
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
