@@ -39,14 +39,6 @@ const PostPage = () => {
       .then(data => {
         if (data?.id) {
           setPost(data);
-          // Set document title and meta for re-sharing
-          document.title = `${data.title} — Mobigate`;
-          setMetaTag("og:title",       `${data.title} — Mobigate`);
-          setMetaTag("og:description", strip(data.content || data.subtitle || "") || `${ucfirst(data.post_type)} by ${data.author_name}`);
-          setMetaTag("og:image",       data.thumbnail_url || data.media_url || "");
-          setMetaTag("og:url",         window.location.href);
-          setMetaTag("twitter:title",  `${data.title} — Mobigate`);
-          setMetaTag("twitter:image",  data.thumbnail_url || data.media_url || "");
         } else {
           setNotFound(true);
         }
