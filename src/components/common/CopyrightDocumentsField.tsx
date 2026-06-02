@@ -71,7 +71,7 @@ export const CopyrightDocumentsField = ({
         </div>
       </div>
 
-      {/* ── 1. Display ✓Copyright marker toggle ── */}
+      {/* ── 1. Display ✓Copyright marker toggle (On/Off) ── */}
       <div className="flex items-start justify-between gap-3 rounded-lg border bg-background px-3 py-2.5">
         <div className="flex items-start gap-2.5 min-w-0">
           <BadgeCheck className="h-4 w-4 text-primary mt-0.5 shrink-0" />
@@ -85,13 +85,22 @@ export const CopyrightDocumentsField = ({
             </p>
           </div>
         </div>
-        <Switch
-          id="copyright-marker"
-          checked={marker}
-          onCheckedChange={onMarkerChange}
-          className="mt-0.5 shrink-0"
-        />
+        <div className="flex flex-col items-center gap-1 shrink-0">
+          <Switch
+            id="copyright-marker"
+            checked={marker}
+            onCheckedChange={onMarkerChange}
+          />
+          <span
+            className={`text-[10px] font-bold uppercase tracking-wide ${
+              marker ? "text-primary" : "text-muted-foreground"
+            }`}
+          >
+            {marker ? "On" : "Off"}
+          </span>
+        </div>
       </div>
+
 
       {/* ── 2. Upload Copyright Documents ── */}
       <div className="flex items-start gap-3">
