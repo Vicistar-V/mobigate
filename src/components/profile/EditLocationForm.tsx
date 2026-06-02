@@ -175,11 +175,15 @@ export const EditLocationForm = ({ currentData, onSave, onClose }: EditLocationF
             <FormField
               control={form.control}
               name="place"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
                   <FormLabel>Place</FormLabel>
                   <FormControl>
-                    <Input placeholder="City, State, Country" {...field} />
+                    <CascadingLocationSelector
+                      value={locationValue}
+                      onChange={updateLocation}
+                      hideHeader
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
