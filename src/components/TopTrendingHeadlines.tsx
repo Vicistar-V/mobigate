@@ -182,6 +182,12 @@ export const TopTrendingHeadlines = () => {
           </button>
         </div>
       </div>
+
+      <NewsArticleDrawer
+        article={trendingToArticle(headline)}
+        open={readerOpen}
+        onOpenChange={setReaderOpen}
+      />
     </section>
   );
 };
