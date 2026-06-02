@@ -21,8 +21,12 @@ import { useAuth }  from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import {
   Search, Check, Copy, ChevronDown, ChevronUp,
-  Send, Loader2, Globe, X, Users, UserPlus, Link2,
+  Send, Loader2, Globe, X, Users, UserPlus, Link2, ArrowLeft,
 } from "lucide-react";
+import {
+  getConnections, connectionTabs,
+  type ConnectionCategory, type ConnectionUser,
+} from "@/lib/inviteConnections";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string) || "/api";
 const APP_URL  = window.location.origin;
