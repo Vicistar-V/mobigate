@@ -716,7 +716,16 @@ export function WallBannerEditDialog({
           updatedAt: now,
         };
       });
-      bulkInsertSlides(slides);
+      const ok = bulkInsertSlides(slides);
+      if (!ok) {
+        toast({
+          title: "Couldn't save slides",
+          description:
+            "Your device storage is full. Try removing old slides or using smaller media files.",
+          variant: "destructive",
+        });
+        return;
+      }
       const customised = pending.filter((p) => p.overrides).length;
       toast({
         title: `${slides.length} slides added`,
