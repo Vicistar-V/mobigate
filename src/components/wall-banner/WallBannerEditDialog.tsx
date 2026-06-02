@@ -544,12 +544,10 @@ export function WallBannerEditDialog({
         e.target.value = "";
         return;
       }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setMediaUrl(reader.result as string);
-        setMediaType(file.type.startsWith("video/") ? "video" : "photo");
-      };
-      reader.readAsDataURL(file);
+      // Use a lightweight object URL instead of a base64 data URL. Videos/images
+      // as base64 blow past the localStorage quota and make saving fail.
+      setMediaUrl(URL.createObjectURL(file));
+      setMediaType(file.type.startsWith("video/") ? "video" : "photo");
       e.target.value = "";
       return;
     }
@@ -576,30 +574,22 @@ export function WallBannerEditDialog({
       return;
     }
 
-    Promise.all(
-      accepted.map(
-        (file) =>
-          new Promise<PendingItem>((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () =>
-              resolve({
-                url: reader.result as string,
-                mediaType: file.type.startsWith("video/") ? "video" : "photo",
-                name: file.name,
-              });
-            reader.readAsDataURL(file);
-          }),
-      ),
-    ).then((items) => {
-      setPending((prev) => [...prev, ...items]);
-      const combined = [...pending, ...items];
-      if (combined.length === 1) {
-        setMediaUrl(combined[0].url);
-        setMediaType(combined[0].mediaType);
-      } else {
-        setMediaUrl("");
-      }
-    });
+    // Object URLs keep localStorage tiny (just a short blob: reference) so even
+    // large videos save successfully, instead of base64 data URLs that overflow
+    // the storage quota and cause "Add slide" to silently fail.
+    const items: PendingItem[] = accepted.map((file) => ({
+      url: URL.createObjectURL(file),
+      mediaType: file.type.startsWith("video/") ? "video" : "photo",
+      name: file.name,
+    }));
+    setPending((prev) => [...prev, ...items]);
+    const combined = [...pending, ...items];
+    if (combined.length === 1) {
+      setMediaUrl(combined[0].url);
+      setMediaType(combined[0].mediaType);
+    } else {
+      setMediaUrl("");
+    }
     e.target.value = "";
   };
 
@@ -726,7 +716,16 @@ export function WallBannerEditDialog({
           updatedAt: now,
         };
       });
-      bulkInsertSlides(slides);
+      const ok = bulkInsertSlides(slides);
+      if (!ok) {
+        toast({
+          title: "Couldn't save slides",
+          description:
+            "Your device storage is full. Try removing old slides or using smaller media files.",
+          variant: "destructive",
+        });
+        return;
+      }
       const customised = pending.filter((p) => p.overrides).length;
       toast({
         title: `${slides.length} slides added`,
@@ -766,7 +765,16 @@ export function WallBannerEditDialog({
       createdAt: initial?.createdAt || now,
       updatedAt: now,
     };
-    upsertSlide(slide);
+    const ok = upsertSlide(slide);
+    if (!ok) {
+      toast({
+        title: "Couldn't save slide",
+        description:
+          "Your device storage is full. Try removing old slides or using a smaller media file.",
+        variant: "destructive",
+      });
+      return;
+    }
     toast({
       title: initial ? "Slide updated" : "Slide added",
       description: "Your wall banner has been saved.",
