@@ -16,10 +16,6 @@ interface ELibrarySectionProps {
   activeFilter: string;
   onFilterChange: (filter: string) => void;
   title?: string;
-  /** Optional label filter applied from the homepage section buttons. */
-  labelFilter?: string | null;
-  /** Called when the user clicks the X on the label filter chip. */
-  onClearLabel?: () => void;
 }
 
 const primaryFilters = [
