@@ -31,6 +31,7 @@ interface Post {
   status?: "Online" | "Offline";
   views?: string;
   fee?: string;
+  copyrightMarked?: boolean;
 }
 
 interface AdSlot {
