@@ -628,6 +628,8 @@ const MyProfile = () => {
             fallbackImage={bannerImage}
             fallbackAlt="Profile Banner"
             isOwner
+            showSundryBar
+            authorName={userProfile.name}
             onManage={() => setWallBannerManagerOpen(true)}
             onChangeFallback={() => setWallBannerManagerOpen(true)}
             onOpenViewer={(slide: WallBannerSlide) => {
