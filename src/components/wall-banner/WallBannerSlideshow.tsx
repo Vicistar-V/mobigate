@@ -193,10 +193,13 @@ export function WallBannerSlideshow({
 
   const current = slides[idx];
 
-  // Auto-rotation timer (per slide)
+  // Auto-rotation timer (per slide). Each slide advances after its OWN
+  // configured display interval (displaySeconds), so creators can set how long
+  // each photo/video stays on screen. Rotation is paused while the owner menu
+  // is open so the banner doesn't shift out from under the user mid-interaction.
   useEffect(() => {
     if (timerRef.current) window.clearTimeout(timerRef.current);
-    if (slides.length < 2 || !current) return;
+    if (slides.length < 2 || !current || menuOpen) return;
     const seconds = Math.max(2, current.displaySeconds || 6);
     timerRef.current = window.setTimeout(() => {
       setIdx((i) => (i + 1) % slides.length);
@@ -204,7 +207,7 @@ export function WallBannerSlideshow({
     return () => {
       if (timerRef.current) window.clearTimeout(timerRef.current);
     };
-  }, [current, slides.length]);
+  }, [current, slides.length, menuOpen]);
 
   const allSlideCount = useMemo(
     () => slides.length,
