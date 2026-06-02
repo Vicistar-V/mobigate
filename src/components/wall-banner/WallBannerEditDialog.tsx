@@ -765,7 +765,16 @@ export function WallBannerEditDialog({
       createdAt: initial?.createdAt || now,
       updatedAt: now,
     };
-    upsertSlide(slide);
+    const ok = upsertSlide(slide);
+    if (!ok) {
+      toast({
+        title: "Couldn't save slide",
+        description:
+          "Your device storage is full. Try removing old slides or using a smaller media file.",
+        variant: "destructive",
+      });
+      return;
+    }
     toast({
       title: initial ? "Slide updated" : "Slide added",
       description: "Your wall banner has been saved.",
