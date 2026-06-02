@@ -546,6 +546,7 @@ const Profile = () => {
       comments: post.comments,
       followers: post.followers,
       isLiked: post.isLiked,
+      copyrightMarked: post.copyrightMarked,
       isOwner: true, // All wall status posts on this profile belong to the owner
     }));
     const initialIndex = wallStatusPosts.findIndex(p => p.id === initialPost.id);
