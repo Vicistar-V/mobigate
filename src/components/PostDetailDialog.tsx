@@ -107,9 +107,17 @@ export const PostDetailDialog = ({
     const shareUrl = post.id
       ? `${window.location.origin}/post/${post.id}`
       : window.location.href;
+
+    const authorName = post.author || "Someone";
+    const profileUrl = post.userId
+      ? `http://www.mobigate-app.mobi/profile/${post.userId}`
+      : `http://www.mobigate-app.mobi/profile/${post.id || ""}`;
+
+    const shareText = `Hi! ${authorName} invites you to join Mobigate community. Please click on the link below to Sign-Up Now.\n\n👉 http://www.mobigate-app.mobi/register\n\n— ${authorName} (${profileUrl})`;
+
     const shareData = {
-      title: post.title,
-      text: post.description || post.title,
+      title: `Join me on Mobigate — ${authorName}`,
+      text: shareText,
       url: shareUrl,
     };
 
@@ -128,11 +136,11 @@ export const PostDetailDialog = ({
     // 2) Fallback: copy the link to the clipboard.
     try {
       if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(shareUrl);
+        await navigator.clipboard.writeText(shareText);
       } else {
         // Legacy fallback for older mobile browsers.
         const ta = document.createElement("textarea");
-        ta.value = shareUrl;
+        ta.value = shareText;
         ta.style.position = "fixed";
         ta.style.opacity = "0";
         document.body.appendChild(ta);
