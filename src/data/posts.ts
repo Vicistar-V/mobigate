@@ -72,7 +72,9 @@ export const feedPosts: Post[] = [
     imageUrl: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&q=80",
     isOwner: true,
     albumId: "alb_2",
-    albumName: "Family Moments"
+    albumName: "Family Moments",
+    copyrightMarked: true,
+    hasCopyrightDocs: true
   },
   {
     id: "post_2",
