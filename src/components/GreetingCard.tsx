@@ -513,10 +513,12 @@ export const GreetingSection = () => {
 
           {/* ============ POSTING AREA ============ */}
           <div className="mt-3">
-            {/* Section tabs */}
-            <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1 pb-1">
+            {/* Section tabs — Y2K nav: black "Stories" left, outlined green
+                "Vibes & Flexing" center, black "Breaking News" right. */}
+            <div className="flex items-end justify-between gap-2 pb-1">
               {(["Stories", "Vibes & Flexing", "Breaking News"] as const).map((t) => {
                 const active = activeFeedTab === t;
+                const isVibe = t === "Vibes & Flexing";
                 return (
                   <button
                     key={t}
@@ -526,10 +528,18 @@ export const GreetingSection = () => {
                       setActiveFeedTab(t);
                       setFeaturedPublicIdx(0);
                     }}
-                    className={`shrink-0 h-9 px-3 rounded-md text-[13px] font-bold border-2 transition-colors touch-manipulation ${
-                      active
-                        ? "bg-green-600 text-white border-green-600 shadow-sm"
-                        : "bg-card text-foreground border-border hover:border-green-500/60"
+                    className={`shrink-0 touch-manipulation transition-all leading-none ${
+                      isVibe
+                        ? "text-[15px] font-extrabold uppercase tracking-tight"
+                        : "text-[13px] font-bold"
+                    } ${
+                      isVibe
+                        ? active
+                          ? "text-green-500 [text-shadow:0_0_1px_#fff,1px_1px_0_#fff,-1px_-1px_0_#fff,1px_-1px_0_#fff,-1px_1px_0_#fff] scale-105"
+                          : "text-green-500/70 [text-shadow:0_0_1px_#fff,1px_1px_0_#fff,-1px_-1px_0_#fff]"
+                        : active
+                          ? "text-foreground underline underline-offset-4 decoration-2"
+                          : "text-muted-foreground"
                     }`}
                   >
                     {t}
@@ -635,28 +645,28 @@ export const GreetingSection = () => {
                   </div>
                 </div>
 
-                {/* Footer — ◄ Flex with more exciting Vibes ► */}
-                <div className="mt-3 flex items-center justify-center gap-3">
+                {/* Footer — ◄ Flex with more exciting Vibes ► (Y2K teal bar) */}
+                <div className="mt-3 flex items-center justify-center gap-3 rounded-md bg-[hsl(180_35%_42%)] py-2 px-3 shadow-sm">
                   <button
                     type="button"
                     onClick={() =>
                       setFeaturedIdx((safeFeaturedIdx - 1 + myRecentPosts.length) % myRecentPosts.length)
                     }
-                    className="h-7 w-7 rounded-full bg-card border border-[hsl(212_95%_50%)]/40 shadow-sm flex items-center justify-center text-[hsl(212_95%_50%)] active:scale-95 touch-manipulation"
+                    className="h-7 w-7 rounded-full bg-white/20 flex items-center justify-center text-white/90 active:scale-95 touch-manipulation"
                     aria-label="Previous vibe"
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft className="h-5 w-5" />
                   </button>
-                  <span className="italic font-bold underline underline-offset-2 text-[13px] text-[hsl(212_95%_50%)]">
+                  <span className="italic font-bold text-[14px] text-white [text-shadow:1px_1px_2px_rgba(0,0,0,0.25)]">
                     Flex with more exciting Vibes
                   </span>
                   <button
                     type="button"
                     onClick={() => setFeaturedIdx((safeFeaturedIdx + 1) % myRecentPosts.length)}
-                    className="h-7 w-7 rounded-full bg-card border border-[hsl(212_95%_50%)]/40 shadow-sm flex items-center justify-center text-[hsl(212_95%_50%)] active:scale-95 touch-manipulation"
+                    className="h-7 w-7 rounded-full bg-white/20 flex items-center justify-center text-white/90 active:scale-95 touch-manipulation"
                     aria-label="Next vibe"
                   >
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-5 w-5" />
                   </button>
                 </div>
               </div>
