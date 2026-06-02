@@ -54,6 +54,7 @@ export const FeedPost = ({
   imageUrl,
   fee = "6",
   isOwner = false,
+  copyrightMarked = false,
   onEdit,
   onDelete,
 }: FeedPostProps) => {
