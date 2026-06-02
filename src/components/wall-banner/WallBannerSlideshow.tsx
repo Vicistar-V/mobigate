@@ -75,11 +75,19 @@ export function WallBannerSlideshow({
   const [createOpen, setCreateOpen] = useState(false);
   const [bulkOpen, setBulkOpen] = useState(false);
   const [editSlide, setEditSlide] = useState<WallBannerSlide | null>(null);
+  // Controlled open-state for the owner "+" quick-menu. Keeping it here (instead
+  // of letting the dropdown manage its own state inside an inline component)
+  // prevents the menu from snapping shut whenever the parent re-renders — e.g.
+  // the live clock ticking or the slideshow auto-rotating every few seconds.
+  const [menuOpen, setMenuOpen] = useState(false);
 
-
-  // The owner "+" quick-menu trigger and content (reused for both states)
-  const OwnerPlusMenu = ({ slide }: { slide?: WallBannerSlide | null }) => (
-    <DropdownMenu>
+  // The owner "+" quick-menu trigger and content (reused for both states).
+  // IMPORTANT: this is a plain render function (called inline), NOT a nested
+  // React component invoked as <OwnerPlusMenu/>. Rendering it inline keeps it
+  // part of the parent's element tree so React never unmounts/remounts it on
+  // re-render — which was causing the dropdown to close instantly.
+  const renderOwnerPlusMenu = (slide?: WallBannerSlide | null) => (
+    <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
