@@ -10,6 +10,7 @@ import MyProfile          from "./pages/MyProfile";
 import UserProfile        from "./pages/UserProfile";
 import PostPage           from "./pages/PostPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import CopyrightDocumentsPage from "./pages/admin/CopyrightDocumentsPage";
 import { ScrollToTop }    from "./components/ScrollToTop";
 import { BackToTopButton } from "./components/BackToTopButton";
 
