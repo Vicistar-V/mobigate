@@ -7,7 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Play, Image, FileText, Headphones, FileIcon, Link, MoreHorizontal, Settings, X, Tag } from "lucide-react";
+import { Play, Image, FileText, Headphones, FileIcon, Link, MoreHorizontal, Settings } from "lucide-react";
 import { FilterDialog } from "./FilterDialog";
 import { ManageELibraryDialog } from "./ManageELibraryDialog";
 import { useState } from "react";
