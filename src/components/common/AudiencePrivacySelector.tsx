@@ -39,6 +39,10 @@ export const AGE_BANDS = [
   "10 - 17", "18 - 30", "31 - 40", "41 - 50", "51 - 60", "61 - 70", "70+",
 ] as const;
 
+export const LIFE_MATE_GROUPS = [
+  "Class-Mates", "School-Mates", "Age-Mates", "Work Colleagues",
+] as const;
+
 export interface AudienceValue {
   /** Multi-select list of granted audiences. 'public' overrides all others. */
   selected: AudienceKey[];
@@ -48,6 +52,8 @@ export interface AudienceValue {
   locations: { country: string; state: string; lga: string; city: string; town: string };
   /** Selected age bands (only meaningful when 'agelimits' is selected). */
   ageLimits: string[];
+  /** Selected Life-Mate groups (only meaningful when 'lifemates' is selected). */
+  lifeMates: string[];
 }
 
 export const DEFAULT_AUDIENCE_VALUE: AudienceValue = {
@@ -55,6 +61,7 @@ export const DEFAULT_AUDIENCE_VALUE: AudienceValue = {
   exclusions: {},
   locations: { country: "", state: "", lga: "", city: "", town: "" },
   ageLimits: [],
+  lifeMates: [],
 };
 
 interface OptionMeta {
@@ -118,6 +125,13 @@ export const AudiencePrivacySelector = ({
       ? value.ageLimits.filter(b => b !== band)
       : [...value.ageLimits, band];
     set({ ageLimits: next });
+  };
+
+  const toggleLifeMate = (group: string) => {
+    const next = value.lifeMates.includes(group)
+      ? value.lifeMates.filter(g => g !== group)
+      : [...value.lifeMates, group];
+    set({ lifeMates: next });
   };
 
   return (
@@ -192,6 +206,30 @@ export const AudiencePrivacySelector = ({
                       compact
                       hideHeader
                     />
+                  )}
+
+                  {/* Life-Mates config — independent groups */}
+                  {opt.key === "lifemates" && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {LIFE_MATE_GROUPS.map(group => {
+                        const on = value.lifeMates.includes(group);
+                        return (
+                          <button
+                            key={group}
+                            type="button"
+                            onClick={() => toggleLifeMate(group)}
+                            className={cn(
+                              "px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors",
+                              on
+                                ? "bg-primary text-primary-foreground border-primary"
+                                : "bg-white text-muted-foreground border-border hover:border-primary/40",
+                            )}
+                          >
+                            {group}
+                          </button>
+                        );
+                      })}
+                    </div>
                   )}
 
                   {/* Age-limits config */}
@@ -271,5 +309,10 @@ export function appendAudienceToFormData(form: FormData, v: AudienceValue, prefi
   // Age-limit targeting
   if (v.selected.includes("agelimits")) {
     form.append(`${prefix}_age_limits`, v.ageLimits.join(","));
+  }
+
+  // Life-Mate group targeting
+  if (v.selected.includes("lifemates")) {
+    form.append(`${prefix}_life_mates`, v.lifeMates.join(","));
   }
 }
