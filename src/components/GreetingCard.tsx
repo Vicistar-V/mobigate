@@ -602,7 +602,7 @@ export const GreetingSection = () => {
                       <Images className="h-4 w-4 shrink-0" />
                     </button>
 
-                    <div className="grid grid-cols-2 auto-rows-fr gap-1.5 flex-1 min-h-0 overflow-y-auto touch-pan-y">
+                    <div className="flex flex-row gap-1.5 flex-1 min-h-0 overflow-x-auto touch-pan-x snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                       {myRecentPosts.slice(0, 15).map((post, i) => {
                         const realIdx = myRecentPosts.findIndex(
                           (p) => (p.id || p.imageUrl) === (post.id || post.imageUrl),
@@ -613,7 +613,7 @@ export const GreetingSection = () => {
                             key={`vibe-thumb-${i}-${post.id ?? i}`}
                             type="button"
                             onClick={() => setFeaturedIdx(realIdx < 0 ? 0 : realIdx)}
-                            className={`relative rounded-md overflow-hidden bg-muted h-full w-full min-h-[40px] active:scale-95 transition-all touch-manipulation ${
+                            className={`relative shrink-0 h-full w-[46%] snap-start rounded-md overflow-hidden bg-muted active:scale-95 transition-all touch-manipulation ${
                               isActive
                                 ? "ring-2 ring-[hsl(212_95%_50%)] border border-[hsl(212_95%_50%)]"
                                 : "border border-[hsl(212_95%_50%)]/30 opacity-90 hover:opacity-100"
