@@ -641,13 +641,27 @@ export const CreatePostDialog = ({
             )}
           </div>
           )}
+            </CollapsibleContent>
+          </Collapsible>
 
-
-
-          {/* Audience Privacy */}
-          <div className="rounded-xl border border-border bg-muted/30 p-3">
-            <AudiencePrivacySelector value={audience} onChange={setAudience} />
-          </div>
+          {/* Audience Privacy (collapsible) */}
+          <Collapsible open={audienceOpen} onOpenChange={setAudienceOpen} className="rounded-xl border border-border bg-card">
+            <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 p-3 sm:p-4 text-left">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-muted">
+                  <Shield className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">Audience Privacy</p>
+                  <p className="text-xs text-muted-foreground">Choose who can see this content</p>
+                </div>
+              </div>
+              <ChevronDown className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-300 ${audienceOpen ? "rotate-180" : ""}`} />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-3 pb-3 sm:px-4 sm:pb-4">
+              <AudiencePrivacySelector value={audience} onChange={setAudience} />
+            </CollapsibleContent>
+          </Collapsible>
 
           {/* Album */}
           <div className="space-y-1.5">
