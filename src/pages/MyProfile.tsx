@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AdCard } from "@/components/AdCard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ELibrarySection } from "@/components/ELibrarySection";
+import { MetaTags } from "@/components/MetaTags";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { getPostsByUserId, Post, mockProfilePictures, mockBannerImages, wallStatusPosts, feedPosts } from "@/data/posts";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
