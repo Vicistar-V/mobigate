@@ -354,6 +354,11 @@ export const MediaGalleryViewer = ({
         >
           {renderMedia()}
 
+          {/* "✓Copyright" designation marker — bottom-right of the media */}
+          {currentItem.copyrightMarked && currentItem.type !== "audio" && viewMode !== "reader" && (
+            <CopyrightBadge size="md" />
+          )}
+
           {/* Reader Mode overlay — text fills screen, media floats in corner */}
           {viewMode === "reader" && currentItem.description && (
             <>
