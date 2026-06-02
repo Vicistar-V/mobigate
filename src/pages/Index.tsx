@@ -149,7 +149,7 @@ const Index = () => {
   // Reset pagination when filter changes
   useEffect(() => {
     setVisiblePostCount(20);
-  }, [contentFilter, labelFilter]);
+  }, [contentFilter]);
 
 
   // Convert wall status posts to Post format for WallStatusCarousel
