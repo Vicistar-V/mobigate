@@ -587,7 +587,7 @@ export const GreetingSection = () => {
                       onClick={openComposerBlank}
                       className="bg-primary text-primary-foreground rounded-md px-2.5 py-2.5 text-center text-[15px] font-bold leading-tight truncate active:opacity-90 touch-manipulation shadow-sm"
                     >
-                      Post &amp; Share something now
+                      {tabMeta.composeCta}
                     </button>
                     {/* Storyline 1 — read-only div opener for Edit / Create New */}
                     <div
