@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { CommentDialog } from "@/components/CommentDialog";
 import { useSwipeable } from "react-swipeable";
 import { MediaOwnerMenu } from "@/components/media/MediaOwnerMenu";
+import { CopyrightBadge } from "@/components/common/CopyrightBadge";
 
 
 export interface MediaItem {
