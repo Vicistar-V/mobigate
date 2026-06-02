@@ -94,6 +94,10 @@ export const CreatePostDialog = ({
   // Audience privacy
   const [audience, setAudience] = useState<AudienceValue>(DEFAULT_AUDIENCE_VALUE);
 
+  // Collapsible sections (collapsed by default to save space)
+  const [monetizationOpen, setMonetizationOpen] = useState(false);
+  const [audienceOpen, setAudienceOpen] = useState(false);
+
 
   // Monetization
   const [isMonetized,  setIsMonetized]  = useState(false);
