@@ -34,7 +34,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/useAuth";
 import { MetaTags } from "@/components/MetaTags";
 import {
-  CascadingLocationSelector, type LocationValue, DEFAULT_LOCATION_VALUE,
+  CascadingLocationSelector, type LocationValue, EMPTY_LOCATION,
 } from "@/components/common/CascadingLocationSelector";
 import { cn } from "@/lib/utils";
 
@@ -174,7 +174,7 @@ const AccountVerificationPage = () => {
   const { user } = useAuth();
 
   const [form, setForm] = useState<VerificationForm>(EMPTY_FORM);
-  const [location, setLocation] = useState<LocationValue>(DEFAULT_LOCATION_VALUE);
+  const [location, setLocation] = useState<LocationValue>(EMPTY_LOCATION);
   const [idFront, setIdFront] = useState<File | null>(null);
   const [idBack, setIdBack] = useState<File | null>(null);
   const [selfie, setSelfie] = useState<File | null>(null);
