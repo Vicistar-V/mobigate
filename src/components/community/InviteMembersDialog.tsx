@@ -109,6 +109,7 @@ export const InviteMembersDialog = ({
       setSelectedComms([]); setCustomText(""); setExtStep("compose");
       setSelectedMobiComms([]); setMobiCommOpen(false);
       setLinkComms([]); setCopied(false); setCommOpen(false); setLinkCommOpen(false);
+      setShowConnections(false); setConnTab("friends"); setConnSearch("");
     }
   }, [open]);
 
