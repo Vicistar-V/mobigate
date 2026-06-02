@@ -31,7 +31,7 @@ const moreFilters = [
   { value: "url", label: "URL Links", icon: Link, count: "20.0k" },
 ];
 
-export const ELibrarySection = ({ activeFilter, onFilterChange, title = "Recommended E-Library Contents", labelFilter, onClearLabel }: ELibrarySectionProps) => {
+export const ELibrarySection = ({ activeFilter, onFilterChange, title = "Recommended E-Library Contents" }: ELibrarySectionProps) => {
   const isMoreActive = moreFilters.some(filter => filter.value === activeFilter);
   const [sortFilter, setSortFilter] = useState("all");
   const [isManageDialogOpen, setIsManageDialogOpen] = useState(false);
