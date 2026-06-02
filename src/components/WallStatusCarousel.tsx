@@ -12,6 +12,7 @@ import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { MoveHorizontal, MoveVertical } from "lucide-react";
 import React, { useState } from "react";
 import { useCurrentUserId } from "@/hooks/useWindowData";
+import { CopyrightBadge } from "@/components/common/CopyrightBadge";
 
 interface Post {
   id?: string;
