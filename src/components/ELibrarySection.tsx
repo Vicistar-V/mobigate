@@ -59,30 +59,8 @@ export const ELibrarySection = ({ activeFilter, onFilterChange, title = "Recomme
         />
       </div>
 
-      {/* Removable label filter chip — applied when a section button on the
-          homepage (e.g. "Vibes & Flexing" / "Breaking News") is tapped. */}
-      {labelFilter && (
-        <div className="mb-3 flex flex-wrap items-center gap-2">
-          <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">
-            Showing only
-          </span>
-          <Badge
-            variant="secondary"
-            className="gap-1.5 pl-2 pr-1 py-1 text-[12px] bg-green-600/10 text-green-700 dark:text-green-400 border border-green-600/30"
-          >
-            <Tag className="h-3 w-3" />
-            {labelFilter}
-            <button
-              type="button"
-              onClick={onClearLabel}
-              aria-label={`Remove ${labelFilter} filter`}
-              className="ml-0.5 h-5 w-5 rounded-full hover:bg-green-600/20 flex items-center justify-center touch-manipulation"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          </Badge>
-        </div>
-      )}
+
+
 
       <div className="flex flex-wrap items-center gap-2">
         {primaryFilters.map((option) => {
