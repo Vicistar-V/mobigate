@@ -90,6 +90,10 @@ export const CreatePostDialog = ({
   const [submitting,       setSubmitting]       = useState(false);
   const [progress,         setProgress]         = useState(0);
   const [legalAccepted,    setLegalAccepted]    = useState(false);
+  // Copyright protection
+  const [copyrightEnabled, setCopyrightEnabled] = useState(false);
+  const [copyrightFile,    setCopyrightFile]    = useState<File | null>(null);
+  const [copyrightMarked,  setCopyrightMarked]  = useState(true);
 
   // Audience privacy
   const [audience, setAudience] = useState<AudienceValue>(DEFAULT_AUDIENCE_VALUE);
