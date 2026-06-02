@@ -463,10 +463,12 @@ export const PostDetailDialog = ({
         isOpen={showGiftDialog}
         onClose={() => setShowGiftDialog(false)}
         recipientName={post.author}
-        onSendGift={(gift) => {
-          toast.success(`Gift sent to ${post.author}!`);
+        recipientId={post.userId}
+        onSendGift={() => {
+          // The dialog already confirms + deducts on success; nothing else needed here.
         }}
       />
+
 
       {isMobile ? (
         <Drawer open={open} onOpenChange={onOpenChange}>
