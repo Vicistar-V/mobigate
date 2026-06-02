@@ -627,6 +627,7 @@ export const GreetingSection = () => {
                             key={`vibe-thumb-${i}-${post.id ?? i}`}
                             type="button"
                             onClick={() => setFeaturedIdx(realIdx < 0 ? 0 : realIdx)}
+                            data-vibe-active={isActive}
                             className={`relative shrink-0 h-full w-[46%] snap-start rounded-md overflow-hidden bg-muted active:scale-95 transition-all touch-manipulation ${
                               isActive
                                 ? "ring-2 ring-[hsl(212_95%_50%)] border border-[hsl(212_95%_50%)]"
