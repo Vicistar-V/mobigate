@@ -597,8 +597,8 @@ export const GreetingSection = () => {
                       <Images className="h-4 w-4 shrink-0" />
                     </button>
 
-                    <div className="grid grid-cols-4 auto-rows-fr gap-1 flex-1 min-h-0">
-                      {myRecentPosts.slice(0, 12).map((post, i) => {
+                    <div className="grid grid-cols-3 gap-1.5 flex-1 min-h-0 overflow-y-auto content-start pr-0.5 [scrollbar-width:thin] overscroll-contain touch-pan-y">
+                      {myRecentPosts.slice(0, 18).map((post, i) => {
                         const realIdx = myRecentPosts.findIndex(
                           (p) => (p.id || p.imageUrl) === (post.id || post.imageUrl),
                         );
@@ -608,7 +608,7 @@ export const GreetingSection = () => {
                             key={`vibe-thumb-${i}-${post.id ?? i}`}
                             type="button"
                             onClick={() => setFeaturedIdx(realIdx < 0 ? 0 : realIdx)}
-                            className={`relative rounded-md overflow-hidden bg-muted h-full w-full min-h-[44px] active:scale-95 transition-all touch-manipulation ${
+                            className={`relative rounded-md overflow-hidden bg-muted aspect-square w-full active:scale-95 transition-all touch-manipulation ${
                               isActive
                                 ? "ring-2 ring-[hsl(212_95%_50%)] border border-[hsl(212_95%_50%)]"
                                 : "border border-[hsl(212_95%_50%)]/30 opacity-90 hover:opacity-100"
