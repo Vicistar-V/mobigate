@@ -11,6 +11,7 @@ import { CommentDialog } from "@/components/CommentDialog";
 import { ShareDialog } from "@/components/ShareDialog";
 import { generateShareUrl } from "@/lib/shareUtils";
 import { toast } from "sonner";
+import { PostSundryBar } from "@/components/feed/PostSundryBar";
 
 interface FeedPostProps {
   id?: string;
