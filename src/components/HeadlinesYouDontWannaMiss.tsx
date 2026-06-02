@@ -1,14 +1,26 @@
+import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import {
   fallbackMissedHeadlines,
+  missedToArticle,
   type MissedHeadline,
+  type NewsArticle,
 } from "@/data/trendingHeadlines";
 import { useMissedHeadlines } from "@/hooks/useWindowData";
+import { NewsArticleDrawer } from "./NewsArticleDrawer";
 
 export const HeadlinesYouDontWannaMiss = () => {
   const phpHeadlines = useMissedHeadlines() as MissedHeadline[] | null;
   const headlines =
     phpHeadlines && phpHeadlines.length > 0 ? phpHeadlines : fallbackMissedHeadlines;
+
+  const [activeArticle, setActiveArticle] = useState<NewsArticle | null>(null);
+  const [readerOpen, setReaderOpen] = useState(false);
+
+  const openArticle = (item: MissedHeadline) => {
+    setActiveArticle(missedToArticle(item));
+    setReaderOpen(true);
+  };
 
   return (
     <section className="mt-6" aria-label="Headlines you don't wanna miss">
@@ -18,7 +30,12 @@ export const HeadlinesYouDontWannaMiss = () => {
 
       <div className="divide-y divide-border rounded-xl border border-border bg-card">
         {headlines.map((item) => (
-          <article key={item.id} className="flex gap-3 p-3">
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => openArticle(item)}
+            className="flex w-full gap-3 p-3 text-left active:bg-muted/50 transition-colors touch-manipulation"
+          >
             <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
               <img
                 src={item.imageUrl}
@@ -36,18 +53,21 @@ export const HeadlinesYouDontWannaMiss = () => {
               </p>
               <div className="mt-1.5 flex items-center justify-between">
                 <span className="text-[10px] text-muted-foreground">{item.timeAgo}</span>
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-0.5 text-[12px] font-bold text-destructive active:opacity-80 touch-manipulation"
-                >
+                <span className="inline-flex items-center gap-0.5 text-[12px] font-bold text-destructive">
                   ...More!
                   <ChevronRight className="h-3.5 w-3.5" />
-                </button>
+                </span>
               </div>
             </div>
-          </article>
+          </button>
         ))}
       </div>
+
+      <NewsArticleDrawer
+        article={activeArticle}
+        open={readerOpen}
+        onOpenChange={setReaderOpen}
+      />
     </section>
   );
 };
