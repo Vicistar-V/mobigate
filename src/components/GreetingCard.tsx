@@ -687,28 +687,41 @@ export const GreetingSection = () => {
                   </div>
                 </div>
 
-                {/* Footer — ◄ Flex with more exciting Vibes ► */}
+                {/* Footer — ◄ scroll · see-all · scroll ► (arrows scroll the strip,
+                    dim when exhausted; center text opens the full media window) */}
                 <div className="mt-3 flex items-center justify-center gap-3">
                   <button
                     type="button"
-                    onClick={() =>
-                      setFeaturedIdx((safeFeaturedIdx - 1 + myRecentPosts.length) % myRecentPosts.length)
-                    }
-                    className="h-7 w-7 rounded-full bg-card border border-[hsl(212_95%_50%)]/40 shadow-sm flex items-center justify-center text-[hsl(212_95%_50%)] active:scale-95 touch-manipulation"
-                    aria-label="Previous vibe"
+                    onClick={() => scrollVibeStrip("left")}
+                    disabled={!vibeCanLeft}
+                    aria-label="Scroll vibes left"
+                    className={`h-8 w-8 rounded-full border flex items-center justify-center transition-all touch-manipulation ${
+                      vibeCanLeft
+                        ? "bg-foreground text-background border-foreground shadow-md active:scale-90"
+                        : "bg-muted text-muted-foreground/40 border-border cursor-not-allowed"
+                    }`}
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft className="h-5 w-5" strokeWidth={vibeCanLeft ? 3 : 2} />
                   </button>
-                  <span className="italic font-bold underline underline-offset-2 text-[13px] text-[hsl(212_95%_50%)]">
-                    Flex with more exciting Vibes
-                  </span>
                   <button
                     type="button"
-                    onClick={() => setFeaturedIdx((safeFeaturedIdx + 1) % myRecentPosts.length)}
-                    className="h-7 w-7 rounded-full bg-card border border-[hsl(212_95%_50%)]/40 shadow-sm flex items-center justify-center text-[hsl(212_95%_50%)] active:scale-95 touch-manipulation"
-                    aria-label="Next vibe"
+                    onClick={() => setViewerOpen(true)}
+                    className="italic font-bold underline underline-offset-2 text-[13px] text-center leading-tight px-1 text-[hsl(212_95%_50%)] active:opacity-70 touch-manipulation"
                   >
-                    <ChevronRight className="h-4 w-4" />
+                    Flex with more exciting Vibes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => scrollVibeStrip("right")}
+                    disabled={!vibeCanRight}
+                    aria-label="Scroll vibes right"
+                    className={`h-8 w-8 rounded-full border flex items-center justify-center transition-all touch-manipulation ${
+                      vibeCanRight
+                        ? "bg-foreground text-background border-foreground shadow-md active:scale-90"
+                        : "bg-muted text-muted-foreground/40 border-border cursor-not-allowed"
+                    }`}
+                  >
+                    <ChevronRight className="h-5 w-5" strokeWidth={vibeCanRight ? 3 : 2} />
                   </button>
                 </div>
               </div>
