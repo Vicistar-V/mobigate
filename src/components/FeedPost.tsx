@@ -135,6 +135,7 @@ export const FeedPost = ({
             <Badge className="absolute top-2 left-2" variant="destructive">
               {type}
             </Badge>
+            {copyrightMarked && <CopyrightBadge size="sm" />}
           </div>
         )}
       
