@@ -121,7 +121,6 @@ export const GreetingSection = () => {
 
   const [friendsMenuView, setFriendsMenuView] = useState<"main" | "requests" | "birthdays">("main");
   const [createPostOpen, setCreatePostOpen] = useState(false);
-  const [activeFeedTab, setActiveFeedTab] = useState<"Stories" | "Vibes & Flexing" | "Breaking News">("Stories");
   const [presetMediaUrl, setPresetMediaUrl] = useState<string | null>(null);
   const [presetTitle, setPresetTitle] = useState<string>("");
   const galleryInputRef = useRef<HTMLInputElement>(null);
