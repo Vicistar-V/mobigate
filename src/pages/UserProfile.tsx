@@ -284,6 +284,11 @@ const UserProfile = () => {
 
   return (
     <div className="flex flex-col w-full min-h-screen bg-background">
+      <MetaTags
+        title={profile ? `${profile.name} — MobiGate` : "Profile — MobiGate"}
+        description={profile ? `View ${profile.name}'s profile on MobiGate` : "View user profile on MobiGate"}
+        ogType="profile"
+      />
       <Header />
 
       <main className="container max-w-4xl mx-auto px-4 py-6 flex-1">
