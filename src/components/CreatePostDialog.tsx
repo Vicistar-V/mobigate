@@ -519,7 +519,23 @@ export const CreatePostDialog = ({
             </div>
           )}
 
-          {/* ── MONETIZATION SECTION ── */}
+          {/* ── MONETIZATION SECTION (collapsible) ── */}
+          <Collapsible open={monetizationOpen} onOpenChange={setMonetizationOpen} className="rounded-xl border border-border bg-card">
+            <CollapsibleTrigger className="flex w-full items-center justify-between gap-3 p-3 sm:p-4 text-left">
+              <div className="flex items-center gap-3">
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${isMonetized ? "bg-amber-400" : "bg-muted"}`}>
+                  {isMonetized ? <Lock className="h-5 w-5 text-white" /> : <DollarSign className="h-5 w-5 text-muted-foreground" />}
+                </div>
+                <div>
+                  <p className="font-semibold text-sm">Monetisation</p>
+                  <p className="text-xs text-muted-foreground">
+                    {isMonetized ? `Monetized · ${feeValue} Mobi to unlock` : "Tap to set up paid access"}
+                  </p>
+                </div>
+              </div>
+              <ChevronDown className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-300 ${monetizationOpen ? "rotate-180" : ""}`} />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-3 pb-3 sm:px-4 sm:pb-4">
           {!canMonetize ? (
             <MonetizationEligibilityCard profile={monetizationProfile} hideWhenEligible={false} />
           ) : (
