@@ -22,6 +22,7 @@ interface PostData {
   access_fee: number; is_monetized: boolean; is_liked: boolean;
   author_name: string; author_username: string; author_profile_photo?: string;
   user_id: string; created_at: string;
+  copyright_marked?: boolean | number; has_copyright_docs?: boolean | number;
 }
 
 const PostPage = () => {
@@ -123,6 +124,7 @@ const PostPage = () => {
           status="Online"
           isOwner={false}
           followers="0"
+          copyrightMarked={post.copyright_marked === true || post.copyright_marked === 1}
         />
       </main>
       <Footer />
