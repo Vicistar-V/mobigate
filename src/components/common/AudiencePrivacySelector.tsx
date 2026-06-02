@@ -4,7 +4,7 @@ import {
   GraduationCap, MapPin, CalendarRange, ChevronDown, Check,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+
 import { cn } from "@/lib/utils";
 import { ExclusionPicker, type ExcludedUser } from "@/components/common/ExclusionPicker";
 import { CascadingLocationSelector } from "@/components/common/CascadingLocationSelector";
