@@ -83,6 +83,16 @@ export const PostDetailDialog = ({
     setIsLiked(!isLiked);
   };
 
+  const focusCommentInput = () => {
+    const commentInput = document.querySelector(
+      'textarea[placeholder*="comment"]'
+    ) as HTMLTextAreaElement | null;
+    if (commentInput) {
+      commentInput.scrollIntoView({ behavior: "smooth", block: "center" });
+      commentInput.focus();
+    }
+  };
+
   const handleFollow = () => {
     if (isFollowing) {
       setFollowerCount(followerCount - 1);
