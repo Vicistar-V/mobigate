@@ -21,8 +21,12 @@ import { useAuth }  from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import {
   Search, Check, Copy, ChevronDown, ChevronUp,
-  Send, Loader2, Globe, X, Users, UserPlus, Link2,
+  Send, Loader2, Globe, X, Users, UserPlus, Link2, ArrowLeft,
 } from "lucide-react";
+import {
+  getConnections, connectionTabs,
+  type ConnectionCategory, type ConnectionUser,
+} from "@/lib/inviteConnections";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string) || "/api";
 const APP_URL  = window.location.origin;
@@ -77,6 +81,10 @@ export const InviteMembersDialog = ({
   const [searching,       setSearching]       = useState(false);
   const [selectedUsers,   setSelectedUsers]   = useState<MobiUser[]>([]);
   const [sending,         setSending]         = useState(false);
+  // Connections picker (Friends / Followers / Suggested)
+  const [showConnections, setShowConnections] = useState(false);
+  const [connTab,         setConnTab]         = useState<ConnectionCategory>("friends");
+  const [connSearch,      setConnSearch]      = useState("");
   const [mobiMessage,     setMobiMessage]     = useState("");
   const [selectedMobiComms, setSelectedMobiComms] = useState<Community[]>([]);
   const [mobiCommOpen,    setMobiCommOpen]    = useState(false);
@@ -101,6 +109,7 @@ export const InviteMembersDialog = ({
       setSelectedComms([]); setCustomText(""); setExtStep("compose");
       setSelectedMobiComms([]); setMobiCommOpen(false);
       setLinkComms([]); setCopied(false); setCommOpen(false); setLinkCommOpen(false);
+      setShowConnections(false); setConnTab("friends"); setConnSearch("");
     }
   }, [open]);
 
@@ -136,6 +145,15 @@ export const InviteMembersDialog = ({
 
   const toggleUser = (u: MobiUser) =>
     setSelectedUsers(prev => prev.find(p => p.id === u.id) ? prev.filter(p => p.id !== u.id) : [...prev, u]);
+
+  // Connections shown in the picker, filtered by the picker's own search box
+  const connList: ConnectionUser[] = (() => {
+    const list = getConnections(connTab);
+    const q = connSearch.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter(c =>
+      c.name.toLowerCase().includes(q) || c.username.toLowerCase().includes(q));
+  })();
 
   const toggleComm = (c: Community) =>
     setSelectedComms(prev => prev.find(p => p.id === c.id) ? prev.filter(p => p.id !== c.id) : [...prev, c]);
@@ -301,7 +319,83 @@ export const InviteMembersDialog = ({
         <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 py-4">
 
           {/* ══ TAB 1: MOBIGATE USERS ══ */}
-          {tab === "mobigate" && (
+          {tab === "mobigate" && showConnections && (
+            <div className="space-y-3">
+              {/* Picker header */}
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={() => { setShowConnections(false); setConnSearch(""); }}
+                  className="flex items-center gap-1 text-sm font-semibold text-purple-600 hover:text-purple-700">
+                  <ArrowLeft className="h-4 w-4"/>Back
+                </button>
+                <span className="text-sm font-bold text-gray-800 ml-1">Select from Connections</span>
+              </div>
+
+              {/* Category chips */}
+              <div className="flex gap-1.5 bg-gray-100 rounded-xl p-1">
+                {connectionTabs.map(({ key, label }) => (
+                  <button key={key} type="button" onClick={() => setConnTab(key)}
+                    className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all
+                      ${connTab === key ? "bg-white text-purple-700 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Picker search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"/>
+                <Input value={connSearch} onChange={e => setConnSearch(e.target.value)}
+                  placeholder={`Search your ${connTab}...`}
+                  className="pl-9 rounded-xl border-gray-200 focus-visible:ring-purple-400"/>
+              </div>
+
+              {selectedUsers.length > 0 && (
+                <p className="text-sm text-purple-600 font-semibold">
+                  {selectedUsers.length} selected
+                </p>
+              )}
+
+              {/* Connections list */}
+              <div className="space-y-1 max-h-72 overflow-y-auto">
+                {connList.length === 0 && (
+                  <p className="text-sm text-gray-400 text-center py-6">
+                    {connSearch ? "No matches found" : `No ${connTab} yet`}
+                  </p>
+                )}
+                {connList.map(u => {
+                  const isSel = selectedUsers.some(s => s.id === u.id);
+                  return (
+                    <div key={u.id} onClick={() => toggleUser(u)}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer border transition-all
+                        ${isSel ? "bg-purple-50 border-purple-200" : "border-transparent hover:bg-gray-50"}`}>
+                      <div className={`w-5 h-5 rounded flex items-center justify-center border-2 shrink-0 transition-colors
+                        ${isSel ? "bg-purple-600 border-purple-600" : "border-gray-300"}`}>
+                        {isSel && <Check className="h-3 w-3 text-white"/>}
+                      </div>
+                      <Avatar className="h-9 w-9 shrink-0">
+                        <AvatarImage src={u.profile_photo}/>
+                        <AvatarFallback className="bg-purple-100 text-purple-700 text-xs font-bold">
+                          {(u.name || u.username || "?").charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{u.name || u.username}</p>
+                        <p className="text-xs text-gray-400">@{u.username}{u.role ? ` • ${u.role}` : ""}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <Button className="w-full rounded-xl bg-purple-600 hover:bg-purple-700 text-white gap-2"
+                onClick={() => { setShowConnections(false); setConnSearch(""); }}>
+                <Check className="h-4 w-4"/>
+                Done{selectedUsers.length > 0 ? ` (${selectedUsers.length} selected)` : ""}
+              </Button>
+            </div>
+          )}
+
+          {tab === "mobigate" && !showConnections && (
             <div className="space-y-4">
               {/* Search */}
               <div className="relative">
@@ -314,6 +408,20 @@ export const InviteMembersDialog = ({
                 />
                 {searching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-purple-400"/>}
               </div>
+
+              {/* Select from Connections */}
+              <Button type="button" variant="outline"
+                onClick={() => setShowConnections(true)}
+                className="w-full rounded-xl border-2 border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300 gap-2 font-semibold">
+                <Users className="h-4 w-4"/>
+                Select from Connections
+              </Button>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-px bg-gray-100"/>
+                <span className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">or search</span>
+                <div className="flex-1 h-px bg-gray-100"/>
+              </div>
+
 
               {/* Select Community / Group */}
               <div>
@@ -341,11 +449,21 @@ export const InviteMembersDialog = ({
                 />
               </div>
 
-              {/* Selected count */}
+              {/* Selected users (chips — removable) */}
               {selectedUsers.length > 0 && (
-                <p className="text-sm text-purple-600 font-semibold">
-                  {selectedUsers.length} user{selectedUsers.length > 1 ? "s" : ""} selected
-                </p>
+                <div>
+                  <p className="text-sm text-purple-600 font-semibold mb-2">
+                    {selectedUsers.length} user{selectedUsers.length > 1 ? "s" : ""} selected
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {selectedUsers.map(u => (
+                      <Badge key={u.id} onClick={() => toggleUser(u)}
+                        className="bg-purple-100 text-purple-700 gap-1 cursor-pointer pr-1.5 hover:bg-purple-200">
+                        {u.name || u.username}<X className="h-3 w-3"/>
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
               )}
 
               {/* User list */}
