@@ -61,6 +61,7 @@ export const EditLocationForm = ({ currentData, onSave, onClose }: EditLocationF
   const [privacy, setPrivacy] = useState("public");
   const [exceptions, setExceptions] = useState<string[]>([]);
   const [showCustomInput, setShowCustomInput] = useState(false);
+  const [locationValue, setLocationValue] = useState<LocationValue>(EMPTY_LOCATION);
 
   const form = useForm({
     resolver: zodResolver(locationSchema),
