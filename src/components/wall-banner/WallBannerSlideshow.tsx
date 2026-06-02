@@ -75,11 +75,19 @@ export function WallBannerSlideshow({
   const [createOpen, setCreateOpen] = useState(false);
   const [bulkOpen, setBulkOpen] = useState(false);
   const [editSlide, setEditSlide] = useState<WallBannerSlide | null>(null);
+  // Controlled open-state for the owner "+" quick-menu. Keeping it here (instead
+  // of letting the dropdown manage its own state inside an inline component)
+  // prevents the menu from snapping shut whenever the parent re-renders — e.g.
+  // the live clock ticking or the slideshow auto-rotating every few seconds.
+  const [menuOpen, setMenuOpen] = useState(false);
 
-
-  // The owner "+" quick-menu trigger and content (reused for both states)
-  const OwnerPlusMenu = ({ slide }: { slide?: WallBannerSlide | null }) => (
-    <DropdownMenu>
+  // The owner "+" quick-menu trigger and content (reused for both states).
+  // IMPORTANT: this is a plain render function (called inline), NOT a nested
+  // React component invoked as <OwnerPlusMenu/>. Rendering it inline keeps it
+  // part of the parent's element tree so React never unmounts/remounts it on
+  // re-render — which was causing the dropdown to close instantly.
+  const renderOwnerPlusMenu = (slide?: WallBannerSlide | null) => (
+    <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
@@ -185,10 +193,13 @@ export function WallBannerSlideshow({
 
   const current = slides[idx];
 
-  // Auto-rotation timer (per slide)
+  // Auto-rotation timer (per slide). Each slide advances after its OWN
+  // configured display interval (displaySeconds), so creators can set how long
+  // each photo/video stays on screen. Rotation is paused while the owner menu
+  // is open so the banner doesn't shift out from under the user mid-interaction.
   useEffect(() => {
     if (timerRef.current) window.clearTimeout(timerRef.current);
-    if (slides.length < 2 || !current) return;
+    if (slides.length < 2 || !current || menuOpen) return;
     const seconds = Math.max(2, current.displaySeconds || 6);
     timerRef.current = window.setTimeout(() => {
       setIdx((i) => (i + 1) % slides.length);
@@ -196,7 +207,7 @@ export function WallBannerSlideshow({
     return () => {
       if (timerRef.current) window.clearTimeout(timerRef.current);
     };
-  }, [current, slides.length]);
+  }, [current, slides.length, menuOpen]);
 
   const allSlideCount = useMemo(
     () => slides.length,
@@ -237,7 +248,7 @@ export function WallBannerSlideshow({
         )}
         {isOwner && (
           <div className="absolute bottom-3 right-3 z-20">
-            <OwnerPlusMenu slide={null} />
+            {renderOwnerPlusMenu(null)}
           </div>
         )}
         {isOwner && (
@@ -363,7 +374,7 @@ export function WallBannerSlideshow({
       {/* Owner overlay — "+" quick menu */}
       {isOwner && (
         <div className="absolute bottom-3 right-3 z-20">
-          <OwnerPlusMenu slide={current} />
+          {renderOwnerPlusMenu(current)}
         </div>
       )}
 
