@@ -310,4 +310,9 @@ export function appendAudienceToFormData(form: FormData, v: AudienceValue, prefi
   if (v.selected.includes("agelimits")) {
     form.append(`${prefix}_age_limits`, v.ageLimits.join(","));
   }
+
+  // Life-Mate group targeting
+  if (v.selected.includes("lifemates")) {
+    form.append(`${prefix}_life_mates`, v.lifeMates.join(","));
+  }
 }
