@@ -92,14 +92,48 @@ export const PostDetailDialog = ({
     setIsFollowing(!isFollowing);
   };
 
-  const handleShare = () => {
-    // Share functionality
-    if (navigator.share) {
-      navigator.share({
-        title: post.title,
-        text: post.description,
-        url: window.location.href,
-      });
+  const handleShare = async () => {
+    // Build a deep-link to this specific post when we have an id.
+    const shareUrl = post.id
+      ? `${window.location.origin}/post/${post.id}`
+      : window.location.href;
+    const shareData = {
+      title: post.title,
+      text: post.description || post.title,
+      url: shareUrl,
+    };
+
+    // 1) Try native mobile share sheet first.
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch (err) {
+        // User cancelled the share sheet — do nothing further.
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        // Otherwise fall through to clipboard fallback.
+      }
+    }
+
+    // 2) Fallback: copy the link to the clipboard.
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        // Legacy fallback for older mobile browsers.
+        const ta = document.createElement("textarea");
+        ta.value = shareUrl;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+      toast.success("Link copied to clipboard");
+    } catch {
+      toast.error("Couldn't share or copy the link");
     }
   };
 
@@ -429,10 +463,12 @@ export const PostDetailDialog = ({
         isOpen={showGiftDialog}
         onClose={() => setShowGiftDialog(false)}
         recipientName={post.author}
-        onSendGift={(gift) => {
-          toast.success(`Gift sent to ${post.author}!`);
+        recipientId={post.userId}
+        onSendGift={() => {
+          // The dialog already confirms + deducts on success; nothing else needed here.
         }}
       />
+
 
       {isMobile ? (
         <Drawer open={open} onOpenChange={onOpenChange}>
