@@ -574,30 +574,22 @@ export function WallBannerEditDialog({
       return;
     }
 
-    Promise.all(
-      accepted.map(
-        (file) =>
-          new Promise<PendingItem>((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () =>
-              resolve({
-                url: reader.result as string,
-                mediaType: file.type.startsWith("video/") ? "video" : "photo",
-                name: file.name,
-              });
-            reader.readAsDataURL(file);
-          }),
-      ),
-    ).then((items) => {
-      setPending((prev) => [...prev, ...items]);
-      const combined = [...pending, ...items];
-      if (combined.length === 1) {
-        setMediaUrl(combined[0].url);
-        setMediaType(combined[0].mediaType);
-      } else {
-        setMediaUrl("");
-      }
-    });
+    // Object URLs keep localStorage tiny (just a short blob: reference) so even
+    // large videos save successfully, instead of base64 data URLs that overflow
+    // the storage quota and cause "Add slide" to silently fail.
+    const items: PendingItem[] = accepted.map((file) => ({
+      url: URL.createObjectURL(file),
+      mediaType: file.type.startsWith("video/") ? "video" : "photo",
+      name: file.name,
+    }));
+    setPending((prev) => [...prev, ...items]);
+    const combined = [...pending, ...items];
+    if (combined.length === 1) {
+      setMediaUrl(combined[0].url);
+      setMediaType(combined[0].mediaType);
+    } else {
+      setMediaUrl("");
+    }
     e.target.value = "";
   };
 
