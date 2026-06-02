@@ -83,6 +83,12 @@ const PostPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <MetaTags
+        title={`${post.title} — MobiGate`}
+        description={strip(post.content || post.subtitle || "") || `${ucfirst(post.post_type)} by ${post.author_name}`}
+        image={post.thumbnail_url || post.media_url || undefined}
+        ogType="article"
+      />
       <Header />
       <main className="container max-w-2xl mx-auto px-4 py-6 flex-1">
         <button onClick={() => navigate(-1)}
