@@ -570,6 +570,7 @@ const Profile = () => {
     likes: String(post.likes),
     type: post.type === "video" ? "Video" as const : "Photo" as const,
     imageUrl: post.url,
+    copyrightMarked: post.copyrightMarked,
     isOwner: true
   }));
 
