@@ -613,7 +613,10 @@ export const GreetingSection = () => {
                       <Images className="h-4 w-4 shrink-0" />
                     </button>
 
-                    <div className="flex flex-row gap-1.5 flex-1 min-h-0 overflow-x-auto touch-pan-x snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    <div
+                      ref={vibeStripRef}
+                      className="flex flex-row gap-1.5 flex-1 min-h-0 overflow-x-auto overflow-y-hidden touch-pan-x overscroll-x-contain snap-x snap-mandatory [-webkit-overflow-scrolling:touch] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                    >
                       {myRecentPosts.slice(0, 15).map((post, i) => {
                         const realIdx = myRecentPosts.findIndex(
                           (p) => (p.id || p.imageUrl) === (post.id || post.imageUrl),
