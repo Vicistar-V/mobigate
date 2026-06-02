@@ -43,6 +43,9 @@ export const ProfileDropdown = () => {
         <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/profile')}>
           <User className="mr-2 h-4 w-4" /><span>My Profile</span>
         </DropdownMenuItem>
+        <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/verify-account')}>
+          <BadgeCheck className="mr-2 h-4 w-4 text-primary" /><span>Verify Account</span>
+        </DropdownMenuItem>
         <DropdownMenuItem className="cursor-pointer">
           <Settings className="mr-2 h-4 w-4" /><span>Settings</span>
         </DropdownMenuItem>
