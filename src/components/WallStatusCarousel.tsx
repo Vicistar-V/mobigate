@@ -201,7 +201,7 @@ export const WallStatusCarousel = ({
                       <Badge className="absolute top-1 left-1 sm:top-2 sm:left-2 z-10 text-xs sm:text-sm px-1.5 sm:px-2.5 py-0 sm:py-0.5" variant="destructive">
                         {item.type}
                       </Badge>
-                      {item.copyrightMarked && item.type !== "video" && <CopyrightBadge size="md" />}
+                      {item.copyrightMarked && <CopyrightBadge size="md" />}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-2 sm:p-3">
                         <p className="text-white text-sm sm:text-base font-medium truncate">{item.author}</p>
                         <p className="text-white/90 text-xs sm:text-sm truncate">{item.title}</p>
@@ -262,7 +262,7 @@ export const WallStatusCarousel = ({
                       <Badge className="absolute top-1 left-1 sm:top-2 sm:left-2 z-10 text-xs sm:text-sm px-1.5 sm:px-2.5 py-0 sm:py-0.5" variant="destructive">
                         {item.type}
                       </Badge>
-                      {item.copyrightMarked && item.type !== "video" && <CopyrightBadge size="sm" />}
+                      {item.copyrightMarked && <CopyrightBadge size="sm" />}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-2 sm:p-3">
                         <p className="text-white text-sm sm:text-base font-medium truncate">{item.author}</p>
                         <p className="text-white/90 text-xs sm:text-sm truncate">{item.title}</p>
@@ -315,7 +315,7 @@ export const WallStatusCarousel = ({
                           <Badge className="absolute top-1 left-1 sm:top-2 sm:left-2 z-10 text-xs sm:text-sm px-1.5 sm:px-2.5 py-0 sm:py-0.5" variant="destructive">
                             {item.type}
                           </Badge>
-                          {item.copyrightMarked && item.type !== "video" && <CopyrightBadge size="sm" />}
+                          {item.copyrightMarked && <CopyrightBadge size="sm" />}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-2 sm:p-3">
                             <p className="text-white text-sm sm:text-base font-medium truncate">{item.author}</p>
                             <p className="text-white/90 text-xs sm:text-sm truncate">{item.title}</p>
@@ -401,7 +401,7 @@ export const WallStatusCarousel = ({
                     <Badge className="absolute top-1 left-1 sm:top-2 sm:left-2 z-10 text-xs sm:text-sm px-1.5 sm:px-2.5 py-0 sm:py-0.5" variant="destructive">
                       {item.type}
                     </Badge>
-                    {item.copyrightMarked && item.type !== "video" && <CopyrightBadge size="sm" />}
+                    {item.copyrightMarked && <CopyrightBadge size="sm" />}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-2 sm:p-3">
                       <p className="text-white text-sm sm:text-base font-medium truncate">{item.author}</p>
                       <p className="text-white/90 text-xs sm:text-sm truncate">{item.title}</p>
