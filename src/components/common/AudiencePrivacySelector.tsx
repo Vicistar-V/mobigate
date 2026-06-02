@@ -208,6 +208,30 @@ export const AudiencePrivacySelector = ({
                     />
                   )}
 
+                  {/* Life-Mates config — independent groups */}
+                  {opt.key === "lifemates" && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {LIFE_MATE_GROUPS.map(group => {
+                        const on = value.lifeMates.includes(group);
+                        return (
+                          <button
+                            key={group}
+                            type="button"
+                            onClick={() => toggleLifeMate(group)}
+                            className={cn(
+                              "px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors",
+                              on
+                                ? "bg-primary text-primary-foreground border-primary"
+                                : "bg-white text-muted-foreground border-border hover:border-primary/40",
+                            )}
+                          >
+                            {group}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
                   {/* Age-limits config */}
                   {opt.key === "agelimits" && (
                     <div className="flex flex-wrap gap-1.5">
