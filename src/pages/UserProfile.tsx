@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { MetaTags } from "@/components/MetaTags";
 import { useState, useEffect, useCallback } from "react";
 import { useParams }           from "react-router-dom";
 import { Post, wallStatusPosts, feedPosts } from "@/data/posts";
