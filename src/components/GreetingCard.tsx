@@ -602,7 +602,7 @@ export const GreetingSection = () => {
                       <Images className="h-4 w-4 shrink-0" />
                     </button>
 
-                    <div className="grid grid-cols-3 auto-rows-fr gap-1.5 flex-1 min-h-0">
+                    <div className="grid grid-cols-2 auto-rows-fr gap-1.5 flex-1 min-h-0 overflow-y-auto touch-pan-y">
                       {myRecentPosts.slice(0, 15).map((post, i) => {
                         const realIdx = myRecentPosts.findIndex(
                           (p) => (p.id || p.imageUrl) === (post.id || post.imageUrl),
