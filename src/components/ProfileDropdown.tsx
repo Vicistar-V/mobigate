@@ -4,7 +4,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, Settings, CreditCard, LogOut, Loader2 } from "lucide-react";
+import { User, Settings, CreditCard, LogOut, Loader2, BadgeCheck } from "lucide-react";
 import { useAuth } from "@/contexts/useAuth";
 import { useState } from "react";
 
@@ -42,6 +42,9 @@ export const ProfileDropdown = () => {
         <DropdownMenuSeparator />
         <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/profile')}>
           <User className="mr-2 h-4 w-4" /><span>My Profile</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/verify-account')}>
+          <BadgeCheck className="mr-2 h-4 w-4 text-primary" /><span>Verify Account</span>
         </DropdownMenuItem>
         <DropdownMenuItem className="cursor-pointer">
           <Settings className="mr-2 h-4 w-4" /><span>Settings</span>
