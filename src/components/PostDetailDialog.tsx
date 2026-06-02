@@ -176,12 +176,23 @@ export const PostDetailDialog = ({
                 className="w-full h-full object-cover transition-opacity group-hover:opacity-90"
               />
             </AspectRatio>
+            {/* Play / View affordance — tap media to play/view */}
+            {(post.type === "Video" || post.type === "Audio") && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-black/55 backdrop-blur-sm transition-transform group-hover:scale-110 group-active:scale-95">
+                  <Play className="h-8 w-8 text-white fill-white translate-x-0.5" />
+                </div>
+              </div>
+            )}
             <Badge
               className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm text-foreground border-border hover:bg-background/95"
               variant="outline"
             >
               {post.type}
             </Badge>
+            <span className="absolute bottom-3 right-3 rounded-full bg-black/55 backdrop-blur-sm px-2.5 py-1 text-[11px] font-medium text-white pointer-events-none">
+              Tap to {post.type === "Video" || post.type === "Audio" ? "play" : "view"}
+            </span>
           </div>
         )}
 
