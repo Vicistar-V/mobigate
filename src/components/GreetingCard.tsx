@@ -23,7 +23,8 @@ import { PeopleYouMayKnow } from "./PeopleYouMayKnow";
 import { TopTrendingHeadlines } from "./TopTrendingHeadlines";
 import { HeadlinesYouDontWannaMiss } from "./HeadlinesYouDontWannaMiss";
 import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { ScrollableThumbStrip } from "@/components/feed/ScrollableThumbStrip";
 import { UserTagBadges } from "./UserTagBadges";
 import { useUserProfile, useCurrentUserId, useFeedPosts } from "@/hooks/useWindowData";
 import { feedPosts as fallbackFeedPosts } from "@/data/posts";
@@ -129,6 +130,35 @@ export const GreetingSection = () => {
       activeEl.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
     }
   }, [safeFeaturedIdx]);
+
+  // Real Play-style scroll arrows for the Vibes thumbnail strip: track which
+  // direction still has hidden items so the arrows can dim when exhausted.
+  const [vibeCanLeft, setVibeCanLeft] = useState(false);
+  const [vibeCanRight, setVibeCanRight] = useState(false);
+  const updateVibeScroll = useCallback(() => {
+    const el = vibeStripRef.current;
+    if (!el) return;
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    setVibeCanLeft(scrollLeft > 2);
+    setVibeCanRight(scrollLeft + clientWidth < scrollWidth - 2);
+  }, []);
+  useEffect(() => {
+    const el = vibeStripRef.current;
+    if (!el) return;
+    updateVibeScroll();
+    el.addEventListener("scroll", updateVibeScroll, { passive: true });
+    window.addEventListener("resize", updateVibeScroll);
+    return () => {
+      el.removeEventListener("scroll", updateVibeScroll);
+      window.removeEventListener("resize", updateVibeScroll);
+    };
+  }, [updateVibeScroll, safeFeaturedIdx, activeFeedTab]);
+  const scrollVibeStrip = (dir: "left" | "right") => {
+    const el = vibeStripRef.current;
+    if (!el) return;
+    const amount = Math.max(el.clientWidth * 0.7, 120);
+    el.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
+  };
   // Keep legacy names so the rest of the file keeps compiling unchanged
   const featuredPost = myLatestOwnPost;
   const myRecentPosts = thumbnailPosts;
@@ -657,28 +687,41 @@ export const GreetingSection = () => {
                   </div>
                 </div>
 
-                {/* Footer — ◄ Flex with more exciting Vibes ► */}
+                {/* Footer — ◄ scroll · see-all · scroll ► (arrows scroll the strip,
+                    dim when exhausted; center text opens the full media window) */}
                 <div className="mt-3 flex items-center justify-center gap-3">
                   <button
                     type="button"
-                    onClick={() =>
-                      setFeaturedIdx((safeFeaturedIdx - 1 + myRecentPosts.length) % myRecentPosts.length)
-                    }
-                    className="h-7 w-7 rounded-full bg-card border border-[hsl(212_95%_50%)]/40 shadow-sm flex items-center justify-center text-[hsl(212_95%_50%)] active:scale-95 touch-manipulation"
-                    aria-label="Previous vibe"
+                    onClick={() => scrollVibeStrip("left")}
+                    disabled={!vibeCanLeft}
+                    aria-label="Scroll vibes left"
+                    className={`h-8 w-8 rounded-full border flex items-center justify-center transition-all touch-manipulation ${
+                      vibeCanLeft
+                        ? "bg-foreground text-background border-foreground shadow-md active:scale-90"
+                        : "bg-muted text-muted-foreground/40 border-border cursor-not-allowed"
+                    }`}
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft className="h-5 w-5" strokeWidth={vibeCanLeft ? 3 : 2} />
                   </button>
-                  <span className="italic font-bold underline underline-offset-2 text-[13px] text-[hsl(212_95%_50%)]">
-                    Flex with more exciting Vibes
-                  </span>
                   <button
                     type="button"
-                    onClick={() => setFeaturedIdx((safeFeaturedIdx + 1) % myRecentPosts.length)}
-                    className="h-7 w-7 rounded-full bg-card border border-[hsl(212_95%_50%)]/40 shadow-sm flex items-center justify-center text-[hsl(212_95%_50%)] active:scale-95 touch-manipulation"
-                    aria-label="Next vibe"
+                    onClick={() => setViewerOpen(true)}
+                    className="italic font-bold underline underline-offset-2 text-[13px] text-center leading-tight px-1 text-[hsl(212_95%_50%)] active:opacity-70 touch-manipulation"
                   >
-                    <ChevronRight className="h-4 w-4" />
+                    Flex with more exciting Vibes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => scrollVibeStrip("right")}
+                    disabled={!vibeCanRight}
+                    aria-label="Scroll vibes right"
+                    className={`h-8 w-8 rounded-full border flex items-center justify-center transition-all touch-manipulation ${
+                      vibeCanRight
+                        ? "bg-foreground text-background border-foreground shadow-md active:scale-90"
+                        : "bg-muted text-muted-foreground/40 border-border cursor-not-allowed"
+                    }`}
+                  >
+                    <ChevronRight className="h-5 w-5" strokeWidth={vibeCanRight ? 3 : 2} />
                   </button>
                 </div>
               </div>
@@ -818,89 +861,22 @@ export const GreetingSection = () => {
 
 
 
-            {/* RTL auto-scrolling thumbnail strip — click to load into the big featured panel above */}
+            {/* Scrollable thumbnail strip with real Play-style scroll arrows.
+                Arrows scroll the media left/right and dim when nothing is left in
+                that direction; the center label opens the full media window. */}
             {activeFeedTab !== "Vibes & Flexing" && myRecentPosts.length > 1 && (
-              <div className="mt-2 rounded-lg border border-border bg-card/50 p-1.5 overflow-hidden">
-                <div className="group/strip relative">
-                  {/* Prev button */}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setFeaturedIdx((safeFeaturedIdx - 1 + myRecentPosts.length) % myRecentPosts.length)
-                    }
-                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background/90 border border-border shadow-md flex items-center justify-center active:scale-95 touch-manipulation"
-                    aria-label="Previous post"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </button>
-                  {/* Next button */}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setFeaturedIdx((safeFeaturedIdx + 1) % myRecentPosts.length)
-                    }
-                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background/90 border border-border shadow-md flex items-center justify-center active:scale-95 touch-manipulation"
-                    aria-label="Next post"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                  <div
-                    className="flex gap-2 w-max animate-marquee-rtl group-hover/strip:[animation-play-state:paused] px-9"
-                    style={{ animationDuration: `${Math.max(18, myRecentPosts.length * 3)}s` }}
-                  >
-                    {[...myRecentPosts, ...myRecentPosts].map((post, i) => {
-                      const realIdx = i % myRecentPosts.length;
-                      const isActive = realIdx === safeFeaturedIdx;
-                      return (
-                        <button
-                          key={`thumb-${i}-${post.id ?? realIdx}`}
-                          type="button"
-                          onClick={() => setFeaturedIdx(realIdx)}
-                          className={`relative shrink-0 h-16 w-16 rounded-md overflow-hidden bg-muted active:scale-95 transition-all touch-manipulation ${
-                            isActive
-                              ? "ring-2 ring-red-500 border-2 border-red-500 shadow-md scale-[1.04]"
-                              : "border border-foreground/30 opacity-90 hover:opacity-100"
-                          }`}
-                          aria-label={`Show ${post.title} in big view`}
-                          aria-pressed={isActive}
-                        >
-                          <img
-                            src={post.imageUrl}
-                            alt={post.title}
-                            className="h-full w-full object-cover"
-                            loading="lazy"
-                          />
-                          {isActive && (
-                            <span className="absolute inset-x-0 bottom-0 bg-red-600 text-white text-[9px] font-bold text-center py-0.5">
-                              Showing
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-                <p className="mt-1 text-[11px] text-muted-foreground text-center italic">
-                  Auto-scrolls right → left · tap any thumbnail to feature it above · tap ‹ › to step through posts · tap the big image to open larger
-                </p>
-
-              </div>
-            )}
-
-            {/* See-more link — scrolls down the feed for more of this tab's content */}
-            {activeFeedTab !== "Vibes & Flexing" && (
-              <button
-                type="button"
-                onClick={() => {
-                  window.scrollBy({ top: window.innerHeight * 0.8, behavior: "smooth" });
-                }}
-                className="mt-2 flex items-center gap-2 px-1 py-1.5 text-primary active:opacity-80 touch-manipulation"
-              >
-                <ChevronLeft className="h-4 w-4 shrink-0 rotate-[-90deg]" />
-                <span className="italic font-semibold underline underline-offset-2 text-[13px]">
-                  {tabMeta.moreLabel}
-                </span>
-              </button>
+              <ScrollableThumbStrip
+                items={myRecentPosts.map((p, i) => ({
+                  id: p.id || `thumb-${i}`,
+                  imageUrl: p.imageUrl,
+                  title: p.title,
+                }))}
+                activeIdx={safeFeaturedIdx}
+                onSelect={(idx) => setFeaturedIdx(idx)}
+                moreLabel={tabMeta.moreLabel}
+                onSeeAll={() => setViewerOpen(true)}
+                accent="0 84% 60%"
+              />
             )}
 
             {/* Hidden gallery input */}
