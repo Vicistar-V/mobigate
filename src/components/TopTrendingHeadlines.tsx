@@ -54,14 +54,17 @@ export const TopTrendingHeadlines = () => {
 
   return (
     <section className="mt-6" aria-label="Top trending headlines">
-      {/* Red banner title */}
-      <div className="relative overflow-hidden rounded-t-xl bg-destructive px-4 py-2.5 shadow-sm">
+      {/* Banner title — bright red condensed uppercase on white, news-web aesthetic */}
+      <div className="rounded-t-xl border border-b-0 border-border bg-background px-4 pt-3 pb-0">
         <div className="flex items-center justify-center gap-2">
-          <Flame className="h-4 w-4 shrink-0 text-destructive-foreground" />
-          <h2 className="text-center text-base font-extrabold uppercase tracking-wide text-destructive-foreground sm:text-lg">
+          <Flame className="h-5 w-5 shrink-0 text-destructive" />
+          <h2 className="text-center text-lg font-extrabold uppercase tracking-tight text-destructive sm:text-xl [font-stretch:condensed]">
             Top Trending Headlines!
           </h2>
         </div>
+        {/* Red rule + green accent line beneath the title */}
+        <div className="mt-2 h-[3px] w-full bg-destructive" />
+        <div className="h-[2px] w-full bg-[hsl(142_71%_45%)]" />
       </div>
 
       {/* Card body */}
@@ -82,7 +85,7 @@ export const TopTrendingHeadlines = () => {
                 <a
                   key={link.label}
                   href={link.href}
-                  className="text-[11px] font-medium leading-tight text-primary underline-offset-2 hover:underline"
+                  className="text-[11px] font-medium leading-tight text-[hsl(212_95%_50%)] underline underline-offset-2 hover:opacity-80"
                 >
                   {link.label}
                 </a>
