@@ -25,6 +25,8 @@ export interface MediaItem {
   followers?: string;
   isLiked?: boolean;
   isOwner?: boolean;
+  /** Show the "✓Copyright" designation marker on this media (default true) */
+  copyrightMarked?: boolean;
 }
 
 interface MediaGalleryViewerProps {
