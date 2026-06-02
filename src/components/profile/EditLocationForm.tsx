@@ -68,10 +68,33 @@ export const EditLocationForm = ({ currentData, onSave, onClose }: EditLocationF
     defaultValues: { place: "", description: "", customDescription: "", period: "" },
   });
 
+  // Best-effort reverse of formatLocation ("City, LGA, State, Country").
+  const parseLocation = (place: string): LocationValue => {
+    const parts = (place || "").split(",").map((p) => p.trim()).filter(Boolean);
+    const [city = "", lga = "", state = "", country = ""] = parts.length <= 4
+      ? [...parts].reverse().reverse() && (() => {
+          // map from the END so country is last
+          const rev = [...parts];
+          const ctry = rev.length > 0 ? rev[rev.length - 1] : "";
+          const st = rev.length > 1 ? rev[rev.length - 2] : "";
+          const lg = rev.length > 2 ? rev[rev.length - 3] : "";
+          const ct = rev.length > 3 ? rev[rev.length - 4] : (rev.length === 1 ? "" : rev[0]);
+          return [ct, lg, st, ctry];
+        })()
+      : ["", "", "", ""];
+    return { ...EMPTY_LOCATION, country, state, lga, city };
+  };
+
+  const updateLocation = (loc: LocationValue) => {
+    setLocationValue(loc);
+    form.setValue("place", formatLocation(loc), { shouldValidate: true });
+  };
+
   const handleAdd = () => {
     setIsAdding(true);
     setShowCustomInput(false);
     setExceptions([]);
+    setLocationValue(EMPTY_LOCATION);
     form.reset({ place: "", description: "", customDescription: "", period: "" });
   };
 
@@ -80,6 +103,7 @@ export const EditLocationForm = ({ currentData, onSave, onClose }: EditLocationF
     const isCustom = !descriptionOptions.slice(0, -1).includes(location.description);
     setShowCustomInput(isCustom);
     setExceptions(location.exceptions || []);
+    setLocationValue(parseLocation(location.place));
     form.reset({ 
       place: location.place, 
       description: isCustom ? "Other" : location.description, 
