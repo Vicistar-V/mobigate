@@ -146,6 +146,15 @@ export const InviteMembersDialog = ({
   const toggleUser = (u: MobiUser) =>
     setSelectedUsers(prev => prev.find(p => p.id === u.id) ? prev.filter(p => p.id !== u.id) : [...prev, u]);
 
+  // Connections shown in the picker, filtered by the picker's own search box
+  const connList: ConnectionUser[] = (() => {
+    const list = getConnections(connTab);
+    const q = connSearch.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter(c =>
+      c.name.toLowerCase().includes(q) || c.username.toLowerCase().includes(q));
+  })();
+
   const toggleComm = (c: Community) =>
     setSelectedComms(prev => prev.find(p => p.id === c.id) ? prev.filter(p => p.id !== c.id) : [...prev, c]);
 
