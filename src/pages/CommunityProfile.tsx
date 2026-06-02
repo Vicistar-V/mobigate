@@ -694,6 +694,7 @@ const CommunityProfile = () => {
                       likes={post.likes}
                       type={post.type}
                       imageUrl={post.imageUrl}
+                      copyrightMarked={(post as any).copyrightMarked}
                     />
                     {/* Insert premium ad after every 4 posts */}
                     {(index + 1) % 4 === 0 && index < displayedPosts.length - 1 && (
