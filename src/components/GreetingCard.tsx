@@ -745,7 +745,7 @@ export const GreetingSection = () => {
                 Inside it: the IMAGE opens the media viewer (enlarge),
                 the STORYLINE text opens the full story details dialog.
                 The outer card itself is NOT clickable. */}
-            {featuredPublicPost && (
+            {activeFeedTab !== "Vibes & Flexing" && featuredPublicPost && (
               <div
                 className="mt-2 rounded-lg overflow-hidden bg-purple-200/60 p-1.5"
                 aria-label="Public post preview"
