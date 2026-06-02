@@ -130,6 +130,35 @@ export const GreetingSection = () => {
       activeEl.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
     }
   }, [safeFeaturedIdx]);
+
+  // Real Play-style scroll arrows for the Vibes thumbnail strip: track which
+  // direction still has hidden items so the arrows can dim when exhausted.
+  const [vibeCanLeft, setVibeCanLeft] = useState(false);
+  const [vibeCanRight, setVibeCanRight] = useState(false);
+  const updateVibeScroll = useCallback(() => {
+    const el = vibeStripRef.current;
+    if (!el) return;
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    setVibeCanLeft(scrollLeft > 2);
+    setVibeCanRight(scrollLeft + clientWidth < scrollWidth - 2);
+  }, []);
+  useEffect(() => {
+    const el = vibeStripRef.current;
+    if (!el) return;
+    updateVibeScroll();
+    el.addEventListener("scroll", updateVibeScroll, { passive: true });
+    window.addEventListener("resize", updateVibeScroll);
+    return () => {
+      el.removeEventListener("scroll", updateVibeScroll);
+      window.removeEventListener("resize", updateVibeScroll);
+    };
+  }, [updateVibeScroll, safeFeaturedIdx, activeFeedTab]);
+  const scrollVibeStrip = (dir: "left" | "right") => {
+    const el = vibeStripRef.current;
+    if (!el) return;
+    const amount = Math.max(el.clientWidth * 0.7, 120);
+    el.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
+  };
   // Keep legacy names so the rest of the file keeps compiling unchanged
   const featuredPost = myLatestOwnPost;
   const myRecentPosts = thumbnailPosts;
