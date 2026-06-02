@@ -15,6 +15,7 @@ import { Pencil, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { PrivacySelector } from "./PrivacySelector";
+import { CascadingLocationSelector, EMPTY_LOCATION, formatLocation, type LocationValue } from "@/components/common/CascadingLocationSelector";
 
 const locationSchema = z.object({
   place: z.string().min(1, "Place is required"),
