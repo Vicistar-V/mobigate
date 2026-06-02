@@ -617,6 +617,7 @@ const MyProfile = () => {
 
   return (
     <div className="flex flex-col w-full min-h-screen bg-background">
+      <MetaTags title="My Profile — MobiGate" ogType="profile" />
       <Header />
       
       <main className="container max-w-4xl mx-auto px-4 py-6 flex-1">
