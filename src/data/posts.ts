@@ -433,7 +433,8 @@ export const wallStatusPosts: WallStatusPost[] = [
     followers: "15.2K",
     userId: "1",
     status: "Online",
-    views: "25.4K"
+    views: "25.4K",
+    copyrightMarked: true
   },
   {
     id: "wall_2",
