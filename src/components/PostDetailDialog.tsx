@@ -274,6 +274,13 @@ export const PostDetailDialog = ({
         </div>
       </ScrollArea>
 
+      {/* Floating viewer options "..." — Rate / Hide / Report / Block */}
+      <div className="absolute right-3 bottom-[calc(env(safe-area-inset-bottom)+4.5rem)] md:bottom-20 z-50">
+        <PostViewerOptionsMenu
+          authorName={post.author}
+          onHide={() => onOpenChange(false)}
+        />
+      </div>
 
       {/* Fixed Bottom Action Bar - Mobile */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border px-3 py-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] z-50">
