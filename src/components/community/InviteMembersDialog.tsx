@@ -449,11 +449,21 @@ export const InviteMembersDialog = ({
                 />
               </div>
 
-              {/* Selected count */}
+              {/* Selected users (chips — removable) */}
               {selectedUsers.length > 0 && (
-                <p className="text-sm text-purple-600 font-semibold">
-                  {selectedUsers.length} user{selectedUsers.length > 1 ? "s" : ""} selected
-                </p>
+                <div>
+                  <p className="text-sm text-purple-600 font-semibold mb-2">
+                    {selectedUsers.length} user{selectedUsers.length > 1 ? "s" : ""} selected
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {selectedUsers.map(u => (
+                      <Badge key={u.id} onClick={() => toggleUser(u)}
+                        className="bg-purple-100 text-purple-700 gap-1 cursor-pointer pr-1.5 hover:bg-purple-200">
+                        {u.name || u.username}<X className="h-3 w-3"/>
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
               )}
 
               {/* User list */}
