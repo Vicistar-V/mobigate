@@ -83,6 +83,16 @@ export const PostDetailDialog = ({
     setIsLiked(!isLiked);
   };
 
+  const focusCommentInput = () => {
+    const commentInput = document.querySelector(
+      'textarea[placeholder*="comment"]'
+    ) as HTMLTextAreaElement | null;
+    if (commentInput) {
+      commentInput.scrollIntoView({ behavior: "smooth", block: "center" });
+      commentInput.focus();
+    }
+  };
+
   const handleFollow = () => {
     if (isFollowing) {
       setFollowerCount(followerCount - 1);
@@ -272,27 +282,39 @@ export const PostDetailDialog = ({
             </p>
           )}
 
-          {/* Stats Row - Compact */}
-          <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+          {/* Stats Row - Compact (interactive) */}
+          <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
             {post.fee && (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 px-1.5 py-1">
                 <Coins className="h-3.5 w-3.5" />
                 <span>{post.fee} Mobi</span>
               </div>
             )}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 px-1.5 py-1">
               <Eye className="h-3.5 w-3.5" />
               <span>{post.views}</span>
             </div>
-            <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={focusCommentInput}
+              className="flex items-center gap-1 rounded-full px-2 py-1 hover:bg-muted active:scale-95 transition touch-manipulation"
+              aria-label="Jump to comments"
+            >
               <MessageCircle className="h-3.5 w-3.5" />
               <span>{post.comments}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Heart className="h-3.5 w-3.5" />
-              <span>{likeCount}</span>
-            </div>
+            </button>
+            <button
+              type="button"
+              onClick={handleLike}
+              className="flex items-center gap-1 rounded-full px-2 py-1 hover:bg-muted active:scale-95 transition touch-manipulation"
+              aria-label={isLiked ? "Unlike post" : "Like post"}
+              aria-pressed={isLiked}
+            >
+              <Heart className={`h-3.5 w-3.5 transition-colors ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
+              <span className={isLiked ? "text-red-500 font-medium" : ""}>{likeCount}</span>
+            </button>
           </div>
+
 
           {/* Divider */}
           <div className="border-t border-border" />
