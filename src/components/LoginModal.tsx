@@ -357,7 +357,7 @@ export const LoginModal = () => {
                   <Input
                     placeholder="johndoe"
                     value={regUser}
-                    onChange={e => setRegUser(e.target.value.toLowerCase().replace(/[^a-z0-9_\.]/g, ""))}
+                    onChange={e => setRegUser(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g, ""))}
                     disabled={otpSending}
                     className={`pl-7 pr-9 ${usernameBorder}`}
                     maxLength={30}
