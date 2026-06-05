@@ -383,7 +383,6 @@ export const InviteMembersDialog = ({
                 {searching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-purple-400"/>}
               </div>
 
-<<<<<<< Updated upstream
               {/* Select from Connections */}
               <Button type="button" variant="outline"
                 onClick={() => setShowConnections(true)}
