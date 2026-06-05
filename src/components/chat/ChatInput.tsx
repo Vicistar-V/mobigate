@@ -1,3 +1,5 @@
+const API_BASE = (import.meta.env.VITE_API_URL as string) || "/api";
+
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { X, Send, Camera, Mic, Gift, Gamepad2, Play, MoreVertical } from "lucide-react";
@@ -46,6 +48,18 @@ export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, rec
       handleSend();
     }
   };
+
+  // Upload file to server
+  const uploadToServer = async (file: File): Promise<{ url: string; name: string; type: string } | null> => {
+    const fd = new FormData();
+    fd.append("file", file);
+    try {
+      const res  = await fetch(`${API_BASE}/chat/upload.php`, { method: "POST", credentials: "include", body: fd });
+      const data = await res.json();
+      return data.success ? { url: data.url, name: data.name, type: data.type } : null;
+    } catch { return null; }
+  };
+
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;

@@ -3,27 +3,23 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
     proxy: {
-      "/api": {
-        target: "https://mobigate-app.mobi",
+      // Every request to /api/... gets forwarded to mobigate-app.mobi
+      // The browser only sees localhost:8080 — no CORS at all
+      '/api': {
+        target: 'https://mobigate-app.mobi',
         changeOrigin: true,
-        secure: false,
-      },
-      "/uploads": {
-        target: "https://mobigate-app.mobi",
-        changeOrigin: true,
-        secure: false,
-      },
-    },
+        secure: true,
+      }
+    }
   },
   plugins: [
     react(),
-    mode === 'development' && componentTagger(),
+    mode === "development" && componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {

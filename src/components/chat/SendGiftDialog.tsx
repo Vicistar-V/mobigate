@@ -199,7 +199,7 @@ export const SendGiftDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={v => !v && onClose()}>
-      <DialogContent className="max-w-md max-h-[90vh] flex flex-col p-0 gap-0">
+      <DialogContent aria-describedby={undefined} className="max-w-md max-h-[90vh] flex flex-col p-0 gap-0">
         <DialogHeader className="px-4 pt-4 pb-3 border-b shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <Gift className="h-5 w-5 text-primary" />

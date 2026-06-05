@@ -22,12 +22,10 @@ export const MessagesSheet = () => {
     activeQuizSession,
     quizTimeRemaining,
     totalUnread,
-    loadingConvs,
     loadingMsgs,
     sendMessage,
     selectConversation,
     startConversationWith,
-    fetchConversations,
     editMessage,
     deleteMessage,
     deleteSelectedMessages,
@@ -41,12 +39,10 @@ export const MessagesSheet = () => {
 
   const showMobileChat = activeConversationId !== null;
   const isGameMode = !!activeQuizSession && !activeQuizSession.completedAt;
-  const totalUnreadCount = totalUnread ?? conversations.reduce((t, c) => t + c.unreadCount, 0);
+  
+  // Calculate total unread messages
+  const totalUnreadCount = totalUnread ?? conversations.reduce((total, conv) => total + conv.unreadCount, 0);
 
-  // Refresh conversations whenever the sheet opens
-  useEffect(() => {
-    if (isOpen) fetchConversations(true);
-  }, [isOpen, fetchConversations]);
   // Listen for custom event to open chat with specific user
   useEffect(() => {
     const handleOpenChat = async (event: CustomEvent) => {
@@ -127,7 +123,6 @@ export const MessagesSheet = () => {
               onSelectConversation={selectConversation}
               onBack={() => setIsOpen(false)}
               onCloseSheet={() => setIsOpen(false)}
-              loading={loadingConvs}
             />
           </div>
 

@@ -96,7 +96,7 @@ export const ActiveCallDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm p-0 overflow-hidden bg-gradient-to-b from-background via-background to-muted/30 border-0">
+      <DialogContent aria-describedby={undefined} className="max-w-sm p-0 overflow-hidden bg-gradient-to-b from-background via-background to-muted/30 border-0">
         <div className="flex flex-col items-center justify-between min-h-[70vh] py-8 px-6">
           {/* Top Section - Recipient Info */}
           <div className="flex flex-col items-center space-y-4 flex-1 justify-center">

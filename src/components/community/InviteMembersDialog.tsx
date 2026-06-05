@@ -53,7 +53,7 @@ function buildMessage(
 ): string {
   const profileLink = `${APP_URL}/profile/${senderId}`;
   const greeting    = recipientName.trim() ? `Hi, ${recipientName.trim()}! ` : "Hi! ";
-  let body = `${greeting}${senderName} invites you to join Mobigate community. Please click on the link below to Sign-Up Now.\n\n👉 ${APP_URL}/register`;
+  let body = `${greeting}${senderName} invites you to join the Mobigate community. Please click on the link below to Sign-Up Now.\n\n👉 ${APP_URL}/register`;
   if (communities.length > 0) {
     body += "\n\nAfter joining, you can also connect with me here:";
     communities.forEach(c => { body += `\n• ${c.name}: ${APP_URL}/community/${c.id}`; });
@@ -86,8 +86,6 @@ export const InviteMembersDialog = ({
   const [connTab,         setConnTab]         = useState<ConnectionCategory>("friends");
   const [connSearch,      setConnSearch]      = useState("");
   const [mobiMessage,     setMobiMessage]     = useState("");
-  const [selectedMobiComms, setSelectedMobiComms] = useState<Community[]>([]);
-  const [mobiCommOpen,    setMobiCommOpen]    = useState(false);
   // External tab
   const [recipientName,   setRecipientName]   = useState("");
   const [communities,     setCommunities]     = useState<Community[]>([]);
@@ -107,7 +105,6 @@ export const InviteMembersDialog = ({
       setTab("mobigate"); setUserSearch(""); setSearchResults([]);
       setSelectedUsers([]); setMobiMessage(""); setRecipientName("");
       setSelectedComms([]); setCustomText(""); setExtStep("compose");
-      setSelectedMobiComms([]); setMobiCommOpen(false);
       setLinkComms([]); setCopied(false); setCommOpen(false); setLinkCommOpen(false);
       setShowConnections(false); setConnTab("friends"); setConnSearch("");
     }
@@ -115,8 +112,7 @@ export const InviteMembersDialog = ({
 
   // ── Fetch communities when external/link tab opens ──────────────────────
   useEffect(() => {
-    if (!open) return;
-    if (tab !== "mobigate" && tab !== "external" && tab !== "link") return;
+    if (!open || (tab !== "external" && tab !== "link")) return;
     if (communities.length > 0) return;
     setCommLoading(true);
     fetch(`${API_BASE}/community/my_communities.php`, { credentials: "include" })
@@ -158,25 +154,8 @@ export const InviteMembersDialog = ({
   const toggleComm = (c: Community) =>
     setSelectedComms(prev => prev.find(p => p.id === c.id) ? prev.filter(p => p.id !== c.id) : [...prev, c]);
 
-  const toggleMobiComm = (c: Community) =>
-    setSelectedMobiComms(prev => prev.find(p => p.id === c.id) ? prev.filter(p => p.id !== c.id) : [...prev, c]);
-
-
   const toggleLinkComm = (c: Community) =>
     setLinkComms(prev => prev.find(p => p.id === c.id) ? prev.filter(p => p.id !== c.id) : [...prev, c]);
-
-  // ── Build the full in-app invite message (text + community links) ────────
-  const buildMobiMessage = () => {
-    let body = mobiMessage.trim()
-      || "You've been invited to join our community on Mobigate! Click the link below to complete your membership application.";
-    if (selectedMobiComms.length > 0) {
-      body += selectedMobiComms.length > 1
-        ? "\n\nYou're invited to join these communities/groups:"
-        : "\n\nYou're invited to join this community/group:";
-      selectedMobiComms.forEach(c => { body += `\n• ${c.name}: ${APP_URL}/community/${c.id}`; });
-    }
-    return body;
-  };
 
   // ── Send in-app invites ─────────────────────────────────────────────────
   const sendMobiInvites = async () => {
@@ -186,18 +165,13 @@ export const InviteMembersDialog = ({
       await fetch(`${API_BASE}/notifications/invite.php`, {
         method: "POST", credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          recipient_ids: selectedUsers.map(u => u.id),
-          message: buildMobiMessage(),
-          community_ids: selectedMobiComms.map(c => c.id),
-        }),
+        body: JSON.stringify({ recipient_ids: selectedUsers.map(u => u.id), message: mobiMessage }),
       });
       toast({ title: `Invite sent to ${selectedUsers.length} user${selectedUsers.length > 1 ? "s" : ""}!` });
       onOpenChange(false);
     } catch { toast({ title: "Error sending invites", variant: "destructive" }); }
     finally { setSending(false); }
   };
-
 
   // ── Computed values ─────────────────────────────────────────────────────
   const extMessage = buildMessage(senderName, senderId, recipientName, selectedComms, customText);
@@ -294,29 +268,29 @@ export const InviteMembersDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-1rem)] sm:w-full max-w-lg p-0 overflow-x-hidden rounded-2xl max-h-[92vh] flex flex-col">
+      <DialogContent aria-describedby={undefined} className="max-w-lg w-full p-0 overflow-hidden rounded-2xl max-h-[90vh] flex flex-col">
 
-        <DialogHeader className="px-4 sm:px-6 pt-5 pb-0 shrink-0">
-          <DialogTitle className="text-lg font-bold pr-6">Invite Members</DialogTitle>
+        <DialogHeader className="px-6 pt-5 pb-0 shrink-0">
+          <DialogTitle className="text-lg font-bold">Invite Members</DialogTitle>
         </DialogHeader>
 
         {/* ── Tab switcher (matching screenshot) ── */}
-        <div className="flex gap-1 mx-4 sm:mx-6 mt-4 bg-gray-100 rounded-xl p-1 shrink-0">
+        <div className="flex gap-1 mx-6 mt-4 bg-gray-100 rounded-xl p-1 shrink-0">
           {([
-            ["mobigate","Mobigate Users", <UserPlus className="h-3.5 w-3.5 shrink-0"/>],
-            ["external","External",       <Send      className="h-3.5 w-3.5 shrink-0"/>],
-            ["link",    "Share Link",     <Link2     className="h-3.5 w-3.5 shrink-0"/>],
+            ["mobigate","Mobigate Users", <UserPlus className="h-3.5 w-3.5"/>],
+            ["external","External",       <Send      className="h-3.5 w-3.5"/>],
+            ["link",    "Share Link",     <Link2     className="h-3.5 w-3.5"/>],
           ] as [Tab, string, React.ReactNode][]).map(([t, label, icon]) => (
             <button key={t} onClick={() => setTab(t)}
-              className={`flex-1 min-w-0 flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-semibold transition-all
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all
                 ${tab === t ? "bg-white text-purple-700 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
-              {icon}<span className="truncate">{label}</span>
+              {icon}{label}
             </button>
           ))}
         </div>
 
         {/* ── Tab content ── */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 py-4">
+        <div className="flex-1 overflow-y-auto px-6 py-4">
 
           {/* ══ TAB 1: MOBIGATE USERS ══ */}
           {tab === "mobigate" && showConnections && (
@@ -409,6 +383,7 @@ export const InviteMembersDialog = ({
                 {searching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-purple-400"/>}
               </div>
 
+<<<<<<< Updated upstream
               {/* Select from Connections */}
               <Button type="button" variant="outline"
                 onClick={() => setShowConnections(true)}
@@ -437,6 +412,8 @@ export const InviteMembersDialog = ({
               </div>
 
 
+=======
+>>>>>>> Stashed changes
               {/* Personalized message */}
               <div>
                 <p className="text-sm font-bold text-gray-800 mb-2">Personalized Message</p>
@@ -650,7 +627,7 @@ export const InviteMembersDialog = ({
         </div>
 
         {/* ── Footer ── */}
-        <div className="px-4 sm:px-6 py-4 border-t border-gray-100 shrink-0 flex justify-between gap-2 flex-wrap">
+        <div className="px-6 py-4 border-t border-gray-100 shrink-0 flex justify-between gap-3">
           {tab === "mobigate" && (
             <>
               <Button variant="outline" className="rounded-xl" onClick={() => onOpenChange(false)}>Cancel</Button>

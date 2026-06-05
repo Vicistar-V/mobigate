@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChatAvatar } from "@/components/chat/ChatAvatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Conversation, Message } from "@/types/chat";
 import { formatChatTime } from "@/data/chatData";
@@ -162,19 +162,21 @@ export const ChatInterface = ({
               </Button>}
             <Link to={`/profile/${conversation.user.id}`} className="flex items-center flex-1 min-w-0 hover:bg-[#f5f6f6] rounded-lg px-2 py-1 -mx-2 -my-1 transition-colors" onClick={() => onCloseSheet?.()}>
               <div className="relative mr-[15px] shrink-0">
-                <ChatAvatar
-                  src={conversation.user.avatar}
-                  name={conversation.user.name}
-                  size={40}
-                  isOnline={conversation.user.isOnline}
-                />
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={conversation.user.avatar} alt={conversation.user.name} />
+                  <AvatarFallback className="bg-purple-100 text-purple-700 font-bold">
+                    {conversation.user.name.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                {conversation.user.isOnline && <div className="absolute bottom-0 right-0 h-3 w-3 bg-[#00a884] border-2 border-white rounded-full" />}
               </div>
               <div className="flex-1 min-w-0 max-w-full overflow-hidden">
                 <h3 className="font-semibold text-[#111b21] text-lg truncate max-w-[55vw] md:max-w-full">{conversation.user.name.split(' ')[0]}...</h3>
-                <p className="text-[15px]" style={{ color: conversation.user.isOnline ? '#00a884' : '#667781' }}>
-                  {isGameMode
-                    ? <span className="flex items-center gap-1"><Gamepad2 className="h-3 w-3" /> Playing Quiz</span>
-                    : conversation.user.isOnline ? "Online" : "Offline"}
+                <p className="text-[15px] text-[#667781]">
+                  {isGameMode ? <span className="flex items-center gap-1">
+                      <Gamepad2 className="h-3 w-3" />
+                      Playing Quiz
+                    </span> : conversation.user.isOnline ? "online" : "Offline"}
                 </p>
               </div>
             </Link>

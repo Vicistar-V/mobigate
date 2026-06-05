@@ -123,7 +123,7 @@ export const ShareProfileDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={o => !o && onClose()}>
-      <DialogContent className="max-w-sm w-full p-0 overflow-hidden rounded-2xl">
+      <DialogContent aria-describedby={undefined} className="max-w-sm w-full p-0 overflow-hidden rounded-2xl">
         <DialogHeader className="px-6 pt-6 pb-4 border-b border-gray-100">
           <DialogTitle className="text-lg font-bold flex items-center gap-2">
             <Send className="h-5 w-5 text-purple-600" />

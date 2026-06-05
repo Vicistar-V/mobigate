@@ -106,7 +106,7 @@ export const ShareDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm w-full p-0 overflow-hidden rounded-2xl">
+      <DialogContent aria-describedby={undefined} className="max-w-sm w-full p-0 overflow-hidden rounded-2xl">
 
         <DialogHeader className="px-5 pt-5 pb-3 border-b border-gray-100">
           <DialogTitle className="text-base font-bold flex items-center gap-2">

@@ -62,7 +62,7 @@ export const ChatWithFriendsDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md p-0 max-h-[80vh]">
+      <DialogContent aria-describedby={undefined} className="max-w-md p-0 max-h-[80vh]">
         <DialogHeader className="px-4 pt-4 pb-2 border-b">
           <DialogTitle className="flex items-center gap-2 text-lg">
             <MessageCircle className="h-5 w-5 text-primary" />
