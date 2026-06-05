@@ -411,8 +411,6 @@ export const InviteMembersDialog = ({
               </div>
 
 
-=======
->>>>>>> Stashed changes
               {/* Personalized message */}
               <div>
                 <p className="text-sm font-bold text-gray-800 mb-2">Personalized Message</p>
