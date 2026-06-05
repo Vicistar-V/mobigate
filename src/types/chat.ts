@@ -29,6 +29,7 @@ export interface Message {
     emoji: string;
   }[];
   isEdited?: boolean;
+  replyToId?: string;
   replyTo?: {
     messageId: string;
     content: string;

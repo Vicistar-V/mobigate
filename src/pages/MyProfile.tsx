@@ -847,11 +847,6 @@ const MyProfile = () => {
               </div>
 
               {/* No friend status on own profile */}
-              {false && (
-                <p className="text-emerald-600 font-medium text-base">
-                  placeholder
-                </p>
-              )}
             </div>
             </div>
           </div>

@@ -154,7 +154,7 @@ export const LoginModal = () => {
     if (!regName.trim())  { setError("Please enter your full name."); return; }
     if (!regUser.trim())  { setError("Please enter a username."); return; }
     if (regUser.length < 3) { setError("Username must be at least 3 characters."); return; }
-    if (!/^[a-z0-9_\.]+$/.test(regUser)) {
+    if (!/^[a-z0-9_.]+$/.test(regUser)) {
       setError("Username may only contain letters, numbers, underscores and dots."); return;
     }
     if (usernameState === "taken") {
@@ -357,7 +357,7 @@ export const LoginModal = () => {
                   <Input
                     placeholder="johndoe"
                     value={regUser}
-                    onChange={e => setRegUser(e.target.value.toLowerCase().replace(/[^a-z0-9_\.]/g, ""))}
+                    onChange={e => setRegUser(e.target.value.toLowerCase().replace(/[^a-z0-9_.]/g, ""))}
                     disabled={otpSending}
                     className={`pl-7 pr-9 ${usernameBorder}`}
                     maxLength={30}
