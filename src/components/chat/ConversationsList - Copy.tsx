@@ -10,7 +10,7 @@ import { formatMessageTime } from "@/data/chatData";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, Settings, Users, Search, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import mobichatLogo from "@/assets/mobichat-logo.svg";
+import mobichatLogo from "@/assets/mobiface-logo.png";
 import { useCurrentUserId } from "@/hooks/useWindowData";
 
 interface ConversationsListProps {

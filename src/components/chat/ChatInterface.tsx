@@ -9,7 +9,7 @@ import { ChatInput } from "./ChatInput";
 import { MessageContextMenu } from "./MessageContextMenu";
 import { EditMessageDialog } from "./EditMessageDialog";
 import { Video, Phone, MoreVertical, ArrowLeft, X, CheckCheck, Check, Paperclip, Gift, Mic, Play, Pause, Gamepad2 } from "lucide-react";
-import mobichatLogo from "@/assets/mobichat-logo.svg";
+import mobichatLogo from "@/assets/mobiface-logo.png";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";

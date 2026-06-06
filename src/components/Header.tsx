@@ -6,7 +6,7 @@ import { NotificationsSheet } from "./NotificationsSheet";
 import { MessagesSheet } from "./MessagesSheet";
 import { useSidebar } from "@/components/ui/sidebar";
 import mobigateIcon from "@/assets/mobigate-icon.svg";
-import mobigateLogo from "@/assets/mobigate-logo.svg";
+import mobigateLogo from "@/assets/mobiface-logo.png";
 
 export const Header = () => {
   const { toggleSidebar } = useSidebar();

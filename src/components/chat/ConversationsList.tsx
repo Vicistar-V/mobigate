@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Conversation } from "@/types/chat";
 import { formatMessageTime } from "@/data/chatData";
 import { cn } from "@/lib/utils";
-import mobichatLogo from "@/assets/mobichat-logo.svg";
+import mobichatLogo from "@/assets/mobiface-logo.png";
 import { ChatAvatar } from "@/components/chat/ChatAvatar";
 
 interface Props {
