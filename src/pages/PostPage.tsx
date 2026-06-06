@@ -63,7 +63,7 @@ const PostPage = () => {
 
   if (notFound || !post) return (
     <div className="flex flex-col min-h-screen">
-      <MetaTags title="Post Not Found — MobiGate" />
+      <MetaTags title="Post Not Found — Mobiface" />
       <Header />
       <main className="flex-1 flex items-center justify-center p-6">
         <Card className="p-8 text-center max-w-sm">
@@ -84,7 +84,7 @@ const PostPage = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <MetaTags
-        title={`${post.title} — MobiGate`}
+        title={`${post.title} — Mobiface`}
         description={strip(post.content || post.subtitle || "") || `${ucfirst(post.post_type)} by ${post.author_name}`}
         image={post.thumbnail_url || post.media_url || undefined}
         ogType="article"

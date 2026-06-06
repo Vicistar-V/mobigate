@@ -18,8 +18,8 @@ interface MetaTagsProps {
  * This component controls what shows up when the page is *shared*.
  */
 export function MetaTags({
-  title = "MobiGate - Social Content Platform",
-  description = "Connect, share, and discover amazing content with MobiGate - Your premier social content platform",
+  title = "Mobiface - Social Content Platform",
+  description = "Connect, share, and discover amazing content with Mobiface - Your premier social content platform",
   image = "https://mobi-gate-com.lovable.app/mobigate-favicon.png",
   canonical,
   ogType = "website",
@@ -45,13 +45,13 @@ export function MetaTags({
       <meta property="og:description" content={description} />
       <meta property="og:url" content={canonicalUrl} />
       <meta property="og:image" content={image} />
-      <meta property="og:image:alt" content={`${title} - MobiGate`} />
+      <meta property="og:image:alt" content={`${title} - Mobiface`} />
 
       {/* Twitter */}
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={image} />
-      <meta name="twitter:image:alt" content={`${title} - MobiGate`} />
+      <meta name="twitter:image:alt" content={`${title} - Mobiface`} />
       <meta name="twitter:url" content={canonicalUrl} />
 
       {/* Robots */}
