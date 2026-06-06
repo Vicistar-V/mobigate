@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { useToast } from "@/hooks/use-toast";
 import { merchantCountries } from "@/data/mobiMerchantsData";
-import { mockMerchants } from "@/data/mobigateInteractiveQuizData";
+import { mockMerchants } from "@/data/mobifaceInteractiveQuizData";
 import { allLocationMerchants } from "@/data/nigerianLocationsData";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 

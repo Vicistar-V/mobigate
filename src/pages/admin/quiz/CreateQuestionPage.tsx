@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/Header";
 import { CreateQuizQuestionForm } from "@/components/mobiface/CreateQuizQuestionForm";
-import { type AdminQuizQuestion } from "@/data/mobigateQuizQuestionsData";
+import { type AdminQuizQuestion } from "@/data/mobifaceQuizQuestionsData";
 import { QUIZ_TYPE_LABELS, type QuizType } from "@/data/quizTypeQuestionsData";
 import { PlusCircle, ListChecks } from "lucide-react";
 
@@ -35,7 +35,7 @@ export default function CreateQuestionPage() {
               <PlusCircle className="h-4 w-4 mr-2" />
               Create Another
             </Button>
-            <Button className="flex-1 h-12" onClick={() => navigate(`/mobigate-admin/quiz/${qt}/questions`)}>
+            <Button className="flex-1 h-12" onClick={() => navigate(`/mobiface-admin/quiz/${qt}/questions`)}>
               <ListChecks className="h-4 w-4 mr-2" />
               View All Questions
             </Button>

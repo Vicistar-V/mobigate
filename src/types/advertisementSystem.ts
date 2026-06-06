@@ -87,7 +87,7 @@ export interface EnhancedAdvertisement {
   audiencePremium: number;
   totalFeeInMobi: number;
   communityShare: number;
-  mobigateShare: number;
+  mobifaceShare: number;
   paymentStatus: "pending" | "paid" | "refunded";
   paidAt?: Date;
 

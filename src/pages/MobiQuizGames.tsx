@@ -6,8 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MobigateQuizHub } from "@/components/community/mobigate-quiz/MobigateQuizHub";
-import { mockMerchants, mockSeasons } from "@/data/mobigateInteractiveQuizData";
+import { MobifaceQuizHub } from "@/components/community/mobiface-quiz/MobifaceQuizHub";
+import { mockMerchants, mockSeasons } from "@/data/mobifaceInteractiveQuizData";
 import { allLocationMerchants } from "@/data/nigerianLocationsData";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
@@ -238,7 +238,7 @@ export default function MobiQuizGames() {
       </div>
 
       {/* Mobi Quiz Game Hub Dialog */}
-      <MobigateQuizHub open={showQuizHub} onOpenChange={setShowQuizHub} hideInteractive />
+      <MobifaceQuizHub open={showQuizHub} onOpenChange={setShowQuizHub} hideInteractive />
     </div>
   );
 }

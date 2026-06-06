@@ -10,7 +10,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { HelpCircle, PlusCircle, Snowflake, Ban, Zap } from "lucide-react";
-import { type AdminQuizQuestion, type QuizQuestionStatus } from "@/data/mobigateQuizQuestionsData";
+import { type AdminQuizQuestion, type QuizQuestionStatus } from "@/data/mobifaceQuizQuestionsData";
 import { getQuestionsForType, QUIZ_TYPE_LABELS, type QuizType } from "@/data/quizTypeQuestionsData";
 import { QuizQuestionCard } from "@/components/mobiface/QuizQuestionCard";
 import { QuizQuestionFilters } from "@/components/mobiface/QuizQuestionFilters";
@@ -86,7 +86,7 @@ export default function ManageQuestionsPage() {
         <ScrollArea className="h-[calc(100vh-160px)]">
           <div className="space-y-4 pb-6">
             <Button className="w-full h-12 text-base font-semibold"
-              onClick={() => navigate(`/mobigate-admin/quiz/${qt}/questions/create`)}>
+              onClick={() => navigate(`/mobiface-admin/quiz/${qt}/questions/create`)}>
               <PlusCircle className="h-5 w-5 mr-2" />
               Create New Question
             </Button>

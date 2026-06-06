@@ -72,7 +72,7 @@ const getAmountForType = (campaign: typeof mockEnhancedCampaigns[0], viewType: F
     case "community":
       return campaign.communityShare;
     case "mobiface":
-      return campaign.mobigateShare;
+      return campaign.mobifaceShare;
   }
 };
 

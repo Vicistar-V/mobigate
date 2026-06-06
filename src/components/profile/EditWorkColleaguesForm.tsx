@@ -12,7 +12,7 @@ import { PrivacySelector } from "./PrivacySelector";
 import { ImageUploader } from "./ImageUploader";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { MobigateUserSearch, MobigateUser } from "./MobigateUserSearch";
+import { MobifaceUserSearch, MobifaceUser } from "./MobifaceUserSearch";
 import { FriendsListSearch, Friend } from "./FriendsListSearch";
 
 const workColleagueSchema = z.object({
@@ -60,8 +60,8 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
   const [superiority, setSuperiority] = useState("");
   const [profileImage, setProfileImage] = useState<string | undefined>();
   const [workplaceLogo, setWorkplaceLogo] = useState<string | undefined>();
-  const [selectedUser, setSelectedUser] = useState<MobigateUser | Friend | null>(null);
-  const [searchMobigateOpen, setSearchMobigateOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<MobifaceUser | Friend | null>(null);
+  const [searchMobifaceOpen, setSearchMobifaceOpen] = useState(false);
   const [searchFriendsOpen, setSearchFriendsOpen] = useState(false);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
@@ -196,7 +196,7 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setSearchMobigateOpen(true)}
+                onClick={() => setSearchMobifaceOpen(true)}
                 className="w-full"
               >
                 <Globe className="h-4 w-4 mr-2" />
@@ -343,9 +343,9 @@ export const EditWorkColleaguesForm = ({ currentData, onSave, onClose }: EditWor
         </Button>
       )}
 
-      <MobigateUserSearch
-        open={searchMobigateOpen}
-        onOpenChange={setSearchMobigateOpen}
+      <MobifaceUserSearch
+        open={searchMobifaceOpen}
+        onOpenChange={setSearchMobifaceOpen}
         onSelect={(user) => {
           setSelectedUser(user);
           reset({ ...reset, name: user.name });

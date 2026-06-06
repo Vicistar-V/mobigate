@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { SeasonDetailsReveal } from "@/components/community/mobigate-quiz/SeasonDetailsReveal";
+import { SeasonDetailsReveal } from "@/components/community/mobiface-quiz/SeasonDetailsReveal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -25,13 +25,13 @@ import {
   ChevronDown,
   Handshake,
 } from "lucide-react";
-import { mockMerchants, mockSeasons, type QuizSeason } from "@/data/mobigateInteractiveQuizData";
+import { mockMerchants, mockSeasons, type QuizSeason } from "@/data/mobifaceInteractiveQuizData";
 import { format } from "date-fns";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
-import { LiveScoreboardDrawer } from "@/components/community/mobigate-quiz/LiveScoreboardDrawer";
-import { InteractiveQuizPlayDialog } from "@/components/community/mobigate-quiz/InteractiveQuizPlayDialog";
-import { HighlightedWinnersCarousel } from "@/components/community/mobigate-quiz/HighlightedWinnersCarousel";
-import { ViewSponsorsDrawer } from "@/components/community/mobigate-quiz/ViewSponsorsDrawer";
+import { LiveScoreboardDrawer } from "@/components/community/mobiface-quiz/LiveScoreboardDrawer";
+import { InteractiveQuizPlayDialog } from "@/components/community/mobiface-quiz/InteractiveQuizPlayDialog";
+import { HighlightedWinnersCarousel } from "@/components/community/mobiface-quiz/HighlightedWinnersCarousel";
+import { ViewSponsorsDrawer } from "@/components/community/mobiface-quiz/ViewSponsorsDrawer";
 
 function getSeasonTypeColor(type: string) {
   switch (type) {

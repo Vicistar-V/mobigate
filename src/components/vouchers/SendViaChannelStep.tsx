@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { MobigateUserSearch, MobigateUser } from "@/components/profile/MobigateUserSearch";
+import { MobifaceUserSearch, MobifaceUser } from "@/components/profile/MobifaceUserSearch";
 import { useCurrentUserId } from "@/hooks/useWindowData";
 
 export type ChannelType = "email" | "mobiChat" | "whatsApp" | "sms";
@@ -32,7 +32,7 @@ const CHANNEL_CONFIG: Record<ChannelType, { label: string; icon: typeof Mail; co
 };
 
 interface RecipientAllocation {
-  user: MobigateUser;
+  user: MobifaceUser;
   amount: number;
 }
 
@@ -63,7 +63,7 @@ export function SendViaChannelStep({ channel, remainingMobi, onBack, onSendCompl
   // MobiChat multi-recipient state
   const [showUserSearch, setShowUserSearch] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<RecipientAllocation[]>([]);
-  const [sentResults, setSentResults] = useState<Array<{ user?: MobigateUser; contact?: string; amount: number; pin: string }>>([]);
+  const [sentResults, setSentResults] = useState<Array<{ user?: MobifaceUser; contact?: string; amount: number; pin: string }>>([]);
 
   // Contact-based multi-recipient state (email, whatsApp, sms)
   const [contactRecipients, setContactRecipients] = useState<ContactRecipient[]>([]);
@@ -122,7 +122,7 @@ export function SendViaChannelStep({ channel, remainingMobi, onBack, onSendCompl
   };
 
   // ─── MobiChat user management ───
-  const handleMultiUsersSelected = (users: MobigateUser[]) => {
+  const handleMultiUsersSelected = (users: MobifaceUser[]) => {
     setSelectedUsers(prev => {
       const existing = new Map(prev.map(r => [r.user.id, r]));
       return users.map(u => existing.get(u.id) || { user: u, amount: 0 });
@@ -372,7 +372,7 @@ export function SendViaChannelStep({ channel, remainingMobi, onBack, onSendCompl
               </div>
               <Plus className="h-5 w-5 text-primary shrink-0" />
             </button>
-            <MobigateUserSearch
+            <MobifaceUserSearch
               open={showUserSearch}
               onOpenChange={setShowUserSearch}
               multiSelect

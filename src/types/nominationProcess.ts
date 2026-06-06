@@ -107,7 +107,7 @@ export interface CandidateAnalytics {
  * Mobiface platform nomination configuration
  * Only visible to Mobiface Admin (not Community Admins)
  */
-export interface MobigateNominationConfig {
+export interface MobifaceNominationConfig {
   serviceChargePercent: number; // 15-30%
   minimumServiceChargePercent: number; // 15
   maximumServiceChargePercent: number; // 30
@@ -124,5 +124,5 @@ export interface NominationCostBreakdown {
   serviceCharge: number;
   totalDebited: number;
   communityReceives: number;
-  mobigateReceives: number;
+  mobifaceReceives: number;
 }

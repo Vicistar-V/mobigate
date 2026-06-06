@@ -426,8 +426,8 @@ export function CampaignSettingsDialog({
               <span>{formatMobiAmount(feeDistribution.communityShare)}</span>
             </div>
             <div className="flex justify-between">
-              <span>Mobiface Share ({feeDistribution.mobigatePercentage}%)</span>
-              <span>{formatMobiAmount(feeDistribution.mobigateShare)}</span>
+              <span>Mobiface Share ({feeDistribution.mobifacePercentage}%)</span>
+              <span>{formatMobiAmount(feeDistribution.mobifaceShare)}</span>
             </div>
           </div>
         </CardContent>

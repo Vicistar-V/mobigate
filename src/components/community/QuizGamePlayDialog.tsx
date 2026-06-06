@@ -162,7 +162,7 @@ export function QuizGamePlayDialog({
 
     // Deduct stake (mock)
     setStakeDeducted(true);
-    const { communityShare, mobigateShare } = calculateStakeDistribution(quiz.stakeAmount);
+    const { communityShare, mobifaceShare } = calculateStakeDistribution(quiz.stakeAmount);
     
     toast({
       title: "Stake Deducted",

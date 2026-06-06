@@ -20,7 +20,7 @@ interface MetaTagsProps {
 export function MetaTags({
   title = "Mobiface - Social Content Platform",
   description = "Connect, share, and discover amazing content with Mobiface - Your premier social content platform",
-  image = "https://mobi-gate-com.lovable.app/mobigate-favicon.png",
+  image = "https://mobi-gate-com.lovable.app/mobiface-favicon.png",
   canonical,
   ogType = "website",
   noIndex = false,

@@ -1,5 +1,5 @@
 // Separate question pools for each quiz type
-import { type AdminQuizQuestion } from "./mobigateQuizQuestionsData";
+import { type AdminQuizQuestion } from "./mobifaceQuizQuestionsData";
 
 export type QuizType = "group" | "standard" | "interactive" | "food" | "scholarship";
 

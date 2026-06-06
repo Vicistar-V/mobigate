@@ -29,21 +29,21 @@ export function CampaignFeeDistributionSettings() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [history] = useState<FeeDistributionHistory[]>(mockFeeDistributionHistory);
 
-  const mobigatePercent = 100 - communityPercent;
+  const mobifacePercent = 100 - communityPercent;
   const hasChanges = communityPercent !== config.communityPercentage;
 
   const handleSave = () => {
     setConfig(prev => ({
       ...prev,
       communityPercentage: communityPercent,
-      mobigatePercentage: mobigatePercent,
+      mobifacePercentage: mobifacePercent,
       lastUpdatedAt: new Date(),
       lastUpdatedBy: "Mobiface Admin"
     }));
     
     toast({
       title: "Distribution Updated ✓",
-      description: `New ratio: Community ${communityPercent}% : Mobiface ${mobigatePercent}%`,
+      description: `New ratio: Community ${communityPercent}% : Mobiface ${mobifacePercent}%`,
     });
     
     setShowConfirm(false);
@@ -68,7 +68,7 @@ export function CampaignFeeDistributionSettings() {
             </div>
             <div className="rounded-lg bg-orange-500/5 border border-orange-500/20 p-3 text-center">
               <Globe className="h-5 w-5 mx-auto text-orange-500 mb-1" />
-              <p className="text-2xl font-bold text-orange-500">{mobigatePercent}%</p>
+              <p className="text-2xl font-bold text-orange-500">{mobifacePercent}%</p>
               <p className="text-xs text-muted-foreground">Mobiface</p>
             </div>
           </div>
@@ -86,7 +86,7 @@ export function CampaignFeeDistributionSettings() {
             />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>Community: {communityPercent}%</span>
-              <span>Mobiface: {mobigatePercent}%</span>
+              <span>Mobiface: {mobifacePercent}%</span>
             </div>
           </div>
 
@@ -114,7 +114,7 @@ export function CampaignFeeDistributionSettings() {
               <div className="relative">
                 <Input
                   type="number"
-                  value={mobigatePercent}
+                  value={mobifacePercent}
                   disabled
                   className="pr-8 h-11 bg-muted"
                 />
@@ -153,7 +153,7 @@ export function CampaignFeeDistributionSettings() {
             {history.map((item) => (
               <div key={item.id} className="border-l-2 border-muted pl-3 py-1">
                 <Badge variant="outline" className="text-xs">
-                  {item.previousCommunityPercentage}:{item.previousMobigatePercentage} → {item.newCommunityPercentage}:{item.newMobigatePercentage}
+                  {item.previousCommunityPercentage}:{item.previousMobifacePercentage} → {item.newCommunityPercentage}:{item.newMobifacePercentage}
                 </Badge>
                 <p className="text-xs text-muted-foreground mt-1">
                   {format(new Date(item.changedAt), "MMM d, yyyy")} • {item.changedBy}
@@ -173,7 +173,7 @@ export function CampaignFeeDistributionSettings() {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Distribution Change</AlertDialogTitle>
             <AlertDialogDescription>
-              Change fee distribution to Community {communityPercent}% : Mobiface {mobigatePercent}%? This will apply to all new campaign payments.
+              Change fee distribution to Community {communityPercent}% : Mobiface {mobifacePercent}%? This will apply to all new campaign payments.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

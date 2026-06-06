@@ -379,7 +379,7 @@ export default function ManageUsersPage() {
       <div className="p-4">
         {/* Back + Title */}
         <div className="flex items-center gap-3 mb-4">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate("/mobigate-admin")}>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate("/mobiface-admin")}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex-1">

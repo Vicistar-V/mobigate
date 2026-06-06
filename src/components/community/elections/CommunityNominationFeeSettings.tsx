@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import {
   nominationFeeStructures,
-  mobigateNominationConfig,
+  mobifaceNominationConfig,
   communityNominationFeeOverrides,
   getEffectiveNominationFee,
   getMinimumNominationFee,
@@ -174,13 +174,13 @@ function OfficeFeeRow({
               }}
               onBlur={(e) => {
                 const v = Math.max(
-                  mobigateNominationConfig.absoluteMinimumFee,
+                  mobifaceNominationConfig.absoluteMinimumFee,
                   Number(e.target.value) || 0
                 );
                 setDraft(String(v));
               }}
               className="pl-8"
-              min={mobigateNominationConfig.absoluteMinimumFee}
+              min={mobifaceNominationConfig.absoluteMinimumFee}
               step={500}
             />
           </div>
@@ -239,7 +239,7 @@ export function CommunityNominationFeeSettings({
     () => ({ ...(communityNominationFeeOverrides[communityId] || {}) })
   );
 
-  const policy = mobigateNominationConfig.communityFeePolicy;
+  const policy = mobifaceNominationConfig.communityFeePolicy;
   const PolicyIcon = POLICY_META[policy].icon;
 
   const grouped = useMemo(
@@ -274,7 +274,7 @@ export function CommunityNominationFeeSettings({
     });
     toast({
       title: "Reverted to System Minimum",
-      description: "Community will charge the Mobigate-set minimum for this office.",
+      description: "Community will charge the Mobiface-set minimum for this office.",
     });
   };
 

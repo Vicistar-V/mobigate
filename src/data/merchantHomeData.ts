@@ -1,4 +1,4 @@
-import { mockMerchants } from "./mobigateInteractiveQuizData";
+import { mockMerchants } from "./mobifaceInteractiveQuizData";
 
 export interface MerchantGalleryItem {
   id: string;

@@ -12,7 +12,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Header } from "@/components/Header";
-import { PRESET_QUIZ_CATEGORIES } from "@/data/mobigateQuizLevelsData";
+import { PRESET_QUIZ_CATEGORIES } from "@/data/mobifaceQuizLevelsData";
 import { Layers, PlusCircle, Trash2, CheckCircle, XCircle, FolderOpen } from "lucide-react";
 import { QUIZ_TYPE_LABELS, type QuizType } from "@/data/quizTypeQuestionsData";
 

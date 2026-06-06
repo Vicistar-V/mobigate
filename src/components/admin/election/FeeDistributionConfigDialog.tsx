@@ -41,7 +41,7 @@ export function FeeDistributionConfigDialog({
   const [reason, setReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const mobigatePercentage = 100 - communityPercentage;
+  const mobifacePercentage = 100 - communityPercentage;
 
   const handleSaveConfig = async () => {
     if (!reason.trim()) {
@@ -87,7 +87,7 @@ export function FeeDistributionConfigDialog({
             <div className="flex-1 text-center p-3 bg-background rounded-lg">
               <Wallet className="h-5 w-5 mx-auto text-blue-600 mb-1" />
               <p className="text-2xl font-bold text-blue-600">
-                {defaultFeeDistributionConfig.mobigatePercentage}%
+                {defaultFeeDistributionConfig.mobifacePercentage}%
               </p>
               <p className="text-xs text-muted-foreground">Mobiface</p>
             </div>
@@ -116,7 +116,7 @@ export function FeeDistributionConfigDialog({
                 <p className="text-xs text-muted-foreground">Community</p>
               </div>
               <div className="text-center">
-                <p className="text-3xl font-bold text-blue-600">{mobigatePercentage}%</p>
+                <p className="text-3xl font-bold text-blue-600">{mobifacePercentage}%</p>
                 <p className="text-xs text-muted-foreground">Mobiface</p>
               </div>
             </div>
@@ -199,11 +199,11 @@ export function FeeDistributionConfigDialog({
               
               <div className="flex items-center gap-2 text-sm mb-2">
                 <span className="text-muted-foreground">
-                  {history.previousCommunityPercentage}:{history.previousMobigatePercentage}
+                  {history.previousCommunityPercentage}:{history.previousMobifacePercentage}
                 </span>
                 <span>→</span>
                 <span className="font-medium">
-                  {history.newCommunityPercentage}:{history.newMobigatePercentage}
+                  {history.newCommunityPercentage}:{history.newMobifacePercentage}
                 </span>
               </div>
 
