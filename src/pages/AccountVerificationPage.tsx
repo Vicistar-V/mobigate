@@ -317,7 +317,7 @@ const AccountVerificationPage = () => {
   if (submitted) {
     return (
       <div className="min-h-screen bg-muted/20 px-4 py-10 flex items-start justify-center">
-        <MetaTags title="Account Verification — MobiGate" />
+        <MetaTags title="Account Verification — Mobiface" />
         <div className="w-full max-w-md text-center bg-card rounded-2xl border p-6 mt-6">
           <div className="mx-auto w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mb-4">
             <CheckCircle2 className="h-9 w-9 text-emerald-600" />
@@ -335,7 +335,7 @@ const AccountVerificationPage = () => {
 
   return (
     <div className="min-h-screen bg-muted/20 pb-28">
-      <MetaTags title="Account Verification — MobiGate" />
+      <MetaTags title="Account Verification — Mobiface" />
 
       {/* Sticky header */}
       <div className="sticky top-0 z-20 bg-card/95 backdrop-blur border-b px-3 py-3 sm:px-4">

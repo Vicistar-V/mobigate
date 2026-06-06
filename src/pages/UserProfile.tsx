@@ -286,8 +286,8 @@ const UserProfile = () => {
   return (
     <div className="flex flex-col w-full min-h-screen bg-background">
       <MetaTags
-        title={profile ? `${profile.name} — MobiGate` : "Profile — MobiGate"}
-        description={profile ? `View ${profile.name}'s profile on MobiGate` : "View user profile on MobiGate"}
+        title={profile ? `${profile.name} — Mobiface` : "Profile — Mobiface"}
+        description={profile ? `View ${profile.name}'s profile on Mobiface` : "View user profile on Mobiface"}
         ogType="profile"
       />
       <Header />

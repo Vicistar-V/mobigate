@@ -48,7 +48,7 @@ export function LiveScoreboardDrawer({ open, onOpenChange }: LiveScoreboardDrawe
       const url = `${window.location.origin}/profile/${player.id}`;
       const shared = await shareViaNative(
         player.name,
-        `Check out ${player.name}'s performance on MobiGate!`,
+        `Check out ${player.name}'s performance on Mobiface!`,
         url
       );
       if (!shared) {

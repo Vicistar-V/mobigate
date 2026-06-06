@@ -1,7 +1,7 @@
 {
-  "name": "MobiGate",
-  "short_name": "MobiGate",
-  "description": "Connect, share, and discover amazing content with MobiGate - Your premier social content platform",
+  "name": "Mobiface",
+  "short_name": "Mobiface",
+  "description": "Connect, share, and discover amazing content with Mobiface - Your premier social content platform",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
