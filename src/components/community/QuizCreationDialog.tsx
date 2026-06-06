@@ -347,7 +347,7 @@ export function QuizCreationDialog({ open, onOpenChange }: QuizCreationDialogPro
                 <div className="p-3 bg-background rounded-lg text-xs space-y-1">
                   <p className="font-medium">Stake Distribution:</p>
                   <p className="text-muted-foreground">• 70% to Community Wallet</p>
-                  <p className="text-muted-foreground">• 30% to Mobigate</p>
+                  <p className="text-muted-foreground">• 30% to Mobiface</p>
                 </div>
               </CardContent>
             </Card>

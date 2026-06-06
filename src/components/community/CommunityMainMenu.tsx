@@ -164,7 +164,7 @@ export function CommunityMainMenu({
       setOpen(false);
       return;
     }
-    if (action === "Invite Mobigate Users" || action === "Invite Non-Mobigate Users") {
+    if (action === "Invite Mobiface Users" || action === "Invite Non-Mobigate Users") {
       setShowInviteMembers(true);
       setOpen(false);
       return;
@@ -436,9 +436,9 @@ export function CommunityMainMenu({
                       <Button
                         variant="ghost"
                         className="w-full justify-start pl-4 text-sm h-8"
-                        onClick={() => handleMenuClick("Invite Mobigate Users")}
+                        onClick={() => handleMenuClick("Invite Mobiface Users")}
                       >
-                        Invite Mobigate Users
+                        Invite Mobiface Users
                       </Button>
                       <Button
                         variant="ghost"
@@ -642,7 +642,7 @@ export function CommunityMainMenu({
                   }}
                 >
                   <Play className="h-4 w-4 mr-2 text-amber-600" />
-                  <span className="text-amber-700 dark:text-amber-400 font-medium">Play Mobigate Quiz</span>
+                  <span className="text-amber-700 dark:text-amber-400 font-medium">Play Mobiface Quiz</span>
                 </Button>
                 {(isAdmin || isOwner) && (
                   <Button
@@ -1348,7 +1348,7 @@ export function CommunityMainMenu({
         onOpenChange={setShowQuizWallet}
       />
 
-      {/* Mobigate Quiz Dialog */}
+      {/* Mobiface Quiz Dialog */}
       <MobigateQuizDialog 
         open={showMobigateQuiz} 
         onOpenChange={setShowMobigateQuiz}

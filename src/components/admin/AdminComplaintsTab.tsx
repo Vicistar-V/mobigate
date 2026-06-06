@@ -67,8 +67,8 @@ const penaltyDurations = [
 
 const penaltyConfig: Record<PenaltyType, { label: string; description: string; icon: React.ElementType; color: string; bg: string; border: string; requiresDuration: boolean }> = {
   warning: { label: "Send Warning ⚠️", description: "Send an official warning to the merchant", icon: AlertTriangle, color: "text-amber-700", bg: "bg-amber-500/10", border: "border-amber-400", requiresDuration: false },
-  suspend: { label: "Suspend Merchant", description: "Suspend merchant account only (user's Mobigate account stays active)", icon: ShieldOff, color: "text-orange-700", bg: "bg-orange-500/10", border: "border-orange-400", requiresDuration: true },
-  ban: { label: "Ban on Mobigate", description: "Ban the user entirely from Mobigate platform", icon: Ban, color: "text-red-700", bg: "bg-red-500/10", border: "border-red-400", requiresDuration: true },
+  suspend: { label: "Suspend Merchant", description: "Suspend merchant account only (user's Mobiface account stays active)", icon: ShieldOff, color: "text-orange-700", bg: "bg-orange-500/10", border: "border-orange-400", requiresDuration: true },
+  ban: { label: "Ban on Mobiface", description: "Ban the user entirely from Mobiface platform", icon: Ban, color: "text-red-700", bg: "bg-red-500/10", border: "border-red-400", requiresDuration: true },
   deactivate: { label: "Deactivate Permanently", description: "Permanently deactivate the account — irreversible", icon: Trash2, color: "text-red-900", bg: "bg-red-600/10", border: "border-red-600", requiresDuration: false },
 };
 
@@ -316,7 +316,7 @@ export function AdminComplaintsTab() {
       const penaltyLabel =
         selectedPenalty === "warning" ? "Official warning sent" :
         selectedPenalty === "suspend" ? `Suspended for ${durationLabel}` :
-        selectedPenalty === "ban" ? `Banned from Mobigate for ${durationLabel}` :
+        selectedPenalty === "ban" ? `Banned from Mobiface for ${durationLabel}` :
         "Account permanently deactivated";
 
       // Record penalty in the tag system

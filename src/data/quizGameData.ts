@@ -483,7 +483,7 @@ export const walletTransactions: QuizWalletTransaction[] = [
     playerName: "Chukwudi Okafor",
     quizId: "quiz-1",
     quizTitle: "Community Heritage Quiz",
-    description: "Mobigate fee (30% of ₦500)",
+    description: "Mobiface fee (30% of ₦500)",
     createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000)
   },
   {
@@ -556,7 +556,7 @@ export const quizRules = [
   "Each quiz consists of exactly 10 questions with 8 answer options (A-H)",
   "Each question has its own time limit - unanswered questions automatically disappear when time elapses",
   "The stake amount is automatically deducted from your wallet when you start the game",
-  "Stake distribution: 70% goes to Community Wallet, 30% goes to Mobigate",
+  "Stake distribution: 70% goes to Community Wallet, 30% goes to Mobiface",
   "Scoring: 10/10 correct = 100% winning amount, 8-9/10 correct = 20% winning amount, less than 8/10 = no prize",
   "You must have sufficient wallet balance to play any quiz game",
   "Quiz games are automatically disabled when Community Wallet balance is less than 1000% of the winning amount",

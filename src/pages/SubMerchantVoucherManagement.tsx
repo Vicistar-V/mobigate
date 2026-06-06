@@ -373,7 +373,7 @@ export default function SubMerchantVoucherManagement() {
                                     </div>
                                     <div className="flex-1">
                                       <p className="text-xs font-semibold text-foreground">{soldBreakdown.soldOnline} Sold Online</p>
-                                      <p className="text-[10px] text-muted-foreground">Via Mobigate Digital</p>
+                                      <p className="text-[10px] text-muted-foreground">Via Mobiface Digital</p>
                                     </div>
                                   </div>
                                   <div className="flex items-center gap-2.5 p-2 rounded-lg bg-amber-500/5">

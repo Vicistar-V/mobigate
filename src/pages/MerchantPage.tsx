@@ -98,7 +98,7 @@ import { shareToFacebook, shareToTwitter, shareToWhatsApp, shareViaEmail, shareV
 import { useFriendsList } from "@/hooks/useWindowData";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CreateQuizQuestionForm } from "@/components/mobigate/CreateQuizQuestionForm";
+import { CreateQuizQuestionForm } from "@/components/mobiface/CreateQuizQuestionForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PlusCircle } from "lucide-react";
 import { ManageSponsorsSheet } from "@/components/community/mobigate-quiz/ManageSponsorsSheet";
@@ -1047,8 +1047,8 @@ function SeasonsTab({ merchantId, merchant }: { merchantId: string; merchant: Qu
                   {/* Boost Show Drawer */}
                   {boostSeasonId === season.id && (() => {
                     const shareUrl = `${window.location.origin}/quiz-season/${season.id}`;
-                    const shareText = `Join "${season.name}" on Mobigate! Play quizzes and win up to ${formatLocalAmount(season.firstPrize, "NGN")} in prizes. 🏆`;
-                    const emailSubject = `Join ${season.name} on Mobigate!`;
+                    const shareText = `Join "${season.name}" on Mobiface! Play quizzes and win up to ${formatLocalAmount(season.firstPrize, "NGN")} in prizes. 🏆`;
+                    const emailSubject = `Join ${season.name} on Mobiface!`;
                     const emailBody = `Hey!\n\nI wanted to share this amazing quiz season with you:\n\n🎯 ${season.name}\n💰 Win up to ${formatLocalAmount(season.firstPrize, "NGN")}\n🏆 Total Prize Pool: ${formatLocalAmount(season.totalWinningPrizes, "NGN")}\n\nJoin now: ${shareUrl}\n\nSee you there!`;
                     const smsBody = `${shareText}\n\nJoin: ${shareUrl}`;
 
@@ -1059,7 +1059,7 @@ function SeasonsTab({ merchantId, merchant }: { merchantId: string; merchant: Qu
                           <h4 className="text-sm font-bold flex items-center gap-2">
                             <Megaphone className="h-4 w-4 text-primary" />
                             {boostStep === 'menu' && 'Boost Show'}
-                            {boostStep === 'boost-confirm' && 'Boost on Mobigate'}
+                            {boostStep === 'boost-confirm' && 'Boost on Mobiface'}
                             {boostStep === 'friends-picker' && 'Share with Friends'}
                             {boostStep === 'store-form' && 'List on Mobi-Store'}
                             {boostStep === 'social-picker' && 'Share on Social Media'}
@@ -1077,8 +1077,8 @@ function SeasonsTab({ merchantId, merchant }: { merchantId: string; merchant: Qu
                               <button className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]" onClick={() => setBoostStep('boost-confirm')}>
                                 <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0"><Megaphone className="h-5 w-5 text-primary" /></div>
                                 <div className="text-left flex-1 min-w-0">
-                                  <p className="text-sm font-semibold">Boost on Mobigate</p>
-                                  <p className="text-xs text-muted-foreground">Promote to all Mobigate users</p>
+                                  <p className="text-sm font-semibold">Boost on Mobiface</p>
+                                  <p className="text-xs text-muted-foreground">Promote to all Mobiface users</p>
                                 </div>
                                 {boostedSeasons.includes(season.id) && <Badge className="bg-primary/15 text-primary text-xs shrink-0">Active</Badge>}
                               </button>
@@ -1086,7 +1086,7 @@ function SeasonsTab({ merchantId, merchant }: { merchantId: string; merchant: Qu
                               <button className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors touch-manipulation active:scale-[0.97]" onClick={() => setBoostStep('friends-picker')}>
                                 <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0"><Users className="h-5 w-5 text-blue-600" /></div>
                                 <div className="text-left flex-1 min-w-0">
-                                  <p className="text-sm font-semibold">Share with Mobigate Users</p>
+                                  <p className="text-sm font-semibold">Share with Mobiface Users</p>
                                   <p className="text-xs text-muted-foreground">Especially friends & connections</p>
                                 </div>
                               </button>
@@ -1130,7 +1130,7 @@ function SeasonsTab({ merchantId, merchant }: { merchantId: string; merchant: Qu
                         {/* ── BOOST CONFIRM ── */}
                         {boostStep === 'boost-confirm' && (
                           <div className="space-y-3">
-                            <p className="text-xs text-muted-foreground">Select how long to boost "{season.name}" on Mobigate's featured feed.</p>
+                            <p className="text-xs text-muted-foreground">Select how long to boost "{season.name}" on Mobiface's featured feed.</p>
                             <div className="space-y-2">
                               {[
                                 { days: 7, price: 5000, label: "7 Days", desc: "Reach ~2,000 users" },
@@ -1157,7 +1157,7 @@ function SeasonsTab({ merchantId, merchant }: { merchantId: string; merchant: Qu
                               className="w-full h-12 text-sm font-bold gap-2 touch-manipulation active:scale-[0.97]"
                               onClick={() => {
                                 setBoostedSeasons((p) => [...new Set([...p, season.id])]);
-                                toast({ title: "🚀 Boost Activated!", description: `"${season.name}" is now boosted for ${boostDuration} days on Mobigate.` });
+                                toast({ title: "🚀 Boost Activated!", description: `"${season.name}" is now boosted for ${boostDuration} days on Mobiface.` });
                                 setBoostSeasonId(null);
                               }}
                             >

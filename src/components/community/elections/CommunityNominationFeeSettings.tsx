@@ -55,21 +55,21 @@ const POLICY_META: Record<
     tone: "text-emerald-700 bg-emerald-500/10 border-emerald-500/30",
     icon: ShieldCheck,
     banner:
-      "Mobigate requires fees to be at least the system minimum for each office. You can raise them but not lower them.",
+      "Mobiface requires fees to be at least the system minimum for each office. You can raise them but not lower them.",
   },
   allow_below: {
     label: "Below-Minimum Allowed",
     tone: "text-amber-700 bg-amber-500/10 border-amber-500/30",
     icon: ShieldAlert,
     banner:
-      "Mobigate currently lets communities set fees below the system minimum (down to the absolute floor).",
+      "Mobiface currently lets communities set fees below the system minimum (down to the absolute floor).",
   },
   free_for_all: {
     label: "Communities Set Freely",
     tone: "text-fuchsia-700 bg-fuchsia-500/10 border-fuchsia-500/30",
     icon: Sparkles,
     banner:
-      "Mobigate has waived its minimums — your community sets nomination fees freely for every office.",
+      "Mobiface has waived its minimums — your community sets nomination fees freely for every office.",
   },
 };
 
@@ -293,14 +293,14 @@ export function CommunityNominationFeeSettings({
         unlock to edit, then save to re-lock.
       </p>
 
-      {/* Policy banner from Mobigate */}
+      {/* Policy banner from Mobiface */}
       <div
         className={`rounded-xl border-2 p-3 flex items-start gap-2.5 ${POLICY_META[policy].tone}`}
       >
         <PolicyIcon className="h-4 w-4 shrink-0 mt-0.5" />
         <div className="min-w-0">
           <p className="text-xs font-bold">
-            Mobigate Policy: {POLICY_META[policy].label}
+            Mobiface Policy: {POLICY_META[policy].label}
           </p>
           <p className="text-[11px] leading-snug mt-0.5 opacity-90">
             {POLICY_META[policy].banner}
@@ -392,7 +392,7 @@ export function CommunityNominationFeeSettings({
             (paid once per side).
           </p>
           <p>
-            <strong>Mobigate minimums</strong> protect the platform from being
+            <strong>Mobiface minimums</strong> protect the platform from being
             undercut. If the policy is set to <em>Enforce</em>, you cannot save
             a fee below the system value. Each setting must be unlocked before
             it can be edited.

@@ -1,4 +1,4 @@
-// Mobigate Universal Currency Translation Utilities
+// Mobiface Universal Currency Translation Utilities
 
 import { 
   SUPPORTED_CURRENCIES, 
@@ -161,7 +161,7 @@ export { SUPPORTED_CURRENCIES } from "@/types/mobiFinancialProtocol";
 
 /**
  * Calculate platform profit from exchange rate margins
- * Mobigate profits from the spread between buy/sell rates
+ * Mobiface profits from the spread between buy/sell rates
  */
 export function calculatePlatformProfit(
   transactionAmount: number,
@@ -178,7 +178,7 @@ export function calculatePlatformProfit(
   
   const grossProfit = exchangeMargin + platformFee;
   
-  // Split between community and Mobigate
+  // Split between community and Mobiface
   const communityShare = grossProfit * (communitySharePercent / 100);
   const mobigateShare = grossProfit * ((100 - communitySharePercent) / 100);
   

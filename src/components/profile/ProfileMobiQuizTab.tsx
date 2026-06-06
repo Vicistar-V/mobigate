@@ -14,7 +14,7 @@ import {
 import { mobigatePlayerStats } from "@/data/mobigateQuizData";
 import { quizGamesPlayedData, type QuizGameRecord } from "@/data/quizGamesPlayedData";
 import { mockMerchants, mockSeasonWinners } from "@/data/mobigateInteractiveQuizData";
-import { QuizGameDetailDrawer } from "@/components/mobigate/QuizGameDetailDrawer";
+import { QuizGameDetailDrawer } from "@/components/mobiface/QuizGameDetailDrawer";
 import { QuizWinnerProfileDrawer } from "@/components/community/mobigate-quiz/QuizWinnerProfileDrawer";
 import { formatLocalAmount, formatMobiAmount } from "@/lib/mobiCurrencyTranslation";
 

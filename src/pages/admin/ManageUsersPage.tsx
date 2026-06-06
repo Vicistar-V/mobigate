@@ -219,7 +219,7 @@ const roleConfig: Record<UserRole, { label: string; icon: React.ElementType }> =
   user: { label: "User", icon: Users },
   merchant: { label: "Merchant", icon: Star },
   community_admin: { label: "Community Admin", icon: Crown },
-  mobigate_admin: { label: "Mobigate Admin", icon: Shield },
+  mobigate_admin: { label: "Mobiface Admin", icon: Shield },
 };
 
 // Authorising admins for status changes (UI template — deterministic by user id)

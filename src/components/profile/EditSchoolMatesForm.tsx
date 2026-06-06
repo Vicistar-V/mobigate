@@ -190,7 +190,7 @@ export const EditSchoolMatesForm = ({ currentData, onSave, onClose }: EditSchool
           <div className="space-y-3 p-3 sm:p-4 bg-muted/20 rounded-lg border-2 border-dashed">
             <div className="flex items-center gap-2">
               <Search className="h-4 w-4 text-muted-foreground" />
-              <Label className="text-base font-medium">Link to Mobigate User</Label>
+              <Label className="text-base font-medium">Link to Mobiface User</Label>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -201,7 +201,7 @@ export const EditSchoolMatesForm = ({ currentData, onSave, onClose }: EditSchool
                 className="w-full"
               >
                 <Globe className="h-4 w-4 mr-2" />
-                Search on Mobigate
+                Search on Mobiface
               </Button>
               
               <Button
@@ -256,7 +256,7 @@ export const EditSchoolMatesForm = ({ currentData, onSave, onClose }: EditSchool
               placeholder="Type manually or search above"
             />
             <p className="text-sm text-muted-foreground mt-1">
-              Type manually or search above to link a Mobigate user
+              Type manually or search above to link a Mobiface user
             </p>
             {errors.name && <p className="text-base text-destructive mt-1">{errors.name.message as string}</p>}
           </div>

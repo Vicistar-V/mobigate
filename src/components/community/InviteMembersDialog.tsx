@@ -2,7 +2,7 @@
  * components/community/InviteMembersDialog.tsx
  *
  * 3-tab invite dialog matching the existing UI:
- * Tab 1 — Mobigate Users  : search + checkbox select existing users → send in-app invite
+ * Tab 1 — Mobiface Users  : search + checkbox select existing users → send in-app invite
  * Tab 2 — External         : invite non-members via WhatsApp, SMS, Email etc.
  *                            includes community selector + auto-generated message
  * Tab 3 — Share Link       : copy/share a signup link with community links
@@ -41,7 +41,7 @@ interface Props {
   senderId?:    string;
 }
 
-type Tab = "mobigate" | "external" | "link";
+type Tab = "mobiface" | "external" | "link";
 
 // ── Build invite message ────────────────────────────────────────────────────
 function buildMessage(
@@ -53,7 +53,7 @@ function buildMessage(
 ): string {
   const profileLink = `${APP_URL}/profile/${senderId}`;
   const greeting    = recipientName.trim() ? `Hi, ${recipientName.trim()}! ` : "Hi! ";
-  let body = `${greeting}${senderName} invites you to join the Mobigate community. Please click on the link below to Sign-Up Now.\n\n👉 ${APP_URL}/register`;
+  let body = `${greeting}${senderName} invites you to join the Mobiface community. Please click on the link below to Sign-Up Now.\n\n👉 ${APP_URL}/register`;
   if (communities.length > 0) {
     body += "\n\nAfter joining, you can also connect with me here:";
     communities.forEach(c => { body += `\n• ${c.name}: ${APP_URL}/community/${c.id}`; });
@@ -69,13 +69,13 @@ export const InviteMembersDialog = ({
   const { user }  = useAuth();
   const { toast } = useToast();
 
-  const senderName = propSenderName || user?.fullName || user?.username || "A Mobigate Member";
+  const senderName = propSenderName || user?.fullName || user?.username || "A Mobiface Member";
   const senderId   = propSenderId   || user?.id || "";
   const profileUrl = `${APP_URL}/profile/${senderId}`;
   const signupUrl  = `${APP_URL}/register`;
 
-  const [tab,             setTab]             = useState<Tab>("mobigate");
-  // Mobigate Users tab
+  const [tab,             setTab]             = useState<Tab>("mobiface");
+  // Mobiface Users tab
   const [userSearch,      setUserSearch]      = useState("");
   const [searchResults,   setSearchResults]   = useState<MobiUser[]>([]);
   const [searching,       setSearching]       = useState(false);
@@ -102,7 +102,7 @@ export const InviteMembersDialog = ({
   // ── Reset on close ──────────────────────────────────────────────────────
   useEffect(() => {
     if (!open) {
-      setTab("mobigate"); setUserSearch(""); setSearchResults([]);
+      setTab("mobiface"); setUserSearch(""); setSearchResults([]);
       setSelectedUsers([]); setMobiMessage(""); setRecipientName("");
       setSelectedComms([]); setCustomText(""); setExtStep("compose");
       setLinkComms([]); setCopied(false); setCommOpen(false); setLinkCommOpen(false);
@@ -122,7 +122,7 @@ export const InviteMembersDialog = ({
       .finally(() => setCommLoading(false));
   }, [open, tab]);
 
-  // ── Search Mobigate users ───────────────────────────────────────────────
+  // ── Search Mobiface users ───────────────────────────────────────────────
   const searchUsers = useCallback(async (q: string) => {
     if (q.length < 2) { setSearchResults([]); return; }
     setSearching(true);
@@ -177,7 +177,7 @@ export const InviteMembersDialog = ({
   const extMessage = buildMessage(senderName, senderId, recipientName, selectedComms, customText);
 
   const linkText = (() => {
-    let t = `Join me on Mobigate! Sign up here: ${signupUrl}`;
+    let t = `Join me on Mobiface! Sign up here: ${signupUrl}`;
     if (linkComms.length > 0) {
       t += "\n\nJoin these communities:";
       linkComms.forEach(c => { t += `\n• ${c.name}: ${APP_URL}/community/${c.id}`; });
@@ -199,9 +199,9 @@ export const InviteMembersDialog = ({
     { label:"SMS",      icon:"📱", color:"bg-blue-500 hover:bg-blue-600 text-white",
       action:()=>window.open(`sms:?body=${encodeURIComponent(msg)}`,"_blank") },
     { label:"Email",    icon:"✉️", color:"bg-gray-700 hover:bg-gray-800 text-white",
-      action:()=>window.open(`mailto:?subject=${encodeURIComponent(senderName+" invites you to Mobigate")}&body=${encodeURIComponent(msg)}`,"_blank") },
+      action:()=>window.open(`mailto:?subject=${encodeURIComponent(senderName+" invites you to Mobiface")}&body=${encodeURIComponent(msg)}`,"_blank") },
     { label:"Twitter/X",icon:"𝕏", color:"bg-black hover:bg-gray-900 text-white",
-      action:()=>window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(senderName+" invites you to Mobigate: "+signupUrl)}`,"_blank") },
+      action:()=>window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(senderName+" invites you to Mobiface: "+signupUrl)}`,"_blank") },
     { label:"Telegram", icon:"✈️", color:"bg-[#229ED9] hover:bg-[#1a8fbf] text-white",
       action:()=>window.open(`https://t.me/share/url?url=${encodeURIComponent(signupUrl)}&text=${encodeURIComponent(msg)}`,"_blank") },
     { label:"Facebook", icon:"f",  color:"bg-[#1877F2] hover:bg-[#1462cc] text-white",
@@ -277,7 +277,7 @@ export const InviteMembersDialog = ({
         {/* ── Tab switcher (matching screenshot) ── */}
         <div className="flex gap-1 mx-6 mt-4 bg-gray-100 rounded-xl p-1 shrink-0">
           {([
-            ["mobigate","Mobigate Users", <UserPlus className="h-3.5 w-3.5"/>],
+            ["mobiface","Mobiface Users", <UserPlus className="h-3.5 w-3.5"/>],
             ["external","External",       <Send      className="h-3.5 w-3.5"/>],
             ["link",    "Share Link",     <Link2     className="h-3.5 w-3.5"/>],
           ] as [Tab, string, React.ReactNode][]).map(([t, label, icon]) => (
@@ -292,8 +292,8 @@ export const InviteMembersDialog = ({
         {/* ── Tab content ── */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
 
-          {/* ══ TAB 1: MOBIGATE USERS ══ */}
-          {tab === "mobigate" && showConnections && (
+          {/* ══ TAB 1: MOBIFACE USERS ══ */}
+          {tab === "mobiface" && showConnections && (
             <div className="space-y-3">
               {/* Picker header */}
               <div className="flex items-center gap-2">
@@ -369,7 +369,7 @@ export const InviteMembersDialog = ({
             </div>
           )}
 
-          {tab === "mobigate" && !showConnections && (
+          {tab === "mobiface" && !showConnections && (
             <div className="space-y-4">
               {/* Search */}
               <div className="relative">
@@ -377,7 +377,7 @@ export const InviteMembersDialog = ({
                 <Input
                   value={userSearch}
                   onChange={e => setUserSearch(e.target.value)}
-                  placeholder="Search Mobigate users..."
+                  placeholder="Search Mobiface users..."
                   className="pl-9 rounded-xl border-gray-200 focus-visible:ring-purple-400"
                 />
                 {searching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-purple-400"/>}
@@ -417,7 +417,7 @@ export const InviteMembersDialog = ({
                 <Textarea
                   value={mobiMessage}
                   onChange={e => setMobiMessage(e.target.value)}
-                  placeholder={`You've been invited to join our community on Mobigate! Click the link below to complete your membership application.`}
+                  placeholder={`You've been invited to join our community on Mobiface! Click the link below to complete your membership application.`}
                   rows={3}
                   className="rounded-xl border-gray-200 focus-visible:ring-purple-400 resize-none text-sm"
                 />
@@ -511,7 +511,7 @@ export const InviteMembersDialog = ({
                     Personalized Message <span className="text-gray-400 font-normal normal-case">(optional)</span>
                   </label>
                   <Textarea value={customText} onChange={e => setCustomText(e.target.value)}
-                    placeholder="e.g. I've been using Mobigate and it's amazing! You should join too..."
+                    placeholder="e.g. I've been using Mobiface and it's amazing! You should join too..."
                     rows={2} className="rounded-xl border-gray-200 focus-visible:ring-purple-400 resize-none"/>
                 </div>
 
@@ -539,7 +539,7 @@ export const InviteMembersDialog = ({
                 </div>
                 {typeof navigator !== "undefined" && (navigator as any).share && (
                   <Button className="w-full gap-2 bg-purple-600 hover:bg-purple-700 text-white"
-                    onClick={async () => { try { await (navigator as any).share({ title:`${senderName} invites you to Mobigate`, text:extMessage, url:signupUrl }); } catch {} }}>
+                    onClick={async () => { try { await (navigator as any).share({ title:`${senderName} invites you to Mobiface`, text:extMessage, url:signupUrl }); } catch {} }}>
                     <Send className="h-4 w-4"/>Share via device apps
                   </Button>
                 )}
@@ -570,7 +570,7 @@ export const InviteMembersDialog = ({
           {tab === "link" && (
             <div className="space-y-4">
               <p className="text-sm text-gray-600">
-                Share your Mobigate signup link directly. Optionally include community links so recipients can join specific groups after signing up.
+                Share your Mobiface signup link directly. Optionally include community links so recipients can join specific groups after signing up.
               </p>
 
               {/* Community select for link */}
@@ -625,7 +625,7 @@ export const InviteMembersDialog = ({
 
         {/* ── Footer ── */}
         <div className="px-6 py-4 border-t border-gray-100 shrink-0 flex justify-between gap-3">
-          {tab === "mobigate" && (
+          {tab === "mobiface" && (
             <>
               <Button variant="outline" className="rounded-xl" onClick={() => onOpenChange(false)}>Cancel</Button>
               <Button className="rounded-xl bg-purple-600 hover:bg-purple-700 text-white gap-2"

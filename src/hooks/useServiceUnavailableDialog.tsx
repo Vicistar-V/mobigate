@@ -29,7 +29,7 @@ export const useServiceUnavailableDialog = () => {
               the Service, or this Service is not yet available in your country.
             </p>
             <p className="text-sm">
-              You can find out more by going through Mobigate{" "}
+              You can find out more by going through Mobiface{" "}
               <span className="font-semibold">'ACCESSIBILITY & TERMS OF SERVICE'</span> and{" "}
               <span className="font-semibold">'COMMUNITY STANDARDS'</span>.
             </p>

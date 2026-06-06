@@ -1048,7 +1048,7 @@ const Profile = () => {
                 <AlertDescription className="mt-2">
                   You cannot use this Service now: it's either you are not eligible to use 
                   the Service, or this Service is not yet available in your country. You can 
-                  find out more by going through Mobigate 'ACCESSIBILITY & TERMS OF SERVICE' 
+                  find out more by going through Mobiface 'ACCESSIBILITY & TERMS OF SERVICE' 
                   and 'COMMUNITY STANDARDS'.
                 </AlertDescription>
               </Alert>
@@ -1063,7 +1063,7 @@ const Profile = () => {
                 <AlertDescription className="mt-2">
                   You cannot use this Service now: it's either you are not eligible to use 
                   the Service, or this Service is not yet available in your country. You can 
-                  find out more by going through Mobigate 'ACCESSIBILITY & TERMS OF SERVICE' 
+                  find out more by going through Mobiface 'ACCESSIBILITY & TERMS OF SERVICE' 
                   and 'COMMUNITY STANDARDS'.
                 </AlertDescription>
               </Alert>
@@ -1078,7 +1078,7 @@ const Profile = () => {
                 <AlertDescription className="mt-2">
                   You cannot use this Service now: it's either you are not eligible to use 
                   the Service, or this Service is not yet available in your country. You can 
-                  find out more by going through Mobigate 'ACCESSIBILITY & TERMS OF SERVICE' 
+                  find out more by going through Mobiface 'ACCESSIBILITY & TERMS OF SERVICE' 
                   and 'COMMUNITY STANDARDS'.
                 </AlertDescription>
               </Alert>

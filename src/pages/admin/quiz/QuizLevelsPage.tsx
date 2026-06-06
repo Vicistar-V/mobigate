@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { Header } from "@/components/Header";
-import { MobigateQuizLevelsManagement } from "@/components/mobigate/MobigateQuizLevelsManagement";
+import { MobigateQuizLevelsManagement } from "@/components/mobiface/MobigateQuizLevelsManagement";
 import { QUIZ_TYPE_LABELS, type QuizType } from "@/data/quizTypeQuestionsData";
 
 export default function QuizLevelsPage() {

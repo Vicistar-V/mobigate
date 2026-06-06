@@ -7,9 +7,9 @@
  *
  * Legal behaviour (enforced by the PHP backend — surfaced here for the author):
  *  - Uploaded documents are submitted to the System against the Author's Account.
- *  - Only Mobigate Admins can access or view these Documents.
+ *  - Only Mobiface Admins can access or view these Documents.
  *  - The Author CANNOT delete or remove a submitted document, even if the post
- *    itself is later deleted. It is a legal document that belongs to Mobigate.
+ *    itself is later deleted. It is a legal document that belongs to Mobiface.
  */
 
 import { useRef } from "react";
@@ -155,12 +155,12 @@ export const CopyrightDocumentsField = ({
 
           <p className="text-[11px] text-muted-foreground">Supported formats: PDF, JPEG, TIFF, PNG, GIF</p>
 
-          {/* Legal notice — documents belong to Mobigate */}
+          {/* Legal notice — documents belong to Mobiface */}
           <div className="flex gap-2 rounded-lg border border-amber-300/60 bg-amber-50 px-2.5 py-2">
             <Lock className="h-3.5 w-3.5 text-amber-600 shrink-0 mt-0.5" />
             <p className="text-[11px] leading-snug text-amber-800">
               Submitted documents are filed against your account as legal records that
-              <strong> belong to Mobigate</strong>. Only Mobigate Admins can view them, and they
+              <strong> belong to Mobiface</strong>. Only Mobiface Admins can view them, and they
               <strong> cannot be removed</strong> — even if you later delete this post.
             </p>
           </div>

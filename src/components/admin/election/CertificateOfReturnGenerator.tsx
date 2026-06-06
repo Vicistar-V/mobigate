@@ -98,7 +98,7 @@ export function CertificateOfReturnGenerator({
       tenureEnd: addYears(now, tenureYearsNum),
       tenureDurationYears: tenureYearsNum,
       issuedDate: now,
-      issuedBy: "Mobigate Independent Electoral System",
+      issuedBy: "Mobiface Independent Electoral System",
       digitalSignature: "MOBIGATE-SIG-" + Math.random().toString(36).substring(2, 10).toUpperCase(),
       verificationCode: Math.random().toString(36).substring(2, 10).toUpperCase(),
       status: 'issued'
@@ -125,7 +125,7 @@ export function CertificateOfReturnGenerator({
               <h4 className="font-semibold text-sm">Certificate of Return</h4>
               <p className="text-xs text-muted-foreground mt-1">
                 Generate official certificates for election winners. These digital 
-                documents, signed by Mobigate, serve as verified evidence of 
+                documents, signed by Mobiface, serve as verified evidence of 
                 leadership for bank accounts and legal requirements.
               </p>
             </div>

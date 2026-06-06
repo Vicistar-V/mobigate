@@ -27,7 +27,7 @@ export const ShareDialog = ({
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
 
-  const postTitle = title || "Check this out on Mobigate";
+  const postTitle = title || "Check this out on Mobiface";
   const postDesc  = description || (author ? `${postType || "Post"} by ${author}` : "");
   const shareText = `${postTitle}${postDesc ? `\n${postDesc}` : ""}\n\n${shareUrl}`;
   const shortText = `${postTitle} — ${shareUrl}`;

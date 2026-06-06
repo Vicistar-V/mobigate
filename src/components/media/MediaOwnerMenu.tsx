@@ -111,7 +111,7 @@ export const MediaOwnerMenu = ({
               <AlertDialogTitle>Delete {itemLabel}?</AlertDialogTitle>
               <AlertDialogDescription>
                 This will permanently remove this {itemLabel.toLowerCase()} from
-                your Mobigate profile. This action cannot be undone.
+                your Mobiface profile. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

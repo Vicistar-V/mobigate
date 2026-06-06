@@ -89,7 +89,7 @@ export function FeeDistributionConfigDialog({
               <p className="text-2xl font-bold text-blue-600">
                 {defaultFeeDistributionConfig.mobigatePercentage}%
               </p>
-              <p className="text-xs text-muted-foreground">Mobigate</p>
+              <p className="text-xs text-muted-foreground">Mobiface</p>
             </div>
           </div>
           <p className="text-xs text-muted-foreground mt-3 text-center">
@@ -117,7 +117,7 @@ export function FeeDistributionConfigDialog({
               </div>
               <div className="text-center">
                 <p className="text-3xl font-bold text-blue-600">{mobigatePercentage}%</p>
-                <p className="text-xs text-muted-foreground">Mobigate</p>
+                <p className="text-xs text-muted-foreground">Mobiface</p>
               </div>
             </div>
 

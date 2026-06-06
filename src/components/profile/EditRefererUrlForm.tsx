@@ -92,7 +92,7 @@ export const EditRefererUrlForm = ({ currentData, onSave, onClose }: EditReferer
             <FormItem>
               <FormLabel>Referer Profile URL</FormLabel>
               <FormControl>
-                <Input placeholder="https://mobigate.com/profile/username" {...field} />
+                <Input placeholder="https://mobiface.com/profile/username" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

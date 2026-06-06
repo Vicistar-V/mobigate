@@ -86,7 +86,7 @@ export const calculateCampaignFee = (
 };
 
 /**
- * Distribute the campaign fee between Community and Mobigate
+ * Distribute the campaign fee between Community and Mobiface
  */
 export const distributeCampaignFee = (
   totalFee: number,

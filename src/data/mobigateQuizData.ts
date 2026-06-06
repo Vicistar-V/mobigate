@@ -1,4 +1,4 @@
-// Mobigate Quiz - Platform-wide global quiz questions and data
+// Mobiface Quiz - Platform-wide global quiz questions and data
 // Theme: Amber/Orange - Global knowledge, trending topics, entertainment
 
 export interface MobigateQuizQuestion {
@@ -300,7 +300,7 @@ const popCultureQuestions: MobigateQuizQuestion[] = [
   }
 ];
 
-// Active Mobigate Quizzes
+// Active Mobiface Quizzes
 export const activeMobigateQuizzes: MobigateQuiz[] = [
   {
     id: "mobi-quiz-1",
@@ -403,7 +403,7 @@ export const activeMobigateQuizzes: MobigateQuiz[] = [
   }
 ];
 
-// Mobigate Global Leaderboard
+// Mobiface Global Leaderboard
 export const mobigateLeaderboard: MobigateLeaderboardEntry[] = [
   {
     id: "ml1",
@@ -503,7 +503,7 @@ export const mobigateLeaderboard: MobigateLeaderboardEntry[] = [
   }
 ];
 
-// Mobigate Player Stats
+// Mobiface Player Stats
 export const mobigatePlayerStats: MobigatePlayerStats = {
   playerId: "current-user",
   playerName: "You",
@@ -522,7 +522,7 @@ export const mobigatePlayerStats: MobigatePlayerStats = {
   favoriteCategory: "Pop Culture"
 };
 
-// Mobigate Wallet
+// Mobiface Wallet
 export const mobigateWalletData: MobigateWallet = {
   balance: 25000,
   totalEarnings: 67500,
@@ -530,9 +530,9 @@ export const mobigateWalletData: MobigateWallet = {
   lastUpdated: new Date()
 };
 
-// Mobigate Quiz Rules
+// Mobiface Quiz Rules
 export const mobigateQuizRules = [
-  "Mobigate Quizzes are open to all registered Mobigate users worldwide",
+  "Mobiface Quizzes are open to all registered Mobiface users worldwide",
   "Compete with players from around the world for massive prizes",
   "10 questions per quiz with 8 answer options (A-H) each",
   "Faster completion times give you higher rankings on the leaderboard",

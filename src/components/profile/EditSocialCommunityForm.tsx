@@ -71,7 +71,7 @@ export const EditSocialCommunityForm = ({
         <div className="flex gap-3">
           <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
           <AlertDescription className="text-sm leading-relaxed">
-            Social Communities are automatically added when you join organizations on Mobigate. 
+            Social Communities are automatically added when you join organizations on Mobiface. 
             You can only manage privacy settings for these memberships.
           </AlertDescription>
         </div>

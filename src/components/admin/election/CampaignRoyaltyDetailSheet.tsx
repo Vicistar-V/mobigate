@@ -107,7 +107,7 @@ export function CampaignRoyaltyDetailSheet({
       </Card>
 
       {/* Fee Breakdown - Community Admin View */}
-      {/* Note: Total Collected and detailed fee breakdown are Mobigate Admin concerns only */}
+      {/* Note: Total Collected and detailed fee breakdown are Mobiface Admin concerns only */}
       {/* Community Admins only see their royalty share */}
 
       {/* Community Royalty - Only show Community's share */}
@@ -119,7 +119,7 @@ export function CampaignRoyaltyDetailSheet({
             <MobiExplainerTooltip size="sm" />
           </div>
           
-          {/* Only Community Share - Mobigate Share hidden for Community Admins */}
+          {/* Only Community Share - Mobiface Share hidden for Community Admins */}
           <div className="flex justify-between items-center p-3 bg-background rounded-lg">
             <div>
               <span className="text-sm text-muted-foreground">Your Community Earnings</span>

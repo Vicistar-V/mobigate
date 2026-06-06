@@ -417,7 +417,7 @@ const Index = () => {
             {/* User's Status Banner — same banner shown on their Profile, with their click action + auto-rotation */}
             <UserStatusBanner />
 
-            {/* Campaign Banners for Mobigate Interface */}
+            {/* Campaign Banners for Mobiface Interface */}
             <CampaignBannerRotation 
               audienceType="mobigate_interface" 
               compact={false}

@@ -269,7 +269,7 @@ export const ProfileAboutTab = ({
   });
   const [refererUrl, setRefererUrl] = useState<RefererUrl>(() => 
     phpAbout?.refererUrl || loadFromStorage("profile_refererUrl", {
-      url: "https://mobigate.com/profile/john-doe",
+      url: "https://mobiface.com/profile/john-doe",
       refererName: "John Doe",
       refererId: currentUserId,
       privacy: "public",
@@ -1067,7 +1067,7 @@ export const ProfileAboutTab = ({
                   </Badge>
                 </div>
               </div>) : <p className="text-base text-muted-foreground">
-              You haven't joined any Social Communities yet. Join Town Unions, Clubs, and Associations on Mobigate to see them here.
+              You haven't joined any Social Communities yet. Join Town Unions, Clubs, and Associations on Mobiface to see them here.
             </p>}
         </div>
       </Card>

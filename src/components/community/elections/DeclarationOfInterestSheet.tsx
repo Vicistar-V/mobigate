@@ -284,7 +284,7 @@ export function DeclarationOfInterestSheet({
                 <span className="font-medium">{formatMobiAmount(costBreakdown.communityReceives)} ({formatLocalAmount(costBreakdown.communityReceives, "NGN")})</span>
               </p>
               <p className="flex justify-between">
-                <span>→ Mobigate Platform (both wallets):</span>
+                <span>→ Mobiface Platform (both wallets):</span>
                 <span className="font-medium">{formatMobiAmount(costBreakdown.mobigateReceives)} ({formatLocalAmount(costBreakdown.mobigateReceives, "NGN")})</span>
               </p>
             </div>
@@ -439,7 +439,7 @@ export function DeclarationOfInterestSheet({
                   <span>{formatMobiAmount(costBreakdown?.communityReceives || 0)} ({formatLocalAmount(costBreakdown?.communityReceives || 0, "NGN")})</span>
                 </p>
                 <p className="flex justify-between">
-                  <span>• Mobigate Platform:</span>
+                  <span>• Mobiface Platform:</span>
                   <span>{formatMobiAmount(costBreakdown?.mobigateReceives || 0)} ({formatLocalAmount(costBreakdown?.mobigateReceives || 0, "NGN")})</span>
                 </p>
               </div>

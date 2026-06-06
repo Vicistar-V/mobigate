@@ -104,8 +104,8 @@ export interface CandidateAnalytics {
 }
 
 /**
- * Mobigate platform nomination configuration
- * Only visible to Mobigate Admin (not Community Admins)
+ * Mobiface platform nomination configuration
+ * Only visible to Mobiface Admin (not Community Admins)
  */
 export interface MobigateNominationConfig {
   serviceChargePercent: number; // 15-30%

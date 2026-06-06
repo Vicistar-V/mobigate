@@ -16,7 +16,7 @@ const API_BASE = (import.meta.env.VITE_API_URL as string) || "/api";
  * regardless of the audience that's been granted access.
  *
  * Three ways to add an exclusion (per spec):
- *   1. Type a person's NAME → fetches matching Mobigate users to pick from.
+ *   1. Type a person's NAME → fetches matching Mobiface users to pick from.
  *   2. Enter an EMAIL or PHONE → auto-fetches the connected user(s).
  *   3. Select from your own Friends (same search box surfaces friends too).
  *

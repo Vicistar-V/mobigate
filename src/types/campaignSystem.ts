@@ -2,8 +2,8 @@
 export type CampaignAudience = 
   | "community_interface"      // Within Community Interface Only
   | "members_interface"        // On Members Interface
-  | "mobigate_interface"       // Across Mobigate Interface
-  | "mobigate_users"           // On Mobigate Users Interface
+  | "mobigate_interface"       // Across Mobiface Interface
+  | "mobigate_users"           // On Mobiface Users Interface
   | "mobi_store_marketplace";  // On Mobi-Store Marketplace
 
 export interface CampaignAudienceOption {

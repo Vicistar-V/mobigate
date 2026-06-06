@@ -64,7 +64,7 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
     toast({
       title: result.amountWon > 0 ? "🔥 Amazing Win!" : "Game Over",
       description: result.amountWon > 0 
-        ? `You won ${formatLocalFirst(result.amountWon, "NGN")} on Mobigate!` 
+        ? `You won ${formatLocalFirst(result.amountWon, "NGN")} on Mobiface!` 
         : "Better luck next time!",
     });
     setShowGamePlay(false);
@@ -88,7 +88,7 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
                 </div>
                 <div>
                   <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
-                    Mobigate Quiz <Flame className="h-4 w-4" />
+                    Mobiface Quiz <Flame className="h-4 w-4" />
                   </DialogTitle>
                   <p className="text-xs text-amber-100">Global competition, massive prizes!</p>
                 </div>
@@ -336,7 +336,7 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
                     <Card>
                       <CardContent className="p-8 text-center">
                         <Inbox className="h-12 w-12 mx-auto text-amber-300 mb-3" />
-                        <h3 className="font-semibold text-amber-700">No Mobigate Quizzes Available</h3>
+                        <h3 className="font-semibold text-amber-700">No Mobiface Quizzes Available</h3>
                         <p className="text-sm text-muted-foreground">Check back soon for global competitions!</p>
                       </CardContent>
                     </Card>
@@ -390,7 +390,7 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
                   <Card className="border-amber-200 dark:border-amber-800">
                     <CardContent className="p-4 space-y-3">
                       <h3 className="font-semibold text-sm flex items-center gap-2 text-amber-700 dark:text-amber-300">
-                        <BarChart3 className="h-4 w-4" />Your Mobigate Stats
+                        <BarChart3 className="h-4 w-4" />Your Mobiface Stats
                       </h3>
                       <div className="grid grid-cols-3 gap-2 text-center">
                         <div className="p-2 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200">
@@ -437,7 +437,7 @@ export function MobigateQuizDialog({ open, onOpenChange }: MobigateQuizDialogPro
                   <Card className="border-amber-200 dark:border-amber-800">
                     <CardContent className="p-4 space-y-3">
                       <h3 className="font-semibold text-sm flex items-center gap-2 text-amber-700">
-                        <Book className="h-4 w-4" />Mobigate Quiz Rules
+                        <Book className="h-4 w-4" />Mobiface Quiz Rules
                       </h3>
                       <ul className="space-y-2">
                         {mobigateQuizRules.map((rule, idx) => (

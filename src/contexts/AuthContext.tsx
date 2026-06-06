@@ -10,7 +10,7 @@ import {
 } from "react";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string) || "/api";
-const AUTH_CACHE_KEY = "mobigate.auth.user";
+const AUTH_CACHE_KEY = "mobiface.auth.user";
 
 export interface AuthUser {
   id:            string;

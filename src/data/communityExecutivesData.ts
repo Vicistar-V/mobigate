@@ -46,7 +46,7 @@ export interface ExecutiveMember {
   position: string;
   tenure: string;
   imageUrl: string;
-  communityImageUrl?: string; // Community-specific profile photo (separate from Mobigate)
+  communityImageUrl?: string; // Community-specific profile photo (separate from Mobiface)
   level: "topmost" | "deputy" | "officer" | "staff";
   committee: "executive" | "ad-hoc" | "staff";
   adHocDepartment?: "Finance" | "Welfare" | "Protocol" | "Education" | "Sports";

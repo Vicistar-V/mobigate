@@ -38,7 +38,7 @@ export const FriendExceptionDialog = ({
   const mockFriends: Friend[] = phpFriends?.map(f => ({
     id: f.id,
     name: f.name,
-    email: `${f.name.toLowerCase().replace(/\s+/g, '.')}@mobigate.com`
+    email: `${f.name.toLowerCase().replace(/\s+/g, '.')}@mobiface.com`
   })) || [
     { id: "1", name: "John Doe", email: "john.doe@example.com" },
     { id: "2", name: "Jane Smith", email: "jane.smith@example.com" },

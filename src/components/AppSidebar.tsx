@@ -8,12 +8,12 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupConte
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { QuizAdminDrawer } from "@/components/mobigate/QuizAdminDrawer";
+import { QuizAdminDrawer } from "@/components/mobiface/QuizAdminDrawer";
 
 // Superadmin Menu Items
 const superadminMenuItems = [
   {
-    title: "Mobigate Admin Dashboard",
+    title: "Mobiface Admin Dashboard",
     icon: LayoutDashboard,
     items: [
       { title: "Overview", url: "/mobigate-admin" }
@@ -388,8 +388,8 @@ export function AppSidebar() {
         <div className="flex items-center gap-3">
           {open ? <>
               
-              <img src={mobigateLogo} alt="Mobigate" className="h-10 w-auto" />
-            </> : <img src={mobigateIcon} alt="Mobigate" className="h-10 w-10" />}
+              <img src={mobigateLogo} alt="Mobiface" className="h-10 w-auto" />
+            </> : <img src={mobigateIcon} alt="Mobiface" className="h-10 w-10" />}
         </div>
       </SidebarHeader>
 

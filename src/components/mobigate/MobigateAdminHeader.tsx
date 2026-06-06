@@ -22,7 +22,7 @@ interface MobigateAdminHeaderProps {
 }
 
 export function MobigateAdminHeader({
-  title = "Mobigate Admin",
+  title = "Mobiface Admin",
   subtitle = "Platform Administration",
   pendingActions = 0,
 }: MobigateAdminHeaderProps) {

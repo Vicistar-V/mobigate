@@ -157,7 +157,7 @@ export function updateAdvertStatus(
       expiresAt.setMonth(expiresAt.getMonth() + 24);
       adverts[index].expiresAt = expiresAt;
       // Set standard approval message
-      adverts[index].approvedReason = "Congratulations! \nYour Advertisement Subscription was successful and approved. You are welcome to enjoy the World of Mobigate ...your World!";
+      adverts[index].approvedReason = "Congratulations! \nYour Advertisement Subscription was successful and approved. You are welcome to enjoy the World of Mobiface ...your World!";
     }
 
     if (status === "rejected" && rejectedReason) {

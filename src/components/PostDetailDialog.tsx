@@ -113,10 +113,10 @@ export const PostDetailDialog = ({
       ? `http://www.mobigate-app.mobi/profile/${post.userId}`
       : `http://www.mobigate-app.mobi/profile/${post.id || ""}`;
 
-    const shareText = `Hi! ${authorName} invites you to join Mobigate community. Please click on the link below to Sign-Up Now.\n\n👉 http://www.mobigate-app.mobi/register\n\n— ${authorName} (${profileUrl})`;
+    const shareText = `Hi! ${authorName} invites you to join Mobiface community. Please click on the link below to Sign-Up Now.\n\n👉 http://www.mobigate-app.mobi/register\n\n— ${authorName} (${profileUrl})`;
 
     const shareData = {
-      title: `Join me on Mobigate — ${authorName}`,
+      title: `Join me on Mobiface — ${authorName}`,
       text: shareText,
       url: shareUrl,
     };

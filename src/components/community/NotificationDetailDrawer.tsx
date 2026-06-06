@@ -355,7 +355,7 @@ export function NotificationDetailDrawer({
       <ShareDialog
         open={showShareDialog}
         onOpenChange={setShowShareDialog}
-        shareUrl={`https://mobigate.lovable.app/notification/${notification.id}`}
+        shareUrl={`https://mobiface.lovable.app/notification/${notification.id}`}
         title={isBirthdayNotification 
           ? `Wish ${notification.personName || "them"} a Happy Birthday! 🎂` 
           : notification.title

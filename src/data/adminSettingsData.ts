@@ -297,7 +297,7 @@ export const financeSettings: AdminSetting[] = [
     currentValue: "dual",
     options: [
       { value: "naira_only", label: "Naira Only (₦)" },
-      { value: "mobigate_only", label: "Mobigate Only (M)" },
+      { value: "mobigate_only", label: "Mobiface Only (M)" },
       { value: "dual", label: "Dual Currency", description: "Show both ₦ and M" },
     ],
     approvalPercentage: 90,
@@ -610,7 +610,7 @@ export const promotionSettings: AdminSetting[] = [
     id: "promo-1",
     key: "search_visibility",
     name: "Search Visibility",
-    description: "Can community be found in Mobigate search",
+    description: "Can community be found in Mobiface search",
     category: "promotion_settings",
     currentValue: "listed",
     options: [

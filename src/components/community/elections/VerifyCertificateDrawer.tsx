@@ -52,7 +52,7 @@ const mockVerifiedCertificate: CertificateOfReturn = {
   tenureEnd: addYears(new Date(2026, 1, 4), 4),
   tenureDurationYears: 4,
   issuedDate: new Date(2026, 1, 4),
-  issuedBy: "Mobigate Independent Electoral System",
+  issuedBy: "Mobiface Independent Electoral System",
   digitalSignature: "MOBIGATE-SIG-Y5LE6SLJ",
   verificationCode: "Y5LE6SLJ",
   status: 'issued'

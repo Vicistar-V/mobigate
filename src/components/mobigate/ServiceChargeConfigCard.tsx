@@ -187,7 +187,7 @@ export function ServiceChargeConfigCard({
           <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900">
             <div className="flex items-center gap-2 mb-2">
               <Wallet className="h-4 w-4 text-amber-600" />
-              <span className="text-xs font-medium text-amber-700 dark:text-amber-400">Mobigate Receives</span>
+              <span className="text-xs font-medium text-amber-700 dark:text-amber-400">Mobiface Receives</span>
             </div>
             <p className="text-lg font-bold text-amber-700 dark:text-amber-400">
               {formatMobi(serviceCharge * 2)}

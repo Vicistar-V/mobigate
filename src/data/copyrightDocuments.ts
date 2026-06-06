@@ -5,9 +5,9 @@
  *
  * LEGAL MODEL (enforced by PHP backend — represented here for the admin UI):
  *  - Documents are submitted to the System against the Author's Account.
- *  - Only Mobigate Admins can access/view these documents.
+ *  - Only Mobiface Admins can access/view these documents.
  *  - Authors cannot delete or remove them — even if the related post is deleted.
- *    They are legal documents that belong to Mobigate.
+ *    They are legal documents that belong to Mobiface.
  *
  * The PHP backend can inject the real records via window.__COPYRIGHT_DOCUMENTS__
  * which overrides the demo data automatically.

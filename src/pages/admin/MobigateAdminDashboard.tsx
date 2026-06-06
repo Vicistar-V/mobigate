@@ -27,13 +27,13 @@ import {
   Store,
 } from "lucide-react";
 import { Header } from "@/components/Header";
-import { NominationFeeSettingsSection } from "@/components/mobigate/NominationFeeSettingsSection";
+import { NominationFeeSettingsSection } from "@/components/mobiface/NominationFeeSettingsSection";
 import { AdminExchangeRateTab } from "@/components/admin/AdminExchangeRateTab";
 import { AdminAuthGate } from "@/components/admin/AdminAuthGate";
 import { CampaignFeeDistributionSettings } from "@/components/admin/settings/CampaignFeeDistributionSettings";
-import { WithdrawalSettingsCard } from "@/components/mobigate/WithdrawalSettingsCard";
-import { MediaAccessFeeSettingsCard } from "@/components/mobigate/MediaAccessFeeSettingsCard";
-import { QuizSettingsCard } from "@/components/mobigate/QuizSettingsCard";
+import { WithdrawalSettingsCard } from "@/components/mobiface/WithdrawalSettingsCard";
+import { MediaAccessFeeSettingsCard } from "@/components/mobiface/MediaAccessFeeSettingsCard";
+import { QuizSettingsCard } from "@/components/mobiface/QuizSettingsCard";
 // VoucherDiscountSettingsCard moved to ManageMerchantsPage
 // MobigateQuizManagement moved to /mobigate-admin/quiz
 import { formatMobi, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
@@ -392,7 +392,7 @@ export default function MobigateAdminDashboard() {
                   <div className="flex items-center gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
                     <Shield className="h-5 w-5 text-primary shrink-0" />
                     <div>
-                      <p className="text-sm font-medium">Mobigate Admin Only</p>
+                      <p className="text-sm font-medium">Mobiface Admin Only</p>
                       <p className="text-xs text-muted-foreground">
                         Settings only accessible to platform administrators
                       </p>

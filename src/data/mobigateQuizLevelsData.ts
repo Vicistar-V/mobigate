@@ -1,4 +1,4 @@
-// Pre-set quiz categories from Mobigate Quiz System
+// Pre-set quiz categories from Mobiface Quiz System
 export const PRESET_QUIZ_CATEGORIES = [
   "Current Affairs",
   "Politics and Leadership",

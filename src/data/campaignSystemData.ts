@@ -25,15 +25,15 @@ export const campaignAudienceOptions: CampaignAudienceOption[] = [
   },
   {
     value: "mobigate_interface",
-    label: "Across Mobigate Interface",
-    description: "Reach users across the entire Mobigate platform for maximum exposure",
+    label: "Across Mobiface Interface",
+    description: "Reach users across the entire Mobiface platform for maximum exposure",
     icon: "Globe",
     premiumMultiplier: 1.5 // 50% premium
   },
   {
     value: "mobigate_users",
-    label: "On Mobigate Users Interface",
-    description: "Target all registered Mobigate users on their personalized feeds",
+    label: "On Mobiface Users Interface",
+    description: "Target all registered Mobiface users on their personalized feeds",
     icon: "UsersRound",
     premiumMultiplier: 1.4 // 40% premium
   },
@@ -118,7 +118,7 @@ export const mockFeeDistributionHistory: FeeDistributionHistory[] = [
     previousMobigatePercentage: 50,
     newCommunityPercentage: 60,
     newMobigatePercentage: 40,
-    changedBy: "Mobigate Admin",
+    changedBy: "Mobiface Admin",
     changedAt: new Date("2024-01-15T10:00:00"),
     reason: "Increased community share to incentivize local campaigns"
   },

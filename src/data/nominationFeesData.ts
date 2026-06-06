@@ -273,8 +273,8 @@ export function isPrimaryRequired(officeId: string): boolean {
 }
 
 /**
- * Mobigate platform nomination configuration
- * Only accessible to Mobigate Admin
+ * Mobiface platform nomination configuration
+ * Only accessible to Mobiface Admin
  *
  * Community Override Policy controls whether communities can deviate from the
  * system-wide minimum nomination fees:
@@ -293,7 +293,7 @@ export const mobigateNominationConfig = {
   /** Absolute floor for any nomination fee — applies even under "allow_below". */
   absoluteMinimumFee: 1000,
   lastUpdatedAt: new Date("2025-01-01"),
-  lastUpdatedBy: "Mobigate Admin",
+  lastUpdatedBy: "Mobiface Admin",
 };
 
 /**
@@ -384,7 +384,7 @@ export function calculateTotalNominationCost(officeId: string, communityId?: str
   communityDebited: number;
   /** Net community receives: nomination fee − community-side service charge. */
   communityReceives: number;
-  /** Mobigate receives both sides of the service charge. */
+  /** Mobiface receives both sides of the service charge. */
   mobigateReceives: number;
   /** True if the community has overridden the system minimum for this office. */
   isCommunityOverride: boolean;

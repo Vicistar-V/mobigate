@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { formatMobi, formatLocalAmount, generateTransactionReference } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
-import { MerchantEligibilityCard, getEligibilityItems } from "@/components/mobigate/MerchantEligibilityCard";
+import { MerchantEligibilityCard, getEligibilityItems } from "@/components/mobiface/MerchantEligibilityCard";
 
 const SectionTitle = ({ children }: { children: React.ReactNode }) => (
   <div className="border-b border-border pb-1 mb-3">
@@ -730,7 +730,7 @@ export default function MerchantApplication() {
                 <div className="flex items-start gap-2.5 p-3 bg-muted/30 rounded-lg border">
                   <Checkbox id="accept-policies" checked={acceptedPolicies} onCheckedChange={(checked) => setAcceptedPolicies(checked === true)} className="mt-0.5" />
                   <Label htmlFor="accept-policies" className="text-[11px] leading-relaxed cursor-pointer">
-                    You must read and agree to the <span className="text-primary font-semibold underline">Terms and Conditions</span> of MOBIGATE Application usage and management policy.
+                    You must read and agree to the <span className="text-primary font-semibold underline">Terms and Conditions</span> of MOBIFACE Application usage and management policy.
                     {waiverMode
                       ? <> Application fee: <span className="font-bold text-primary">{formatMobi(50000)}</span> + Waiver fee: <span className="font-bold text-orange-600">{formatMobi(50000)}</span> = <span className="font-bold text-primary">{formatMobi(totalFee)}</span></>
                       : <> Application fee: <span className="font-bold text-primary">{formatMobi(50000)}</span></>

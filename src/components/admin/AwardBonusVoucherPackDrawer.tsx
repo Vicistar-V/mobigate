@@ -106,14 +106,14 @@ const mockAwardHistory: AwardHistoryItem[] = [
     id: "ah-1",
     pack: "Pack of 50 Units of M500",
     awardedAt: "2024-02-10T14:30:00",
-    awardedBy: "Admin (Mobigate HQ)",
+    awardedBy: "Admin (Mobiface HQ)",
     totalValue: 25000,
   },
   {
     id: "ah-2",
     pack: "Pack of 25 Units of M5,000",
     awardedAt: "2023-11-22T09:15:00",
-    awardedBy: "Admin (Mobigate HQ)",
+    awardedBy: "Admin (Mobiface HQ)",
     totalValue: 125000,
   },
 ];

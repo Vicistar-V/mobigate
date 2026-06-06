@@ -191,7 +191,7 @@ export function CreditUsersManuallyDrawer({ open, onOpenChange }: CreditUsersMan
       `Amount Credited: M${formatNum(finalAmount)} (₦${formatNum(finalAmount)})`, "",
       "Tagged: Sold Offline",
       `Date: ${new Date().toLocaleString("en-NG")}`, "",
-      "— Mobigate Merchant Services —",
+      "— Mobiface Merchant Services —",
     ].join("\n");
   };
 

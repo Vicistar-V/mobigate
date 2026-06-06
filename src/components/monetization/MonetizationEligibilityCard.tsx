@@ -146,7 +146,7 @@ export const MonetizationEligibilityCard = ({
 
       <p className="text-[10px] text-muted-foreground italic text-center pt-1 border-t border-amber-200">
         Until then, your posts will be published as <strong>free</strong> content.
-        Thresholds set by Mobigate Admin · Friends ≥ {postMonetizationEligibilitySettings.minFriends.toLocaleString()},
+        Thresholds set by Mobiface Admin · Friends ≥ {postMonetizationEligibilitySettings.minFriends.toLocaleString()},
         Followers ≥ {postMonetizationEligibilitySettings.minFollowers.toLocaleString()},
         Following ≥ {postMonetizationEligibilitySettings.minFollowing.toLocaleString()}.
       </p>
