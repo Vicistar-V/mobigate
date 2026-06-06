@@ -180,15 +180,15 @@ export function calculatePlatformProfit(
   
   // Split between community and Mobiface
   const communityShare = grossProfit * (communitySharePercent / 100);
-  const mobigateShare = grossProfit * ((100 - communitySharePercent) / 100);
+  const mobifaceShare = grossProfit * ((100 - communitySharePercent) / 100);
   
   return {
     grossAmount: transactionAmount,
     exchangeMargin,
     platformFee,
     communityShare,
-    mobigateShare,
-    netProfit: mobigateShare,
+    mobifaceShare,
+    netProfit: mobifaceShare,
   };
 }
 

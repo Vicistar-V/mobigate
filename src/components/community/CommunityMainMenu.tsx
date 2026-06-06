@@ -35,7 +35,7 @@ import { QuizCreationDialog } from "./QuizCreationDialog";
 import { MembershipApplicationDrawer } from "./MembershipApplicationDrawer";
 import { ManageLeadershipDialog } from "./leadership/ManageLeadershipDialog";
 import { CommunityQuizDialog } from "./CommunityQuizDialog";
-import { MobigateQuizHub as MobigateQuizDialog } from "./mobigate-quiz/MobigateQuizHub";
+import { MobifaceQuizHub as MobifaceQuizDialog } from "./mobiface-quiz/MobifaceQuizHub";
 import { MemberPrivacyVotingSheet } from "./settings/MemberPrivacyVotingSheet";
 import { CommunitySettingsSheet } from "./settings/CommunitySettingsSheet";
 import { DeclarationOfInterestSheet } from "./elections/DeclarationOfInterestSheet";
@@ -93,7 +93,7 @@ export function CommunityMainMenu({
   const [showManageMembershipRequests, setShowManageMembershipRequests] = useState(false);
   const [showManageGallery, setShowManageGallery] = useState(false);
   const [showCommunityQuiz, setShowCommunityQuiz] = useState(false);
-  const [showMobigateQuiz, setShowMobigateQuiz] = useState(false);
+  const [showMobifaceQuiz, setShowMobifaceQuiz] = useState(false);
   const [showPrivacyVoting, setShowPrivacyVoting] = useState(false);
   const [showCommunitySettings, setShowCommunitySettings] = useState(false);
   const [showDeclarationOfInterest, setShowDeclarationOfInterest] = useState(false);
@@ -164,7 +164,7 @@ export function CommunityMainMenu({
       setOpen(false);
       return;
     }
-    if (action === "Invite Mobiface Users" || action === "Invite Non-Mobigate Users") {
+    if (action === "Invite Mobiface Users" || action === "Invite Non-Mobiface Users") {
       setShowInviteMembers(true);
       setOpen(false);
       return;
@@ -443,9 +443,9 @@ export function CommunityMainMenu({
                       <Button
                         variant="ghost"
                         className="w-full justify-start pl-4 text-sm h-8"
-                        onClick={() => handleMenuClick("Invite Non-Mobigate Users")}
+                        onClick={() => handleMenuClick("Invite Non-Mobiface Users")}
                       >
-                        Invite Non-Mobigate Users
+                        Invite Non-Mobiface Users
                       </Button>
                     </AccordionContent>
                   </AccordionItem>
@@ -637,7 +637,7 @@ export function CommunityMainMenu({
                   variant="ghost"
                   className="w-full justify-start pl-4 h-9 transition-colors duration-200 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-900/40"
                   onClick={() => {
-                    setShowMobigateQuiz(true);
+                    setShowMobifaceQuiz(true);
                     setOpen(false);
                   }}
                 >
@@ -1349,9 +1349,9 @@ export function CommunityMainMenu({
       />
 
       {/* Mobiface Quiz Dialog */}
-      <MobigateQuizDialog 
-        open={showMobigateQuiz} 
-        onOpenChange={setShowMobigateQuiz}
+      <MobifaceQuizDialog 
+        open={showMobifaceQuiz} 
+        onOpenChange={setShowMobifaceQuiz}
       />
 
       {/* Member Privacy Voting Sheet */}

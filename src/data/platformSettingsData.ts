@@ -305,7 +305,7 @@ export function getTierPreview(): Array<{ tier: number; rangeStart: number; rang
 
 // ─── Question Bank Distribution Settings ───
 export interface PlatformQuestionBankDistribution {
-  mobigatePercent: number;    // Central bank (default 60%)
+  mobifacePercent: number;    // Central bank (default 60%)
   merchantOwnPercent: number; // Merchant's own bank (default 30%)
   otherMerchantsPercent: number; // Other merchants (default 10%)
   lastUpdatedAt: Date;
@@ -313,7 +313,7 @@ export interface PlatformQuestionBankDistribution {
 }
 
 export const platformQuestionBankDistribution: PlatformQuestionBankDistribution = {
-  mobigatePercent: 60,
+  mobifacePercent: 60,
   merchantOwnPercent: 30,
   otherMerchantsPercent: 10,
   lastUpdatedAt: new Date(),
@@ -327,7 +327,7 @@ export function getQuestionBankDistribution(): PlatformQuestionBankDistribution 
 export function setQuestionBankDistribution(mobiface: number, merchantOwn: number, otherMerchants: number): boolean {
   if (mobiface + merchantOwn + otherMerchants !== 100) return false;
   if (mobiface < 0 || merchantOwn < 0 || otherMerchants < 0) return false;
-  platformQuestionBankDistribution.mobigatePercent = mobiface;
+  platformQuestionBankDistribution.mobifacePercent = mobiface;
   platformQuestionBankDistribution.merchantOwnPercent = merchantOwn;
   platformQuestionBankDistribution.otherMerchantsPercent = otherMerchants;
   platformQuestionBankDistribution.lastUpdatedAt = new Date();

@@ -11,11 +11,11 @@ import {
   Users, Zap, GraduationCap, UtensilsCrossed, ToggleLeft, Award, History, BarChart3,
   Target, Flame, Hash, ArrowUpRight, ArrowDownRight, Coins
 } from "lucide-react";
-import { mobigatePlayerStats } from "@/data/mobigateQuizData";
+import { mobifacePlayerStats } from "@/data/mobifaceQuizData";
 import { quizGamesPlayedData, type QuizGameRecord } from "@/data/quizGamesPlayedData";
-import { mockMerchants, mockSeasonWinners } from "@/data/mobigateInteractiveQuizData";
+import { mockMerchants, mockSeasonWinners } from "@/data/mobifaceInteractiveQuizData";
 import { QuizGameDetailDrawer } from "@/components/mobiface/QuizGameDetailDrawer";
-import { QuizWinnerProfileDrawer } from "@/components/community/mobigate-quiz/QuizWinnerProfileDrawer";
+import { QuizWinnerProfileDrawer } from "@/components/community/mobiface-quiz/QuizWinnerProfileDrawer";
 import { formatLocalAmount, formatMobiAmount } from "@/lib/mobiCurrencyTranslation";
 
 const IS_CELEBRITY = true;
@@ -72,7 +72,7 @@ export function ProfileMobiQuizTab() {
   const [visibleCount, setVisibleCount] = useState(GAMES_PER_PAGE);
   const [selectedStat, setSelectedStat] = useState<StatKey | null>(null);
 
-  const stats = mobigatePlayerStats;
+  const stats = mobifacePlayerStats;
   const winRate = stats.gamesPlayed > 0 ? Math.round((stats.gamesWon / stats.gamesPlayed) * 100) : 0;
   const modeBreakdown = groupByMode(EXTENDED_GAMES);
 

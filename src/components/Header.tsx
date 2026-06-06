@@ -5,8 +5,8 @@ import { ProfileDropdown } from "./ProfileDropdown";
 import { NotificationsSheet } from "./NotificationsSheet";
 import { MessagesSheet } from "./MessagesSheet";
 import { useSidebar } from "@/components/ui/sidebar";
-import mobigateIcon from "@/assets/mobigate-icon.svg";
-import mobigateLogo from "@/assets/mobiface-logo.png";
+import mobifaceIcon from "@/assets/mobiface-icon.svg";
+import mobifaceLogo from "@/assets/mobiface-logo.png";
 
 export const Header = () => {
   const { toggleSidebar } = useSidebar();
@@ -26,7 +26,7 @@ export const Header = () => {
           <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
             {/* Full logo with text on all screens */}
             <img 
-              src={mobigateLogo} 
+              src={mobifaceLogo} 
               alt="Mobiface" 
               className="h-12 w-auto"
             />

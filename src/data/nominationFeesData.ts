@@ -284,7 +284,7 @@ export function isPrimaryRequired(officeId: string): boolean {
  */
 export type CommunityFeePolicy = "enforce_minimum" | "allow_below" | "free_for_all";
 
-export const mobigateNominationConfig = {
+export const mobifaceNominationConfig = {
   serviceChargePercent: 20, // 15-30% range
   minimumServiceChargePercent: 15,
   maximumServiceChargePercent: 30,
@@ -325,12 +325,12 @@ export function getEffectiveNominationFee(officeId: string, communityId?: string
   const override = communityNominationFeeOverrides[communityId]?.[officeId];
   if (override === undefined) return systemMin;
 
-  const policy = mobigateNominationConfig.communityFeePolicy;
+  const policy = mobifaceNominationConfig.communityFeePolicy;
   if (policy === "free_for_all") {
-    return Math.max(override, mobigateNominationConfig.absoluteMinimumFee);
+    return Math.max(override, mobifaceNominationConfig.absoluteMinimumFee);
   }
   if (policy === "allow_below") {
-    return Math.max(override, mobigateNominationConfig.absoluteMinimumFee);
+    return Math.max(override, mobifaceNominationConfig.absoluteMinimumFee);
   }
   // enforce_minimum
   return Math.max(override, systemMin);
@@ -349,10 +349,10 @@ export function setCommunityNominationFee(communityId: string, officeId: string,
  * Returns null on OK, or an error message string.
  */
 export function validateCommunityNominationFee(officeId: string, fee: number): string | null {
-  if (fee < mobigateNominationConfig.absoluteMinimumFee) {
-    return `Fee cannot be below the absolute floor of M${mobigateNominationConfig.absoluteMinimumFee.toLocaleString()}.`;
+  if (fee < mobifaceNominationConfig.absoluteMinimumFee) {
+    return `Fee cannot be below the absolute floor of M${mobifaceNominationConfig.absoluteMinimumFee.toLocaleString()}.`;
   }
-  const policy = mobigateNominationConfig.communityFeePolicy;
+  const policy = mobifaceNominationConfig.communityFeePolicy;
   if (policy === "enforce_minimum") {
     const min = getMinimumNominationFee(officeId);
     if (fee < min) return `System policy: this office requires at least M${min.toLocaleString()}.`;
@@ -385,7 +385,7 @@ export function calculateTotalNominationCost(officeId: string, communityId?: str
   /** Net community receives: nomination fee − community-side service charge. */
   communityReceives: number;
   /** Mobiface receives both sides of the service charge. */
-  mobigateReceives: number;
+  mobifaceReceives: number;
   /** True if the community has overridden the system minimum for this office. */
   isCommunityOverride: boolean;
   /** The system-mandated minimum, for transparency. */
@@ -396,7 +396,7 @@ export function calculateTotalNominationCost(officeId: string, communityId?: str
   const isCommunityOverride =
     !!communityId && communityNominationFeeOverrides[communityId]?.[officeId] !== undefined;
 
-  const serviceCharge = base * (mobigateNominationConfig.serviceChargePercent / 100);
+  const serviceCharge = base * (mobifaceNominationConfig.serviceChargePercent / 100);
 
   const candidateDebited = base + serviceCharge;
   const communityDebited = serviceCharge;
@@ -409,7 +409,7 @@ export function calculateTotalNominationCost(officeId: string, communityId?: str
     candidateDebited,
     communityDebited,
     communityReceives: base - communityDebited,
-    mobigateReceives: serviceCharge * 2, // collected from both wallets
+    mobifaceReceives: serviceCharge * 2, // collected from both wallets
     isCommunityOverride,
     systemMinimum,
   };

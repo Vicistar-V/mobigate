@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { PrivacySelector } from "./PrivacySelector";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { MobigateUserSearch, MobigateUser } from "./MobigateUserSearch";
+import { MobifaceUserSearch, MobifaceUser } from "./MobifaceUserSearch";
 import { FriendsListSearch, Friend } from "./FriendsListSearch";
 import { useFriendsList } from "@/hooks/useWindowData";
 import { mockFriends as fallbackFriends } from "@/data/profileData";
@@ -50,8 +50,8 @@ export const EditLoveFriendshipForm = ({ currentData, onSave, onClose }: EditLov
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [privacy, setPrivacy] = useState("public");
-  const [selectedUser, setSelectedUser] = useState<MobigateUser | Friend | null>(null);
-  const [searchMobigateOpen, setSearchMobigateOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<MobifaceUser | Friend | null>(null);
+  const [searchMobifaceOpen, setSearchMobifaceOpen] = useState(false);
   const [searchFriendsOpen, setSearchFriendsOpen] = useState(false);
 
   const form = useForm<z.infer<typeof loveFriendshipSchema>>({
@@ -179,7 +179,7 @@ export const EditLoveFriendshipForm = ({ currentData, onSave, onClose }: EditLov
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setSearchMobigateOpen(true)}
+                  onClick={() => setSearchMobifaceOpen(true)}
                   className="w-full"
                 >
                   <Globe className="h-4 w-4 mr-2" />
@@ -296,9 +296,9 @@ export const EditLoveFriendshipForm = ({ currentData, onSave, onClose }: EditLov
         </Button>
       )}
 
-      <MobigateUserSearch
-        open={searchMobigateOpen}
-        onOpenChange={setSearchMobigateOpen}
+      <MobifaceUserSearch
+        open={searchMobifaceOpen}
+        onOpenChange={setSearchMobifaceOpen}
         onSelect={(user) => setSelectedUser(user)}
       />
 

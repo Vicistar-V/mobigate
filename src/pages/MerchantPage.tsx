@@ -56,7 +56,7 @@ import {
   Shield,
   Handshake,
 } from "lucide-react";
-import { QuizWinnerProfileDrawer } from "@/components/community/mobigate-quiz/QuizWinnerProfileDrawer";
+import { QuizWinnerProfileDrawer } from "@/components/community/mobiface-quiz/QuizWinnerProfileDrawer";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -83,12 +83,12 @@ import {
   type TVShowRound,
   type SeasonWinner,
   type SeasonSponsor,
-} from "@/data/mobigateInteractiveQuizData";
+} from "@/data/mobifaceInteractiveQuizData";
 import {
   INITIAL_ADMIN_QUESTIONS,
   ANSWER_LABELS,
   type AdminQuizQuestion,
-} from "@/data/mobigateQuizQuestionsData";
+} from "@/data/mobifaceQuizQuestionsData";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { Progress } from "@/components/ui/progress";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -101,7 +101,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { CreateQuizQuestionForm } from "@/components/mobiface/CreateQuizQuestionForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PlusCircle } from "lucide-react";
-import { ManageSponsorsSheet } from "@/components/community/mobigate-quiz/ManageSponsorsSheet";
+import { ManageSponsorsSheet } from "@/components/community/mobiface-quiz/ManageSponsorsSheet";
 
 // Simulate "my merchant" = first approved merchant
 const myMerchant = mockMerchants.find((m) => m.applicationStatus === "approved")!;

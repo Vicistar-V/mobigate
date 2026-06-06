@@ -138,7 +138,7 @@ export interface ProfitCalculation {
   exchangeMargin: number;
   platformFee: number;
   communityShare: number;
-  mobigateShare: number;
+  mobifaceShare: number;
   netProfit: number;
 }
 

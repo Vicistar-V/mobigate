@@ -29,7 +29,7 @@ export interface CampaignDurationOption {
 export interface FeeDistributionConfig {
   id: string;
   communityPercentage: number;  // e.g., 60
-  mobigatePercentage: number;   // e.g., 40
+  mobifacePercentage: number;   // e.g., 40
   lastUpdatedBy: string;
   lastUpdatedAt: Date;
   isActive: boolean;
@@ -38,9 +38,9 @@ export interface FeeDistributionConfig {
 export interface FeeDistributionHistory {
   id: string;
   previousCommunityPercentage: number;
-  previousMobigatePercentage: number;
+  previousMobifacePercentage: number;
   newCommunityPercentage: number;
-  newMobigatePercentage: number;
+  newMobifacePercentage: number;
   changedBy: string;
   changedAt: Date;
   reason?: string;
@@ -90,7 +90,7 @@ export interface EnhancedCampaign {
   audiencePremium: number;
   totalFeeInMobi: number;
   communityShare: number;
-  mobigateShare: number;
+  mobifaceShare: number;
   paymentStatus: "pending" | "paid" | "refunded";
   paidAt?: Date;
   
@@ -135,9 +135,9 @@ export interface CampaignFeeCalculation {
 export interface CampaignFeeDistribution {
   totalFee: number;
   communityShare: number;
-  mobigateShare: number;
+  mobifaceShare: number;
   communityPercentage: number;
-  mobigatePercentage: number;
+  mobifacePercentage: number;
 }
 
 // Campaign Payment Result

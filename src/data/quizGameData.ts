@@ -82,7 +82,7 @@ export interface CommunityQuizWallet {
   balance: number;
   totalStakesReceived: number;
   totalPayouts: number;
-  totalMobigateFees: number;
+  totalMobifaceFees: number;
   lastUpdated: Date;
 }
 
@@ -94,7 +94,7 @@ export interface QuizStatistics {
   totalGamesLost: number;
   totalStakeCollected: number;
   totalPayoutsGiven: number;
-  totalMobigateFees: number;
+  totalMobifaceFees: number;
   averageScore: number;
   highestScore: number;
   mostActivePlayer: {
@@ -514,7 +514,7 @@ export const communityQuizWallet: CommunityQuizWallet = {
   balance: 250000,
   totalStakesReceived: 175000,
   totalPayouts: 125000,
-  totalMobigateFees: 75000,
+  totalMobifaceFees: 75000,
   lastUpdated: new Date()
 };
 
@@ -526,7 +526,7 @@ export const quizStatistics: QuizStatistics = {
   totalGamesLost: 458,
   totalStakeCollected: 543500,
   totalPayoutsGiven: 1435000,
-  totalMobigateFees: 232500,
+  totalMobifaceFees: 232500,
   averageScore: 6.8,
   highestScore: 10,
   mostActivePlayer: {
@@ -604,9 +604,9 @@ export const calculateWinnings = (questionsCorrect: number, winningAmount: numbe
 };
 
 // Helper function to calculate stake distribution
-export const calculateStakeDistribution = (stakeAmount: number): { communityShare: number; mobigateShare: number } => {
+export const calculateStakeDistribution = (stakeAmount: number): { communityShare: number; mobifaceShare: number } => {
   return {
     communityShare: stakeAmount * 0.7, // 70%
-    mobigateShare: stakeAmount * 0.3   // 30%
+    mobifaceShare: stakeAmount * 0.3   // 30%
   };
 };

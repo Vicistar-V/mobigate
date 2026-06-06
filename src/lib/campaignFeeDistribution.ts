@@ -93,14 +93,14 @@ export const distributeCampaignFee = (
   config: FeeDistributionConfig = defaultFeeDistributionConfig
 ): CampaignFeeDistribution => {
   const communityShare = Math.round((totalFee * config.communityPercentage) / 100);
-  const mobigateShare = totalFee - communityShare; // Ensure no rounding errors
+  const mobifaceShare = totalFee - communityShare; // Ensure no rounding errors
   
   return {
     totalFee,
     communityShare,
-    mobigateShare,
+    mobifaceShare,
     communityPercentage: config.communityPercentage,
-    mobigatePercentage: config.mobigatePercentage
+    mobifacePercentage: config.mobifacePercentage
   };
 };
 

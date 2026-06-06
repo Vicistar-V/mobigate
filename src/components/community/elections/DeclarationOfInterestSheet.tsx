@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { MobiCurrencyDisplay } from "@/components/common/MobiCurrencyDisplay";
-import { nominationFeeStructures, getNominationFee, mockNominationPeriod, calculateTotalNominationCost, mobigateNominationConfig } from "@/data/nominationFeesData";
+import { nominationFeeStructures, getNominationFee, mockNominationPeriod, calculateTotalNominationCost, mobifaceNominationConfig } from "@/data/nominationFeesData";
 import { NominationFeeStructure } from "@/types/nominationProcess";
 import { formatMobiAmount, formatLocalAmount, generateTransactionReference } from "@/lib/mobiCurrencyTranslation";
 import { format } from "date-fns";
@@ -249,7 +249,7 @@ export function DeclarationOfInterestSheet({
               </div>
               <div className="flex justify-between text-amber-600">
                 <span className="leading-tight">
-                  Service Charge / Processing Fee ({mobigateNominationConfig.serviceChargePercent}%)
+                  Service Charge / Processing Fee ({mobifaceNominationConfig.serviceChargePercent}%)
                 </span>
                 <div className="text-right">
                   <span className="font-medium">{formatMobiAmount(costBreakdown.serviceCharge)}</span>
@@ -285,7 +285,7 @@ export function DeclarationOfInterestSheet({
               </p>
               <p className="flex justify-between">
                 <span>→ Mobiface Platform (both wallets):</span>
-                <span className="font-medium">{formatMobiAmount(costBreakdown.mobigateReceives)} ({formatLocalAmount(costBreakdown.mobigateReceives, "NGN")})</span>
+                <span className="font-medium">{formatMobiAmount(costBreakdown.mobifaceReceives)} ({formatLocalAmount(costBreakdown.mobifaceReceives, "NGN")})</span>
               </p>
             </div>
 
@@ -440,7 +440,7 @@ export function DeclarationOfInterestSheet({
                 </p>
                 <p className="flex justify-between">
                   <span>• Mobiface Platform:</span>
-                  <span>{formatMobiAmount(costBreakdown?.mobigateReceives || 0)} ({formatLocalAmount(costBreakdown?.mobigateReceives || 0, "NGN")})</span>
+                  <span>{formatMobiAmount(costBreakdown?.mobifaceReceives || 0)} ({formatLocalAmount(costBreakdown?.mobifaceReceives || 0, "NGN")})</span>
                 </p>
               </div>
               <p className="text-amber-600">

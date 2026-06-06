@@ -104,7 +104,7 @@ export const campaignDurationOptions: CampaignDurationOption[] = [
 export const defaultFeeDistributionConfig: FeeDistributionConfig = {
   id: "fee-dist-001",
   communityPercentage: 60,
-  mobigatePercentage: 40,
+  mobifacePercentage: 40,
   lastUpdatedBy: "System Admin",
   lastUpdatedAt: new Date("2024-01-15T10:00:00"),
   isActive: true
@@ -115,9 +115,9 @@ export const mockFeeDistributionHistory: FeeDistributionHistory[] = [
   {
     id: "history-001",
     previousCommunityPercentage: 50,
-    previousMobigatePercentage: 50,
+    previousMobifacePercentage: 50,
     newCommunityPercentage: 60,
-    newMobigatePercentage: 40,
+    newMobifacePercentage: 40,
     changedBy: "Mobiface Admin",
     changedAt: new Date("2024-01-15T10:00:00"),
     reason: "Increased community share to incentivize local campaigns"
@@ -125,9 +125,9 @@ export const mockFeeDistributionHistory: FeeDistributionHistory[] = [
   {
     id: "history-002",
     previousCommunityPercentage: 55,
-    previousMobigatePercentage: 45,
+    previousMobifacePercentage: 45,
     newCommunityPercentage: 50,
-    newMobigatePercentage: 50,
+    newMobifacePercentage: 50,
     changedBy: "System Admin",
     changedAt: new Date("2023-12-01T14:30:00"),
     reason: "Initial equal distribution"
@@ -185,7 +185,7 @@ export const mockEnhancedCampaigns: EnhancedCampaign[] = [
     audiencePremium: 1750,
     totalFeeInMobi: 4250,
     communityShare: 2550,
-    mobigateShare: 1700,
+    mobifaceShare: 1700,
     paymentStatus: "paid",
     paidAt: new Date("2024-01-31"),
     views: 1247,
@@ -219,7 +219,7 @@ export const mockEnhancedCampaigns: EnhancedCampaign[] = [
     audiencePremium: 540,
     totalFeeInMobi: 2340,
     communityShare: 1404,
-    mobigateShare: 936,
+    mobifaceShare: 936,
     paymentStatus: "paid",
     paidAt: new Date("2024-02-04"),
     views: 856,
@@ -252,7 +252,7 @@ export const mockEnhancedCampaigns: EnhancedCampaign[] = [
     audiencePremium: 0,
     totalFeeInMobi: 1000,
     communityShare: 600,
-    mobigateShare: 400,
+    mobifaceShare: 400,
     paymentStatus: "paid",
     paidAt: new Date("2024-02-09"),
     views: 423,
@@ -285,7 +285,7 @@ export const mockEnhancedCampaigns: EnhancedCampaign[] = [
     audiencePremium: 1280,
     totalFeeInMobi: 4480,
     communityShare: 2688,
-    mobigateShare: 1792,
+    mobifaceShare: 1792,
     paymentStatus: "paid",
     paidAt: new Date("2024-01-19"),
     views: 1876,
@@ -318,7 +318,7 @@ export const mockEnhancedCampaigns: EnhancedCampaign[] = [
     audiencePremium: 6600,
     totalFeeInMobi: 12100,
     communityShare: 7260,
-    mobigateShare: 4840,
+    mobifaceShare: 4840,
     paymentStatus: "pending",
     views: 0,
     clicks: 0,
@@ -350,9 +350,9 @@ export const getCampaignStats = () => {
   const totalCommunityShare = mockEnhancedCampaigns
     .filter(c => c.paymentStatus === "paid")
     .reduce((sum, c) => sum + c.communityShare, 0);
-  const totalMobigateShare = mockEnhancedCampaigns
+  const totalMobifaceShare = mockEnhancedCampaigns
     .filter(c => c.paymentStatus === "paid")
-    .reduce((sum, c) => sum + c.mobigateShare, 0);
+    .reduce((sum, c) => sum + c.mobifaceShare, 0);
 
   return {
     active,
@@ -361,6 +361,6 @@ export const getCampaignStats = () => {
     total: mockEnhancedCampaigns.length,
     totalFees,
     totalCommunityShare,
-    totalMobigateShare
+    totalMobifaceShare
   };
 };

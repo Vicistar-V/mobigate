@@ -2,8 +2,8 @@ import { LayoutDashboard, Settings, Wallet, Gamepad2, TrendingUp, BookOpen, Stor
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-import mobigateIcon from "@/assets/mobigate-icon.svg";
-import mobigateLogo from "@/assets/mobiface-logo.png";
+import mobifaceIcon from "@/assets/mobiface-icon.svg";
+import mobifaceLogo from "@/assets/mobiface-logo.png";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, useSidebar } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
@@ -16,7 +16,7 @@ const superadminMenuItems = [
     title: "Mobiface Admin Dashboard",
     icon: LayoutDashboard,
     items: [
-      { title: "Overview", url: "/mobigate-admin" }
+      { title: "Overview", url: "/mobiface-admin" }
     ]
   },
   {
@@ -34,7 +34,7 @@ const superadminMenuItems = [
   {
     title: "Manage Merchants",
     icon: Store,
-    url: "/mobigate-admin/merchants",
+    url: "/mobiface-admin/merchants",
     isDirectLink: true,
   },
   {
@@ -97,9 +97,9 @@ const superadminMenuItems = [
     title: "Manage Adverts",
     icon: Megaphone,
     items: [
-      { title: "Set Ad Slot Rate", url: "/mobigate-admin/adverts/slot-rates" },
-      { title: "View/Manage All Adverts", url: "/mobigate-admin/adverts/manage" },
-      { title: "Upload/Manage Promotional Ads", url: "/mobigate-admin/adverts/promotional" }
+      { title: "Set Ad Slot Rate", url: "/mobiface-admin/adverts/slot-rates" },
+      { title: "View/Manage All Adverts", url: "/mobiface-admin/adverts/manage" },
+      { title: "Upload/Manage Promotional Ads", url: "/mobiface-admin/adverts/promotional" }
     ]
   }
 ];
@@ -388,8 +388,8 @@ export function AppSidebar() {
         <div className="flex items-center gap-3">
           {open ? <>
               
-              <img src={mobigateLogo} alt="Mobiface" className="h-10 w-auto" />
-            </> : <img src={mobigateIcon} alt="Mobiface" className="h-10 w-10" />}
+              <img src={mobifaceLogo} alt="Mobiface" className="h-10 w-auto" />
+            </> : <img src={mobifaceIcon} alt="Mobiface" className="h-10 w-10" />}
         </div>
       </SidebarHeader>
 
