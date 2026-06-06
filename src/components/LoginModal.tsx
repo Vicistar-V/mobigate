@@ -30,7 +30,7 @@ function identifierPlaceholder(type: "email" | "phone" | "username") {
   return "johndoe";
 }
 
-export const LoginModal = () => {
+export const LoginModal = ({ onClose }: { onClose?: () => void }) => {
   const { login } = useAuth();
   const [screen, setScreen] = useState<Screen>("login");
 
