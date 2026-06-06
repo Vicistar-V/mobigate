@@ -1,10 +1,11 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoginModal } from "@/components/LoginModal";
 import { Loader2 } from "lucide-react";
 
 export const AuthGuard = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
+  const [dismissed, setDismissed] = useState(false);
 
   // Don't show LoginModal on the forgot-password page
   const isForgotPassword = window.location.pathname === "/forgot-password";
@@ -25,15 +26,17 @@ export const AuthGuard = ({ children }: { children: ReactNode }) => {
     return <>{children}</>;
   }
 
+  const showLogin = !isAuthenticated && !dismissed;
+
   return (
     <>
       <div
-        className={!isAuthenticated ? "select-none opacity-30" : ""}
-        aria-hidden={!isAuthenticated}
+        className={showLogin ? "select-none opacity-30" : ""}
+        aria-hidden={showLogin}
       >
         {children}
       </div>
-      {!isAuthenticated && <LoginModal />}
+      {showLogin && <LoginModal onClose={() => setDismissed(true)} />}
     </>
   );
 };
