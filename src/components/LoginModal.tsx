@@ -252,16 +252,28 @@ export const LoginModal = ({ onClose }: { onClose?: () => void }) => {
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4">
-      <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-gray-100 max-h-[95vh] overflow-y-auto">
+      <div className="relative bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-gray-100 max-h-[95vh] overflow-y-auto">
+
+        {/* ── Close / continue as guest ── */}
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close and continue browsing"
+            className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
 
         {/* ── HEADER ── */}
         <div className="px-8 pt-10 pb-6 text-center bg-white">
-          <AppLogo
-            height={64} maxWidth={240}
-            textClassName="font-black text-4xl tracking-tight text-gray-900"
-            showTagline={true} taglineClassName="text-gray-400 text-sm font-medium mt-2"
-            className="flex flex-col items-center"
+          <img
+            src={mobifaceLogo}
+            alt="Mobiface"
+            className="mx-auto h-16 w-auto object-contain"
           />
+          <p className="text-gray-400 text-sm font-medium mt-2">Connect, Share and Earn</p>
         </div>
 
         {/* Tab switcher */}
