@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Header } from "@/components/Header";
-import { CreateQuizQuestionForm } from "@/components/mobigate/CreateQuizQuestionForm";
+import { CreateQuizQuestionForm } from "@/components/mobiface/CreateQuizQuestionForm";
 import { type AdminQuizQuestion } from "@/data/mobigateQuizQuestionsData";
 import { QUIZ_TYPE_LABELS, type QuizType } from "@/data/quizTypeQuestionsData";
 import { PlusCircle, ListChecks } from "lucide-react";

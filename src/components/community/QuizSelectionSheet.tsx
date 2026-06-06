@@ -68,7 +68,7 @@ export function QuizSelectionSheet({
               <div className="text-center">
                 <p className="font-semibold text-sm text-amber-700 dark:text-amber-300">Mobi Quiz</p>
                 <p className="text-[11px] text-muted-foreground mt-1 leading-tight">
-                  Platform-wide Mobigate quiz challenges
+                  Platform-wide Mobiface quiz challenges
                 </p>
               </div>
             </button>

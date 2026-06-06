@@ -188,7 +188,7 @@ const mockHistory: GameEntry[] = [
   {
     id: 7, mode: "Scholarship", date: "2026-02-07", time: "13:00", score: "18/20", scoreNum: 18, scoreTotal: 20,
     stake: 20000, prize: 0, won: false, duration: "8m 42s", category: "Academic Excellence", tier: "Diamond",
-    scholarshipName: "Mobigate STEM Scholarship 2026 (Annual Budget: M100,000)",
+    scholarshipName: "Mobiface STEM Scholarship 2026 (Annual Budget: M100,000)",
     questions: [
       { question: "What is the derivative of x²?", yourAnswer: "2x", correctAnswer: "2x", isCorrect: true },
       { question: "What is Newton's second law?", yourAnswer: "F=ma", correctAnswer: "F = ma", isCorrect: true },

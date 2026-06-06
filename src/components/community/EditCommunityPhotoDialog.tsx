@@ -43,7 +43,7 @@ export const EditCommunityPhotoDialog = ({
       <Alert className="bg-muted/50 border-primary/20">
         <Info className="h-4 w-4 text-primary" />
         <AlertDescription className="text-xs">
-          This photo is used <strong>only in this community</strong>. Your Mobigate profile picture remains unchanged.
+          This photo is used <strong>only in this community</strong>. Your Mobiface profile picture remains unchanged.
         </AlertDescription>
       </Alert>
 

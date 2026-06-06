@@ -1,4 +1,4 @@
-// Platform-wide settings managed by Mobigate Admin
+// Platform-wide settings managed by Mobiface Admin
 // These settings are hidden from and cannot be modified by Community Admins
 
 export interface PlatformWithdrawalSettings {
@@ -14,7 +14,7 @@ export const platformWithdrawalSettings: PlatformWithdrawalSettings = {
   minimumWithdrawalMin: 1000,
   minimumWithdrawalMax: 50000,
   lastUpdatedAt: new Date(),
-  lastUpdatedBy: "Mobigate Admin",
+  lastUpdatedBy: "Mobiface Admin",
 };
 
 export function getMinimumWithdrawal(): number {
@@ -42,7 +42,7 @@ export const platformFeeSettings: PlatformFeeSettings = {
   serviceChargeMax: 30,
 };
 
-// Platform Quiz Settings - Managed by Mobigate Admin
+// Platform Quiz Settings - Managed by Mobiface Admin
 export interface PlatformQuizSettings {
   // Separate timers for objective and non-objective questions
   objectiveTimePerQuestion: number;     // seconds (default 10)
@@ -69,7 +69,7 @@ export const platformQuizSettings: PlatformQuizSettings = {
   partialWinMin: 10,
   partialWinMax: 50,
   lastUpdatedAt: new Date(),
-  lastUpdatedBy: "Mobigate Admin",
+  lastUpdatedBy: "Mobiface Admin",
 };
 
 // Objective timer getters/setters
@@ -134,7 +134,7 @@ export const platformQuestionViewSettings: PlatformQuestionViewSettings = {
   questionViewFeeMin: 500,
   questionViewFeeMax: 10000,
   lastUpdatedAt: new Date(),
-  lastUpdatedBy: "Mobigate Admin",
+  lastUpdatedBy: "Mobiface Admin",
 };
 
 export function getQuestionViewFee(): number {
@@ -163,7 +163,7 @@ export const platformSolvencySettings: PlatformSolvencySettings = {
   merchantSolvencyMin: 50,
   merchantSolvencyMax: 100,
   lastUpdatedAt: new Date(),
-  lastUpdatedBy: "Mobigate Admin",
+  lastUpdatedBy: "Mobiface Admin",
 };
 
 export function getMerchantSolvencyPercent(): number {
@@ -219,7 +219,7 @@ export const platformVoucherDiscountSettings: PlatformVoucherDiscountSettings = 
   maxDiscountMin: 5,
   maxDiscountMax: 10,
   lastUpdatedAt: new Date(),
-  lastUpdatedBy: "Mobigate Admin",
+  lastUpdatedBy: "Mobiface Admin",
 };
 
 // Backward-compatible alias
@@ -317,17 +317,17 @@ export const platformQuestionBankDistribution: PlatformQuestionBankDistribution 
   merchantOwnPercent: 30,
   otherMerchantsPercent: 10,
   lastUpdatedAt: new Date(),
-  lastUpdatedBy: "Mobigate Admin",
+  lastUpdatedBy: "Mobiface Admin",
 };
 
 export function getQuestionBankDistribution(): PlatformQuestionBankDistribution {
   return { ...platformQuestionBankDistribution };
 }
 
-export function setQuestionBankDistribution(mobigate: number, merchantOwn: number, otherMerchants: number): boolean {
-  if (mobigate + merchantOwn + otherMerchants !== 100) return false;
-  if (mobigate < 0 || merchantOwn < 0 || otherMerchants < 0) return false;
-  platformQuestionBankDistribution.mobigatePercent = mobigate;
+export function setQuestionBankDistribution(mobiface: number, merchantOwn: number, otherMerchants: number): boolean {
+  if (mobiface + merchantOwn + otherMerchants !== 100) return false;
+  if (mobiface < 0 || merchantOwn < 0 || otherMerchants < 0) return false;
+  platformQuestionBankDistribution.mobigatePercent = mobiface;
   platformQuestionBankDistribution.merchantOwnPercent = merchantOwn;
   platformQuestionBankDistribution.otherMerchantsPercent = otherMerchants;
   platformQuestionBankDistribution.lastUpdatedAt = new Date();
@@ -348,7 +348,7 @@ export const platformContinueStakeSettings: PlatformContinueStakeSettings = {
   continuePlayingStakePercentMin: 10,
   continuePlayingStakePercentMax: 100,
   lastUpdatedAt: new Date(),
-  lastUpdatedBy: "Mobigate Admin",
+  lastUpdatedBy: "Mobiface Admin",
 };
 
 export function getContinuePlayingStakePercent(): number {
@@ -378,7 +378,7 @@ export const platformRegenerationFeeSettings: PlatformRegenerationFeeSettings = 
   regenerationFeeMin: 10,
   regenerationFeeMax: 10000,
   lastUpdatedAt: new Date(),
-  lastUpdatedBy: "Mobigate Admin",
+  lastUpdatedBy: "Mobiface Admin",
 };
 
 export function getRegenerationFee(): number {
@@ -413,7 +413,7 @@ export const platformMerchantAppFeeSettings: PlatformMerchantAppFeeSettings = {
   waiverFeeMin: 10000,
   waiverFeeMax: 500000,
   lastUpdatedAt: new Date(),
-  lastUpdatedBy: "Mobigate Admin",
+  lastUpdatedBy: "Mobiface Admin",
 };
 
 export function getApplicationFee(): number {
@@ -502,7 +502,7 @@ export const platformEligibilitySettings: PlatformEligibilitySettings = {
   imvsdAmountMin: 100000,
   imvsdAmountMax: 10000000,
   lastUpdatedAt: new Date(),
-  lastUpdatedBy: "Mobigate Admin",
+  lastUpdatedBy: "Mobiface Admin",
 };
 
 export function setEligibilitySetting(key: keyof PlatformEligibilitySettings, value: number): void {
@@ -516,7 +516,7 @@ export function setEligibilitySetting(key: keyof PlatformEligibilitySettings, va
   }
 }
 
-// Platform Media Access Fee Settings - Managed by Mobigate Admin
+// Platform Media Access Fee Settings - Managed by Mobiface Admin
 // Controls per-content access fee creators set when uploading monetised media
 // Range: M5 (min) – M100 (max). Set to 0 to keep content free.
 export interface PlatformMediaAccessFeeSettings {
@@ -534,7 +534,7 @@ export const platformMediaAccessFeeSettings: PlatformMediaAccessFeeSettings = {
   maxFee: 100,
   hardMaxFee: 500,
   lastUpdatedAt: new Date(),
-  lastUpdatedBy: "Mobigate Admin",
+  lastUpdatedBy: "Mobiface Admin",
 };
 
 export function getMediaAccessFeeDefault(): number {
@@ -567,7 +567,7 @@ export function setMediaAccessFeeMax(value: number): void {
   }
 }
 
-// Platform Content Posting Fees - Managed by Mobigate Admin
+// Platform Content Posting Fees - Managed by Mobiface Admin
 // Charged from creator's Mobi Wallet when a piece of content is posted.
 // Video/Audio media: M300 – M500. Still media (Photo/Article/News/PDF): M200 – M300.
 export type ContentMediaType =
@@ -596,7 +596,7 @@ export const platformContentPostingFees: PlatformContentPostingFees = {
   motion: { min: 300, max: 500, default: 300 },
   still: { min: 200, max: 300, default: 200 },
   lastUpdatedAt: new Date(),
-  lastUpdatedBy: "Mobigate Admin",
+  lastUpdatedBy: "Mobiface Admin",
 };
 
 export function isMotionMedia(type: ContentMediaType | string): boolean {

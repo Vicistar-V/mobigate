@@ -78,7 +78,7 @@ export const AnonymousVotingSection = ({ onSubmit }: AnonymousVotingSectionProps
 
           <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
             <p className="text-xs text-blue-900">
-              <span className="font-semibold">Mobigate Guarantee:</span> Your privacy is our
+              <span className="font-semibold">Mobiface Guarantee:</span> Your privacy is our
               priority. We use industry-standard encryption to protect your voting data. Your
               anonymous vote cannot be traced back to you by anyone, including administrators.
             </p>

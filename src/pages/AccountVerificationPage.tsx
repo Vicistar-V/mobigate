@@ -367,7 +367,7 @@ const AccountVerificationPage = () => {
           <p className="text-[11px] leading-snug text-muted-foreground">
             This information is used solely to verify your identity for payouts, gifting and
             higher account limits. Your banking details are encrypted and only accessible to
-            Mobigate's verification team.
+            Mobiface's verification team.
           </p>
         </div>
 

@@ -25,7 +25,7 @@ import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { format } from "date-fns";
 import { MobiExplainerTooltip, MobiCurrencyInfoBanner } from "@/components/common/MobiExplainerTooltip";
 
-type FeeViewType = "total" | "community" | "mobigate";
+type FeeViewType = "total" | "community" | "mobiface";
 
 interface CampaignFeeDetailSheetProps {
   open: boolean;
@@ -53,14 +53,14 @@ const getViewConfig = (viewType: FeeViewType) => {
         borderColor: "border-green-500/20",
         description: "60% of campaign fees allocated to the Community Wallet"
       };
-    case "mobigate":
+    case "mobiface":
       return {
-        title: "Mobigate Share Breakdown",
+        title: "Mobiface Share Breakdown",
         icon: <Globe className="h-5 w-5 text-blue-500" />,
         color: "text-blue-500",
         bgColor: "bg-blue-500/10",
         borderColor: "border-blue-500/20",
-        description: "40% of campaign fees allocated to Mobigate Platform"
+        description: "40% of campaign fees allocated to Mobiface Platform"
       };
   }
 };
@@ -71,7 +71,7 @@ const getAmountForType = (campaign: typeof mockEnhancedCampaigns[0], viewType: F
       return campaign.totalFeeInMobi;
     case "community":
       return campaign.communityShare;
-    case "mobigate":
+    case "mobiface":
       return campaign.mobigateShare;
   }
 };
@@ -217,7 +217,7 @@ export function CampaignFeeDetailSheet({
                         </div>
                         <div className="flex justify-between text-xs">
                           <span className="text-muted-foreground">
-                            {viewType === "community" ? "Community Share (60%)" : "Mobigate Share (40%)"}
+                            {viewType === "community" ? "Community Share (60%)" : "Mobiface Share (40%)"}
                           </span>
                           <span className={`font-medium ${config.color}`}>
                             {formatMobiAmount(getAmountForType(campaign, viewType))}

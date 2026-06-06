@@ -34,11 +34,11 @@ interface AdminOption {
 
 const ADMIN_POOL: AdminOption[] = [
   { id: "sa", name: "Adaeze Okonkwo", role: "Super Admin", isSuperAdmin: true },
-  { id: "a1", name: "Amaka Eze", role: "Mobigate Admin" },
-  { id: "a2", name: "Tunde Bakare", role: "Mobigate Admin" },
-  { id: "a3", name: "Ngozi Okafor", role: "Mobigate Admin" },
-  { id: "a4", name: "Chinedu Obi", role: "Mobigate Admin" },
-  { id: "a5", name: "Yusuf Ibrahim", role: "Mobigate Admin" },
+  { id: "a1", name: "Amaka Eze", role: "Mobiface Admin" },
+  { id: "a2", name: "Tunde Bakare", role: "Mobiface Admin" },
+  { id: "a3", name: "Ngozi Okafor", role: "Mobiface Admin" },
+  { id: "a4", name: "Chinedu Obi", role: "Mobiface Admin" },
+  { id: "a5", name: "Yusuf Ibrahim", role: "Mobiface Admin" },
 ];
 
 const ACTION_META: Record<

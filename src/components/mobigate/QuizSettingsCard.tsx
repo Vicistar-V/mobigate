@@ -359,7 +359,7 @@ export function QuizSettingsCard() {
           <div className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Mobigate Central Bank</span>
+                <span className="text-xs text-muted-foreground">Mobiface Central Bank</span>
                 <span className="text-sm font-bold">{bankMobigate}%</span>
               </div>
               <Slider
@@ -439,7 +439,7 @@ export function QuizSettingsCard() {
             <p className="font-medium mb-0.5">Platform-Wide Setting</p>
             <p>
               These settings apply to all quiz types: Community Quizzes, 
-              Mobigate Quizzes, and newly created quizzes. Changes take effect immediately.
+              Mobiface Quizzes, and newly created quizzes. Changes take effect immediately.
             </p>
           </div>
         </div>

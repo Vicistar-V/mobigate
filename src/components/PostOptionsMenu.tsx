@@ -119,25 +119,25 @@ export const PostOptionsMenu = ({
           <ScrollArea className="flex-1 pr-4">
             <div className="space-y-4 text-sm leading-relaxed text-foreground/90">
               <p>
-                Mobigate and it's subsidiaries do not guarantee Copyright Ownership of
+                Mobiface and it's subsidiaries do not guarantee Copyright Ownership of
                 any materials, information or expressions shared or published on it's
                 platforms; and do not accept responsibility for any violation or
                 infringement thereof of any such Rights whether written or otherwise;
                 or of any claims that might arise from any such whether legally or
                 otherwise from or by any interests whether corporate or individual
-                whatsoever! All views, materials and/or information shared on Mobigate
+                whatsoever! All views, materials and/or information shared on Mobiface
                 platforms are entirely the opinions and/or expressions of the Users /
                 publishers — those who share or post such contents.
               </p>
               <p>
-                The Mobigate User(s) — the publisher accept(s) responsibilities for
-                every information, materials and/or opinions shared on Mobigate
-                platforms; and do indemnify and exonorate Mobigate Applications Ltd
+                The Mobiface User(s) — the publisher accept(s) responsibilities for
+                every information, materials and/or opinions shared on Mobiface
+                platforms; and do indemnify and exonorate Mobiface Applications Ltd
                 and it's subsidiaries, partners and interests worldwide of any
                 liabilities, claims or whatsoever that might arise as a result of or
                 in connection with any information, materials and/or opinions
-                expressed or shared on Mobigate platforms. All publications on
-                Mobigate platforms are exclusively those of the individuals and/or
+                expressed or shared on Mobiface platforms. All publications on
+                Mobiface platforms are exclusively those of the individuals and/or
                 entities that shared them. Any presentation or assumptions to the
                 contrary is a criminal offence!
               </p>

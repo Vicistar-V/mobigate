@@ -15,7 +15,7 @@ interface AppBranding {
 }
 
 const DEFAULT: AppBranding = {
-  app_name:    "Mobigate",
+  app_name:    "Mobiface",
   app_tagline: "Connect, Share and Earn",
   app_logo_url:"",
   loaded:      false,
@@ -34,7 +34,7 @@ export const useLogo = (): AppBranding => {
       .then(d => {
         if (d) {
           const b: AppBranding = {
-            app_name:     d.app_name     || "Mobigate",
+            app_name:     d.app_name     || "Mobiface",
             app_tagline:  d.app_tagline  || "Connect, Share and Earn",
             app_logo_url: d.app_logo_url || "",
             loaded:       true,

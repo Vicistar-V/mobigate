@@ -27,7 +27,7 @@ export const Header = () => {
             {/* Full logo with text on all screens */}
             <img 
               src={mobigateLogo} 
-              alt="Mobigate" 
+              alt="Mobiface" 
               className="h-12 w-auto"
             />
           </Link>

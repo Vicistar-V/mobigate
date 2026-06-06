@@ -52,7 +52,7 @@ const MerchantApplicationStatus = () => {
   const handleReminder = () => {
     toast({
       title: "Reminder Sent",
-      description: "A reminder has been sent to Mobigate to review your application.",
+      description: "A reminder has been sent to Mobiface to review your application.",
     });
   };
 
@@ -138,13 +138,13 @@ const MerchantApplicationStatus = () => {
                 className="w-full h-12 rounded-xl touch-manipulation active:scale-[0.97] text-base font-semibold gap-2"
               >
                 <Bell className="h-5 w-5" />
-                Send Reminder to Mobigate
+                Send Reminder to Mobiface
               </Button>
               <div className="rounded-xl bg-amber-500/5 border border-amber-500/20 p-3">
                 <div className="flex gap-2">
                   <span className="text-amber-600 shrink-0">ℹ️</span>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    <span className="font-bold text-foreground">Note:</span> Your application is being reviewed by <span className="font-bold text-foreground">Mobigate</span>. You'll be notified once they take action. You can send a reminder if it's been more than 14 days.
+                    <span className="font-bold text-foreground">Note:</span> Your application is being reviewed by <span className="font-bold text-foreground">Mobiface</span>. You'll be notified once they take action. You can send a reminder if it's been more than 14 days.
                   </p>
                 </div>
               </div>

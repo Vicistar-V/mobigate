@@ -12,9 +12,9 @@ import {
 import { HelpCircle, PlusCircle, Snowflake, Ban, Zap } from "lucide-react";
 import { type AdminQuizQuestion, type QuizQuestionStatus } from "@/data/mobigateQuizQuestionsData";
 import { getQuestionsForType, QUIZ_TYPE_LABELS, type QuizType } from "@/data/quizTypeQuestionsData";
-import { QuizQuestionCard } from "@/components/mobigate/QuizQuestionCard";
-import { QuizQuestionFilters } from "@/components/mobigate/QuizQuestionFilters";
-import { EditQuizQuestionForm } from "@/components/mobigate/EditQuizQuestionForm";
+import { QuizQuestionCard } from "@/components/mobiface/QuizQuestionCard";
+import { QuizQuestionFilters } from "@/components/mobiface/QuizQuestionFilters";
+import { EditQuizQuestionForm } from "@/components/mobiface/EditQuizQuestionForm";
 import { Header } from "@/components/Header";
 
 export default function ManageQuestionsPage() {

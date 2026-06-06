@@ -203,7 +203,7 @@ export function CampaignAudienceSelector({
                   <span>{formatMobiAmount(feeDistribution.communityShare)}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
-                  <span>Mobigate Share ({feeDistribution.mobigatePercentage}%)</span>
+                  <span>Mobiface Share ({feeDistribution.mobigatePercentage}%)</span>
                   <span>{formatMobiAmount(feeDistribution.mobigateShare)}</span>
                 </div>
               </div>

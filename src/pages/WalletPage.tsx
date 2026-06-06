@@ -70,16 +70,16 @@ interface WalletTransaction {
 
 const MOCK_TRANSACTIONS: WalletTransaction[] = [
   { id: "wt-1", type: "credit", description: "Voucher Purchase - Mobi Merchant", amount: 50000, date: new Date(Date.now() - 1 * 60 * 60 * 1000), status: "completed", category: "Top-Up", reference: "TXN-20260228-001", counterparty: "QuickMart NG" },
-  { id: "wt-2", type: "debit", description: "Quiz Entry Stake — Champions League", amount: 5000, date: new Date(Date.now() - 3 * 60 * 60 * 1000), status: "completed", category: "Quiz", reference: "TXN-20260228-002", counterparty: "Mobigate Quiz" },
-  { id: "wt-3", type: "credit", description: "Quiz Winnings — History Masters", amount: 25000, date: new Date(Date.now() - 8 * 60 * 60 * 1000), status: "completed", category: "Winnings", reference: "TXN-20260227-003", counterparty: "Mobigate Quiz" },
+  { id: "wt-2", type: "debit", description: "Quiz Entry Stake — Champions League", amount: 5000, date: new Date(Date.now() - 3 * 60 * 60 * 1000), status: "completed", category: "Quiz", reference: "TXN-20260228-002", counterparty: "Mobiface Quiz" },
+  { id: "wt-3", type: "credit", description: "Quiz Winnings — History Masters", amount: 25000, date: new Date(Date.now() - 8 * 60 * 60 * 1000), status: "completed", category: "Winnings", reference: "TXN-20260227-003", counterparty: "Mobiface Quiz" },
   { id: "wt-4", type: "debit", description: "Community Monthly Dues", amount: 5000, date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), status: "completed", category: "Dues", reference: "TXN-20260227-004", counterparty: "Lagos Devs Community" },
   { id: "wt-5", type: "debit", description: "Transfer to @chioma_blessed", amount: 12000, date: new Date(Date.now() - 1.5 * 24 * 60 * 60 * 1000), status: "completed", category: "Transfer", reference: "TXN-20260226-005", counterparty: "chioma_blessed" },
-  { id: "wt-6", type: "credit", description: "Wallet Top-Up via Voucher", amount: 100000, date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), status: "completed", category: "Top-Up", reference: "TXN-20260226-006", counterparty: "Mobigate Merchant" },
-  { id: "wt-7", type: "debit", description: "Advert Submission Fee", amount: 8500, date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), status: "completed", category: "Platform Fee", reference: "TXN-20260225-007", counterparty: "Mobigate Platform" },
-  { id: "wt-8", type: "credit", description: "Referral Bonus", amount: 2500, date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000), status: "completed", category: "Bonus", reference: "TXN-20260224-008", counterparty: "Mobigate Rewards" },
+  { id: "wt-6", type: "credit", description: "Wallet Top-Up via Voucher", amount: 100000, date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), status: "completed", category: "Top-Up", reference: "TXN-20260226-006", counterparty: "Mobiface Merchant" },
+  { id: "wt-7", type: "debit", description: "Advert Submission Fee", amount: 8500, date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), status: "completed", category: "Platform Fee", reference: "TXN-20260225-007", counterparty: "Mobiface Platform" },
+  { id: "wt-8", type: "credit", description: "Referral Bonus", amount: 2500, date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000), status: "completed", category: "Bonus", reference: "TXN-20260224-008", counterparty: "Mobiface Rewards" },
   { id: "wt-9", type: "debit", description: "Community Event Fee", amount: 15000, date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), status: "pending", category: "Events", reference: "TXN-20260223-009", counterparty: "Lagos Devs Community" },
   { id: "wt-10", type: "debit", description: "Failed Transfer Attempt", amount: 3000, date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000), status: "failed", category: "Transfer", reference: "TXN-20260222-010", counterparty: "unknown_user" },
-  { id: "wt-11", type: "credit", description: "Quiz Refund — Cancelled Game", amount: 5000, date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), status: "completed", category: "Refund", reference: "TXN-20260221-011", counterparty: "Mobigate Quiz" },
+  { id: "wt-11", type: "credit", description: "Quiz Refund — Cancelled Game", amount: 5000, date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), status: "completed", category: "Refund", reference: "TXN-20260221-011", counterparty: "Mobiface Quiz" },
   { id: "wt-12", type: "credit", description: "Gift from @tunde_official", amount: 10000, date: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000), status: "completed", category: "Gift", reference: "TXN-20260220-012", counterparty: "tunde_official" },
 ];
 
@@ -1454,7 +1454,7 @@ export default function WalletPage() {
                     {/* Retailer Services */}
                     <button
                       onClick={() => {
-                        toast({ title: "Retailer Services", description: "Visit a nearby Mobigate Retail Merchant to fund your wallet in-person." });
+                        toast({ title: "Retailer Services", description: "Visit a nearby Mobiface Retail Merchant to fund your wallet in-person." });
                       }}
                       className="w-full flex items-center gap-3 p-4 rounded-2xl border-2 border-border/50 bg-card hover:border-primary/40 transition-all touch-manipulation active:scale-[0.98]"
                     >

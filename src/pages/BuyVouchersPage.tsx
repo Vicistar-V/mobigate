@@ -1040,8 +1040,8 @@ export default function BuyVouchersPage() {
               <UserPlus className="h-7 w-7 text-foreground" />
             </div>
             <div className="flex-1">
-              <p className="font-bold text-sm text-foreground">Mobigate Friends</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Send to your friends on Mobigate</p>
+              <p className="font-bold text-sm text-foreground">Mobiface Friends</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Send to your friends on Mobiface</p>
             </div>
             <ChevronRight className="h-5 w-5 text-muted-foreground" />
           </div>
@@ -1065,7 +1065,7 @@ export default function BuyVouchersPage() {
             </div>
             <div className="flex-1">
               <p className="font-bold text-sm text-foreground">Send via Mobi-Chat</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Send voucher PIN to a Mobigate user</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Send voucher PIN to a Mobiface user</p>
             </div>
             <ChevronRight className="h-5 w-5 text-muted-foreground" />
           </div>
@@ -1211,7 +1211,7 @@ export default function BuyVouchersPage() {
             </button>
             <div className="flex-1">
               <h1 className="text-base font-bold text-foreground">Select Recipients</h1>
-              <p className="text-xs text-muted-foreground">{recipientType === "community" ? "Community Members" : "Mobigate Friends"}</p>
+              <p className="text-xs text-muted-foreground">{recipientType === "community" ? "Community Members" : "Mobiface Friends"}</p>
             </div>
           </div>
           {/* Balance banner */}

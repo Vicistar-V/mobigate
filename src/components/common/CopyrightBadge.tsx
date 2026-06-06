@@ -2,7 +2,7 @@
  * components/common/CopyrightBadge.tsx
  *
  * The "✓Copyright" designation marker shown on the bottom-right of copyrighted
- * post media (images / videos), matching the Mobigate design.
+ * post media (images / videos), matching the Mobiface design.
  *
  * Render it inside a `relative` media container. Authors can disable the marker
  * per-post (post.copyrightMarked === false) — when disabled, render nothing.
@@ -28,7 +28,7 @@ export const CopyrightBadge = ({ size = "sm", className }: CopyrightBadgeProps) 
         className,
       )}
       aria-label="Copyright protected content"
-      title="Copyright protected — registered with Mobigate"
+      title="Copyright protected — registered with Mobiface"
     >
       <Check className={cn("shrink-0", isMd ? "h-6 w-6 sm:h-7 sm:w-7" : "h-3.5 w-3.5")} strokeWidth={3} />
       <span className="tracking-tight">Copyright</span>

@@ -42,7 +42,7 @@ export function CertificateOfReturnPreview({
                      CERTIFICATE OF RETURN
 ══════════════════════════════════════════════════════════════════
 
-                    MOBIGATE INDEPENDENT ELECTORAL SYSTEM
+                    MOBIFACE INDEPENDENT ELECTORAL SYSTEM
                       Official Document
 
 Certificate No: ${certificate.certificateNumber}
@@ -91,7 +91,7 @@ Date of Issue:     ${format(certificate.issuedDate, "MMMM d, yyyy")}
 
 
                     ___________________________
-                        MOBIGATE SIGNATURE
+                        MOBIFACE SIGNATURE
                     Electoral System Seal
 
 
@@ -99,7 +99,7 @@ This Certificate of Return serves as official and verified evidence
 of leadership, valid for community bank accounts, legal proceedings,
 and all official documentation purposes.
 
-                    Powered by MOBIGATE
+                    Powered by MOBIFACE
               Digital Community Governance Platform
 
 ══════════════════════════════════════════════════════════════════
@@ -143,7 +143,7 @@ and all official documentation purposes.
               Certificate of Return
             </h1>
             <p className="text-primary-foreground/80 text-[10px] sm:text-xs mt-1 tracking-wide">
-              Mobigate Independent Electoral System
+              Mobiface Independent Electoral System
             </p>
           </div>
 
@@ -274,7 +274,7 @@ and all official documentation purposes.
             {/* Divider */}
             <div className="border-t border-dashed border-border" />
 
-            {/* Mobigate Signature Section */}
+            {/* Mobiface Signature Section */}
             <div className="text-center space-y-3">
               <div className="inline-flex flex-col items-center">
                 {/* Signature Line */}
@@ -283,7 +283,7 @@ and all official documentation purposes.
                 {/* Digital Signature Styled */}
                 <div className="relative">
                   <p className="font-serif italic text-lg sm:text-xl text-foreground/80">
-                    Mobigate
+                    Mobiface
                   </p>
                   <Badge 
                     variant="outline" 
@@ -324,7 +324,7 @@ and all official documentation purposes.
           {/* Certificate Footer - Blue Bar */}
           <div className="bg-gradient-to-r from-primary/80 to-primary py-2 px-4">
             <p className="text-center text-[9px] sm:text-[10px] text-primary-foreground/80 tracking-wide">
-              Powered by <span className="font-semibold text-white">MOBIGATE</span> — Digital Community Governance Platform
+              Powered by <span className="font-semibold text-white">MOBIFACE</span> — Digital Community Governance Platform
             </p>
           </div>
         </CardContent>

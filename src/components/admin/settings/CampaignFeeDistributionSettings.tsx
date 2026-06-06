@@ -38,12 +38,12 @@ export function CampaignFeeDistributionSettings() {
       communityPercentage: communityPercent,
       mobigatePercentage: mobigatePercent,
       lastUpdatedAt: new Date(),
-      lastUpdatedBy: "Mobigate Admin"
+      lastUpdatedBy: "Mobiface Admin"
     }));
     
     toast({
       title: "Distribution Updated ✓",
-      description: `New ratio: Community ${communityPercent}% : Mobigate ${mobigatePercent}%`,
+      description: `New ratio: Community ${communityPercent}% : Mobiface ${mobigatePercent}%`,
     });
     
     setShowConfirm(false);
@@ -69,7 +69,7 @@ export function CampaignFeeDistributionSettings() {
             <div className="rounded-lg bg-orange-500/5 border border-orange-500/20 p-3 text-center">
               <Globe className="h-5 w-5 mx-auto text-orange-500 mb-1" />
               <p className="text-2xl font-bold text-orange-500">{mobigatePercent}%</p>
-              <p className="text-xs text-muted-foreground">Mobigate</p>
+              <p className="text-xs text-muted-foreground">Mobiface</p>
             </div>
           </div>
 
@@ -86,7 +86,7 @@ export function CampaignFeeDistributionSettings() {
             />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>Community: {communityPercent}%</span>
-              <span>Mobigate: {mobigatePercent}%</span>
+              <span>Mobiface: {mobigatePercent}%</span>
             </div>
           </div>
 
@@ -110,7 +110,7 @@ export function CampaignFeeDistributionSettings() {
               </div>
             </div>
             <div>
-              <Label className="text-xs">Mobigate %</Label>
+              <Label className="text-xs">Mobiface %</Label>
               <div className="relative">
                 <Input
                   type="number"
@@ -173,7 +173,7 @@ export function CampaignFeeDistributionSettings() {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Distribution Change</AlertDialogTitle>
             <AlertDialogDescription>
-              Change fee distribution to Community {communityPercent}% : Mobigate {mobigatePercent}%? This will apply to all new campaign payments.
+              Change fee distribution to Community {communityPercent}% : Mobiface {mobigatePercent}%? This will apply to all new campaign payments.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

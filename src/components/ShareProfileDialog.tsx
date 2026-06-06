@@ -29,7 +29,7 @@ export const ShareProfileDialog = ({
   const [copied, setCopied] = useState(false);
 
   const url  = profileUrl || window.location.href;
-  const text = `Check out ${profileName}'s profile on Mobigate: ${url}`;
+  const text = `Check out ${profileName}'s profile on Mobiface: ${url}`;
 
   const copyLink = async () => {
     try {
@@ -46,7 +46,7 @@ export const ShareProfileDialog = ({
   const nativeShare = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title: `${profileName} on Mobigate`, text, url });
+        await navigator.share({ title: `${profileName} on Mobiface`, text, url });
       } catch {}
     }
   };
@@ -68,7 +68,7 @@ export const ShareProfileDialog = ({
       label: "Email",
       color: "bg-gray-600 hover:bg-gray-700 text-white",
       icon: "✉️",
-      action: () => window.open(`mailto:?subject=${encodeURIComponent(`${profileName} on Mobigate`)}&body=${encodeURIComponent(text)}`, "_blank"),
+      action: () => window.open(`mailto:?subject=${encodeURIComponent(`${profileName} on Mobiface`)}&body=${encodeURIComponent(text)}`, "_blank"),
     },
     {
       label: "Twitter / X",
@@ -86,7 +86,7 @@ export const ShareProfileDialog = ({
       label: "Telegram",
       color: "bg-[#229ED9] hover:bg-[#1a8fbf] text-white",
       icon: "✈️",
-      action: () => window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(`Check out ${profileName} on Mobigate`)}`, "_blank"),
+      action: () => window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(`Check out ${profileName} on Mobiface`)}`, "_blank"),
     },
     {
       label: "Instagram",
@@ -117,7 +117,7 @@ export const ShareProfileDialog = ({
       label: "Reddit",
       color: "bg-[#FF4500] hover:bg-[#e03d00] text-white",
       icon: "🤖",
-      action: () => window.open(`https://reddit.com/submit?url=${encodeURIComponent(url)}&title=${encodeURIComponent(`${profileName} on Mobigate`)}`, "_blank"),
+      action: () => window.open(`https://reddit.com/submit?url=${encodeURIComponent(url)}&title=${encodeURIComponent(`${profileName} on Mobiface`)}`, "_blank"),
     },
   ];
 

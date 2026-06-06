@@ -108,7 +108,7 @@ export function CampaignRoyaltySection({ onViewFullReport }: CampaignRoyaltySect
                               {formatMobiAmount(campaign.communityShare)}
                             </span>
                           </div>
-                          {/* Removed: "60% of X total fee" - Mobigate Admin info only */}
+                          {/* Removed: "60% of X total fee" - Mobiface Admin info only */}
                         </div>
                         
                         {/* Audience Targets */}

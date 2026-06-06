@@ -10,7 +10,7 @@ import {
   Users2, Zap, UtensilsCrossed, GraduationCap, Radio, ChevronRight,
   SlidersHorizontal, ArrowUpDown, X, Calendar,
 } from "lucide-react";
-import { MonitorDetailDrawer, type DrawerData } from "@/components/mobigate/MonitorDetailDrawer";
+import { MonitorDetailDrawer, type DrawerData } from "@/components/mobiface/MonitorDetailDrawer";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";

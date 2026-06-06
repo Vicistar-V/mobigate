@@ -409,7 +409,7 @@ export const LoginModal = () => {
                 </div>
                 {emailTaken && (
                   <p className="text-xs text-red-600 font-semibold flex items-center gap-1">
-                    <X className="h-3 w-3"/>This email is already linked to a Mobigate account.
+                    <X className="h-3 w-3"/>This email is already linked to a Mobiface account.
                   </p>
                 )}
               </div>
@@ -428,7 +428,7 @@ export const LoginModal = () => {
                 </div>
                 {phoneTaken && (
                   <p className="text-xs text-red-600 font-semibold flex items-center gap-1">
-                    <X className="h-3 w-3"/>This phone number is already linked to a Mobigate account.
+                    <X className="h-3 w-3"/>This phone number is already linked to a Mobiface account.
                   </p>
                 )}
                 {!phoneTaken && regPhone.length > 7 && (

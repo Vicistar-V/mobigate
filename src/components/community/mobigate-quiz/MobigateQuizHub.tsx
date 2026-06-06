@@ -111,7 +111,7 @@ export function MobigateQuizHub({ open, onOpenChange, hideInteractive = false }:
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                    Mobigate Quiz <Flame className="h-4 w-4" />
+                    Mobiface Quiz <Flame className="h-4 w-4" />
                   </h2>
               <p className="text-xs text-amber-100">Choose your game mode</p>
                 </div>

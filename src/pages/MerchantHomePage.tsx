@@ -723,7 +723,7 @@ export default function MerchantHomePage() {
         onOpenChange={setShareOpen}
         shareUrl={`${window.location.origin}/merchant-home/${merchantId}`}
         title={merchant.name}
-        description={homeData?.about ?? `Check out ${merchant.name} on Mobigate!`}
+        description={homeData?.about ?? `Check out ${merchant.name} on Mobiface!`}
       />
       <LiveScoreboardDrawer open={scoreboardOpen} onOpenChange={setScoreboardOpen} />
       <SubMerchantAccessGateDrawer

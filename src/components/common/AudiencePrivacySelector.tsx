@@ -18,7 +18,7 @@ import { CascadingLocationSelector } from "@/components/common/CascadingLocation
  * MULTIPLE SELECTION is allowed. Picking "Public" covers all selections.
  *
  * Audiences:
- *   • public      — All Public Users (everyone on Mobigate)
+ *   • public      — All Public Users (everyone on Mobiface)
  *   • friends     — Only Friends
  *   • family      — Family Relations
  *   • connections — Followers, Following, Likes, Messaging/Chat, Fundraiser…
@@ -73,7 +73,7 @@ interface OptionMeta {
 }
 
 const OPTIONS: OptionMeta[] = [
-  { key: "public",      label: "Public",      hint: "All public users on Mobigate",                         Icon: Globe2,        tint: "bg-sky-100 text-sky-700" },
+  { key: "public",      label: "Public",      hint: "All public users on Mobiface",                         Icon: Globe2,        tint: "bg-sky-100 text-sky-700" },
   { key: "friends",     label: "Friends",     hint: "Only your Friends",                                    Icon: Users,         tint: "bg-emerald-100 text-emerald-700" },
   { key: "family",      label: "Family",      hint: "Family relations",                                     Icon: Heart,         tint: "bg-pink-100 text-pink-700" },
   { key: "connections", label: "Connections", hint: "Followers, Following, Likes, Chat, Fundraiser…",       Icon: UsersRound,    tint: "bg-indigo-100 text-indigo-700" },

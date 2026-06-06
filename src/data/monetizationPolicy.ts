@@ -7,7 +7,7 @@
  *  3. Maximum friendship & followership caps
  *  4. Per-type fees for NON-MONETIZED posts (company revenue, no creator share)
  *
- * All numeric fields are tunable by Mobigate Admin within the provided
+ * All numeric fields are tunable by Mobiface Admin within the provided
  * (Min ↔ Max) ranges. UI surfaces should use the getters/helpers so admin
  * edits flow through automatically.
  */
@@ -44,7 +44,7 @@ export const postMonetizationEligibilitySettings: PostMonetizationEligibilitySet
   requireVerifiedAccount: true,
 
   lastUpdatedAt: new Date(),
-  lastUpdatedBy: "Mobigate Admin",
+  lastUpdatedBy: "Mobiface Admin",
 };
 
 export interface MonetizationProfileSnapshot {
@@ -167,7 +167,7 @@ export const friendInteractionFeeSettings: FriendInteractionFeeSettings = {
     },
   ],
   lastUpdatedAt: new Date(),
-  lastUpdatedBy: "Mobigate Admin",
+  lastUpdatedBy: "Mobiface Admin",
 };
 
 /**
@@ -239,7 +239,7 @@ export const nonMonetizedPostFeeSettings: NonMonetizedPostFeeSettings = {
     URL:     { feeMobi: 1, feeRange: [1, 10] },
   },
   lastUpdatedAt: new Date(),
-  lastUpdatedBy: "Mobigate Admin",
+  lastUpdatedBy: "Mobiface Admin",
 };
 
 export function getNonMonetizedPostFee(type: NonMonetizedPostType | string): number {
@@ -272,7 +272,7 @@ export const monetizedPostMinFeeSettings: MonetizedPostMinFeeSettings = {
   },
   absoluteMaxMobi: 10000,
   lastUpdatedAt: new Date(),
-  lastUpdatedBy: "Mobigate Admin",
+  lastUpdatedBy: "Mobiface Admin",
 };
 
 export function getMonetizedPostMinFee(type: MonetizedPostType | string): number {

@@ -26,7 +26,7 @@ const audienceIcons: Record<CampaignAudience, React.ReactNode> = {
 const audienceLabels: Record<CampaignAudience, string> = {
   community_interface: "Community",
   members_interface: "Members",
-  mobigate_interface: "Mobigate",
+  mobigate_interface: "Mobiface",
   mobigate_users: "Users",
   mobi_store_marketplace: "Store"
 };

@@ -1,8 +1,8 @@
 /**
  * pages/admin/CopyrightDocumentsPage.tsx
  *
- * Mobigate Admin-only management interface for Copyright Documents submitted by
- * authors. View-only by design — these are legal records owned by Mobigate and
+ * Mobiface Admin-only management interface for Copyright Documents submitted by
+ * authors. View-only by design — these are legal records owned by Mobiface and
  * cannot be deleted (not even by the original author).
  */
 
@@ -74,7 +74,7 @@ export default function CopyrightDocumentsPage() {
           </div>
           <div className="min-w-0">
             <h1 className="text-base font-bold leading-tight truncate">Copyright Documents</h1>
-            <p className="text-[11px] text-muted-foreground leading-tight">Mobigate Admins only · Legal records</p>
+            <p className="text-[11px] text-muted-foreground leading-tight">Mobiface Admins only · Legal records</p>
           </div>
         </div>
       </div>
@@ -85,7 +85,7 @@ export default function CopyrightDocumentsPage() {
           <Lock className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
           <p className="text-[11px] leading-snug text-amber-800">
             These documents are submitted against each author's account and are
-            <strong> legal property of Mobigate</strong>. They are accessible only to Admins and
+            <strong> legal property of Mobiface</strong>. They are accessible only to Admins and
             <strong> cannot be removed</strong> — they are retained even after the related post is deleted.
           </p>
         </div>

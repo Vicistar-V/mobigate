@@ -179,7 +179,7 @@ export const MobigateUserSearch = ({
           <DrawerHeader className="pb-2 border-b shrink-0">
             <DrawerTitle className="text-base flex items-center gap-2">
               {multiSelect && <Users className="h-4 w-4 text-primary" />}
-              Search Mobigate Users
+              Search Mobiface Users
               {multiSelect && multiSelected.size > 0 && (
                 <Badge className="bg-primary text-primary-foreground text-xs ml-auto">
                   {multiSelected.size} selected
@@ -201,7 +201,7 @@ export const MobigateUserSearch = ({
         <DialogHeader className="px-4 pt-4 pb-2">
           <DialogTitle className="text-base sm:text-lg flex items-center gap-2">
             {multiSelect && <Users className="h-4 w-4 text-primary" />}
-            Search Mobigate Users
+            Search Mobiface Users
             {multiSelect && multiSelected.size > 0 && (
               <Badge className="bg-primary text-primary-foreground text-xs ml-auto">
                 {multiSelected.size} selected

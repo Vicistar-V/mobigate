@@ -546,7 +546,7 @@ export const GreetingSection = () => {
           <div className="mt-3 flex items-center gap-2">
             <div className="relative flex-1">
               <Input
-                placeholder="Search anything on Mobigate"
+                placeholder="Search anything on Mobiface"
                 className="h-11 rounded-full bg-muted/40 border-muted-foreground/20 pl-4 pr-4 text-[15px]"
               />
             </div>

@@ -1,7 +1,7 @@
 // PostSundryBar — the universal post/banner action toolbar
 // --------------------------------------------------------
 // Renders the six "sundry" tools that apply to every post & wall-banner image
-// across Mobigate: Like, Comment, Share, Follow, Gift, Report.
+// across Mobiface: Like, Comment, Share, Follow, Gift, Report.
 //
 // Each tool attracts an Admin-set Service Charge (see lib/sundryCharges). When
 // the user has zero / insufficient Mobi, the FundWalletPrompt opens instantly

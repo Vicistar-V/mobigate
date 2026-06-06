@@ -26,7 +26,7 @@ const CONTENT_AD_SLOTS = [
     slotId: "profile-content-ad-1",
     ads: [{
       id: "pca-1",
-      advertiser: { name: "Mobigate Premium", verified: true },
+      advertiser: { name: "Mobiface Premium", verified: true },
       content: { headline: "Upgrade to Premium", description: "Get more visibility for your content.", ctaText: "Learn More", ctaUrl: "#" },
       media: { type: "image" as const, items: [{ url: "https://images.unsplash.com/photo-1557838923-2985c318be48?w=800&q=80" }] },
       layout: "standard" as const,

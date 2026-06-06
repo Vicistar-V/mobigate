@@ -35,7 +35,7 @@ export const DEFAULT_SUNDRY_CHARGES: SundryChargeMap = {
   report: 25,
 };
 
-const STORAGE_KEY = "mobigate.sundryCharges.v1";
+const STORAGE_KEY = "mobiface.sundryCharges.v1";
 
 declare global {
   interface Window {

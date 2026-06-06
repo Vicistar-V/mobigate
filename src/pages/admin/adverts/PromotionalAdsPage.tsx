@@ -31,10 +31,10 @@ interface PromoAd {
 }
 
 const initialAds: PromoAd[] = [
-  { id: "1", title: "Mobigate Premium Launch", linkUrl: "https://mobigate.com/premium", position: "top-banner", active: true, impressions: 45230, clicks: 1890, thumbnail: "🚀" },
-  { id: "2", title: "Quiz Championship 2026", linkUrl: "https://mobigate.com/quiz-championship", position: "feed-insert", active: true, impressions: 23100, clicks: 980, thumbnail: "🏆" },
-  { id: "3", title: "Merchant Partner Program", linkUrl: "https://mobigate.com/merchants", position: "sidebar", active: false, impressions: 12400, clicks: 450, thumbnail: "🤝" },
-  { id: "4", title: "Valentine's Gift Promo", linkUrl: "https://mobigate.com/valentines", position: "feed-insert", active: true, impressions: 67800, clicks: 3200, thumbnail: "💝" },
+  { id: "1", title: "Mobiface Premium Launch", linkUrl: "https://mobiface.com/premium", position: "top-banner", active: true, impressions: 45230, clicks: 1890, thumbnail: "🚀" },
+  { id: "2", title: "Quiz Championship 2026", linkUrl: "https://mobiface.com/quiz-championship", position: "feed-insert", active: true, impressions: 23100, clicks: 980, thumbnail: "🏆" },
+  { id: "3", title: "Merchant Partner Program", linkUrl: "https://mobiface.com/merchants", position: "sidebar", active: false, impressions: 12400, clicks: 450, thumbnail: "🤝" },
+  { id: "4", title: "Valentine's Gift Promo", linkUrl: "https://mobiface.com/valentines", position: "feed-insert", active: true, impressions: 67800, clicks: 3200, thumbnail: "💝" },
 ];
 
 const positionLabels: Record<string, string> = {

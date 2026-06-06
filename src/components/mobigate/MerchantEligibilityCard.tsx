@@ -67,7 +67,7 @@ export function getEligibilityItems(): EligibilityItem[] {
     {
       icon: Users,
       label: "Invited Friends",
-      description: `Must have invited at least ${e.requiredInvitedFriends.toLocaleString()} active friends to Mobigate`,
+      description: `Must have invited at least ${e.requiredInvitedFriends.toLocaleString()} active friends to Mobiface`,
       met: e.invitedFriends >= e.requiredInvitedFriends,
       current: e.invitedFriends.toLocaleString(),
       required: e.requiredInvitedFriends.toLocaleString(),
@@ -179,7 +179,7 @@ export function MerchantEligibilityCard({ className }: MerchantEligibilityCardPr
         <div className="flex items-start gap-2">
           <Store className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
           <div className="text-xs text-muted-foreground leading-relaxed space-y-1">
-            <p>Only Mobi-Merchants can transact directly with the Mobigate central system.</p>
+            <p>Only Mobi-Merchants can transact directly with the Mobiface central system.</p>
             <p>Purchased Vouchers can be credited to wallet, sent as e-PIN, or gifted to other users.</p>
           </div>
         </div>

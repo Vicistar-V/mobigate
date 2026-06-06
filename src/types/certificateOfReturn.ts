@@ -37,7 +37,7 @@ export interface CertificateOfReturn {
   
   // Certificate Metadata
   issuedDate: Date;
-  issuedBy: string; // Mobigate or specific admin
+  issuedBy: string; // Mobiface or specific admin
   digitalSignature: string; // Simulated signature hash
   verificationCode: string; // For authenticity verification
   qrCodeData?: string;

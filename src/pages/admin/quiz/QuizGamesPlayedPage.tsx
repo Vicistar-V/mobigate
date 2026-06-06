@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Header } from "@/components/Header";
 import { formatMobi } from "@/lib/mobiCurrencyTranslation";
 import { quizGamesPlayedData, type QuizGameRecord } from "@/data/quizGamesPlayedData";
-import { QuizGameDetailDrawer } from "@/components/mobigate/QuizGameDetailDrawer";
+import { QuizGameDetailDrawer } from "@/components/mobiface/QuizGameDetailDrawer";
 import { MemberPreviewDialog } from "@/components/community/MemberPreviewDialog";
 import { ExecutiveMember } from "@/data/communityExecutivesData";
 import { ArrowLeft, Search, Gamepad2, Users, Wallet, TrendingUp } from "lucide-react";

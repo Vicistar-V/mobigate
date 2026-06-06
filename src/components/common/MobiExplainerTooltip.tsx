@@ -37,7 +37,7 @@ export function MobiExplainerTooltip({ size = "sm", className }: MobiExplainerTo
             </p>
             <p className="text-xs text-muted-foreground leading-relaxed">
               All community transactions are conducted in your <strong>local currency</strong> and 
-              automatically converted to <strong>Mobi (M)</strong>, Mobigate's universal platform currency.
+              automatically converted to <strong>Mobi (M)</strong>, Mobiface's universal platform currency.
             </p>
             <p className="text-xs text-muted-foreground">
               Current rate: <strong>₦1 = M1</strong>

@@ -136,7 +136,7 @@ export function AccreditationVerification({ onVerified, onBack }: AccreditationV
                 <br />
                 Contact our{" "}
                 <a 
-                  href="mailto:support@mobigate.com" 
+                  href="mailto:support@mobiface.com" 
                   className="text-primary hover:text-primary/80 underline font-medium"
                 >
                   Support Team

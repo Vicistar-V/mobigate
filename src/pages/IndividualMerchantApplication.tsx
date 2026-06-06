@@ -17,7 +17,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { formatMobi, formatLocalAmount, generateTransactionReference } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
-import { MerchantEligibilityCard, getEligibilityItems } from "@/components/mobigate/MerchantEligibilityCard";
+import { MerchantEligibilityCard, getEligibilityItems } from "@/components/mobiface/MerchantEligibilityCard";
 
 const genderOptions = ["Male", "Female"];
 const maritalStatusOptions = ["Single", "Married", "Divorced", "Separated", "Widowed", "Complicated"];
@@ -607,7 +607,7 @@ export default function IndividualMerchantApplication() {
               <Label htmlFor="accept-policies" className="text-xs leading-relaxed cursor-pointer">
                 You must read and agree to the{" "}
                 <span className="text-primary font-semibold underline">Terms and Conditions</span>{" "}
-                of MOBIGATE Application usage and management policy. By submitting, you agree to{" "}
+                of MOBIFACE Application usage and management policy. By submitting, you agree to{" "}
                 {waiverMode ? (
                   <>the application fee of <span className="font-bold text-primary">{formatMobi(50000)}</span> + waiver fee of <span className="font-bold text-orange-600">{formatMobi(50000)}</span> = <span className="font-bold text-primary">{formatMobi(totalFee)}</span></>
                 ) : (

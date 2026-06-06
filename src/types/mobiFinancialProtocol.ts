@@ -1,4 +1,4 @@
-// Mobigate Universal Financial Protocol Types
+// Mobiface Universal Financial Protocol Types
 
 /**
  * Exchange rate configuration for converting between local currencies and Mobi

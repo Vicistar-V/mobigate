@@ -5,7 +5,7 @@
  * Actions: Rate Post, Hide Post, Report Post, Block Author.
  *
  * All actions use optimistic UI — the menu closes and a toast confirms instantly,
- * matching the rest of Mobigate. Compatible with the existing PHP backend: the
+ * matching the rest of Mobiface. Compatible with the existing PHP backend: the
  * optional callbacks let the parent fire the real network request.
  */
 
@@ -99,7 +99,7 @@ export const PostViewerOptionsMenu = ({
       return;
     }
     setShowReport(false);
-    toast.success("Report submitted. Thank you for keeping Mobigate safe.");
+    toast.success("Report submitted. Thank you for keeping Mobiface safe.");
     onReport?.(reportReason + (reportDetails ? ` — ${reportDetails}` : ""));
     setReportReason("");
     setReportDetails("");
