@@ -26,15 +26,17 @@ export const AuthGuard = ({ children }: { children: ReactNode }) => {
     return <>{children}</>;
   }
 
+  const showLogin = !isAuthenticated && !dismissed;
+
   return (
     <>
       <div
-        className={!isAuthenticated ? "select-none opacity-30" : ""}
-        aria-hidden={!isAuthenticated}
+        className={showLogin ? "select-none opacity-30" : ""}
+        aria-hidden={showLogin}
       >
         {children}
       </div>
-      {!isAuthenticated && <LoginModal />}
+      {showLogin && <LoginModal onClose={() => setDismissed(true)} />}
     </>
   );
 };
