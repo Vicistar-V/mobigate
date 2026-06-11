@@ -181,12 +181,15 @@ export const CreateEventDialog = ({ isOpen, onClose, onCreated }: Props) => {
         : EVENT_OPTIONS.find(o => o.value === type)?.label ?? "Event";
 
     const id = `evt-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-    const photo = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name.trim())}`;
+    // Cover image: first uploaded photo when present, otherwise initials avatar.
+    const initialsAvatar = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name.trim())}`;
+    const photo = images[0] || initialsAvatar;
 
     const newEvent: CreatedEvent = {
       id,
       name: name.trim(),
       photo,
+      images: [...images],
       dateLabel: formatHumanDate(dateISO),
       dateISO,
       eventType: type,
