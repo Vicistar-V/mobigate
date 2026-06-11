@@ -21,6 +21,15 @@ export const TopTrendingHeadlines = () => {
   const [isLiked, setIsLiked] = useState(!!headline.isLiked);
   const [likeCount, setLikeCount] = useState(headline.likes ?? 0);
 
+  // Story navigation links — fire a toast + dispatch a window event the PHP
+  // layer (or other components) can hook into, so each link is interactive.
+  const handleNav = (link: { label: string; href: string }) => {
+    window.dispatchEvent(
+      new CustomEvent("trendingNavAction", { detail: { label: link.label, href: link.href } })
+    );
+    toast({ description: `Opening "${link.label}"…` });
+  };
+
 
   const handleFollow = () => {
     setIsFollowing((prev) => {
@@ -84,15 +93,16 @@ export const TopTrendingHeadlines = () => {
                 loading="lazy"
               />
             </div>
-            <nav className="flex flex-col gap-1" aria-label="Story navigation">
+            <nav className="mt-1 flex flex-1 flex-col justify-between gap-3" aria-label="Story navigation">
               {trendingNavLinks.map((link) => (
-                <a
+                <button
                   key={link.label}
-                  href={link.href}
-                  className="text-[11px] font-medium leading-tight text-[hsl(212_95%_50%)] underline underline-offset-2 hover:opacity-80"
+                  type="button"
+                  onClick={() => handleNav(link)}
+                  className="w-full text-left text-[13px] font-semibold leading-tight text-[hsl(212_95%_50%)] underline underline-offset-2 transition-opacity hover:opacity-80 active:opacity-60 touch-manipulation"
                 >
                   {link.label}
-                </a>
+                </button>
               ))}
             </nav>
           </div>
