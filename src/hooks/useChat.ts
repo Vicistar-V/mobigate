@@ -127,27 +127,39 @@ export const useChat = () => {
   }, [fetchMessages, startPoll, stopPoll]);
 
   // ── startConversationWith ─────────────────────────────────────────────────────
-  const startConversationWith = useCallback(async (otherId: string, otherName?: string) => {
+  const startConversationWith = useCallback(async (otherId: string, otherName?: string, otherAvatar?: string) => {
+    // Optimistic local fallback — always opens a chat thread immediately,
+    // even when the backend cannot resolve the user (e.g. demo/placeholder IDs).
+    const openLocal = () => {
+      const localId = `local-${otherId}`;
+      localIds.current.add(localId);
+      setConversations(prev => {
+        if (prev.find(c => c.id === localId)) return prev;
+        return [toConv({ id: localId, user: { id: otherId, name: otherName || "User", avatar: otherAvatar || null, isOnline: false }, lastMessage: "", lastMessageTime: null, unreadCount: 0 }), ...prev];
+      });
+      setActiveConvId(localId);
+      return localId;
+    };
     try {
       const res = await fetch(`${API}/chat/start.php`, {
         method: "POST", credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ other_user_id: otherId }),
       });
-      if (!res.ok) return null;
+      if (!res.ok) return openLocal();
       const { conversation_id: convId } = await res.json();
-      if (!convId) return null;
+      if (!convId) return openLocal();
       localIds.current.add(convId);
       setConversations(prev => {
         if (prev.find(c => c.id === convId)) return prev;
-        return [toConv({ id: convId, user: { id: otherId, name: otherName || "...", avatar: null, isOnline: false }, lastMessage: "", lastMessageTime: null, unreadCount: 0 }), ...prev];
+        return [toConv({ id: convId, user: { id: otherId, name: otherName || "...", avatar: otherAvatar || null, isOnline: false }, lastMessage: "", lastMessageTime: null, unreadCount: 0 }), ...prev];
       });
       setActiveConvId(convId);
       await fetchMessages(convId, false);
       startPoll(convId);
       fetchConversations(true); // get real avatar in background
       return convId;
-    } catch { return null; }
+    } catch { return openLocal(); }
   }, [fetchConversations, fetchMessages, startPoll]);
 
   // ── sendMessage ───────────────────────────────────────────────────────────────
