@@ -240,10 +240,10 @@ export const SendGiftDialog = ({
             <div className="mt-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
               <div className="flex items-start gap-2 mb-2.5">
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold text-destructive">
+                  <p className="text-sm font-semibold text-destructive">
                     {insufficient ? "Insufficient balance to send this gift" : "Low balance — top up to send gifts"}
                   </p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                  <p className="text-[13px] leading-snug text-muted-foreground mt-1">
                     Fund your Mobi Wallet through a Retail Merchant and we'll bring you right back here.
                   </p>
                 </div>
@@ -258,8 +258,8 @@ export const SendGiftDialog = ({
                   <Ticket className="h-5 w-5 text-primary-foreground" />
                 </span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-primary-foreground">Fund Wallet via Retail Merchant</p>
-                  <p className="text-[11px] text-primary-foreground/80">Instant top-up — voucher PIN credited immediately</p>
+                  <p className="text-[15px] font-bold text-primary-foreground">Fund Wallet via Retail Merchant</p>
+                  <p className="text-[12px] text-primary-foreground/80">Instant top-up — voucher PIN credited immediately</p>
                 </div>
                 <ArrowRight className="h-5 w-5 text-primary-foreground shrink-0" />
               </button>
@@ -267,9 +267,9 @@ export const SendGiftDialog = ({
               {/* Toggle alt methods */}
               <button
                 onClick={() => setFundPanelOpen(v => !v)}
-                className="w-full mt-2 text-[11px] text-muted-foreground hover:text-foreground flex items-center justify-center gap-1 py-1"
+                className="w-full mt-2 text-[13px] font-medium text-muted-foreground hover:text-foreground flex items-center justify-center gap-1 py-1.5"
               >
-                {fundPanelOpen ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                {fundPanelOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 {fundPanelOpen ? "Hide other methods" : "Other funding methods"}
               </button>
 
