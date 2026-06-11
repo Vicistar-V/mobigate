@@ -182,11 +182,14 @@ export const trendingToArticle = (h: TrendingHeadline): NewsArticle => ({
   title: h.category,
   content: h.content,
   imageUrl: h.imageUrl,
+  images: h.images && h.images.length ? h.images.slice(0, 3) : [h.imageUrl],
   author: h.author,
   authorAvatar: h.authorAvatar,
   timeAgo: h.timeAgo,
   privacy: h.privacy,
   likes: h.likes,
+  views: h.views,
+  comments: h.comments,
   isFollowing: h.isFollowing,
   isLiked: h.isLiked,
 });
@@ -198,9 +201,13 @@ export const missedToArticle = (h: MissedHeadline): NewsArticle => ({
   title: h.title,
   content: h.content,
   imageUrl: h.imageUrl,
+  images: h.images && h.images.length ? h.images.slice(0, 3) : [h.imageUrl],
   author: h.author,
   authorAvatar: h.authorAvatar,
   timeAgo: h.timeAgo,
   privacy: h.privacy,
   likes: h.likes,
+  views: h.views,
+  comments: h.comments,
+});
 });
