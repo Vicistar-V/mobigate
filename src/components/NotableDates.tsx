@@ -19,6 +19,7 @@ interface NotablePerson {
   id: string;
   name: string;
   photo: string;
+  images?: string[];       // up to 3 event photos (events only)
   dateLabel: string;       // e.g. "August 25"
   isFriend: boolean;
   _bucket: TimeRange;
