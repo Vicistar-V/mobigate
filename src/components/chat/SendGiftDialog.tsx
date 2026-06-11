@@ -240,10 +240,10 @@ export const SendGiftDialog = ({
             <div className="mt-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
               <div className="flex items-start gap-2 mb-2.5">
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold text-destructive">
+                  <p className="text-sm font-semibold text-destructive">
                     {insufficient ? "Insufficient balance to send this gift" : "Low balance — top up to send gifts"}
                   </p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                  <p className="text-[13px] leading-snug text-muted-foreground mt-1">
                     Fund your Mobi Wallet through a Retail Merchant and we'll bring you right back here.
                   </p>
                 </div>
