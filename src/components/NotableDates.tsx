@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { useEffect, useMemo, useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, MoveHorizontal, MoveVertical } from "lucide-react";
+import { Link } from "react-router-dom";
 import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
 import { CreateEventDialog, CreatedEvent } from "@/components/CreateEventDialog";
 import {
@@ -95,6 +96,14 @@ const labelForOffset = (offset: number) => {
   return `${MONTHS[d.getMonth()]} ${d.getDate()}`;
 };
 
+// Date label color by bucket:
+//  Today / Tomorrow → Green · Yesterday → Blue · everything else → Red
+const dateColorClass = (bucket: TimeRange) => {
+  if (bucket === "today" || bucket === "tomorrow") return "text-green-600";
+  if (bucket === "yesterday") return "text-blue-600";
+  return "text-red-600";
+};
+
 const EVENT_TYPE_BY_INDEX: { type: EventType; label: string }[] = [
   { type: "wedding", label: "Wedding" },
   { type: "burial", label: "Burial" },
@@ -142,35 +151,47 @@ const OTHER_EVENT_TYPES = [
 
 // ─── Subcomponents (defined OUTSIDE parent to keep stable refs) ─────────────
 const PersonCard = ({
-  p, showViewDetails, friendState, onMessage, onGift, onOpen, onToggleFriend,
+  p, showViewDetails, friendState, vertical, onMessage, onGift, onOpen, onToggleFriend,
 }: {
   p: NotablePerson;
   showViewDetails: boolean;
   friendState: "none" | "requested" | "friend";
+  vertical: boolean;
   onMessage: (p: NotablePerson) => void;
   onGift:    (p: NotablePerson) => void;
   onOpen:    (p: NotablePerson) => void;
   onToggleFriend: (p: NotablePerson) => void;
-}) => (
+}) => {
+  const profileHref = `/profile/${p.id}`;
+  return (
   <div
     role="button"
     tabIndex={0}
     onClick={() => onOpen(p)}
     onKeyDown={(e) => { if (e.key === "Enter") onOpen(p); }}
-    className="flex-shrink-0 w-[185px] rounded-lg border border-border bg-card overflow-hidden flex flex-col text-left cursor-pointer hover:border-primary/50 hover:shadow-sm transition-all active:scale-[0.99]"
+    className={`${vertical ? "w-full" : "flex-shrink-0 w-[185px]"} rounded-lg border border-border bg-card overflow-hidden flex flex-col text-left cursor-pointer hover:border-primary/50 hover:shadow-sm transition-all active:scale-[0.99]`}
   >
-    <div className="w-full aspect-[3/4] bg-muted overflow-hidden">
-      <img src={p.photo} alt={p.name} className="w-full h-full object-cover" loading="lazy" />
-    </div>
+    <Link
+      to={profileHref}
+      onClick={(e) => e.stopPropagation()}
+      className="block w-full aspect-[3/4] bg-muted overflow-hidden"
+      aria-label={`View ${p.name}'s profile`}
+    >
+      <img src={p.photo} alt={p.name} className="w-full h-full object-cover hover:opacity-90 transition-opacity" loading="lazy" />
+    </Link>
     <div className="p-2.5 space-y-1.5 flex-1 flex flex-col">
-      {/* Row 1 — full name */}
-      <p className="text-[16px] font-bold text-foreground leading-tight text-center break-words">
+      {/* Row 1 — full name → profile */}
+      <Link
+        to={profileHref}
+        onClick={(e) => e.stopPropagation()}
+        className="text-[16px] font-bold text-foreground leading-tight text-center break-words hover:text-primary hover:underline"
+      >
         {p.name}
-      </p>
+      </Link>
 
       {/* Row 2 — date · friend / add friend */}
       <div className="flex items-center justify-center gap-1.5 text-[15px] flex-wrap">
-        <span className="text-red-600 font-bold whitespace-nowrap">{p.dateLabel}</span>
+        <span className={`${dateColorClass(p._bucket)} font-bold whitespace-nowrap`}>{p.dateLabel}</span>
         <span className="text-muted-foreground">|</span>
         <button
           type="button"
@@ -214,7 +235,8 @@ const PersonCard = ({
       )}
     </div>
   </div>
-);
+  );
+};
 
 const TimeRangeChips = ({
   active, onChange, counts,
@@ -286,6 +308,7 @@ export const NotableDates = () => {
   const [bdayRange,  setBdayRange]  = useState<TimeRange>("today");
   const [eventRange, setEventRange] = useState<TimeRange>("today");
   const [eventType,  setEventType]  = useState<EventType>("wedding");
+  const [viewMode,   setViewMode]   = useState<"carousel" | "grid">("carousel");
 
   const { toast } = useToast();
   const [giftOpen, setGiftOpen] = useState(false);
@@ -520,24 +543,55 @@ export const NotableDates = () => {
         <EventTypeChips active={eventType} onChange={setEventType} counts={eventTypeTotals} />
       )}
 
-      <TimeRangeChips
-        active={activeRange}
-        onChange={setActiveRange}
-        counts={{
-          today: rangeCounts.today || 0,
-          tomorrow: rangeCounts.tomorrow || 0,
-          others: rangeCounts.others || 0,
-        }}
-      />
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <TimeRangeChips
+          active={activeRange}
+          onChange={setActiveRange}
+          counts={{
+            today: rangeCounts.today || 0,
+            tomorrow: rangeCounts.tomorrow || 0,
+            others: rangeCounts.others || 0,
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => setViewMode(v => (v === "carousel" ? "grid" : "carousel"))}
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-border text-[13px] font-semibold text-foreground hover:bg-muted active:scale-[0.98] transition-all touch-manipulation"
+          title={viewMode === "carousel" ? "Switch to Vertical View" : "Switch to Horizontal View"}
+        >
+          {viewMode === "carousel"
+            ? <><MoveHorizontal className="h-4 w-4" />Horizontal</>
+            : <><MoveVertical className="h-4 w-4" />Vertical</>}
+        </button>
+      </div>
 
-      {/* Cards row */}
-      <div className="-mx-4 px-4 overflow-x-auto touch-pan-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {filtered.length > 0 ? (
-          <div className="flex gap-3 pb-1">
+      {/* Cards */}
+      {filtered.length > 0 ? (
+        viewMode === "carousel" ? (
+          <div className="-mx-4 px-4 overflow-x-auto touch-pan-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex gap-3 pb-1">
+              {filtered.map(p => (
+                <PersonCard
+                  key={p.id}
+                  p={p}
+                  vertical={false}
+                  showViewDetails={tab === "events"}
+                  friendState={friendStateOf(p)}
+                  onMessage={handleMessage}
+                  onGift={handleGift}
+                  onOpen={handleOpenDetail}
+                  onToggleFriend={handleToggleFriend}
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
             {filtered.map(p => (
               <PersonCard
                 key={p.id}
                 p={p}
+                vertical={true}
                 showViewDetails={tab === "events"}
                 friendState={friendStateOf(p)}
                 onMessage={handleMessage}
@@ -547,12 +601,12 @@ export const NotableDates = () => {
               />
             ))}
           </div>
-        ) : (
-          <p className="text-sm text-muted-foreground italic py-4">
-            No entries in this range. Try another filter above.
-          </p>
-        )}
-      </div>
+        )
+      ) : (
+        <p className="text-sm text-muted-foreground italic py-4">
+          No entries in this range. Try another filter above.
+        </p>
+      )}
 
       {/* Others [Dates] */}
       <p className="text-[15px] text-foreground leading-relaxed">
