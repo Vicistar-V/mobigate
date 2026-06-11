@@ -19,6 +19,7 @@ export interface NotableDetailPerson {
   id: string;
   name: string;
   photo: string;
+  images?: string[];        // up to 3 event photos
   dateLabel: string;
   isFriend: boolean;
   kind: "birthday" | "event";
