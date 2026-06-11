@@ -43,7 +43,8 @@ const App = () => {
                       <Route path="/post/:id"      element={<PostPage />} />
                       <Route path="/verify-account" element={<AccountVerificationPage />} />
                       <Route path="/admin/copyright-documents" element={<CopyrightDocumentsPage />} />
-                      <Route path="/dev/notable-test" element={<NotableTestPage />} />
+
+
 
 
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
