@@ -240,6 +240,7 @@ export const CreateEventDialog = ({ isOpen, onClose, onCreated }: Props) => {
       eventType: type,
       eventLabel: resolvedLabel,
       notes: notes.trim() || undefined,
+      audience,
       isFriend: false,
       createdAt: new Date().toISOString(),
     };
