@@ -45,11 +45,17 @@ export interface NewsArticle {
   title: string;
   content: string[];
   imageUrl: string;
+  /** Up to 3 media images (photos/videos). Falls back to [imageUrl] when absent. */
+  images?: string[];
   author: string;
   authorAvatar: string;
   timeAgo: string;
   privacy: "Public" | "Friends" | "Private";
   likes?: number;
+  /** Auto-incremented view counter shown as "⏺ 2,604". */
+  views?: number;
+  /** Number of comments on the post. */
+  comments?: number;
   isFollowing?: boolean;
   isLiked?: boolean;
 }
