@@ -308,6 +308,7 @@ export const NotableDates = () => {
   const [bdayRange,  setBdayRange]  = useState<TimeRange>("today");
   const [eventRange, setEventRange] = useState<TimeRange>("today");
   const [eventType,  setEventType]  = useState<EventType>("wedding");
+  const [viewMode,   setViewMode]   = useState<"carousel" | "grid">("carousel");
 
   const { toast } = useToast();
   const [giftOpen, setGiftOpen] = useState(false);
