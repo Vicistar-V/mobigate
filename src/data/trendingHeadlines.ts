@@ -12,6 +12,8 @@ export interface TrendingHeadline {
   content: string[];
   /** Large feature portrait / cover image (hero in the drawer) */
   imageUrl: string;
+  /** Up to 3 media images (0–3). When present, drives the swipeable gallery. */
+  images?: string[];
   /** Small inline thumbnail shown beside the excerpt in the card */
   thumbnail: string;
   author: string;
@@ -20,6 +22,8 @@ export interface TrendingHeadline {
   timeAgo: string;
   privacy: "Public" | "Friends" | "Private";
   likes?: number;
+  views?: number;
+  comments?: number;
   isFollowing?: boolean;
   isLiked?: boolean;
 }
@@ -30,12 +34,15 @@ export interface MissedHeadline {
   excerpt: string;
   content: string[];
   imageUrl: string;
+  images?: string[];
   category: string;
   author: string;
   authorAvatar: string;
   timeAgo: string;
   privacy: "Public" | "Friends" | "Private";
   likes?: number;
+  views?: number;
+  comments?: number;
 }
 
 /** Normalized shape the reader drawer consumes from any source. */
@@ -45,11 +52,17 @@ export interface NewsArticle {
   title: string;
   content: string[];
   imageUrl: string;
+  /** Up to 3 media images (photos/videos). Falls back to [imageUrl] when absent. */
+  images?: string[];
   author: string;
   authorAvatar: string;
   timeAgo: string;
   privacy: "Public" | "Friends" | "Private";
   likes?: number;
+  /** Auto-incremented view counter shown as "⏺ 2,604". */
+  views?: number;
+  /** Number of comments on the post. */
+  comments?: number;
   isFollowing?: boolean;
   isLiked?: boolean;
 }
@@ -67,6 +80,11 @@ export const fallbackTrendingHeadline: TrendingHeadline = {
   ],
   imageUrl:
     "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80",
+  images: [
+    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80",
+    "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&q=80",
+    "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80",
+  ],
   thumbnail:
     "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&q=80",
   author: "Anthony Samuel Odiba",
@@ -75,6 +93,8 @@ export const fallbackTrendingHeadline: TrendingHeadline = {
   timeAgo: "2 Hours ago",
   privacy: "Public",
   likes: 1240,
+  views: 2604,
+  comments: 87,
   isFollowing: false,
   isLiked: false,
 };
@@ -100,6 +120,8 @@ export const fallbackMissedHeadlines: MissedHeadline[] = [
     timeAgo: "3 Hours ago",
     privacy: "Public",
     likes: 980,
+    views: 1820,
+    comments: 54,
   },
   {
     id: "mh_2",
@@ -121,6 +143,8 @@ export const fallbackMissedHeadlines: MissedHeadline[] = [
     timeAgo: "5 Hours ago",
     privacy: "Public",
     likes: 642,
+    views: 1133,
+    comments: 31,
   },
   {
     id: "mh_3",
@@ -142,6 +166,8 @@ export const fallbackMissedHeadlines: MissedHeadline[] = [
     timeAgo: "8 Hours ago",
     privacy: "Public",
     likes: 415,
+    views: 894,
+    comments: 22,
   },
 ];
 
@@ -162,11 +188,14 @@ export const trendingToArticle = (h: TrendingHeadline): NewsArticle => ({
   title: h.category,
   content: h.content,
   imageUrl: h.imageUrl,
+  images: h.images && h.images.length ? h.images.slice(0, 3) : [h.imageUrl],
   author: h.author,
   authorAvatar: h.authorAvatar,
   timeAgo: h.timeAgo,
   privacy: h.privacy,
   likes: h.likes,
+  views: h.views,
+  comments: h.comments,
   isFollowing: h.isFollowing,
   isLiked: h.isLiked,
 });
@@ -178,9 +207,12 @@ export const missedToArticle = (h: MissedHeadline): NewsArticle => ({
   title: h.title,
   content: h.content,
   imageUrl: h.imageUrl,
+  images: h.images && h.images.length ? h.images.slice(0, 3) : [h.imageUrl],
   author: h.author,
   authorAvatar: h.authorAvatar,
   timeAgo: h.timeAgo,
   privacy: h.privacy,
   likes: h.likes,
+  views: h.views,
+  comments: h.comments,
 });
