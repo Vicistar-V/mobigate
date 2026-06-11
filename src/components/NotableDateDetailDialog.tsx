@@ -49,9 +49,37 @@ export const NotableDateDetailDialog = ({
   onGift,
   onToggleFriend,
 }: Props) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  // Reset to first slide whenever a different person opens.
+  useEffect(() => {
+    setActiveIdx(0);
+    if (scrollRef.current) scrollRef.current.scrollLeft = 0;
+  }, [person?.id]);
+
   if (!person) return null;
 
   const isBirthday = person.kind === "birthday";
+
+  // Gallery: uploaded event photos when present, otherwise the single cover photo.
+  const gallery =
+    person.images && person.images.length > 0 ? person.images.slice(0, 3) : [person.photo];
+  const hasGallery = gallery.length > 1;
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const idx = Math.round(el.scrollLeft / el.clientWidth);
+    if (idx !== activeIdx) setActiveIdx(idx);
+  };
+
+  const goToSlide = (idx: number) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ left: idx * el.clientWidth, behavior: "smooth" });
+    setActiveIdx(idx);
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={(o) => !o && onClose()}>
@@ -60,14 +88,51 @@ export const NotableDateDetailDialog = ({
           <DialogTitle>{person.name} details</DialogTitle>
         </DialogHeader>
 
-        {/* Hero */}
+        {/* Hero gallery — up to 3 photos, swipe right-to-left */}
         <div className="relative w-full aspect-[4/3] bg-muted">
-          <img
-            src={person.photo}
-            alt={person.name}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent p-4">
+          <div
+            ref={scrollRef}
+            onScroll={handleScroll}
+            className="flex h-full w-full overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {gallery.map((src, idx) => (
+              <div key={idx} className="relative h-full w-full shrink-0 snap-center">
+                <img
+                  src={src}
+                  alt={`${person.name} — photo ${idx + 1}`}
+                  className="w-full h-full object-cover"
+                  loading={idx === 0 ? "eager" : "lazy"}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Photo count badge */}
+          {hasGallery && (
+            <span className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-[11px] font-semibold text-white">
+              <Images className="h-3.5 w-3.5" />
+              {activeIdx + 1}/{gallery.length}
+            </span>
+          )}
+
+          {/* Dot indicators */}
+          {hasGallery && (
+            <div className="absolute bottom-16 inset-x-0 flex items-center justify-center gap-1.5">
+              {gallery.map((_, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => goToSlide(idx)}
+                  className={`h-2 rounded-full transition-all ${
+                    idx === activeIdx ? "w-5 bg-white" : "w-2 bg-white/50"
+                  }`}
+                  aria-label={`Go to photo ${idx + 1}`}
+                />
+              ))}
+            </div>
+          )}
+
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent p-4">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-1 text-[11px] font-bold text-primary-foreground">
               {isBirthday ? (
                 <>
