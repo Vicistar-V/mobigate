@@ -143,6 +143,7 @@ export const CreateEventDialog = ({ isOpen, onClose, onCreated }: Props) => {
   const [customType, setCustomType] = useState("");
   const [dateISO,   setDateISO]   = useState("");
   const [notes,     setNotes]     = useState("");
+  const [audience,  setAudience]  = useState<EventAudience>("public");
   const [images,    setImages]    = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
