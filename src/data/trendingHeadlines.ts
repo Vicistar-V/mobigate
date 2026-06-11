@@ -80,6 +80,11 @@ export const fallbackTrendingHeadline: TrendingHeadline = {
   ],
   imageUrl:
     "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80",
+  images: [
+    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80",
+    "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&q=80",
+    "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80",
+  ],
   thumbnail:
     "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&q=80",
   author: "Anthony Samuel Odiba",
@@ -88,6 +93,8 @@ export const fallbackTrendingHeadline: TrendingHeadline = {
   timeAgo: "2 Hours ago",
   privacy: "Public",
   likes: 1240,
+  views: 2604,
+  comments: 87,
   isFollowing: false,
   isLiked: false,
 };
