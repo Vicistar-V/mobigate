@@ -49,8 +49,13 @@ export function FundWalletPrompt({
     // buy-vouchers page reads this `returnTo` and navigates back here.
     const returnTo = `${location.pathname}${location.search}`;
     const sep = path.includes("?") ? "&" : "?";
+    const dest = `${path}${sep}returnTo=${encodeURIComponent(returnTo)}`;
+    // Close this dialog (and any parent chat sheet) before routing, then
+    // navigate on the next frame so nested Radix portals tear down cleanly —
+    // an immediate navigate can be swallowed / leave the page stuck.
     onOpenChange(false);
-    navigate(`${path}${sep}returnTo=${encodeURIComponent(returnTo)}`);
+    window.dispatchEvent(new CustomEvent("closeChatSheet"));
+    requestAnimationFrame(() => navigate(dest));
   };
 
   // Retail (sub-merchant) voucher funding — the platform's standard top-up flow.

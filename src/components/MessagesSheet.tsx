@@ -85,9 +85,13 @@ export const MessagesSheet = () => {
       }
     };
 
+    const handleCloseChat = () => setIsOpen(false);
+
     window.addEventListener('openChatWithUser' as any, handleOpenChat);
+    window.addEventListener('closeChatSheet' as any, handleCloseChat);
     return () => {
       window.removeEventListener('openChatWithUser' as any, handleOpenChat);
+      window.removeEventListener('closeChatSheet' as any, handleCloseChat);
     };
   }, [conversations, selectConversation, startConversationWith]);
 
