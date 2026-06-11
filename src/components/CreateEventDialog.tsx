@@ -60,6 +60,25 @@ export type CreatedEventType =
   | "ordination"
   | "others";
 
+/** Who is allowed to see this Notable Event. */
+export type EventAudience =
+  | "public"
+  | "friends"
+  | "friends-of-friends"
+  | "only-me";
+
+const AUDIENCE_OPTIONS: {
+  value: EventAudience;
+  label: string;
+  hint: string;
+  icon: typeof Globe;
+}[] = [
+  { value: "public",             label: "Public",             hint: "Anyone on Mobigate can see this event.", icon: Globe },
+  { value: "friends",            label: "Friends",            hint: "Only your friends can see this event.", icon: Users },
+  { value: "friends-of-friends", label: "Friends of Friends", hint: "Your friends and their friends can see it.", icon: UserCheck },
+  { value: "only-me",            label: "Only Me",            hint: "Private — only you can see this event.", icon: Lock },
+];
+
 export interface CreatedEvent {
   id: string;
   name: string;          // celebrant / honouree
