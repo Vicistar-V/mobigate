@@ -99,7 +99,9 @@ export const CreateEventDialog = ({ isOpen, onClose, onCreated }: Props) => {
   const [customType, setCustomType] = useState("");
   const [dateISO,   setDateISO]   = useState("");
   const [notes,     setNotes]     = useState("");
+  const [images,    setImages]    = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const todayISO = useMemo(() => {
     const d = new Date();
@@ -108,12 +110,54 @@ export const CreateEventDialog = ({ isOpen, onClose, onCreated }: Props) => {
     return `${d.getFullYear()}-${mm}-${dd}`;
   }, []);
 
+  const handlePickImages = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (files.length === 0) return;
+
+    const remaining = MAX_IMAGES - images.length;
+    if (remaining <= 0) {
+      toast({
+        title: "Maximum reached",
+        description: `You can add up to ${MAX_IMAGES} images per event.`,
+        variant: "destructive",
+      });
+      e.target.value = "";
+      return;
+    }
+
+    const accepted = files.slice(0, remaining);
+    if (files.length > remaining) {
+      toast({
+        title: "Some images skipped",
+        description: `Only ${MAX_IMAGES} images are allowed — added the first ${remaining}.`,
+      });
+    }
+
+    accepted.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === "string") {
+          // Optimistic: append each image as it finishes reading.
+          setImages((prev) => (prev.length >= MAX_IMAGES ? prev : [...prev, reader.result as string]));
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    e.target.value = "";
+  };
+
+  const removeImage = (idx: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== idx));
+  };
+
   const reset = () => {
     setName("");
     setType("wedding");
     setCustomType("");
     setDateISO("");
     setNotes("");
+    setImages([]);
     setSubmitting(false);
   };
 
