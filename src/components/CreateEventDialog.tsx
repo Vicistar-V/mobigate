@@ -277,6 +277,7 @@ export const CreateEventDialog = ({ isOpen, onClose, onCreated }: Props) => {
         event_label: resolvedLabel,
         event_date: dateISO,
         notes:      newEvent.notes ?? "",
+        audience:   newEvent.audience,
         images:     newEvent.images,
       }),
     }).catch(() => { /* silent — optimistic */ });
