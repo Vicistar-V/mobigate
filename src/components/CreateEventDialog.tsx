@@ -46,6 +46,18 @@ export type CreatedEventType =
   | "house-warming"
   | "naming-ceremony"
   | "coronation"
+  | "anniversary"
+  | "award-nite"
+  | "birthday"
+  | "convocation"
+  | "inauguration"
+  | "investiture"
+  | "induction"
+  | "initiation"
+  | "swearing-in"
+  | "title-conferment"
+  | "title-taking"
+  | "ordination"
   | "others";
 
 export interface CreatedEvent {
@@ -71,6 +83,18 @@ const EVENT_OPTIONS: { value: CreatedEventType; label: string }[] = [
   { value: "house-warming",    label: "House Warming" },
   { value: "naming-ceremony",  label: "Naming Ceremony" },
   { value: "coronation",       label: "Coronation" },
+  { value: "anniversary",      label: "Anniversary" },
+  { value: "award-nite",       label: "Award Nite" },
+  { value: "birthday",         label: "Birthday" },
+  { value: "convocation",      label: "Convocation" },
+  { value: "inauguration",     label: "Inauguration" },
+  { value: "investiture",      label: "Investiture" },
+  { value: "induction",        label: "Induction" },
+  { value: "initiation",       label: "Initiation" },
+  { value: "swearing-in",      label: "Swearing-in" },
+  { value: "title-conferment", label: "Title Conferment" },
+  { value: "title-taking",     label: "Title Taking" },
+  { value: "ordination",       label: "Ordination" },
   { value: "others",           label: "Others (specify)" },
 ];
 
@@ -273,7 +297,7 @@ export const CreateEventDialog = ({ isOpen, onClose, onCreated }: Props) => {
               <SelectTrigger className="text-base h-11">
                 <SelectValue placeholder="Choose an event type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-[60dvh] overflow-y-auto">
                 {EVENT_OPTIONS.map(o => (
                   <SelectItem key={o.value} value={o.value} className="text-base">
                     {o.label}
