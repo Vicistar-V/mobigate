@@ -25,6 +25,7 @@ interface NotablePerson {
   _bucket: TimeRange;
   eventType?: EventType;   // only for events
   eventLabel?: string;     // e.g. "Wedding"
+  notes?: string;          // event notes (created events)
   _typeKey?: string;
 }
 
