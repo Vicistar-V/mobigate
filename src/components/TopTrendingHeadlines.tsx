@@ -21,6 +21,15 @@ export const TopTrendingHeadlines = () => {
   const [isLiked, setIsLiked] = useState(!!headline.isLiked);
   const [likeCount, setLikeCount] = useState(headline.likes ?? 0);
 
+  // Story navigation links — fire a toast + dispatch a window event the PHP
+  // layer (or other components) can hook into, so each link is interactive.
+  const handleNav = (link: { label: string; href: string }) => {
+    window.dispatchEvent(
+      new CustomEvent("trendingNavAction", { detail: { label: link.label, href: link.href } })
+    );
+    toast({ description: `Opening "${link.label}"…` });
+  };
+
 
   const handleFollow = () => {
     setIsFollowing((prev) => {
