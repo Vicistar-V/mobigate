@@ -120,6 +120,8 @@ export const fallbackMissedHeadlines: MissedHeadline[] = [
     timeAgo: "3 Hours ago",
     privacy: "Public",
     likes: 980,
+    views: 1820,
+    comments: 54,
   },
   {
     id: "mh_2",
@@ -141,6 +143,8 @@ export const fallbackMissedHeadlines: MissedHeadline[] = [
     timeAgo: "5 Hours ago",
     privacy: "Public",
     likes: 642,
+    views: 1133,
+    comments: 31,
   },
   {
     id: "mh_3",
@@ -162,6 +166,8 @@ export const fallbackMissedHeadlines: MissedHeadline[] = [
     timeAgo: "8 Hours ago",
     privacy: "Public",
     likes: 415,
+    views: 894,
+    comments: 22,
   },
 ];
 
