@@ -50,7 +50,7 @@ export const MessagesSheet = () => {
   // Listen for custom event to open chat with specific user
   useEffect(() => {
     const handleOpenChat = async (event: CustomEvent) => {
-      const { conversationId, userId, userName } = event.detail;
+      const { conversationId, userId, userName, userAvatar } = event.detail;
 
       // If we have a direct conversationId, select it then open
       if (conversationId) {
@@ -62,13 +62,14 @@ export const MessagesSheet = () => {
       // If userId provided — create/find conversation first, THEN open sheet
       if (userId) {
         setIsOpen(true); // open immediately so user sees loading
-        const convId = await startConversationWith(userId, userName);
+        const convId = await startConversationWith(userId, userName, userAvatar);
         if (!convId) {
           // Still open but no conversation found — user sees empty list
           console.warn('[MessagesSheet] Could not start conversation with', userId);
         }
         return;
       }
+
 
       // Fallback: search by name in existing conversations
       if (userName) {

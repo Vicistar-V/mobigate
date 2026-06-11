@@ -44,8 +44,25 @@ const MONTHS = [
   "July", "August", "September", "October", "November", "December",
 ];
 
-const photoFor = (name: string) =>
-  `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`;
+import sarahJohnson from "@/assets/profile-sarah-johnson.jpg";
+import michaelChen from "@/assets/profile-michael-chen.jpg";
+import emilyDavis from "@/assets/profile-emily-davis.jpg";
+import jamesWilson from "@/assets/profile-james-wilson.jpg";
+import lisaAnderson from "@/assets/profile-lisa-anderson.jpg";
+import davidMartinez from "@/assets/profile-david-martinez.jpg";
+import jenniferTaylor from "@/assets/profile-jennifer-taylor.jpg";
+import robertBrown from "@/assets/profile-robert-brown.jpg";
+
+const PLACEHOLDER_PHOTOS = [
+  sarahJohnson, michaelChen, emilyDavis, jamesWilson,
+  lisaAnderson, davidMartinez, jenniferTaylor, robertBrown,
+];
+
+const photoFor = (name: string) => {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  return PLACEHOLDER_PHOTOS[h % PLACEHOLDER_PHOTOS.length];
+};
 
 // Representative day-offset per bucket (matches bucketOf logic below)
 const BUCKET_OFFSET: Record<TimeRange, number> = {
@@ -98,7 +115,7 @@ const buildPeople = (kind: "birthday" | "event"): NotablePerson[] => {
         name,
         photo: photoFor(name),
         dateLabel: labelForOffset(BUCKET_OFFSET[bucket]),
-        isFriend: kind === "birthday" ? true : i % 2 === 0,
+        isFriend: i % 2 === 0,
         _bucket: bucket,
       };
       if (kind === "event") {
@@ -125,7 +142,7 @@ const OTHER_EVENT_TYPES = [
 
 // ─── Subcomponents (defined OUTSIDE parent to keep stable refs) ─────────────
 const PersonCard = ({
-  p, showViewDetails, friendState, onMessage, onGift, onOpen,
+  p, showViewDetails, friendState, onMessage, onGift, onOpen, onToggleFriend,
 }: {
   p: NotablePerson;
   showViewDetails: boolean;
@@ -133,38 +150,44 @@ const PersonCard = ({
   onMessage: (p: NotablePerson) => void;
   onGift:    (p: NotablePerson) => void;
   onOpen:    (p: NotablePerson) => void;
+  onToggleFriend: (p: NotablePerson) => void;
 }) => (
   <div
     role="button"
     tabIndex={0}
     onClick={() => onOpen(p)}
     onKeyDown={(e) => { if (e.key === "Enter") onOpen(p); }}
-    className="flex-shrink-0 w-[170px] rounded-lg border border-border bg-card overflow-hidden flex flex-col text-left cursor-pointer hover:border-primary/50 hover:shadow-sm transition-all active:scale-[0.99]"
+    className="flex-shrink-0 w-[185px] rounded-lg border border-border bg-card overflow-hidden flex flex-col text-left cursor-pointer hover:border-primary/50 hover:shadow-sm transition-all active:scale-[0.99]"
   >
     <div className="w-full aspect-[3/4] bg-muted overflow-hidden">
       <img src={p.photo} alt={p.name} className="w-full h-full object-cover" loading="lazy" />
     </div>
     <div className="p-2.5 space-y-1.5 flex-1 flex flex-col">
       {/* Row 1 — full name */}
-      <p className="text-[14px] font-bold text-foreground leading-tight text-center break-words">
+      <p className="text-[16px] font-bold text-foreground leading-tight text-center break-words">
         {p.name}
       </p>
 
       {/* Row 2 — date · friend / add friend */}
-      <div className="flex items-center justify-center gap-1.5 text-[13px] flex-wrap">
+      <div className="flex items-center justify-center gap-1.5 text-[15px] flex-wrap">
         <span className="text-red-600 font-bold whitespace-nowrap">{p.dateLabel}</span>
         <span className="text-muted-foreground">|</span>
-        <span className="text-primary font-semibold">
-          {friendState === "friend" ? "Friend" : friendState === "requested" ? "Requested" : "Add Friend"}
-        </span>
+        <button
+          type="button"
+          disabled={friendState === "friend"}
+          onClick={(e) => { e.stopPropagation(); if (friendState !== "friend") onToggleFriend(p); }}
+          className="text-primary font-semibold hover:underline focus:outline-none focus:underline disabled:no-underline disabled:cursor-default touch-manipulation"
+        >
+          {friendState === "friend" ? "Friend" : friendState === "requested" ? "Request Sent" : "Add Friend"}
+        </button>
       </div>
 
       {/* Row 3 — message · send gift */}
-      <div className="flex items-center justify-center gap-1.5 text-[13px] mt-auto pt-1">
+      <div className="flex items-center justify-center gap-1.5 text-[15px] mt-auto pt-1">
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onMessage(p); }}
-          className="text-primary font-semibold hover:underline focus:outline-none focus:underline"
+          className="text-primary font-semibold hover:underline focus:outline-none focus:underline touch-manipulation"
         >
           Message
         </button>
@@ -172,7 +195,7 @@ const PersonCard = ({
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onGift(p); }}
-          className="text-primary font-semibold hover:underline focus:outline-none focus:underline"
+          className="text-primary font-semibold hover:underline focus:outline-none focus:underline touch-manipulation"
         >
           Send Gift
         </button>
@@ -183,7 +206,7 @@ const PersonCard = ({
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); onOpen(p); }}
-            className="text-[13px] text-primary font-semibold hover:underline"
+            className="text-[15px] text-primary font-semibold hover:underline"
           >
             View Details
           </button>
@@ -206,7 +229,7 @@ const TimeRangeChips = ({
     { key: "others",   label: "Others",   count: counts.others   },
   ];
   return (
-    <div className="flex items-center flex-wrap gap-x-1 gap-y-1 text-[13px]">
+    <div className="flex items-center flex-wrap gap-x-1 gap-y-1 text-[15px]">
       <span className="text-muted-foreground font-bold">|</span>
       {items.map((it) => (
         <span key={it.key} className="flex items-center gap-1">
@@ -238,7 +261,7 @@ const EventTypeChips = ({
     { key: "others",  label: "Others",           count: counts.others  },
   ];
   return (
-    <div className="flex items-center flex-wrap gap-x-1 gap-y-1 text-[13px]">
+    <div className="flex items-center flex-wrap gap-x-1 gap-y-1 text-[15px]">
       <span className="text-muted-foreground font-bold">|</span>
       {items.map((it) => (
         <span key={it.key} className="flex items-center gap-1">
@@ -395,7 +418,7 @@ export const NotableDates = () => {
   // ── Actions ──────────────────────────────────────────────────────────────
   const handleMessage = (p: NotablePerson | NotableDetailPerson) => {
     window.dispatchEvent(new CustomEvent("openChatWithUser", {
-      detail: { userId: p.id, userName: p.name },
+      detail: { userId: p.id, userName: p.name, userAvatar: p.photo },
     }));
     toast({ title: "Opening chat", description: `Starting a conversation with ${p.name}` });
   };
@@ -449,13 +472,13 @@ export const NotableDates = () => {
 
   return (
     <Card className="p-4 space-y-3 hover:shadow-md transition-shadow overflow-hidden">
-      <h3 className="text-base font-bold text-foreground">Notable Dates</h3>
+      <h3 className="text-xl font-bold text-foreground">Notable Dates</h3>
 
       {/* Main tabs */}
       <div className="flex items-center gap-2 flex-wrap">
         <button
           onClick={() => setTab("birthdays")}
-          className={`px-4 py-1.5 rounded-md text-sm font-bold transition-colors ${
+          className={`px-4 py-1.5 rounded-md text-base font-bold transition-colors ${
             tab === "birthdays"
               ? "bg-primary text-primary-foreground"
               : "bg-transparent text-foreground hover:bg-muted"
@@ -465,7 +488,7 @@ export const NotableDates = () => {
         </button>
         <button
           onClick={() => setTab("events")}
-          className={`px-4 py-1.5 rounded-md text-sm font-bold transition-colors ${
+          className={`px-4 py-1.5 rounded-md text-base font-bold transition-colors ${
             tab === "events"
               ? "bg-primary text-primary-foreground"
               : "bg-transparent text-foreground hover:bg-muted"
@@ -478,7 +501,7 @@ export const NotableDates = () => {
           <button
             type="button"
             onClick={() => setCreateOpen(true)}
-            className="ml-auto inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-[13px] font-bold bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-all shadow-sm"
+            className="ml-auto inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-[14px] font-bold bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-all shadow-sm"
             aria-label="Create new notable event"
           >
             <Plus className="h-4 w-4" />
@@ -488,7 +511,7 @@ export const NotableDates = () => {
       </div>
 
       {tab === "birthdays" && (
-        <p className="text-[12px] text-muted-foreground leading-snug">
+        <p className="text-[14px] text-muted-foreground leading-snug">
           Birthdays are generated automatically from friends' profile information.
         </p>
       )}
@@ -520,18 +543,19 @@ export const NotableDates = () => {
                 onMessage={handleMessage}
                 onGift={handleGift}
                 onOpen={handleOpenDetail}
+                onToggleFriend={handleToggleFriend}
               />
             ))}
           </div>
         ) : (
-          <p className="text-xs text-muted-foreground italic py-4">
+          <p className="text-sm text-muted-foreground italic py-4">
             No entries in this range. Try another filter above.
           </p>
         )}
       </div>
 
       {/* Others [Dates] */}
-      <p className="text-[13px] text-foreground leading-relaxed">
+      <p className="text-[15px] text-foreground leading-relaxed">
         <span className="font-bold">Others [Dates]:</span>{" "}
         {([
           { label: "Yesterday",  range: "yesterday"   as TimeRange },
@@ -557,7 +581,7 @@ export const NotableDates = () => {
 
       {/* Others [Events] – events tab only */}
       {tab === "events" && (
-        <p className="text-[13px] text-foreground leading-relaxed">
+        <p className="text-[15px] text-foreground leading-relaxed">
           <span className="font-bold">Others [Events]:</span>{" "}
           {OTHER_EVENT_TYPES.map((e, i, arr) => (
             <span key={e.label}>

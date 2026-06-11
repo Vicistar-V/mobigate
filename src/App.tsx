@@ -44,6 +44,9 @@ const App = () => {
                       <Route path="/verify-account" element={<AccountVerificationPage />} />
                       <Route path="/admin/copyright-documents" element={<CopyrightDocumentsPage />} />
 
+
+
+
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
