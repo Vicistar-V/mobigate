@@ -464,6 +464,7 @@ export const NotableDates = () => {
       id: p.id,
       name: p.name,
       photo: p.photo,
+      images: p.images,
       dateLabel: p.dateLabel,
       isFriend: p.isFriend,
       kind: tab === "birthdays" ? "birthday" : "event",
