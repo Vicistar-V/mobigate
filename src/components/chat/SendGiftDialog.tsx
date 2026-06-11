@@ -167,8 +167,15 @@ export const SendGiftDialog = ({
   const goFund = (path: string) => {
     const returnTo = encodeURIComponent(location.pathname + location.search);
     const sep = path.includes("?") ? "&" : "?";
+    const dest = `${path}${sep}returnTo=${returnTo}`;
+    // Close the gift dialog AND the parent chat sheet first. With nested Radix
+    // portals (Dialog inside Sheet) an immediate navigate gets swallowed / the
+    // destination is left non-interactive, which the user perceives as being
+    // bounced back to the homepage. Tear the modals down, then route on the
+    // next frame so cleanup (body pointer-events, focus traps) completes.
     onClose();
-    navigate(`${path}${sep}returnTo=${returnTo}`);
+    window.dispatchEvent(new CustomEvent("closeChatSheet"));
+    requestAnimationFrame(() => navigate(dest));
   };
 
   // Primary funding route: Retail Merchant (submerchant) voucher purchase.
