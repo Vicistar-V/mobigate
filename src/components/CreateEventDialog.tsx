@@ -202,6 +202,7 @@ export const CreateEventDialog = ({ isOpen, onClose, onCreated }: Props) => {
     setCustomType("");
     setDateISO("");
     setNotes("");
+    setAudience("public");
     setImages([]);
     setSubmitting(false);
   };
