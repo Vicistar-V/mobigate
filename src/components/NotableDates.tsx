@@ -477,6 +477,7 @@ export const NotableDates = () => {
       isFriend: p.isFriend,
       kind: tab === "birthdays" ? "birthday" : "event",
       eventLabel: p.eventLabel,
+      notes: p.notes,
     });
     setDetailOpen(true);
   };
