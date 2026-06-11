@@ -14,6 +14,18 @@ import CopyrightDocumentsPage from "./pages/admin/CopyrightDocumentsPage";
 import AccountVerificationPage from "./pages/AccountVerificationPage";
 import { ScrollToTop }    from "./components/ScrollToTop";
 import { BackToTopButton } from "./components/BackToTopButton";
+import { Header } from "./components/Header";
+import { NotableDates } from "./components/NotableDates";
+
+// Temporary dev-only page for verifying the Notable Dates widget
+const NotableTestPage = () => (
+  <div className="min-h-screen bg-background">
+    <Header />
+    <div className="p-3 max-w-md mx-auto">
+      <NotableDates />
+    </div>
+  </div>
+);
 
 const queryClient = new QueryClient();
 
@@ -43,6 +55,8 @@ const App = () => {
                       <Route path="/post/:id"      element={<PostPage />} />
                       <Route path="/verify-account" element={<AccountVerificationPage />} />
                       <Route path="/admin/copyright-documents" element={<CopyrightDocumentsPage />} />
+                      <Route path="/dev/notable-test" element={<NotableTestPage />} />
+
 
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<Navigate to="/" replace />} />
