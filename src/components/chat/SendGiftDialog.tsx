@@ -250,7 +250,7 @@ export const SendGiftDialog = ({
                   <p className="text-sm font-semibold text-destructive">
                     {insufficient ? "Insufficient balance to send this gift" : "Low balance — top up to send gifts"}
                   </p>
-                  <p className="text-[13px] leading-snug text-muted-foreground mt-1">
+                  <p className="text-[14px] leading-snug text-muted-foreground mt-1">
                     Fund your Mobi Wallet through a Retail Merchant and we'll bring you right back here.
                   </p>
                 </div>
@@ -274,7 +274,7 @@ export const SendGiftDialog = ({
               {/* Toggle alt methods */}
               <button
                 onClick={() => setFundPanelOpen(v => !v)}
-                className="w-full mt-2 text-[13px] font-medium text-muted-foreground hover:text-foreground flex items-center justify-center gap-1 py-1.5"
+                className="w-full mt-2 text-[14px] font-medium text-muted-foreground hover:text-foreground flex items-center justify-center gap-1 py-1.5"
               >
                 {fundPanelOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 {fundPanelOpen ? "Hide other methods" : "Other funding methods"}
@@ -294,14 +294,14 @@ export const SendGiftDialog = ({
                           <Icon className={cn("h-4 w-4", m.accentText)} />
                         </span>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-foreground truncate">{m.label}</p>
-                          <p className="text-[11px] text-muted-foreground truncate">{m.subtitle}</p>
+                          <p className="text-[15px] font-semibold text-foreground truncate">{m.label}</p>
+                          <p className="text-[12px] text-muted-foreground truncate">{m.subtitle}</p>
                         </div>
                         <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
                       </button>
                     );
                   })}
-                  <p className="text-[10px] text-muted-foreground text-center pt-1">
+                  <p className="text-[12px] text-muted-foreground text-center pt-1">
                     You'll return to this conversation after funding.
                   </p>
                 </div>
