@@ -115,7 +115,7 @@ const buildPeople = (kind: "birthday" | "event"): NotablePerson[] => {
         name,
         photo: photoFor(name),
         dateLabel: labelForOffset(BUCKET_OFFSET[bucket]),
-        isFriend: kind === "birthday" ? true : i % 2 === 0,
+        isFriend: i % 2 === 0,
         _bucket: bucket,
       };
       if (kind === "event") {
