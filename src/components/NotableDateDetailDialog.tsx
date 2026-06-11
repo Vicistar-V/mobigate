@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +14,7 @@ import {
   UserPlus,
   UserCheck,
   Clock3,
+  Images,
 } from "lucide-react";
 
 export interface NotableDetailPerson {
