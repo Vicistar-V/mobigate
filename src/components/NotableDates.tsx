@@ -389,6 +389,7 @@ export const NotableDates = () => {
       _bucket: bucketOf(ev.dateISO),
       eventType: (ev.eventType === "wedding" || ev.eventType === "burial") ? ev.eventType : "others",
       eventLabel: ev.eventLabel,
+      notes: ev.notes,
       _typeKey: ev.eventType,
     }));
     return [...created, ...baseEvents];
