@@ -51,7 +51,8 @@ export type CreatedEventType =
 export interface CreatedEvent {
   id: string;
   name: string;          // celebrant / honouree
-  photo: string;
+  photo: string;         // cover image (first uploaded image, or initials fallback)
+  images: string[];      // up to 3 uploaded photos/videos for the event
   dateLabel: string;     // e.g. "August 25"
   dateISO: string;       // YYYY-MM-DD
   eventType: CreatedEventType;
