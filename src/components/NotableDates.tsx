@@ -181,10 +181,16 @@ const PersonCard = ({
     <Link
       to={profileHref}
       onClick={(e) => e.stopPropagation()}
-      className="block w-full aspect-[3/4] bg-muted overflow-hidden"
+      className="relative block w-full aspect-[3/4] bg-muted overflow-hidden"
       aria-label={`View ${p.name}'s profile`}
     >
       <img src={p.photo} alt={p.name} className="w-full h-full object-cover hover:opacity-90 transition-opacity" loading="lazy" />
+      {p.images && p.images.length > 1 && (
+        <span className="absolute top-1.5 right-1.5 inline-flex items-center gap-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white">
+          <ImageIcon className="h-3 w-3" />
+          {p.images.length}
+        </span>
+      )}
     </Link>
     <div className="p-2.5 space-y-1.5 flex-1 flex flex-col">
       {/* Row 1 — full name → profile */}
