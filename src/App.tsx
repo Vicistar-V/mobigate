@@ -12,6 +12,7 @@ import PostPage           from "./pages/PostPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import CopyrightDocumentsPage from "./pages/admin/CopyrightDocumentsPage";
 import AccountVerificationPage from "./pages/AccountVerificationPage";
+import BuyVouchersPage     from "./pages/BuyVouchersPage";
 import { ScrollToTop }    from "./components/ScrollToTop";
 import { BackToTopButton } from "./components/BackToTopButton";
 
