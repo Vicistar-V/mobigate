@@ -72,9 +72,19 @@ export const ScrollableThumbStrip = ({
 
   const scrollByAmount = (dir: "left" | "right") => {
     const el = stripRef.current;
-    if (!el) return;
-    const amount = Math.max(el.clientWidth * 0.7, 140);
-    el.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
+    if (el) {
+      const amount = Math.max(el.clientWidth * 0.7, 140);
+      el.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
+    }
+    // Always advance the featured selection too, so the arrows are useful even
+    // when every thumbnail already fits on screen (no horizontal overflow).
+    if (items.length > 1) {
+      const next =
+        dir === "left"
+          ? (activeIdx - 1 + items.length) % items.length
+          : (activeIdx + 1) % items.length;
+      onSelect(next);
+    }
   };
 
   if (!items.length) return null;
@@ -123,15 +133,10 @@ export const ScrollableThumbStrip = ({
         <button
           type="button"
           onClick={() => scrollByAmount("left")}
-          disabled={!canLeft}
-          aria-label="Scroll media left"
-          className={`h-8 w-8 rounded-full border flex items-center justify-center transition-all touch-manipulation ${
-            canLeft
-              ? "bg-foreground text-background border-foreground shadow-md active:scale-90"
-              : "bg-muted text-muted-foreground/40 border-border cursor-not-allowed"
-          }`}
+          aria-label="Previous story"
+          className="h-8 w-8 rounded-full border flex items-center justify-center transition-all touch-manipulation bg-foreground text-background border-foreground shadow-md active:scale-90"
         >
-          <ChevronLeft className="h-5 w-5" strokeWidth={canLeft ? 3 : 2} />
+          <ChevronLeft className="h-5 w-5" strokeWidth={3} />
         </button>
 
         <button
@@ -146,15 +151,10 @@ export const ScrollableThumbStrip = ({
         <button
           type="button"
           onClick={() => scrollByAmount("right")}
-          disabled={!canRight}
-          aria-label="Scroll media right"
-          className={`h-8 w-8 rounded-full border flex items-center justify-center transition-all touch-manipulation ${
-            canRight
-              ? "bg-foreground text-background border-foreground shadow-md active:scale-90"
-              : "bg-muted text-muted-foreground/40 border-border cursor-not-allowed"
-          }`}
+          aria-label="Next story"
+          className="h-8 w-8 rounded-full border flex items-center justify-center transition-all touch-manipulation bg-foreground text-background border-foreground shadow-md active:scale-90"
         >
-          <ChevronRight className="h-5 w-5" strokeWidth={canRight ? 3 : 2} />
+          <ChevronRight className="h-5 w-5" strokeWidth={3} />
         </button>
       </div>
     </div>
