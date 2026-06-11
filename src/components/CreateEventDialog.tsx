@@ -33,7 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { ImagePlus, X } from "lucide-react";
+import { ImagePlus, X, Globe, Users, UserCheck, Lock } from "lucide-react";
 
 const MAX_IMAGES = 3;
 
