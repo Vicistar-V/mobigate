@@ -418,7 +418,7 @@ export const NotableDates = () => {
   // ── Actions ──────────────────────────────────────────────────────────────
   const handleMessage = (p: NotablePerson | NotableDetailPerson) => {
     window.dispatchEvent(new CustomEvent("openChatWithUser", {
-      detail: { userId: p.id, userName: p.name },
+      detail: { userId: p.id, userName: p.name, userAvatar: p.photo },
     }));
     toast({ title: "Opening chat", description: `Starting a conversation with ${p.name}` });
   };
@@ -472,13 +472,13 @@ export const NotableDates = () => {
 
   return (
     <Card className="p-4 space-y-3 hover:shadow-md transition-shadow overflow-hidden">
-      <h3 className="text-base font-bold text-foreground">Notable Dates</h3>
+      <h3 className="text-xl font-bold text-foreground">Notable Dates</h3>
 
       {/* Main tabs */}
       <div className="flex items-center gap-2 flex-wrap">
         <button
           onClick={() => setTab("birthdays")}
-          className={`px-4 py-1.5 rounded-md text-sm font-bold transition-colors ${
+          className={`px-4 py-1.5 rounded-md text-base font-bold transition-colors ${
             tab === "birthdays"
               ? "bg-primary text-primary-foreground"
               : "bg-transparent text-foreground hover:bg-muted"
@@ -488,7 +488,7 @@ export const NotableDates = () => {
         </button>
         <button
           onClick={() => setTab("events")}
-          className={`px-4 py-1.5 rounded-md text-sm font-bold transition-colors ${
+          className={`px-4 py-1.5 rounded-md text-base font-bold transition-colors ${
             tab === "events"
               ? "bg-primary text-primary-foreground"
               : "bg-transparent text-foreground hover:bg-muted"
@@ -501,7 +501,7 @@ export const NotableDates = () => {
           <button
             type="button"
             onClick={() => setCreateOpen(true)}
-            className="ml-auto inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-[13px] font-bold bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-all shadow-sm"
+            className="ml-auto inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-[14px] font-bold bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-all shadow-sm"
             aria-label="Create new notable event"
           >
             <Plus className="h-4 w-4" />
@@ -511,7 +511,7 @@ export const NotableDates = () => {
       </div>
 
       {tab === "birthdays" && (
-        <p className="text-[12px] text-muted-foreground leading-snug">
+        <p className="text-[14px] text-muted-foreground leading-snug">
           Birthdays are generated automatically from friends' profile information.
         </p>
       )}
@@ -543,18 +543,19 @@ export const NotableDates = () => {
                 onMessage={handleMessage}
                 onGift={handleGift}
                 onOpen={handleOpenDetail}
+                onToggleFriend={handleToggleFriend}
               />
             ))}
           </div>
         ) : (
-          <p className="text-xs text-muted-foreground italic py-4">
+          <p className="text-sm text-muted-foreground italic py-4">
             No entries in this range. Try another filter above.
           </p>
         )}
       </div>
 
       {/* Others [Dates] */}
-      <p className="text-[13px] text-foreground leading-relaxed">
+      <p className="text-[15px] text-foreground leading-relaxed">
         <span className="font-bold">Others [Dates]:</span>{" "}
         {([
           { label: "Yesterday",  range: "yesterday"   as TimeRange },
@@ -580,7 +581,7 @@ export const NotableDates = () => {
 
       {/* Others [Events] – events tab only */}
       {tab === "events" && (
-        <p className="text-[13px] text-foreground leading-relaxed">
+        <p className="text-[15px] text-foreground leading-relaxed">
           <span className="font-bold">Others [Events]:</span>{" "}
           {OTHER_EVENT_TYPES.map((e, i, arr) => (
             <span key={e.label}>
