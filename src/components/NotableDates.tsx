@@ -229,7 +229,7 @@ const TimeRangeChips = ({
     { key: "others",   label: "Others",   count: counts.others   },
   ];
   return (
-    <div className="flex items-center flex-wrap gap-x-1 gap-y-1 text-[13px]">
+    <div className="flex items-center flex-wrap gap-x-1 gap-y-1 text-[15px]">
       <span className="text-muted-foreground font-bold">|</span>
       {items.map((it) => (
         <span key={it.key} className="flex items-center gap-1">
@@ -261,7 +261,7 @@ const EventTypeChips = ({
     { key: "others",  label: "Others",           count: counts.others  },
   ];
   return (
-    <div className="flex items-center flex-wrap gap-x-1 gap-y-1 text-[13px]">
+    <div className="flex items-center flex-wrap gap-x-1 gap-y-1 text-[15px]">
       <span className="text-muted-foreground font-bold">|</span>
       {items.map((it) => (
         <span key={it.key} className="flex items-center gap-1">
