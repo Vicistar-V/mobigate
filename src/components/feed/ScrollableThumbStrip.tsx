@@ -133,15 +133,10 @@ export const ScrollableThumbStrip = ({
         <button
           type="button"
           onClick={() => scrollByAmount("left")}
-          disabled={!canLeft}
-          aria-label="Scroll media left"
-          className={`h-8 w-8 rounded-full border flex items-center justify-center transition-all touch-manipulation ${
-            canLeft
-              ? "bg-foreground text-background border-foreground shadow-md active:scale-90"
-              : "bg-muted text-muted-foreground/40 border-border cursor-not-allowed"
-          }`}
+          aria-label="Previous story"
+          className="h-8 w-8 rounded-full border flex items-center justify-center transition-all touch-manipulation bg-foreground text-background border-foreground shadow-md active:scale-90"
         >
-          <ChevronLeft className="h-5 w-5" strokeWidth={canLeft ? 3 : 2} />
+          <ChevronLeft className="h-5 w-5" strokeWidth={3} />
         </button>
 
         <button
@@ -156,15 +151,10 @@ export const ScrollableThumbStrip = ({
         <button
           type="button"
           onClick={() => scrollByAmount("right")}
-          disabled={!canRight}
-          aria-label="Scroll media right"
-          className={`h-8 w-8 rounded-full border flex items-center justify-center transition-all touch-manipulation ${
-            canRight
-              ? "bg-foreground text-background border-foreground shadow-md active:scale-90"
-              : "bg-muted text-muted-foreground/40 border-border cursor-not-allowed"
-          }`}
+          aria-label="Next story"
+          className="h-8 w-8 rounded-full border flex items-center justify-center transition-all touch-manipulation bg-foreground text-background border-foreground shadow-md active:scale-90"
         >
-          <ChevronRight className="h-5 w-5" strokeWidth={canRight ? 3 : 2} />
+          <ChevronRight className="h-5 w-5" strokeWidth={3} />
         </button>
       </div>
     </div>
