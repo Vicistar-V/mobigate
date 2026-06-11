@@ -14,18 +14,6 @@ import CopyrightDocumentsPage from "./pages/admin/CopyrightDocumentsPage";
 import AccountVerificationPage from "./pages/AccountVerificationPage";
 import { ScrollToTop }    from "./components/ScrollToTop";
 import { BackToTopButton } from "./components/BackToTopButton";
-import { Header } from "./components/Header";
-import { NotableDates } from "./components/NotableDates";
-
-// Temporary dev-only page for verifying the Notable Dates widget
-const NotableTestPage = () => (
-  <div className="min-h-screen bg-background">
-    <Header />
-    <div className="p-3 max-w-md mx-auto">
-      <NotableDates />
-    </div>
-  </div>
-);
 
 const queryClient = new QueryClient();
 
