@@ -376,6 +376,7 @@ export const NotableDates = () => {
       id: ev.id,
       name: ev.name,
       photo: ev.photo,
+      images: (ev.images && ev.images.length > 0) ? ev.images : undefined,
       dateLabel: ev.dateLabel,
       isFriend: ev.isFriend,
       _bucket: bucketOf(ev.dateISO),
