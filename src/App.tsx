@@ -44,6 +44,7 @@ const App = () => {
                       <Route path="/post/:id"      element={<PostPage />} />
                       <Route path="/verify-account" element={<AccountVerificationPage />} />
                       <Route path="/admin/copyright-documents" element={<CopyrightDocumentsPage />} />
+                      <Route path="/buy-vouchers"  element={<BuyVouchersPage />} />
 
 
 
