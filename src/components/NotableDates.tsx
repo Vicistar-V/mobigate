@@ -96,6 +96,14 @@ const labelForOffset = (offset: number) => {
   return `${MONTHS[d.getMonth()]} ${d.getDate()}`;
 };
 
+// Date label color by bucket:
+//  Today / Tomorrow → Green · Yesterday → Blue · everything else → Red
+const dateColorClass = (bucket: TimeRange) => {
+  if (bucket === "today" || bucket === "tomorrow") return "text-green-600";
+  if (bucket === "yesterday") return "text-blue-600";
+  return "text-red-600";
+};
+
 const EVENT_TYPE_BY_INDEX: { type: EventType; label: string }[] = [
   { type: "wedding", label: "Wedding" },
   { type: "burial", label: "Burial" },
