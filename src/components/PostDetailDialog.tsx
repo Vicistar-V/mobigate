@@ -346,8 +346,8 @@ export const PostDetailDialog = ({
         />
       </div>
 
-      {/* Fixed Bottom Action Bar - Mobile */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border px-3 py-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] z-50">
+      {/* Bottom Action Bar - Mobile (in-flow so taps always register inside the Drawer) */}
+      <div className="md:hidden shrink-0 bg-card border-t border-border px-3 py-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] z-50">
         <div className="grid grid-cols-5 gap-1 max-w-md mx-auto">
           <button
             onClick={handleLike}
