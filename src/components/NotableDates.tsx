@@ -543,24 +543,55 @@ export const NotableDates = () => {
         <EventTypeChips active={eventType} onChange={setEventType} counts={eventTypeTotals} />
       )}
 
-      <TimeRangeChips
-        active={activeRange}
-        onChange={setActiveRange}
-        counts={{
-          today: rangeCounts.today || 0,
-          tomorrow: rangeCounts.tomorrow || 0,
-          others: rangeCounts.others || 0,
-        }}
-      />
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <TimeRangeChips
+          active={activeRange}
+          onChange={setActiveRange}
+          counts={{
+            today: rangeCounts.today || 0,
+            tomorrow: rangeCounts.tomorrow || 0,
+            others: rangeCounts.others || 0,
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => setViewMode(v => (v === "carousel" ? "grid" : "carousel"))}
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-border text-[13px] font-semibold text-foreground hover:bg-muted active:scale-[0.98] transition-all touch-manipulation"
+          title={viewMode === "carousel" ? "Switch to Vertical View" : "Switch to Horizontal View"}
+        >
+          {viewMode === "carousel"
+            ? <><MoveHorizontal className="h-4 w-4" />Horizontal</>
+            : <><MoveVertical className="h-4 w-4" />Vertical</>}
+        </button>
+      </div>
 
-      {/* Cards row */}
-      <div className="-mx-4 px-4 overflow-x-auto touch-pan-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {filtered.length > 0 ? (
-          <div className="flex gap-3 pb-1">
+      {/* Cards */}
+      {filtered.length > 0 ? (
+        viewMode === "carousel" ? (
+          <div className="-mx-4 px-4 overflow-x-auto touch-pan-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex gap-3 pb-1">
+              {filtered.map(p => (
+                <PersonCard
+                  key={p.id}
+                  p={p}
+                  vertical={false}
+                  showViewDetails={tab === "events"}
+                  friendState={friendStateOf(p)}
+                  onMessage={handleMessage}
+                  onGift={handleGift}
+                  onOpen={handleOpenDetail}
+                  onToggleFriend={handleToggleFriend}
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
             {filtered.map(p => (
               <PersonCard
                 key={p.id}
                 p={p}
+                vertical={true}
                 showViewDetails={tab === "events"}
                 friendState={friendStateOf(p)}
                 onMessage={handleMessage}
@@ -570,12 +601,12 @@ export const NotableDates = () => {
               />
             ))}
           </div>
-        ) : (
-          <p className="text-sm text-muted-foreground italic py-4">
-            No entries in this range. Try another filter above.
-          </p>
-        )}
-      </div>
+        )
+      ) : (
+        <p className="text-sm text-muted-foreground italic py-4">
+          No entries in this range. Try another filter above.
+        </p>
+      )}
 
       {/* Others [Dates] */}
       <p className="text-[15px] text-foreground leading-relaxed">
