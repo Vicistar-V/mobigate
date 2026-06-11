@@ -89,6 +89,7 @@ export interface CreatedEvent {
   eventType: CreatedEventType;
   eventLabel: string;    // human label
   notes?: string;
+  audience: EventAudience;   // who can see this event
   isFriend: boolean;
   createdAt: string;
 }
