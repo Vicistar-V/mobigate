@@ -44,8 +44,25 @@ const MONTHS = [
   "July", "August", "September", "October", "November", "December",
 ];
 
-const photoFor = (name: string) =>
-  `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`;
+import sarahJohnson from "@/assets/profile-sarah-johnson.jpg";
+import michaelChen from "@/assets/profile-michael-chen.jpg";
+import emilyDavis from "@/assets/profile-emily-davis.jpg";
+import jamesWilson from "@/assets/profile-james-wilson.jpg";
+import lisaAnderson from "@/assets/profile-lisa-anderson.jpg";
+import davidMartinez from "@/assets/profile-david-martinez.jpg";
+import jenniferTaylor from "@/assets/profile-jennifer-taylor.jpg";
+import robertBrown from "@/assets/profile-robert-brown.jpg";
+
+const PLACEHOLDER_PHOTOS = [
+  sarahJohnson, michaelChen, emilyDavis, jamesWilson,
+  lisaAnderson, davidMartinez, jenniferTaylor, robertBrown,
+];
+
+const photoFor = (name: string) => {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  return PLACEHOLDER_PHOTOS[h % PLACEHOLDER_PHOTOS.length];
+};
 
 // Representative day-offset per bucket (matches bucketOf logic below)
 const BUCKET_OFFSET: Record<TimeRange, number> = {
@@ -125,7 +142,7 @@ const OTHER_EVENT_TYPES = [
 
 // ─── Subcomponents (defined OUTSIDE parent to keep stable refs) ─────────────
 const PersonCard = ({
-  p, showViewDetails, friendState, onMessage, onGift, onOpen,
+  p, showViewDetails, friendState, onMessage, onGift, onOpen, onToggleFriend,
 }: {
   p: NotablePerson;
   showViewDetails: boolean;
@@ -133,38 +150,44 @@ const PersonCard = ({
   onMessage: (p: NotablePerson) => void;
   onGift:    (p: NotablePerson) => void;
   onOpen:    (p: NotablePerson) => void;
+  onToggleFriend: (p: NotablePerson) => void;
 }) => (
   <div
     role="button"
     tabIndex={0}
     onClick={() => onOpen(p)}
     onKeyDown={(e) => { if (e.key === "Enter") onOpen(p); }}
-    className="flex-shrink-0 w-[170px] rounded-lg border border-border bg-card overflow-hidden flex flex-col text-left cursor-pointer hover:border-primary/50 hover:shadow-sm transition-all active:scale-[0.99]"
+    className="flex-shrink-0 w-[185px] rounded-lg border border-border bg-card overflow-hidden flex flex-col text-left cursor-pointer hover:border-primary/50 hover:shadow-sm transition-all active:scale-[0.99]"
   >
     <div className="w-full aspect-[3/4] bg-muted overflow-hidden">
       <img src={p.photo} alt={p.name} className="w-full h-full object-cover" loading="lazy" />
     </div>
     <div className="p-2.5 space-y-1.5 flex-1 flex flex-col">
       {/* Row 1 — full name */}
-      <p className="text-[14px] font-bold text-foreground leading-tight text-center break-words">
+      <p className="text-[16px] font-bold text-foreground leading-tight text-center break-words">
         {p.name}
       </p>
 
       {/* Row 2 — date · friend / add friend */}
-      <div className="flex items-center justify-center gap-1.5 text-[13px] flex-wrap">
+      <div className="flex items-center justify-center gap-1.5 text-[15px] flex-wrap">
         <span className="text-red-600 font-bold whitespace-nowrap">{p.dateLabel}</span>
         <span className="text-muted-foreground">|</span>
-        <span className="text-primary font-semibold">
-          {friendState === "friend" ? "Friend" : friendState === "requested" ? "Requested" : "Add Friend"}
-        </span>
+        <button
+          type="button"
+          disabled={friendState === "friend"}
+          onClick={(e) => { e.stopPropagation(); if (friendState !== "friend") onToggleFriend(p); }}
+          className="text-primary font-semibold hover:underline focus:outline-none focus:underline disabled:no-underline disabled:cursor-default touch-manipulation"
+        >
+          {friendState === "friend" ? "Friend" : friendState === "requested" ? "Request Sent" : "Add Friend"}
+        </button>
       </div>
 
       {/* Row 3 — message · send gift */}
-      <div className="flex items-center justify-center gap-1.5 text-[13px] mt-auto pt-1">
+      <div className="flex items-center justify-center gap-1.5 text-[15px] mt-auto pt-1">
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onMessage(p); }}
-          className="text-primary font-semibold hover:underline focus:outline-none focus:underline"
+          className="text-primary font-semibold hover:underline focus:outline-none focus:underline touch-manipulation"
         >
           Message
         </button>
@@ -172,7 +195,7 @@ const PersonCard = ({
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onGift(p); }}
-          className="text-primary font-semibold hover:underline focus:outline-none focus:underline"
+          className="text-primary font-semibold hover:underline focus:outline-none focus:underline touch-manipulation"
         >
           Send Gift
         </button>
@@ -183,7 +206,7 @@ const PersonCard = ({
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); onOpen(p); }}
-            className="text-[13px] text-primary font-semibold hover:underline"
+            className="text-[15px] text-primary font-semibold hover:underline"
           >
             View Details
           </button>
