@@ -297,7 +297,7 @@ export const CreateEventDialog = ({ isOpen, onClose, onCreated }: Props) => {
               <SelectTrigger className="text-base h-11">
                 <SelectValue placeholder="Choose an event type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-[60dvh] overflow-y-auto">
                 {EVENT_OPTIONS.map(o => (
                   <SelectItem key={o.value} value={o.value} className="text-base">
                     {o.label}
