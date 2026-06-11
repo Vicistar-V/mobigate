@@ -210,4 +210,3 @@ export const missedToArticle = (h: MissedHeadline): NewsArticle => ({
   views: h.views,
   comments: h.comments,
 });
-});
