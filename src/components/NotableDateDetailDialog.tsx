@@ -174,6 +174,25 @@ export const NotableDateDetailDialog = ({
                 : `You're invited to share in ${person.name.split(" ")[0]}'s ${(person.eventLabel || "event").toLowerCase()}. Send your wishes or a gift.`}
           </p>
 
+          {/* Thumbnail strip — tap to jump to a photo */}
+          {hasGallery && (
+            <div className="flex items-center gap-2">
+              {gallery.map((src, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => goToSlide(idx)}
+                  className={`h-14 w-14 shrink-0 rounded-lg overflow-hidden border-2 transition-all touch-manipulation ${
+                    idx === activeIdx ? "border-primary" : "border-transparent opacity-70"
+                  }`}
+                  aria-label={`View photo ${idx + 1}`}
+                >
+                  <img src={src} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* Actions */}
           <div className="grid grid-cols-2 gap-2 pt-1">
             <Button
