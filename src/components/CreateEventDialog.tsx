@@ -46,6 +46,18 @@ export type CreatedEventType =
   | "house-warming"
   | "naming-ceremony"
   | "coronation"
+  | "anniversary"
+  | "award-nite"
+  | "birthday"
+  | "convocation"
+  | "inauguration"
+  | "investiture"
+  | "induction"
+  | "initiation"
+  | "swearing-in"
+  | "title-conferment"
+  | "title-taking"
+  | "ordination"
   | "others";
 
 export interface CreatedEvent {
