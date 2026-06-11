@@ -12,7 +12,7 @@
  *  - No spinner — the card shows up instantly.
  */
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -33,6 +33,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { ImagePlus, X } from "lucide-react";
+
+const MAX_IMAGES = 3;
 
 export type CreatedEventType =
   | "wedding"
@@ -48,7 +51,8 @@ export type CreatedEventType =
 export interface CreatedEvent {
   id: string;
   name: string;          // celebrant / honouree
-  photo: string;
+  photo: string;         // cover image (first uploaded image, or initials fallback)
+  images: string[];      // up to 3 uploaded photos/videos for the event
   dateLabel: string;     // e.g. "August 25"
   dateISO: string;       // YYYY-MM-DD
   eventType: CreatedEventType;
@@ -95,7 +99,9 @@ export const CreateEventDialog = ({ isOpen, onClose, onCreated }: Props) => {
   const [customType, setCustomType] = useState("");
   const [dateISO,   setDateISO]   = useState("");
   const [notes,     setNotes]     = useState("");
+  const [images,    setImages]    = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const todayISO = useMemo(() => {
     const d = new Date();
@@ -104,12 +110,54 @@ export const CreateEventDialog = ({ isOpen, onClose, onCreated }: Props) => {
     return `${d.getFullYear()}-${mm}-${dd}`;
   }, []);
 
+  const handlePickImages = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (files.length === 0) return;
+
+    const remaining = MAX_IMAGES - images.length;
+    if (remaining <= 0) {
+      toast({
+        title: "Maximum reached",
+        description: `You can add up to ${MAX_IMAGES} images per event.`,
+        variant: "destructive",
+      });
+      e.target.value = "";
+      return;
+    }
+
+    const accepted = files.slice(0, remaining);
+    if (files.length > remaining) {
+      toast({
+        title: "Some images skipped",
+        description: `Only ${MAX_IMAGES} images are allowed — added the first ${remaining}.`,
+      });
+    }
+
+    accepted.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === "string") {
+          // Optimistic: append each image as it finishes reading.
+          setImages((prev) => (prev.length >= MAX_IMAGES ? prev : [...prev, reader.result as string]));
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    e.target.value = "";
+  };
+
+  const removeImage = (idx: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== idx));
+  };
+
   const reset = () => {
     setName("");
     setType("wedding");
     setCustomType("");
     setDateISO("");
     setNotes("");
+    setImages([]);
     setSubmitting(false);
   };
 
@@ -133,12 +181,15 @@ export const CreateEventDialog = ({ isOpen, onClose, onCreated }: Props) => {
         : EVENT_OPTIONS.find(o => o.value === type)?.label ?? "Event";
 
     const id = `evt-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-    const photo = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name.trim())}`;
+    // Cover image: first uploaded photo when present, otherwise initials avatar.
+    const initialsAvatar = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name.trim())}`;
+    const photo = images[0] || initialsAvatar;
 
     const newEvent: CreatedEvent = {
       id,
       name: name.trim(),
       photo,
+      images: [...images],
       dateLabel: formatHumanDate(dateISO),
       dateISO,
       eventType: type,
@@ -179,6 +230,7 @@ export const CreateEventDialog = ({ isOpen, onClose, onCreated }: Props) => {
         event_label: resolvedLabel,
         event_date: dateISO,
         notes:      newEvent.notes ?? "",
+        images:     newEvent.images,
       }),
     }).catch(() => { /* silent — optimistic */ });
 
@@ -260,7 +312,66 @@ export const CreateEventDialog = ({ isOpen, onClose, onCreated }: Props) => {
             )}
           </div>
 
-          {/* Notes (optional) */}
+          {/* Event photos (up to 3) */}
+          <div className="space-y-1.5">
+            <Label className="text-sm font-semibold">
+              Event Photos{" "}
+              <span className="text-muted-foreground font-normal">(optional · up to {MAX_IMAGES})</span>
+            </Label>
+            <p className="text-[12px] text-muted-foreground leading-snug">
+              Add real photos from the occasion — they appear on the event card and in full view.
+            </p>
+
+            <div className="grid grid-cols-3 gap-2">
+              {images.map((src, idx) => (
+                <div
+                  key={idx}
+                  className="relative aspect-square rounded-lg overflow-hidden border border-border bg-muted"
+                >
+                  <img src={src} alt={`Event photo ${idx + 1}`} className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(idx)}
+                    className="absolute top-1 right-1 h-6 w-6 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 active:scale-90 transition-all touch-manipulation"
+                    aria-label={`Remove photo ${idx + 1}`}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                  {idx === 0 && (
+                    <span className="absolute bottom-1 left-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
+                      Cover
+                    </span>
+                  )}
+                </div>
+              ))}
+
+              {images.length < MAX_IMAGES && (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="aspect-square rounded-lg border-2 border-dashed border-border bg-muted/40 flex flex-col items-center justify-center gap-1 text-muted-foreground hover:border-primary/50 hover:text-primary active:scale-[0.98] transition-all touch-manipulation"
+                  aria-label="Add event photo"
+                >
+                  <ImagePlus className="h-6 w-6" />
+                  <span className="text-[11px] font-semibold">Add Photo</span>
+                </button>
+              )}
+            </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={handlePickImages}
+            />
+            <p className="text-[11px] text-muted-foreground text-right">
+              {images.length}/{MAX_IMAGES} added
+            </p>
+          </div>
+
+
           <div className="space-y-1.5">
             <Label htmlFor="ev-notes" className="text-sm font-semibold">
               Notes <span className="text-muted-foreground font-normal">(optional)</span>

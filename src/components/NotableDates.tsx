@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { useEffect, useMemo, useState } from "react";
-import { Plus, MoveHorizontal, MoveVertical } from "lucide-react";
+import { Plus, MoveHorizontal, MoveVertical, Images as ImageIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
 import { CreateEventDialog, CreatedEvent } from "@/components/CreateEventDialog";
@@ -19,11 +19,13 @@ interface NotablePerson {
   id: string;
   name: string;
   photo: string;
+  images?: string[];       // up to 3 event photos (events only)
   dateLabel: string;       // e.g. "August 25"
   isFriend: boolean;
   _bucket: TimeRange;
   eventType?: EventType;   // only for events
   eventLabel?: string;     // e.g. "Wedding"
+  notes?: string;          // event notes (created events)
   _typeKey?: string;
 }
 
@@ -132,6 +134,12 @@ const buildPeople = (kind: "birthday" | "event"): NotablePerson[] => {
         base.eventType = ev.type;
         base.eventLabel = ev.label;
         base._typeKey = ev.type;
+        // Demo: 1–3 event photos per card so the gallery is visible in full view.
+        const imgCount = (n % 3) + 1;
+        base.images = Array.from({ length: imgCount }, (_, k) =>
+          PLACEHOLDER_PHOTOS[(n * 2 + k) % PLACEHOLDER_PHOTOS.length]
+        );
+        base.photo = base.images[0];
       }
       out.push(base);
       n++;
@@ -174,10 +182,16 @@ const PersonCard = ({
     <Link
       to={profileHref}
       onClick={(e) => e.stopPropagation()}
-      className="block w-full aspect-[3/4] bg-muted overflow-hidden"
+      className="relative block w-full aspect-[3/4] bg-muted overflow-hidden"
       aria-label={`View ${p.name}'s profile`}
     >
       <img src={p.photo} alt={p.name} className="w-full h-full object-cover hover:opacity-90 transition-opacity" loading="lazy" />
+      {p.images && p.images.length > 1 && (
+        <span className="absolute top-1.5 right-1.5 inline-flex items-center gap-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white">
+          <ImageIcon className="h-3 w-3" />
+          {p.images.length}
+        </span>
+      )}
     </Link>
     <div className="p-2.5 space-y-1.5 flex-1 flex flex-col">
       {/* Row 1 — full name → profile */}
@@ -369,11 +383,13 @@ export const NotableDates = () => {
       id: ev.id,
       name: ev.name,
       photo: ev.photo,
+      images: (ev.images && ev.images.length > 0) ? ev.images : undefined,
       dateLabel: ev.dateLabel,
       isFriend: ev.isFriend,
       _bucket: bucketOf(ev.dateISO),
       eventType: (ev.eventType === "wedding" || ev.eventType === "burial") ? ev.eventType : "others",
       eventLabel: ev.eventLabel,
+      notes: ev.notes,
       _typeKey: ev.eventType,
     }));
     return [...created, ...baseEvents];
@@ -456,10 +472,12 @@ export const NotableDates = () => {
       id: p.id,
       name: p.name,
       photo: p.photo,
+      images: p.images,
       dateLabel: p.dateLabel,
       isFriend: p.isFriend,
       kind: tab === "birthdays" ? "birthday" : "event",
       eventLabel: p.eventLabel,
+      notes: p.notes,
     });
     setDetailOpen(true);
   };
