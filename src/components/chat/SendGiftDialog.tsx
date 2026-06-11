@@ -258,8 +258,8 @@ export const SendGiftDialog = ({
                   <Ticket className="h-5 w-5 text-primary-foreground" />
                 </span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-primary-foreground">Fund Wallet via Retail Merchant</p>
-                  <p className="text-[11px] text-primary-foreground/80">Instant top-up — voucher PIN credited immediately</p>
+                  <p className="text-[15px] font-bold text-primary-foreground">Fund Wallet via Retail Merchant</p>
+                  <p className="text-[12px] text-primary-foreground/80">Instant top-up — voucher PIN credited immediately</p>
                 </div>
                 <ArrowRight className="h-5 w-5 text-primary-foreground shrink-0" />
               </button>
