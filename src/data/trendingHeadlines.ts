@@ -34,12 +34,15 @@ export interface MissedHeadline {
   excerpt: string;
   content: string[];
   imageUrl: string;
+  images?: string[];
   category: string;
   author: string;
   authorAvatar: string;
   timeAgo: string;
   privacy: "Public" | "Friends" | "Private";
   likes?: number;
+  views?: number;
+  comments?: number;
 }
 
 /** Normalized shape the reader drawer consumes from any source. */
