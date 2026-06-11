@@ -267,9 +267,9 @@ export const SendGiftDialog = ({
               {/* Toggle alt methods */}
               <button
                 onClick={() => setFundPanelOpen(v => !v)}
-                className="w-full mt-2 text-[11px] text-muted-foreground hover:text-foreground flex items-center justify-center gap-1 py-1"
+                className="w-full mt-2 text-[13px] font-medium text-muted-foreground hover:text-foreground flex items-center justify-center gap-1 py-1.5"
               >
-                {fundPanelOpen ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                {fundPanelOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                 {fundPanelOpen ? "Hide other methods" : "Other funding methods"}
               </button>
 
