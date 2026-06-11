@@ -133,6 +133,12 @@ const buildPeople = (kind: "birthday" | "event"): NotablePerson[] => {
         base.eventType = ev.type;
         base.eventLabel = ev.label;
         base._typeKey = ev.type;
+        // Demo: 1–3 event photos per card so the gallery is visible in full view.
+        const imgCount = (n % 3) + 1;
+        base.images = Array.from({ length: imgCount }, (_, k) =>
+          PLACEHOLDER_PHOTOS[(h(name) + k) % PLACEHOLDER_PHOTOS.length]
+        );
+        base.photo = base.images[0];
       }
       out.push(base);
       n++;
