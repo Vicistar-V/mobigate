@@ -12,6 +12,8 @@ export interface TrendingHeadline {
   content: string[];
   /** Large feature portrait / cover image (hero in the drawer) */
   imageUrl: string;
+  /** Up to 3 media images (0–3). When present, drives the swipeable gallery. */
+  images?: string[];
   /** Small inline thumbnail shown beside the excerpt in the card */
   thumbnail: string;
   author: string;
@@ -20,6 +22,8 @@ export interface TrendingHeadline {
   timeAgo: string;
   privacy: "Public" | "Friends" | "Private";
   likes?: number;
+  views?: number;
+  comments?: number;
   isFollowing?: boolean;
   isLiked?: boolean;
 }
