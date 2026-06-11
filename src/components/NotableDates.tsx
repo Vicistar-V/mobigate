@@ -151,35 +151,47 @@ const OTHER_EVENT_TYPES = [
 
 // ─── Subcomponents (defined OUTSIDE parent to keep stable refs) ─────────────
 const PersonCard = ({
-  p, showViewDetails, friendState, onMessage, onGift, onOpen, onToggleFriend,
+  p, showViewDetails, friendState, vertical, onMessage, onGift, onOpen, onToggleFriend,
 }: {
   p: NotablePerson;
   showViewDetails: boolean;
   friendState: "none" | "requested" | "friend";
+  vertical: boolean;
   onMessage: (p: NotablePerson) => void;
   onGift:    (p: NotablePerson) => void;
   onOpen:    (p: NotablePerson) => void;
   onToggleFriend: (p: NotablePerson) => void;
-}) => (
+}) => {
+  const profileHref = `/profile/${p.id}`;
+  return (
   <div
     role="button"
     tabIndex={0}
     onClick={() => onOpen(p)}
     onKeyDown={(e) => { if (e.key === "Enter") onOpen(p); }}
-    className="flex-shrink-0 w-[185px] rounded-lg border border-border bg-card overflow-hidden flex flex-col text-left cursor-pointer hover:border-primary/50 hover:shadow-sm transition-all active:scale-[0.99]"
+    className={`${vertical ? "w-full" : "flex-shrink-0 w-[185px]"} rounded-lg border border-border bg-card overflow-hidden flex flex-col text-left cursor-pointer hover:border-primary/50 hover:shadow-sm transition-all active:scale-[0.99]`}
   >
-    <div className="w-full aspect-[3/4] bg-muted overflow-hidden">
-      <img src={p.photo} alt={p.name} className="w-full h-full object-cover" loading="lazy" />
-    </div>
+    <Link
+      to={profileHref}
+      onClick={(e) => e.stopPropagation()}
+      className="block w-full aspect-[3/4] bg-muted overflow-hidden"
+      aria-label={`View ${p.name}'s profile`}
+    >
+      <img src={p.photo} alt={p.name} className="w-full h-full object-cover hover:opacity-90 transition-opacity" loading="lazy" />
+    </Link>
     <div className="p-2.5 space-y-1.5 flex-1 flex flex-col">
-      {/* Row 1 — full name */}
-      <p className="text-[16px] font-bold text-foreground leading-tight text-center break-words">
+      {/* Row 1 — full name → profile */}
+      <Link
+        to={profileHref}
+        onClick={(e) => e.stopPropagation()}
+        className="text-[16px] font-bold text-foreground leading-tight text-center break-words hover:text-primary hover:underline"
+      >
         {p.name}
-      </p>
+      </Link>
 
       {/* Row 2 — date · friend / add friend */}
       <div className="flex items-center justify-center gap-1.5 text-[15px] flex-wrap">
-        <span className="text-red-600 font-bold whitespace-nowrap">{p.dateLabel}</span>
+        <span className={`${dateColorClass(p._bucket)} font-bold whitespace-nowrap`}>{p.dateLabel}</span>
         <span className="text-muted-foreground">|</span>
         <button
           type="button"
@@ -223,7 +235,8 @@ const PersonCard = ({
       )}
     </div>
   </div>
-);
+  );
+};
 
 const TimeRangeChips = ({
   active, onChange, counts,
