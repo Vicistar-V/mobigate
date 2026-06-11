@@ -72,9 +72,19 @@ export const ScrollableThumbStrip = ({
 
   const scrollByAmount = (dir: "left" | "right") => {
     const el = stripRef.current;
-    if (!el) return;
-    const amount = Math.max(el.clientWidth * 0.7, 140);
-    el.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
+    if (el) {
+      const amount = Math.max(el.clientWidth * 0.7, 140);
+      el.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
+    }
+    // Always advance the featured selection too, so the arrows are useful even
+    // when every thumbnail already fits on screen (no horizontal overflow).
+    if (items.length > 1) {
+      const next =
+        dir === "left"
+          ? (activeIdx - 1 + items.length) % items.length
+          : (activeIdx + 1) % items.length;
+      onSelect(next);
+    }
   };
 
   if (!items.length) return null;
