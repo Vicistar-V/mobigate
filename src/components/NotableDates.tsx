@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { useEffect, useMemo, useState } from "react";
-import { Plus, MoveHorizontal, MoveVertical } from "lucide-react";
+import { Plus, MoveHorizontal, MoveVertical, Images as ImageIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
 import { CreateEventDialog, CreatedEvent } from "@/components/CreateEventDialog";
