@@ -122,6 +122,7 @@ export const useChat = () => {
     setActiveConvId(id);
     setSelectedMsgs(new Set());
     if (!id) return;
+    if (id.startsWith("local-")) return; // local-only thread — nothing to fetch
     await fetchMessages(id, false);
     startPoll(id);
   }, [fetchMessages, startPoll, stopPoll]);
@@ -174,6 +175,7 @@ export const useChat = () => {
     setIsTypingMap(p => ({ ...p, [activeConvId]: true }));
     setTimeout(() => setIsTypingMap(p => ({ ...p, [activeConvId]: false })), 1500);
     const cid = activeConvId;
+    if (cid.startsWith("local-")) return; // local-only thread — keep optimistic message
     try {
       await fetch(`${API}/chat/messages.php`, {
         method: "POST", credentials: "include",
