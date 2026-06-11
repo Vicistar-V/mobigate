@@ -12,7 +12,7 @@
  *  - No spinner — the card shows up instantly.
  */
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -33,6 +33,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { ImagePlus, X } from "lucide-react";
+
+const MAX_IMAGES = 3;
 
 export type CreatedEventType =
   | "wedding"
