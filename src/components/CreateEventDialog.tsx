@@ -434,6 +434,45 @@ export const CreateEventDialog = ({ isOpen, onClose, onCreated }: Props) => {
             />
             <p className="text-[11px] text-muted-foreground text-right">{notes.length}/280</p>
           </div>
+
+          {/* Audience / Privacy */}
+          <div className="space-y-1.5">
+            <Label className="text-sm font-semibold">
+              Audience <span className="text-destructive">*</span>
+            </Label>
+            <p className="text-[12px] text-muted-foreground leading-snug">
+              Choose who is allowed to see this event.
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {AUDIENCE_OPTIONS.map((o) => {
+                const Icon = o.icon;
+                const active = audience === o.value;
+                return (
+                  <button
+                    key={o.value}
+                    type="button"
+                    onClick={() => setAudience(o.value)}
+                    aria-pressed={active}
+                    className={`flex items-start gap-2 rounded-lg border p-2.5 text-left transition-all touch-manipulation active:scale-[0.98] ${
+                      active
+                        ? "border-primary bg-primary/10 ring-1 ring-primary"
+                        : "border-border bg-muted/40 hover:border-primary/40"
+                    }`}
+                  >
+                    <Icon className={`h-4 w-4 mt-0.5 shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`} />
+                    <span className="min-w-0">
+                      <span className={`block text-[13px] font-semibold leading-tight ${active ? "text-primary" : "text-foreground"}`}>
+                        {o.label}
+                      </span>
+                      <span className="block text-[11px] text-muted-foreground leading-snug mt-0.5">
+                        {o.hint}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
