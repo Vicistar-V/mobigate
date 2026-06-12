@@ -271,6 +271,9 @@ All colors MUST be HSL.
 }
 .lp-light .bg-white :where(svg) { color: #fff !important; }
 
+/* hover:text-white would turn text invisible on a light bg → keep it dark */
+.lp-light [class*="hover:text-white"]:hover { color: hsl(var(--lp-fg)) !important; }
+
 @media (prefers-reduced-motion: reduce) {
   .lp-animate-float, .lp-animate-float-slow, .lp-animate-spin-slow,
   .lp-marquee-track, .lp-animate-pan, .lp-pulse-ring { animation: none !important; }
