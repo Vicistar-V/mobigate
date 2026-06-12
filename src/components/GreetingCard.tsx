@@ -251,6 +251,7 @@ export const GreetingSection = ({
       timestamp: (p as any).timestamp,
       likes: Number((p as any).likes) || 0,
       comments: Number((p as any).comments) || 0,
+      views: Number((p as any).views) || 0,
       followers: (p as any).followers,
       isOwner: (p as any).userId === currentUserId,
     }));
