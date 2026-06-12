@@ -53,6 +53,10 @@ export const NewsArticleDrawer = ({ article, open, onOpenChange }: NewsArticleDr
   const [comments, setComments] = useState<ArticleComment[]>([]);
   const [draft, setDraft] = useState("");
 
+  // Gifting
+  const [showGift, setShowGift] = useState(false);
+  const [giftCount, setGiftCount] = useState(0);
+
   const galleryRef = useRef<HTMLDivElement>(null);
   const countedRef = useRef<string | null>(null);
 
