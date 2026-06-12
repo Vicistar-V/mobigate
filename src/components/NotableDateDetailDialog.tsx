@@ -110,11 +110,9 @@ export const NotableDateDetailDialog = ({
 
   // Lightweight optimistic action handlers for the "more" menu.
   const firstName = person.name.split(" ")[0];
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
-  const [willAttend, setWillAttend] = useState(false);
 
   const moreActions = [
+
     {
       key: "view",
       label: "View Profile",
