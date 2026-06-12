@@ -40,6 +40,8 @@ interface MediaGalleryViewerProps {
   initialIndex?: number;
   showActions?: boolean;
   galleryType?: "wall-status" | "profile-picture" | "banner" | "post" | "gallery" | "video-highlights";
+  /** When true, slides auto-advance on a timer (story-style) with a top progress bar. */
+  autoAdvance?: boolean;
 }
 
 export const MediaGalleryViewer = ({
@@ -49,8 +51,11 @@ export const MediaGalleryViewer = ({
   initialIndex = 0,
   showActions = true,
   galleryType = "wall-status",
+  autoAdvance = false,
 }: MediaGalleryViewerProps) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [progress, setProgress] = useState(0);
+  const [paused, setPaused] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
