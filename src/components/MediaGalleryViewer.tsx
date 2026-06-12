@@ -1,7 +1,7 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { X, ChevronLeft, ChevronRight, Heart, Share2, MessageCircle, UserPlus, BookOpen, Image as ImageIcon, Play, Music } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Heart, Share2, MessageCircle, UserPlus, BookOpen, Image as ImageIcon, Play, Music, Eye } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -53,6 +53,7 @@ export const MediaGalleryViewer = ({
   const [likeCount, setLikeCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followerCount, setFollowerCount] = useState(0);
+  const [viewCount, setViewCount] = useState(0);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"media" | "reader">("media");
   const { toast } = useToast();
@@ -81,6 +82,8 @@ export const MediaGalleryViewer = ({
       setFollowerCount(
         currentItem.followers ? parseInt(currentItem.followers.replace(/[^0-9]/g, '')) || 0 : 0
       );
+      // Optimistically count this view (base count + the current viewer).
+      setViewCount((currentItem.views || 0) + 1);
       // Default to reader mode when there's substantive text; otherwise media-first
       const hasText = !!(currentItem.description && currentItem.description.trim().length > 40);
       setViewMode(hasText ? "reader" : "media");
@@ -486,7 +489,7 @@ export const MediaGalleryViewer = ({
           {showActions && (
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-6">
               {/* Action Buttons */}
-              <div className="flex items-center gap-2 sm:gap-6">
+              <div className="flex items-center gap-1 sm:gap-6 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {/* Like Button */}
                 <div className="flex flex-col items-start gap-0.5">
                   <Button
@@ -505,7 +508,7 @@ export const MediaGalleryViewer = ({
                 </div>
 
                 {/* Follow Button */}
-                {currentItem.followers && !currentItem.isOwner && (
+                {!currentItem.isOwner && (
                   <Button
                     variant="ghost"
                     size="icon"
@@ -517,7 +520,7 @@ export const MediaGalleryViewer = ({
                     }`}
                   >
                     <UserPlus className={`h-5 w-5 sm:h-7 sm:w-7 ${isFollowing ? "fill-current" : ""}`} />
-                    <span className="text-base sm:text-xl font-bold">{formatFollowerCount(followerCount)}</span>
+                    <span className="text-base sm:text-xl font-bold">{isFollowing ? "Following" : "Follow"}</span>
                   </Button>
                 )}
 
@@ -542,7 +545,14 @@ export const MediaGalleryViewer = ({
                   <Share2 className="h-5 w-5 sm:h-7 sm:w-7" />
                   <span className="text-base sm:text-xl font-bold">Share</span>
                 </Button>
+
+                {/* Views Counter (read-only) */}
+                <div className="flex flex-col sm:flex-row items-center gap-0.5 sm:gap-2 px-2 py-2 sm:px-4 sm:py-3 min-w-[60px] sm:min-w-0 text-white/90">
+                  <Eye className="h-5 w-5 sm:h-7 sm:w-7" />
+                  <span className="text-base sm:text-xl font-bold">{formatFollowerCount(viewCount)}</span>
+                </div>
               </div>
+
 
               {/* Pagination - Moved to separate row on mobile */}
               <div className="flex justify-center sm:justify-end">

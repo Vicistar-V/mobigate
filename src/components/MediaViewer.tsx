@@ -2,7 +2,7 @@ import {
   Dialog,
   DialogContent,
 } from "@/components/ui/dialog";
-import { X, Heart, MessageCircle, Share2, UserPlus } from "lucide-react";
+import { X, Heart, MessageCircle, Share2, UserPlus, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +19,7 @@ interface MediaViewerProps {
   authorUserId?: string;
   likes?: number;
   comments?: number;
+  views?: number;
   followers?: string;
   isLiked?: boolean;
   isOwner?: boolean;
@@ -35,6 +36,7 @@ export const MediaViewer = ({
   authorUserId,
   likes = 0,
   comments = 0,
+  views = 0,
   followers,
   isLiked: initialIsLiked = false,
   isOwner = false,
@@ -46,6 +48,8 @@ export const MediaViewer = ({
   const [followerCount, setFollowerCount] = useState(
     followers ? parseInt(followers.replace(/[^0-9]/g, '')) || 0 : 0
   );
+  // Optimistically count this view (base + current viewer).
+  const [viewCount] = useState(views + 1);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const { toast } = useToast();
 
@@ -213,7 +217,7 @@ export const MediaViewer = ({
         {/* Bottom Actions */}
         {showActions && (
           <div className="absolute bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-black via-black/90 to-transparent p-3 sm:p-6 pb-4 sm:pb-8">
-            <div className="flex items-start sm:items-center gap-3 sm:gap-6">
+            <div className="flex items-center gap-1 sm:gap-6 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
                 <Button
                   variant="ghost"
@@ -229,7 +233,7 @@ export const MediaViewer = ({
                   <span className="text-sm sm:text-xl font-bold">{likeCount}</span>
                 </Button>
               </div>
-              {followers && !isOwner && (
+              {!isOwner && (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -241,7 +245,7 @@ export const MediaViewer = ({
                   }`}
                 >
                   <UserPlus className={`h-5 w-5 sm:h-7 sm:w-7 ${isFollowing ? "fill-current" : ""}`} />
-                  <span className="text-sm sm:text-xl font-bold">{formatFollowerCount(followerCount)}</span>
+                  <span className="text-sm sm:text-xl font-bold">{isFollowing ? "Following" : "Follow"}</span>
                 </Button>
               )}
               <Button
@@ -262,6 +266,12 @@ export const MediaViewer = ({
                 <Share2 className="h-5 w-5 sm:h-7 sm:w-7" />
                 <span className="text-sm sm:text-xl font-bold">Share</span>
               </Button>
+              {/* Views counter (read-only) */}
+              <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 px-3 py-2 sm:px-4 sm:py-3 text-white/90">
+                <Eye className="h-5 w-5 sm:h-7 sm:w-7" />
+                <span className="text-sm sm:text-xl font-bold">{formatFollowerCount(viewCount)}</span>
+              </div>
+
             </div>
           </div>
         )}

@@ -1096,7 +1096,7 @@ const MyProfile = () => {
         onOpenChange={setMediaGalleryOpen}
         items={galleryItems}
         initialIndex={galleryInitialIndex}
-        showActions={galleryType === "wall-status"}
+        showActions={true}
         galleryType={galleryType}
       />
 
