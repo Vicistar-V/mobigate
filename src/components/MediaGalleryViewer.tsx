@@ -508,7 +508,7 @@ export const MediaGalleryViewer = ({
                 </div>
 
                 {/* Follow Button */}
-                {currentItem.followers && !currentItem.isOwner && (
+                {!currentItem.isOwner && (
                   <Button
                     variant="ghost"
                     size="icon"
@@ -520,7 +520,7 @@ export const MediaGalleryViewer = ({
                     }`}
                   >
                     <UserPlus className={`h-5 w-5 sm:h-7 sm:w-7 ${isFollowing ? "fill-current" : ""}`} />
-                    <span className="text-base sm:text-xl font-bold">{formatFollowerCount(followerCount)}</span>
+                    <span className="text-base sm:text-xl font-bold">{isFollowing ? "Following" : "Follow"}</span>
                   </Button>
                 )}
 
@@ -545,7 +545,14 @@ export const MediaGalleryViewer = ({
                   <Share2 className="h-5 w-5 sm:h-7 sm:w-7" />
                   <span className="text-base sm:text-xl font-bold">Share</span>
                 </Button>
+
+                {/* Views Counter (read-only) */}
+                <div className="flex flex-col sm:flex-row items-center gap-0.5 sm:gap-2 px-2 py-2 sm:px-4 sm:py-3 min-w-[60px] sm:min-w-0 text-white/90">
+                  <Eye className="h-5 w-5 sm:h-7 sm:w-7" />
+                  <span className="text-base sm:text-xl font-bold">{formatFollowerCount(viewCount)}</span>
+                </div>
               </div>
+
 
               {/* Pagination - Moved to separate row on mobile */}
               <div className="flex justify-center sm:justify-end">
