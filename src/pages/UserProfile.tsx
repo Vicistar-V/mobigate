@@ -162,7 +162,19 @@ const UserProfile = () => {
       });
       const data = await res.json();
       if (data.success) { setFriendStatus("pending"); toast({ title: "Friend request sent!" }); }
-      else toast({ title: "Error", description: data.error || "Could not send request", variant: "destructive" });
+      else {
+        const err = (data.error || "").toString().toLowerCase();
+        // Backend already considers them friends/pending — sync the UI instead of erroring.
+        if (err.includes("already friends") || err.includes("already friend")) {
+          setFriendStatus("accepted");
+          toast({ title: "Already friends", description: `You are already friends with ${profile.name}.` });
+        } else if (err.includes("already") || err.includes("pending") || err.includes("sent")) {
+          setFriendStatus("pending");
+          toast({ title: "Request already sent" });
+        } else {
+          toast({ title: "Error", description: data.error || "Could not send request", variant: "destructive" });
+        }
+      }
     } catch { toast({ title: "Error", description: "Cannot reach server", variant: "destructive" }); }
   };
 
