@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -6,6 +7,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
 import {
   Cake,
   CalendarHeart,
@@ -15,6 +24,16 @@ import {
   UserCheck,
   Clock3,
   Images,
+  User,
+  MoreVertical,
+  UserMinus,
+  UserX,
+  Ban,
+  Flag,
+  Heart,
+  Share2,
+  Rss,
+  CalendarCheck,
 } from "lucide-react";
 
 export interface NotableDetailPerson {
@@ -49,8 +68,11 @@ export const NotableDateDetailDialog = ({
   onGift,
   onToggleFriend,
 }: Props) => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIdx, setActiveIdx] = useState(0);
+
 
   // Reset to first slide whenever a different person opens.
   useEffect(() => {
