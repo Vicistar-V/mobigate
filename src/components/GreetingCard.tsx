@@ -33,6 +33,7 @@ import heroAdBanner from "@/assets/hero-ad-banner.jpg";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 import { WallBannerSlideshow } from "@/components/wall-banner/WallBannerSlideshow";
 import { WallBannerManagerDialog } from "@/components/wall-banner/WallBannerManagerDialog";
+import { getActiveSlidesFor } from "@/lib/wallBannerStorage";
 import { PostDetailDialog } from "@/components/PostDetailDialog";
 
 export const GreetingSection = ({
@@ -454,16 +455,19 @@ export const GreetingSection = ({
             onManage={() => setWallBannerManagerOpen(true)}
             onChangeFallback={() => setWallBannerManagerOpen(true)}
             onOpenViewer={(slide) => {
-              setViewerItems([
-                {
-                  id: slide.id,
-                  url: slide.mediaUrl,
-                  type: slide.mediaType,
+              const active = getActiveSlidesFor(currentUserId, "home");
+              const list = active.length ? active : [slide];
+              setViewerItems(
+                list.map((s) => ({
+                  id: s.id,
+                  url: s.mediaUrl,
+                  type: s.mediaType,
                   author: profile.fullName,
-                  title: slide.caption,
-                } as MediaItem,
-              ]);
-              setViewerStartIndex(0);
+                  title: s.caption,
+                  durationMs: (s.displaySeconds || 5) * 1000,
+                }) as MediaItem),
+              );
+              setViewerStartIndex(Math.max(0, list.findIndex((s) => s.id === slide.id)));
               setBannerViewerOpen(true);
             }}
           />
@@ -1324,9 +1328,10 @@ export const GreetingSection = ({
         open={bannerViewerOpen}
         onOpenChange={setBannerViewerOpen}
         items={viewerItems}
-        initialIndex={0}
+        initialIndex={viewerStartIndex}
         showActions={true}
         galleryType="banner"
+        autoAdvance={true}
       />
     </div>
   );

@@ -29,6 +29,8 @@ export interface MediaItem {
   isOwner?: boolean;
   /** Show the "✓Copyright" designation marker on this media (default true) */
   copyrightMarked?: boolean;
+  /** How long this slide stays on screen before auto-advancing (ms). Photos/audio only. */
+  durationMs?: number;
 }
 
 interface MediaGalleryViewerProps {
@@ -38,6 +40,8 @@ interface MediaGalleryViewerProps {
   initialIndex?: number;
   showActions?: boolean;
   galleryType?: "wall-status" | "profile-picture" | "banner" | "post" | "gallery" | "video-highlights";
+  /** When true, slides auto-advance on a timer (story-style) with a top progress bar. */
+  autoAdvance?: boolean;
 }
 
 export const MediaGalleryViewer = ({
@@ -47,8 +51,11 @@ export const MediaGalleryViewer = ({
   initialIndex = 0,
   showActions = true,
   galleryType = "wall-status",
+  autoAdvance = false,
 }: MediaGalleryViewerProps) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [progress, setProgress] = useState(0);
+  const [paused, setPaused] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -195,6 +202,38 @@ export const MediaGalleryViewer = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open, currentIndex]);
 
+  // Reset pause state whenever the viewer opens or the slide changes.
+  useEffect(() => {
+    setPaused(false);
+  }, [open, currentIndex]);
+
+  // Story-style auto-advance timer (photos/audio). Videos advance on "ended".
+  useEffect(() => {
+    if (!open || !autoAdvance || items.length <= 1) {
+      setProgress(0);
+      return;
+    }
+    // Don't auto-advance while reading text, commenting, paused, or watching a video.
+    if (viewMode === "reader" || commentDialogOpen || paused) return;
+    if (currentItem?.type === "video") return;
+
+    setProgress(0);
+    const duration = currentItem?.durationMs ?? 5000;
+    const start = Date.now();
+    const id = window.setInterval(() => {
+      const elapsed = Date.now() - start;
+      const pct = Math.min(100, (elapsed / duration) * 100);
+      setProgress(pct);
+      if (elapsed >= duration) {
+        window.clearInterval(id);
+        goToNext();
+      }
+    }, 50);
+    return () => window.clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, autoAdvance, currentIndex, viewMode, commentDialogOpen, paused, currentItem, items.length]);
+
+
   const renderMedia = () => {
     if (!currentItem) return null;
 
@@ -205,6 +244,7 @@ export const MediaGalleryViewer = ({
             src={currentItem.url}
             controls
             autoPlay
+            onEnded={() => { if (autoAdvance && items.length > 1) goToNext(); }}
             className="w-full h-full object-contain"
             key={currentItem.url}
           >
@@ -271,8 +311,30 @@ export const MediaGalleryViewer = ({
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-[100vw] max-h-[100vh] w-full h-full p-0 gap-0 bg-black border-none !z-[200]" overlayClassName="!z-[200]">
+        {/* Story-style progress bar */}
+        {autoAdvance && items.length > 1 && (
+          <div className="absolute top-0 left-0 right-0 z-[60] flex gap-1 px-2 pt-2">
+            {items.map((_, i) => (
+              <div key={i} className="h-1 flex-1 overflow-hidden rounded-full bg-white/30">
+                <div
+                  className="h-full bg-white"
+                  style={{
+                    width:
+                      i < currentIndex
+                        ? "100%"
+                        : i === currentIndex
+                          ? `${currentItem?.type === "video" ? 0 : progress}%`
+                          : "0%",
+                    transition: i === currentIndex ? "width 60ms linear" : "none",
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Header */}
-        <div className="absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/80 to-transparent p-2 sm:p-4">
+        <div className={`absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/80 to-transparent p-2 sm:p-4 ${autoAdvance && items.length > 1 ? "pt-4 sm:pt-6" : ""}`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-3">
               {currentItem.author && (
@@ -354,6 +416,9 @@ export const MediaGalleryViewer = ({
         {/* Main Content */}
         <div 
           {...swipeHandlers}
+          onPointerDown={() => autoAdvance && setPaused(true)}
+          onPointerUp={() => autoAdvance && setPaused(false)}
+          onPointerCancel={() => autoAdvance && setPaused(false)}
           className="relative w-full h-full flex items-center justify-center touch-pan-y"
         >
           {renderMedia()}

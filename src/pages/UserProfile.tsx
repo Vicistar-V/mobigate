@@ -44,6 +44,7 @@ import { ProfileContentsTab }  from "@/components/profile/ProfileContentsTab";
 import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
 import { WallBannerSlideshow } from "@/components/wall-banner/WallBannerSlideshow";
 import type { WallBannerSlide } from "@/types/wallBanner";
+import { getActiveSlidesFor } from "@/lib/wallBannerStorage";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -97,6 +98,7 @@ const UserProfile = () => {
   const [galleryOpen,    setGalleryOpen]    = useState(false);
   const [galleryItems,   setGalleryItems]   = useState<MediaItem[]>([]);
   const [galleryIdx,     setGalleryIdx]     = useState(0);
+  const [galleryAutoAdvance, setGalleryAutoAdvance] = useState(false);
   // Unfriend confirmation state
   const [unfriendConfirm,  setUnfriendConfirm]  = useState(false);
   const [shareDialogOpen,  setShareDialogOpen]  = useState(false);
@@ -352,16 +354,20 @@ const UserProfile = () => {
             authorName={profile.name}
             authorImage={displayPhoto}
             onOpenViewer={(slide: WallBannerSlide) => {
-              setGalleryItems([
-                {
-                  id: slide.id,
-                  url: slide.mediaUrl,
-                  type: slide.mediaType,
+              const active = getActiveSlidesFor(profile.id, "profile");
+              const list = active.length ? active : [slide];
+              setGalleryItems(
+                list.map((s) => ({
+                  id: s.id,
+                  url: s.mediaUrl,
+                  type: s.mediaType,
                   author: profile.name,
-                  title: slide.caption,
-                } as MediaItem,
-              ]);
-              setGalleryIdx(0);
+                  title: s.caption,
+                  durationMs: (s.displaySeconds || 5) * 1000,
+                }) as MediaItem),
+              );
+              setGalleryIdx(Math.max(0, list.findIndex((s) => s.id === slide.id)));
+              setGalleryAutoAdvance(true);
               setGalleryOpen(true);
             }}
           />
@@ -377,7 +383,7 @@ const UserProfile = () => {
                     className="w-32 h-32 rounded-full object-cover border-4 border-card cursor-pointer"
                     onClick={() => {
                       setGalleryItems([{ id: "photo", url: displayPhoto, type: "photo", author: profile.name }]);
-                      setGalleryIdx(0); setGalleryOpen(true);
+                      setGalleryIdx(0); setGalleryAutoAdvance(false); setGalleryOpen(true);
                     }}
                   />
                 </div>
@@ -680,6 +686,7 @@ const UserProfile = () => {
         initialIndex={galleryIdx}
         showActions={true}
         galleryType="post"
+        autoAdvance={galleryAutoAdvance}
       />
 
       <SendGiftDialog
