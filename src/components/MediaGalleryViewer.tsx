@@ -540,115 +540,125 @@ export const MediaGalleryViewer = ({
           )}
         </div>
 
-        {/* Bottom Info & Actions */}
-        <div className="absolute bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-black via-black/90 to-transparent p-3 sm:p-6 pb-4 sm:pb-8">
-          {currentItem.title && (
-            <div className="text-white mb-3 sm:mb-6">
-              <h3 className="text-base sm:text-2xl font-bold mb-0.5 sm:mb-1">{currentItem.title}</h3>
-              {currentItem.description && (
-                <p className="text-sm sm:text-base text-white/80 line-clamp-2 sm:line-clamp-none">{currentItem.description}</p>
+        {/* Bottom Info & Actions — restructured for a clean, non-scattered layout.
+            Title sits on its own row (tap to read full text), then a single
+            evenly-spaced action bar, then pagination on its own line. */}
+        {viewMode !== "reader" && (
+          <div className="absolute bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-black via-black/85 to-transparent px-3 pt-10 pb-[max(env(safe-area-inset-bottom),0.75rem)] sm:px-6 sm:pt-12 sm:pb-6">
+            <div className="mx-auto w-full max-w-3xl space-y-2.5 sm:space-y-3.5">
+              {/* Title row */}
+              {currentItem.title && (
+                <button
+                  type="button"
+                  onClick={() => currentItem.description && currentItem.description.trim().length > 0 && setViewMode("reader")}
+                  className="block w-full text-left"
+                  aria-label={currentItem.description ? "Read full text" : undefined}
+                >
+                  <h3 className="text-white text-[15px] sm:text-xl font-bold leading-snug line-clamp-2">
+                    {currentItem.title}
+                  </h3>
+                  {currentItem.description && currentItem.description.trim().length > 0 && (
+                    <span className="mt-0.5 inline-flex items-center gap-1 text-[11px] sm:text-xs font-semibold text-white/70">
+                      <BookOpen className="h-3.5 w-3.5" />
+                      Read more
+                    </span>
+                  )}
+                </button>
+              )}
+
+              {showActions && (
+                <>
+                  {/* Action bar — evenly distributed, never overlapping */}
+                  <div className="flex items-stretch justify-between gap-1 rounded-2xl bg-white/10 backdrop-blur-md ring-1 ring-white/10 p-1">
+                    {/* Like */}
+                    <button
+                      type="button"
+                      onClick={handleLike}
+                      className={`flex flex-1 flex-col items-center justify-center gap-0.5 rounded-xl py-2 transition-colors touch-manipulation active:scale-95 ${
+                        isLiked ? "text-red-500" : "text-white hover:bg-white/10"
+                      }`}
+                      aria-pressed={isLiked}
+                      aria-label="Like"
+                    >
+                      <Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} />
+                      <span className="text-[11px] font-bold leading-none">{formatFollowerCount(likeCount)}</span>
+                    </button>
+
+                    {/* Comment */}
+                    <button
+                      type="button"
+                      onClick={handleComment}
+                      className="flex flex-1 flex-col items-center justify-center gap-0.5 rounded-xl py-2 text-white transition-colors hover:bg-white/10 touch-manipulation active:scale-95"
+                      aria-label="Comment"
+                    >
+                      <MessageCircle className="h-5 w-5" />
+                      <span className="text-[11px] font-bold leading-none">{formatFollowerCount(currentItem.comments || 0)}</span>
+                    </button>
+
+                    {/* Share */}
+                    <button
+                      type="button"
+                      onClick={handleShare}
+                      className="flex flex-1 flex-col items-center justify-center gap-0.5 rounded-xl py-2 text-white transition-colors hover:bg-white/10 touch-manipulation active:scale-95"
+                      aria-label="Share"
+                    >
+                      <Share2 className="h-5 w-5" />
+                      <span className="text-[11px] font-bold leading-none">Share</span>
+                    </button>
+
+                    {/* Follow (hidden for owner) */}
+                    {!currentItem.isOwner && (
+                      <button
+                        type="button"
+                        onClick={handleFollow}
+                        className={`flex flex-1 flex-col items-center justify-center gap-0.5 rounded-xl py-2 transition-colors touch-manipulation active:scale-95 ${
+                          isFollowing ? "text-primary" : "text-white hover:bg-white/10"
+                        }`}
+                        aria-pressed={isFollowing}
+                        aria-label={isFollowing ? "Following" : "Follow"}
+                      >
+                        <UserPlus className={`h-5 w-5 ${isFollowing ? "fill-current" : ""}`} />
+                        <span className="text-[11px] font-bold leading-none">{isFollowing ? "Following" : "Follow"}</span>
+                      </button>
+                    )}
+
+                    {/* Views (read-only) */}
+                    <div className="flex flex-1 flex-col items-center justify-center gap-0.5 rounded-xl py-2 text-white/80">
+                      <Eye className="h-5 w-5" />
+                      <span className="text-[11px] font-bold leading-none">{formatFollowerCount(viewCount)}</span>
+                    </div>
+                  </div>
+
+                  {/* Pagination row */}
+                  {items.length > 1 && (
+                    <div className="flex justify-center">
+                      {items.length <= 20 ? (
+                        <div className="flex gap-1">
+                          {items.map((_, index) => (
+                            <button
+                              key={index}
+                              onClick={() => setCurrentIndex(index)}
+                              className={`h-1.5 rounded-full transition-all ${
+                                index === currentIndex
+                                  ? "w-5 bg-white"
+                                  : "w-1.5 bg-white/40 hover:bg-white/60"
+                              }`}
+                              aria-label={`Go to item ${index + 1}`}
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-white/80 text-xs font-medium">
+                          {currentIndex + 1} / {items.length}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
               )}
             </div>
-          )}
-
-          {showActions && (
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-6">
-              {/* Action Buttons */}
-              <div className="flex items-center gap-1 sm:gap-6 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {/* Like Button */}
-                <div className="flex flex-col items-start gap-0.5">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleLike}
-                    className={`flex-col sm:flex-row gap-0.5 sm:gap-2 px-2 py-2 sm:px-4 sm:py-3 h-auto min-w-[60px] sm:min-w-0 ${
-                      isLiked
-                        ? "text-red-500 hover:text-red-400 hover:bg-red-500/10"
-                        : "text-white hover:text-white hover:bg-white/10"
-                    }`}
-                  >
-                    <Heart className={`h-5 w-5 sm:h-7 sm:w-7 ${isLiked ? "fill-current" : ""}`} />
-                    <span className="text-base sm:text-xl font-bold">{likeCount}</span>
-                  </Button>
-                </div>
-
-                {/* Follow Button */}
-                {!currentItem.isOwner && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleFollow}
-                    className={`flex-col sm:flex-row gap-0.5 sm:gap-2 px-2 py-2 sm:px-4 sm:py-3 h-auto min-w-[60px] sm:min-w-0 ${
-                      isFollowing
-                        ? "text-primary hover:text-primary hover:bg-primary/10"
-                        : "text-white hover:text-white hover:bg-white/10"
-                    }`}
-                  >
-                    <UserPlus className={`h-5 w-5 sm:h-7 sm:w-7 ${isFollowing ? "fill-current" : ""}`} />
-                    <span className="text-base sm:text-xl font-bold">{isFollowing ? "Following" : "Follow"}</span>
-                  </Button>
-                )}
-
-                {/* Comment Button */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleComment}
-                  className="flex-col sm:flex-row gap-0.5 sm:gap-2 px-2 py-2 sm:px-4 sm:py-3 h-auto min-w-[60px] sm:min-w-0 text-white hover:text-white hover:bg-white/10"
-                >
-                  <MessageCircle className="h-5 w-5 sm:h-7 sm:w-7" />
-                  <span className="text-base sm:text-xl font-bold">{currentItem.comments || 0}</span>
-                </Button>
-
-                {/* Share Button */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleShare}
-                  className="flex-col sm:flex-row gap-0.5 sm:gap-2 px-2 py-2 sm:px-4 sm:py-3 h-auto min-w-[60px] sm:min-w-0 text-white hover:text-white hover:bg-white/10"
-                >
-                  <Share2 className="h-5 w-5 sm:h-7 sm:w-7" />
-                  <span className="text-base sm:text-xl font-bold">Share</span>
-                </Button>
-
-                {/* Views Counter (read-only) */}
-                <div className="flex flex-col sm:flex-row items-center gap-0.5 sm:gap-2 px-2 py-2 sm:px-4 sm:py-3 min-w-[60px] sm:min-w-0 text-white/90">
-                  <Eye className="h-5 w-5 sm:h-7 sm:w-7" />
-                  <span className="text-base sm:text-xl font-bold">{formatFollowerCount(viewCount)}</span>
-                </div>
-              </div>
-
-
-              {/* Pagination - Moved to separate row on mobile */}
-              <div className="flex justify-center sm:justify-end">
-                {/* Pagination Dots */}
-                {items.length > 1 && items.length <= 20 && (
-                  <div className="flex gap-1 sm:gap-1.5">
-                    {items.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setCurrentIndex(index)}
-                        className={`h-1.5 sm:h-2 rounded-full transition-all ${
-                          index === currentIndex
-                            ? "w-6 sm:w-8 bg-white"
-                            : "w-1.5 sm:w-2 bg-white/40 hover:bg-white/60"
-                        }`}
-                        aria-label={`Go to item ${index + 1}`}
-                      />
-                    ))}
-                  </div>
-                )}
-
-                {/* Counter for large galleries */}
-                {items.length > 20 && (
-                  <div className="text-white/80 text-sm sm:text-base font-medium">
-                    {currentIndex + 1} / {items.length}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </DialogContent>
       </Dialog>
 
