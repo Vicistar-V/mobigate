@@ -102,7 +102,7 @@ const UserProfile = () => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data: ProfileData = await res.json();
       setProfile(data);
-      setFriendStatus(data.friendship_status || "none");
+      setFriendStatus(normalizeFriendStatus(data.friendship_status));
       setIsFollowing(data.is_following || false);
     } catch (e) {
       console.error("[UserProfile] fetch error:", e);
