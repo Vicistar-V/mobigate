@@ -2,7 +2,7 @@ import {
   Dialog,
   DialogContent,
 } from "@/components/ui/dialog";
-import { X, Heart, MessageCircle, Share2, UserPlus } from "lucide-react";
+import { X, Heart, MessageCircle, Share2, UserPlus, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
