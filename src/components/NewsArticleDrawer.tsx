@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/drawer";
 import { useToast } from "@/hooks/use-toast";
 import { SendGiftDialog } from "@/components/chat/SendGiftDialog";
+import { ShareDialog } from "@/components/ShareDialog";
 import type { NewsArticle } from "@/data/trendingHeadlines";
 
 interface NewsArticleDrawerProps {
