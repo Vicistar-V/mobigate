@@ -117,17 +117,24 @@ export const NewsArticleDrawer = ({ article, open, onOpenChange }: NewsArticleDr
       text: article.content[0] ?? article.title,
       url: typeof window !== "undefined" ? window.location.href : "",
     };
-    try {
-      if (navigator.share) {
+    // Prefer the OS-native share sheet (WhatsApp, Messages, etc.) when available.
+    const canNativeShare =
+      typeof navigator !== "undefined" &&
+      typeof (navigator as any).share === "function";
+    if (canNativeShare) {
+      try {
         await navigator.share(shareData);
-      } else {
-        await navigator.clipboard?.writeText(shareData.url);
-        toast({ description: "Link copied to clipboard" });
+        return;
+      } catch (err: any) {
+        // User dismissed the native sheet — don't fall back, just stop.
+        if (err?.name === "AbortError") return;
+        // Otherwise fall through to the in-app share sheet.
       }
-    } catch {
-      /* dismissed — no-op */
     }
+    // Fallback: rich in-app share sheet with relevant channels.
+    setShowShare(true);
   };
+
 
   const handlePostComment = () => {
     const text = draft.trim();
