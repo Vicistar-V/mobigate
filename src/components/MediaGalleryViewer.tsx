@@ -499,23 +499,7 @@ export const MediaGalleryViewer = ({
             </>
           )}
 
-          {/* Floating text card when in MEDIA mode (mirror of reader's floating media) */}
-          {viewMode === "media" && currentItem.description && currentItem.description.trim().length > 40 && (
-            <button
-              type="button"
-              onClick={() => setViewMode("reader")}
-              className="absolute top-20 right-3 sm:top-24 sm:right-5 z-40 max-w-[180px] sm:max-w-[220px] text-left rounded-xl bg-card/95 backdrop-blur shadow-2xl ring-1 ring-white/20 p-2.5 active:scale-[0.97] transition-transform touch-manipulation"
-              aria-label="Open reader mode"
-            >
-              <div className="flex items-center gap-1.5 mb-1">
-                <BookOpen className="h-3.5 w-3.5 text-primary" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-primary">Read</span>
-              </div>
-              <p className="text-[11px] font-semibold leading-snug text-foreground line-clamp-3">
-                {currentItem.description}
-              </p>
-            </button>
-          )}
+          {/* Floating read card removed — the bottom title row now carries the "Read more" affordance. */}
 
           {/* Navigation Buttons */}
           {items.length > 1 && (
