@@ -352,16 +352,19 @@ const UserProfile = () => {
             authorName={profile.name}
             authorImage={displayPhoto}
             onOpenViewer={(slide: WallBannerSlide) => {
-              setGalleryItems([
-                {
-                  id: slide.id,
-                  url: slide.mediaUrl,
-                  type: slide.mediaType,
+              const active = getActiveSlidesFor(profile.id, "profile");
+              const list = active.length ? active : [slide];
+              setGalleryItems(
+                list.map((s) => ({
+                  id: s.id,
+                  url: s.mediaUrl,
+                  type: s.mediaType,
                   author: profile.name,
-                  title: slide.caption,
-                } as MediaItem,
-              ]);
-              setGalleryIdx(0);
+                  title: s.caption,
+                  durationMs: (s.displaySeconds || 5) * 1000,
+                }) as MediaItem),
+              );
+              setGalleryIdx(Math.max(0, list.findIndex((s) => s.id === slide.id)));
               setGalleryOpen(true);
             }}
           />
