@@ -93,7 +93,7 @@ export const FeedShowcaseDialog = ({
                 <DropdownMenuTrigger asChild>
                   <Button size="sm" variant="outline" className="gap-1.5 shrink-0">
                     <SlidersHorizontal className="h-4 w-4" />
-                    <span className="hidden xs:inline">Filter</span>
+                    <span>Filter</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-52">
