@@ -71,6 +71,8 @@ export const NewsArticleDrawer = ({ article, open, onOpenChange }: NewsArticleDr
       setDraft("");
       setComments(seedComments(article));
       setViewCount(article.views ?? 0);
+      setShowGift(false);
+      setGiftCount((article as any).gifts ?? 0);
     }
   }, [article]);
 
