@@ -164,6 +164,119 @@ export const GreetingSection = () => {
   const myRecentPosts = thumbnailPosts;
   const setFeaturedIdx = setFeaturedPublicIdx;
 
+  // ────────────────────────────────────────────────────────────────────────
+  // VIBES & FLEXING data model
+  //  • Area A  → the User's OWN posts (latest on display; rest via the + menu)
+  //  • Area B  → everyone's posts (own + others), auto-scrolling. Ordering:
+  //              Newest (last 7 days) first, then Most Trending (engagement).
+  //  • "Flex with more exciting Vibes" → full window of ALL vibes by everybody.
+  // ────────────────────────────────────────────────────────────────────────
+  const [ownPostsViewerOpen, setOwnPostsViewerOpen] = useState(false);
+  const [allVibesViewerOpen, setAllVibesViewerOpen] = useState(false);
+  const [allVibesStartIdx, setAllVibesStartIdx] = useState(0);
+  const [editPickerOpen, setEditPickerOpen] = useState(false);
+  const [postToEdit, setPostToEdit] = useState<typeof allPosts[number] | null>(null);
+
+  const scoreEngagement = (p: any) =>
+    (Number(p.likes) || 0) +
+    (Number(p.views) || 0) +
+    (Number(p.comments) || 0) +
+    (Number(p.shares) || 0) +
+    (Number(p.followers) || 0);
+  const postTime = (p: any) => {
+    const t = Date.parse(p.timestamp || p.createdAt || p.date || "");
+    return Number.isNaN(t) ? 0 : t;
+  };
+  const sortNewestThenTrending = (posts: typeof allPosts) => {
+    const now = Date.now();
+    const WEEK = 7 * 24 * 60 * 60 * 1000;
+    const recent: typeof allPosts = [];
+    const rest: typeof allPosts = [];
+    posts.forEach((p) => {
+      const t = postTime(p);
+      if (t > 0 && now - t <= WEEK) recent.push(p);
+      else rest.push(p);
+    });
+    recent.sort((a, b) => postTime(b) - postTime(a));
+    rest.sort((a, b) => scoreEngagement(b) - scoreEngagement(a));
+    return [...recent, ...rest];
+  };
+
+  // Area B — everyone's vibes (own + others), de-duped & ordered.
+  const communityVibes = (() => {
+    const tabbed = allPosts.filter(matchesTab);
+    const base = tabbed.length > 1 ? tabbed : allPosts;
+    const seen = new Set<string>();
+    const uniq: typeof allPosts = [];
+    for (const p of base) {
+      const k = p.id || p.imageUrl;
+      if (seen.has(k)) continue;
+      seen.add(k);
+      uniq.push(p);
+    }
+    return sortNewestThenTrending(uniq).slice(0, 24);
+  })();
+
+  // Map feed posts → MediaGalleryViewer items (shared by the own + all viewers).
+  const toMediaItems = (posts: typeof allPosts): MediaItem[] =>
+    posts.map((p, i) => ({
+      id: p.id || `vibe-media-${i}`,
+      url: p.imageUrl,
+      type:
+        (p as any).type?.toLowerCase() === "video"
+          ? "video"
+          : (p as any).type?.toLowerCase() === "audio"
+          ? "audio"
+          : "photo",
+      title: p.title,
+      author: (p as any).author,
+      authorImage: (p as any).authorProfileImage,
+      authorUserId: (p as any).userId,
+      description: (p as any).description,
+      timestamp: (p as any).timestamp,
+      likes: Number((p as any).likes) || 0,
+      comments: Number((p as any).comments) || 0,
+      followers: (p as any).followers,
+      isOwner: (p as any).userId === currentUserId,
+    }));
+
+  // Auto-scroll Area B horizontally (marquee), pausing briefly on interaction.
+  useEffect(() => {
+    if (activeFeedTab !== "Vibes & Flexing") return;
+    const el = vibeStripRef.current;
+    if (!el) return;
+    let paused = false;
+    let resumeT: ReturnType<typeof setTimeout>;
+    const pause = () => {
+      paused = true;
+      clearTimeout(resumeT);
+      resumeT = setTimeout(() => {
+        paused = false;
+      }, 2500);
+    };
+    el.addEventListener("pointerdown", pause, { passive: true });
+    el.addEventListener("wheel", pause, { passive: true });
+    const id = setInterval(() => {
+      if (paused || !el) return;
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 2;
+      if (atEnd) el.scrollTo({ left: 0, behavior: "smooth" });
+      else el.scrollBy({ left: 1 });
+    }, 30);
+    return () => {
+      clearInterval(id);
+      clearTimeout(resumeT);
+      el.removeEventListener("pointerdown", pause);
+      el.removeEventListener("wheel", pause);
+    };
+  }, [activeFeedTab, communityVibes.length]);
+
+  const openAllVibes = (startIdx = 0) => {
+    setAllVibesStartIdx(startIdx);
+    setAllVibesViewerOpen(true);
+  };
+
+
+
 
 
 
