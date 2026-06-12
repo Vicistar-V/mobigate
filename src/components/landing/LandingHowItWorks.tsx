@@ -12,7 +12,7 @@ export const LandingHowItWorks = () => {
   return (
     <section id="how" className="relative lp-tint-bg py-16 sm:py-24">
       <div className="mx-auto max-w-6xl px-5">
-        <Reveal className="mx-auto mb-16 max-w-2xl text-center">
+        <Reveal className="mx-auto mb-10 sm:mb-16 max-w-2xl text-center">
           <p className="lp-eyebrow mb-3 text-xs font-bold uppercase">How it works</p>
           <h2 className="lp-display text-3xl font-extrabold leading-tight sm:text-5xl">
             Up and running in <span className="lp-text-gradient">four moves</span>

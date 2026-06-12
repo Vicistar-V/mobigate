@@ -57,7 +57,7 @@ export const LandingEcosystem = () => {
   return (
     <section id="ecosystem" className="relative bg-[hsl(var(--lp-bg))] py-16 sm:py-24">
       <div className="mx-auto max-w-6xl px-5">
-        <Reveal className="mx-auto mb-14 max-w-2xl text-center">
+        <Reveal className="mx-auto mb-10 sm:mb-14 max-w-2xl text-center">
           <p className="lp-eyebrow mb-3 text-xs font-bold uppercase">One ecosystem</p>
           <h2 className="lp-display text-3xl font-extrabold leading-tight sm:text-5xl">
             Everything you need,
