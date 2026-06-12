@@ -1045,8 +1045,8 @@ export const GreetingSection = ({
         </div>
       </Card>
 
-      {/* People You May Know */}
-      <PeopleYouMayKnow />
+      {/* People You May Know (hidden in embedded/profile mode — the profile renders its own) */}
+      {!embed && <PeopleYouMayKnow />}
 
       {/* Breaking News extras — Top Trending Headlines + Headlines you don't wanna miss */}
       {activeFeedTab === "Breaking News" && (
