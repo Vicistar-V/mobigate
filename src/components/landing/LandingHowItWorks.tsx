@@ -10,7 +10,7 @@ const steps = [
 
 export const LandingHowItWorks = () => {
   return (
-    <section id="how" className="relative lp-tint-bg py-24">
+    <section id="how" className="relative lp-tint-bg py-16 sm:py-24">
       <div className="mx-auto max-w-6xl px-5">
         <Reveal className="mx-auto mb-16 max-w-2xl text-center">
           <p className="lp-eyebrow mb-3 text-xs font-bold uppercase">How it works</p>

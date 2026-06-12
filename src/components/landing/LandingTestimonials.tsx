@@ -24,7 +24,7 @@ const avatarGrads = [
 export const LandingTestimonials = () => {
   const row = [...testimonials, ...testimonials];
   return (
-    <section id="loved" className="relative overflow-hidden lp-tint-bg py-24">
+    <section id="loved" className="relative overflow-hidden lp-tint-bg py-16 sm:py-24">
       <div className="mx-auto mb-12 max-w-2xl px-5 text-center">
         <Reveal>
           <p className="lp-eyebrow mb-3 text-xs font-bold uppercase">Loved by the community</p>

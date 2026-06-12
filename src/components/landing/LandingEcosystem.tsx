@@ -55,7 +55,7 @@ const cards = [
 
 export const LandingEcosystem = () => {
   return (
-    <section id="ecosystem" className="relative bg-[hsl(var(--lp-bg))] py-24">
+    <section id="ecosystem" className="relative bg-[hsl(var(--lp-bg))] py-16 sm:py-24">
       <div className="mx-auto max-w-6xl px-5">
         <Reveal className="mx-auto mb-14 max-w-2xl text-center">
           <p className="lp-eyebrow mb-3 text-xs font-bold uppercase">One ecosystem</p>

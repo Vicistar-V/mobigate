@@ -24,7 +24,7 @@ const apps = [
 
 export const LandingApps = () => {
   return (
-    <section id="apps" className="relative overflow-hidden bg-[hsl(var(--lp-bg))] py-24">
+    <section id="apps" className="relative overflow-hidden bg-[hsl(var(--lp-bg))] py-16 sm:py-24">
       <div className="pointer-events-none absolute left-1/2 top-0 h-96 w-96 -translate-x-1/2 rounded-full bg-[hsl(var(--lp-violet))] opacity-[0.10] blur-[140px]" />
       <div className="relative mx-auto max-w-6xl px-5">
         <Reveal className="mx-auto mb-14 max-w-2xl text-center">
