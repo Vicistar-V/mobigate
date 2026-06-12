@@ -19,6 +19,7 @@ interface MediaViewerProps {
   authorUserId?: string;
   likes?: number;
   comments?: number;
+  views?: number;
   followers?: string;
   isLiked?: boolean;
   isOwner?: boolean;
