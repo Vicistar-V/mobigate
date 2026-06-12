@@ -53,6 +53,7 @@ export const MediaGalleryViewer = ({
   const [likeCount, setLikeCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followerCount, setFollowerCount] = useState(0);
+  const [viewCount, setViewCount] = useState(0);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"media" | "reader">("media");
   const { toast } = useToast();
