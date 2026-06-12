@@ -63,6 +63,10 @@ export interface NewsArticle {
   views?: number;
   /** Number of comments on the post. */
   comments?: number;
+  /** Number of gifts received on the post. */
+  gifts?: number;
+  /** Backend user id of the author — needed to send gifts. */
+  authorId?: string;
   isFollowing?: boolean;
   isLiked?: boolean;
 }
