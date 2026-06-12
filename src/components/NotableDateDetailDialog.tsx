@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -6,6 +7,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useToast } from "@/hooks/use-toast";
 import {
   Cake,
   CalendarHeart,
@@ -15,6 +24,16 @@ import {
   UserCheck,
   Clock3,
   Images,
+  User,
+  MoreVertical,
+  UserMinus,
+  UserX,
+  Ban,
+  Flag,
+  Heart,
+  Share2,
+  Rss,
+  CalendarCheck,
 } from "lucide-react";
 
 export interface NotableDetailPerson {
@@ -49,8 +68,15 @@ export const NotableDateDetailDialog = ({
   onGift,
   onToggleFriend,
 }: Props) => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [willAttend, setWillAttend] = useState(false);
+
+
 
   // Reset to first slide whenever a different person opens.
   useEffect(() => {
@@ -80,6 +106,108 @@ export const NotableDateDetailDialog = ({
     el.scrollTo({ left: idx * el.clientWidth, behavior: "smooth" });
     setActiveIdx(idx);
   };
+
+  const handleViewProfile = () => {
+    onClose();
+    navigate(`/profile/${person.id}`);
+  };
+
+  // Lightweight optimistic action handlers for the "more" menu.
+  const firstName = person.name.split(" ")[0];
+
+  const moreActions = [
+
+    {
+      key: "view",
+      label: "View Profile",
+      icon: User,
+      run: handleViewProfile,
+    },
+    ...(friendState === "friend"
+      ? [
+          {
+            key: "unfriend",
+            label: "Unfriend",
+            icon: UserMinus,
+            run: () => {
+              onToggleFriend(person);
+              toast({ title: "Unfriended", description: `You are no longer friends with ${person.name}.` });
+            },
+          },
+        ]
+      : []),
+    {
+      key: "remove",
+      label: "Remove",
+      icon: UserX,
+      run: () => toast({ title: "Removed", description: `${person.name} removed from your list.` }),
+    },
+    {
+      key: "block",
+      label: "Block",
+      icon: Ban,
+      danger: true,
+      run: () => toast({ title: "Blocked", description: `${person.name} has been blocked.` }),
+    },
+    {
+      key: "report",
+      label: "Report",
+      icon: Flag,
+      danger: true,
+      run: () => toast({ title: "Reported", description: `Your report on ${person.name} was submitted.` }),
+    },
+    {
+      key: "comment",
+      label: "Comment",
+      icon: MessageCircle,
+      run: () => onMessage(person),
+    },
+    {
+      key: "like",
+      label: isLiked ? "Liked" : "Like",
+      icon: Heart,
+      run: () => {
+        setIsLiked((v) => !v);
+        toast({ title: isLiked ? "Like removed" : "Liked", description: `${firstName}'s ${isBirthday ? "birthday" : "event"}.` });
+      },
+    },
+    {
+      key: "share",
+      label: "Share",
+      icon: Share2,
+      run: async () => {
+        const shareData = {
+          title: person.name,
+          text: `Check out ${firstName}'s ${isBirthday ? "birthday" : person.eventLabel || "event"} on Mobigate!`,
+          url: typeof window !== "undefined" ? window.location.href : "",
+        };
+        if (typeof navigator !== "undefined" && typeof (navigator as any).share === "function") {
+          try { await navigator.share(shareData); return; } catch { /* dismissed */ return; }
+        }
+        await navigator.clipboard?.writeText(shareData.url);
+        toast({ title: "Link copied", description: "Share link copied to clipboard." });
+      },
+    },
+    {
+      key: "follow",
+      label: isFollowing ? "Following" : "Follow",
+      icon: Rss,
+      run: () => {
+        setIsFollowing((v) => !v);
+        toast({ title: isFollowing ? "Unfollowed" : "Following", description: `${person.name}` });
+      },
+    },
+    {
+      key: "attend",
+      label: willAttend ? "Attending" : "I will Attend",
+      icon: CalendarCheck,
+      run: () => {
+        setWillAttend((v) => !v);
+        toast({ title: willAttend ? "Attendance cancelled" : "You're attending!", description: `${firstName}'s ${isBirthday ? "birthday" : person.eventLabel || "event"}.` });
+      },
+    },
+  ];
+
 
   return (
     <Dialog open={isOpen} onOpenChange={(o) => !o && onClose()}>
@@ -209,29 +337,63 @@ export const NotableDateDetailDialog = ({
             </Button>
           </div>
 
-          <Button
-            variant={friendState === "none" ? "default" : "secondary"}
-            className="w-full"
-            disabled={friendState === "friend"}
-            onClick={() => onToggleFriend(person)}
-          >
-            {friendState === "friend" ? (
-              <>
-                <UserCheck className="h-4 w-4 mr-1.5" />
-                Friends
-              </>
-            ) : friendState === "requested" ? (
-              <>
-                <UserCheck className="h-4 w-4 mr-1.5" />
-                Request Sent — Undo
-              </>
-            ) : (
-              <>
-                <UserPlus className="h-4 w-4 mr-1.5" />
-                Add Friend
-              </>
-            )}
-          </Button>
+          {/* Friend status + View Profile + more menu */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant={friendState === "none" ? "default" : "secondary"}
+              className="flex-1"
+              disabled={friendState === "friend"}
+              onClick={() => onToggleFriend(person)}
+            >
+              {friendState === "friend" ? (
+                <>
+                  <UserCheck className="h-4 w-4 mr-1.5" />
+                  Friends
+                </>
+              ) : friendState === "requested" ? (
+                <>
+                  <UserCheck className="h-4 w-4 mr-1.5" />
+                  Request Sent — Undo
+                </>
+              ) : (
+                <>
+                  <UserPlus className="h-4 w-4 mr-1.5" />
+                  Add Friend
+                </>
+              )}
+            </Button>
+
+            <Button variant="outline" className="flex-1" onClick={handleViewProfile}>
+              <User className="h-4 w-4 mr-1.5" />
+              View Profile
+            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="shrink-0" aria-label="More actions">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                {moreActions.map((a, i) => {
+                  const Icon = a.icon;
+                  return (
+                    <div key={a.key}>
+                      {(a.key === "remove" || a.key === "comment") && <DropdownMenuSeparator />}
+                      <DropdownMenuItem
+                        onClick={a.run}
+                        className={a.danger ? "text-destructive focus:text-destructive" : ""}
+                      >
+                        <Icon className="h-4 w-4 mr-2" />
+                        {a.label}
+                      </DropdownMenuItem>
+                    </div>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
         </div>
       </DialogContent>
     </Dialog>
