@@ -407,6 +407,18 @@ export const NewsArticleDrawer = ({ article, open, onOpenChange }: NewsArticleDr
               setGiftCount((c) => c + 1);
             }}
           />
+
+          {/* ── Share sheet (fallback when native share is unavailable) ── */}
+          <ShareDialog
+            open={showShare}
+            onOpenChange={setShowShare}
+            shareUrl={typeof window !== "undefined" ? window.location.href : ""}
+            title={article.title}
+            description={article.content[0] ?? ""}
+            imageUrl={article.imageUrl}
+            author={article.author}
+            postType={article.category}
+          />
         </div>
       </DrawerContent>
     </Drawer>
