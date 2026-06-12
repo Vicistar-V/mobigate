@@ -231,21 +231,8 @@ export function WallBannerSlideshow({
             className="w-full h-full object-cover"
           />
         )}
-        {showSundryBar && (
-          <div className="absolute left-2 right-14 bottom-2 z-20">
-            <PostSundryBar
-              postId={`${ownerId}-${scope}-banner`}
-              title={fallbackAlt}
-              author={authorName}
-              authorId={ownerId}
-              authorImage={authorImage}
-              imageUrl={fallbackImage}
-              postType="Banner"
-              isOwner={isOwner}
-              variant="overlay"
-            />
-          </div>
-        )}
+        {/* Sundry tools intentionally NOT shown on the inline banner. */}
+
         {isOwner && (
           <div className="absolute bottom-3 right-3 z-20">
             {renderOwnerPlusMenu(null)}
