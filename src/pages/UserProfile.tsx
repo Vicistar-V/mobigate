@@ -98,6 +98,7 @@ const UserProfile = () => {
   const [galleryOpen,    setGalleryOpen]    = useState(false);
   const [galleryItems,   setGalleryItems]   = useState<MediaItem[]>([]);
   const [galleryIdx,     setGalleryIdx]     = useState(0);
+  const [galleryAutoAdvance, setGalleryAutoAdvance] = useState(false);
   // Unfriend confirmation state
   const [unfriendConfirm,  setUnfriendConfirm]  = useState(false);
   const [shareDialogOpen,  setShareDialogOpen]  = useState(false);
