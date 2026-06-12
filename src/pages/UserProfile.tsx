@@ -686,6 +686,7 @@ const UserProfile = () => {
         initialIndex={galleryIdx}
         showActions={true}
         galleryType="post"
+        autoAdvance={galleryAutoAdvance}
       />
 
       <SendGiftDialog
