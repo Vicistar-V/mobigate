@@ -244,6 +244,7 @@ export const MediaGalleryViewer = ({
             src={currentItem.url}
             controls
             autoPlay
+            onEnded={() => { if (autoAdvance && items.length > 1) goToNext(); }}
             className="w-full h-full object-contain"
             key={currentItem.url}
           >
