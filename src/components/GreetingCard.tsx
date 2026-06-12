@@ -1325,7 +1325,7 @@ export const GreetingSection = ({
         onOpenChange={setBannerViewerOpen}
         items={viewerItems}
         initialIndex={0}
-        showActions={false}
+        showActions={true}
         galleryType="banner"
       />
     </div>
