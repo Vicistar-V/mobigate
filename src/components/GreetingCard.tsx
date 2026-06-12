@@ -451,7 +451,7 @@ export const GreetingSection = ({
 
         {/* Identity Row — overlapping avatar */}
         <div className={embed ? "px-3 pb-3 pt-3 relative" : "px-3 pb-3 -mt-12 relative"}>
-          {!embed && (
+          {!embed && (<>
           <div className="flex items-end gap-3">
             {/* Avatar with online dot — nudged right, slightly larger */}
             <div className="relative shrink-0 ml-2">
