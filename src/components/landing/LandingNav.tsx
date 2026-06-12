@@ -52,13 +52,40 @@ export const LandingNav = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <Link
-            to="/dashboard"
-            className="lp-btn-primary group hidden items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-bold sm:inline-flex"
-          >
-            Enter App
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-          </Link>
+          <div className="relative hidden sm:block">
+            <button
+              onClick={() => setAppMenu((v) => !v)}
+              className="lp-btn-primary group inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-bold"
+            >
+              Enter App
+              <ChevronDown className={`h-4 w-4 transition-transform ${appMenu ? "rotate-180" : ""}`} />
+            </button>
+            <AnimatePresence>
+              {appMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  className="absolute right-0 mt-2 w-48 rounded-2xl lp-surface-lg p-2"
+                >
+                  <Link
+                    to="/dashboard"
+                    onClick={() => setAppMenu(false)}
+                    className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold text-[hsl(var(--lp-fg))] transition-colors hover:bg-[hsl(var(--lp-bg-tint))]"
+                  >
+                    Mobi Face <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <a
+                    href="#"
+                    onClick={() => setAppMenu(false)}
+                    className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold text-[hsl(var(--lp-fg))] transition-colors hover:bg-[hsl(var(--lp-bg-tint))]"
+                  >
+                    Mobi-Store <ArrowRight className="h-4 w-4" />
+                  </a>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
           <button
             onClick={() => setOpen((v) => !v)}
             className="lp-pill inline-flex h-10 w-10 items-center justify-center rounded-xl text-[hsl(var(--lp-fg))] md:hidden"
