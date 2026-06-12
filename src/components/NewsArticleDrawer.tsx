@@ -72,7 +72,7 @@ export const NewsArticleDrawer = ({ article, open, onOpenChange }: NewsArticleDr
       setComments(seedComments(article));
       setViewCount(article.views ?? 0);
       setShowGift(false);
-      setGiftCount((article as any).gifts ?? 0);
+      setGiftCount(article.gifts ?? 0);
     }
   }, [article]);
 
@@ -389,7 +389,7 @@ export const NewsArticleDrawer = ({ article, open, onOpenChange }: NewsArticleDr
             isOpen={showGift}
             onClose={() => setShowGift(false)}
             recipientName={article.author}
-            recipientId={(article as any).authorId}
+            recipientId={article.authorId}
             onSendGift={() => {
               // Optimistically bump the visible gift tally; the dialog itself
               // confirms + deducts the Mobi balance on success.
