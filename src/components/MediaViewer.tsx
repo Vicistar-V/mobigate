@@ -36,6 +36,7 @@ export const MediaViewer = ({
   authorUserId,
   likes = 0,
   comments = 0,
+  views = 0,
   followers,
   isLiked: initialIsLiked = false,
   isOwner = false,
@@ -47,6 +48,8 @@ export const MediaViewer = ({
   const [followerCount, setFollowerCount] = useState(
     followers ? parseInt(followers.replace(/[^0-9]/g, '')) || 0 : 0
   );
+  // Optimistically count this view (base + current viewer).
+  const [viewCount] = useState(views + 1);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const { toast } = useToast();
 
