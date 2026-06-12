@@ -1328,9 +1328,10 @@ export const GreetingSection = ({
         open={bannerViewerOpen}
         onOpenChange={setBannerViewerOpen}
         items={viewerItems}
-        initialIndex={0}
+        initialIndex={viewerStartIndex}
         showActions={true}
         galleryType="banner"
+        autoAdvance={true}
       />
     </div>
   );
