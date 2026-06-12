@@ -120,59 +120,64 @@ export const FriendRequestsTab = () => {
   };
 
   const RequestCard = ({ req, type }: { req: FriendRequest; type: "received" | "sent" }) => (
-    <div className="flex items-center gap-4 p-4 hover:bg-accent/5 transition-colors border-b last:border-b-0">
-      <div className="relative flex-shrink-0 cursor-pointer" onClick={() => navigate(`/profile/${req.user_id}`)}>
-        <Avatar className={`h-16 w-16 ring-2 ${req.is_online ? "ring-emerald-500/50" : "ring-border"}`}>
-          <AvatarImage src={req.avatar || undefined} />
-          <AvatarFallback>{req.name.substring(0, 2)}</AvatarFallback>
-        </Avatar>
-        <div className={`absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-card ${req.is_online ? "bg-emerald-500" : "bg-muted"}`} />
+    <div className="p-4 hover:bg-accent/5 transition-colors border-b last:border-b-0">
+      {/* Identity row */}
+      <div className="flex items-start gap-3">
+        <div className="relative flex-shrink-0 cursor-pointer" onClick={() => navigate(`/profile/${req.user_id}`)}>
+          <Avatar className={`h-14 w-14 ring-2 ${req.is_online ? "ring-emerald-500/50" : "ring-border"}`}>
+            <AvatarImage src={req.avatar || undefined} />
+            <AvatarFallback>{req.name.substring(0, 2)}</AvatarFallback>
+          </Avatar>
+          <div className={`absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-card ${req.is_online ? "bg-emerald-500" : "bg-muted"}`} />
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <button onClick={() => navigate(`/profile/${req.user_id}`)} className="text-left hover:underline max-w-full">
+            <p className="font-semibold text-base leading-snug break-words">{req.name}</p>
+            <p className="text-sm text-muted-foreground truncate">@{req.username}</p>
+          </button>
+          <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+            <Clock className="h-3 w-3 flex-shrink-0" />
+            <span className="truncate">
+              {type === "received" ? "Sent you a request" : "Request sent"} · {timeAgo(req.created_at)}
+            </span>
+          </p>
+        </div>
       </div>
 
-      <div className="flex-1 min-w-0">
-        <button onClick={() => navigate(`/profile/${req.user_id}`)} className="text-left hover:underline">
-          <p className="font-semibold text-base">{req.name}</p>
-          <p className="text-sm text-muted-foreground">@{req.username}</p>
-        </button>
-        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-          <Clock className="h-3 w-3" />
-          {type === "received" ? "Sent you a request" : "Request sent"} · {timeAgo(req.created_at)}
-        </p>
-      </div>
-
-      <div className="flex gap-2 flex-shrink-0">
+      {/* Action row — full-width, restacked below identity so nothing overlaps */}
+      <div className="mt-3">
         {type === "received" ? (
-          <>
+          <div className="grid grid-cols-2 gap-2">
             <Button
-              size="sm"
-              className="bg-primary hover:bg-primary/90"
+              className="w-full bg-primary hover:bg-primary/90"
               onClick={() => handleAccept(req)}
               disabled={acting[req.id]}
             >
               {acting[req.id]
                 ? <Loader2 className="h-4 w-4 animate-spin" />
-                : <><UserCheck className="h-4 w-4 mr-1" />Accept</>
+                : <><UserCheck className="h-4 w-4 mr-1.5" />Accept</>
               }
             </Button>
             <Button
-              size="sm"
               variant="destructive"
+              className="w-full"
               onClick={() => handleDecline(req)}
               disabled={acting[req.id]}
             >
-              <UserX className="h-4 w-4 mr-1" />Decline
+              <UserX className="h-4 w-4 mr-1.5" />Decline
             </Button>
-          </>
+          </div>
         ) : (
           <Button
-            size="sm"
             variant="outline"
+            className="w-full"
             onClick={() => handleCancel(req)}
             disabled={acting[req.id]}
           >
             {acting[req.id]
               ? <Loader2 className="h-4 w-4 animate-spin" />
-              : <><UserX className="h-4 w-4 mr-1" />Cancel</>
+              : <><UserX className="h-4 w-4 mr-1.5" />Cancel Request</>
             }
           </Button>
         )}
