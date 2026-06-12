@@ -290,6 +290,18 @@ export const GreetingSection = ({
     setAllVibesViewerOpen(true);
   };
 
+  // Tapping the owner's own media: on your own page → Edit/Create/View menu;
+  // when viewing someone else's page → read-only viewer (no editing).
+  const handleOwnPrimary = () => {
+    if (canEdit) {
+      setOwnActionsOpen(true);
+    } else if (featuredPost) {
+      setOwnPostsViewerOpen(true);
+    }
+  };
+
+
+
 
 
 
