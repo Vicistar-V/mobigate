@@ -1102,6 +1102,7 @@ const MyProfile = () => {
         initialIndex={galleryInitialIndex}
         showActions={true}
         galleryType={galleryType}
+        autoAdvance={galleryType === "banner" || galleryType === "wall-status"}
       />
 
       <SendGiftDialog
