@@ -1,7 +1,7 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { X, ChevronLeft, ChevronRight, Heart, Share2, MessageCircle, UserPlus, BookOpen, Image as ImageIcon, Play, Music } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Heart, Share2, MessageCircle, UserPlus, BookOpen, Image as ImageIcon, Play, Music, Eye } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
