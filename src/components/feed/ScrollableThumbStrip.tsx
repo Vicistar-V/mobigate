@@ -36,6 +36,8 @@ export const ScrollableThumbStrip = ({
   const stripRef = useRef<HTMLDivElement>(null);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(false);
+  // Auto-scroll is paused briefly whenever the user interacts with the strip.
+  const pausedUntilRef = useRef(0);
 
   // Re-evaluate which direction still has hidden content.
   const updateScrollState = useCallback(() => {
@@ -58,6 +60,35 @@ export const ScrollableThumbStrip = ({
       window.removeEventListener("resize", updateScrollState);
     };
   }, [updateScrollState, items.length]);
+
+  // ── Auto-scroll (marquee): content drifts from right → left continuously.
+  //    Pauses while the user touches/hovers and loops back to the start.
+  useEffect(() => {
+    const el = stripRef.current;
+    if (!el || items.length <= 1) return;
+
+    const pause = () => { pausedUntilRef.current = Date.now() + 2500; };
+    el.addEventListener("pointerdown", pause, { passive: true });
+    el.addEventListener("touchstart", pause, { passive: true });
+    el.addEventListener("wheel", pause, { passive: true });
+    el.addEventListener("mouseenter", pause);
+
+    const id = window.setInterval(() => {
+      if (Date.now() < pausedUntilRef.current) return;
+      const max = el.scrollWidth - el.clientWidth;
+      if (max <= 0) return;
+      // Loop back to the beginning once we reach the end.
+      el.scrollLeft = el.scrollLeft >= max - 1 ? 0 : el.scrollLeft + 1;
+    }, 30);
+
+    return () => {
+      window.clearInterval(id);
+      el.removeEventListener("pointerdown", pause);
+      el.removeEventListener("touchstart", pause);
+      el.removeEventListener("wheel", pause);
+      el.removeEventListener("mouseenter", pause);
+    };
+  }, [items.length]);
 
   // Keep the active thumbnail visible when it changes (e.g. via arrows above).
   useEffect(() => {
@@ -104,7 +135,7 @@ export const ScrollableThumbStrip = ({
               type="button"
               data-active={isActive}
               onClick={() => onSelect(i)}
-              className={`relative shrink-0 h-16 w-16 snap-start rounded-md overflow-hidden bg-muted active:scale-95 transition-all touch-manipulation ${
+              className={`relative shrink-0 h-44 w-[5.75rem] sm:h-52 sm:w-[6.5rem] snap-start rounded-lg overflow-hidden bg-muted active:scale-95 transition-all touch-manipulation ${
                 isActive
                   ? "ring-2 ring-red-500 border-2 border-red-500 shadow-md scale-[1.04]"
                   : "border border-foreground/30 opacity-90 hover:opacity-100"

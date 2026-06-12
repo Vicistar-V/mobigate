@@ -25,6 +25,7 @@ import { HeadlinesYouDontWannaMiss } from "./HeadlinesYouDontWannaMiss";
 import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { ScrollableThumbStrip } from "@/components/feed/ScrollableThumbStrip";
+import { FeedShowcaseDialog } from "@/components/feed/FeedShowcaseDialog";
 import { UserTagBadges } from "./UserTagBadges";
 import { useUserProfile, useCurrentUserId, useFeedPosts } from "@/hooks/useWindowData";
 import { feedPosts as fallbackFeedPosts } from "@/data/posts";
@@ -125,6 +126,8 @@ export const GreetingSection = ({
   // The SECOND big space rotates based on which thumbnail was tapped (any thumb, own or public)
   const [featuredPublicIdx, setFeaturedPublicIdx] = useState(0);
   const [viewerOpen, setViewerOpen] = useState(false);
+  // Full-window "see all" showcase with Filter (applies to every feed area).
+  const [showcaseOpen, setShowcaseOpen] = useState(false);
   const [viewerStartIndex, setViewerStartIndex] = useState(0);
   const [storyDetailOpen, setStoryDetailOpen] = useState(false);
   const [ownActionsOpen, setOwnActionsOpen] = useState(false);
@@ -251,9 +254,27 @@ export const GreetingSection = ({
       timestamp: (p as any).timestamp,
       likes: Number((p as any).likes) || 0,
       comments: Number((p as any).comments) || 0,
+      views: Number((p as any).views) || 0,
       followers: (p as any).followers,
       isOwner: (p as any).userId === currentUserId,
     }));
+
+  // Every post belonging to the active feed area (own + connections + public),
+  // de-duped — feeds the full-window "see all" showcase with its Filter menu.
+  const showcaseMediaItems = (() => {
+    const tabbed = allPosts.filter(matchesTab);
+    const base = tabbed.length > 0 ? tabbed : allPosts;
+    const seen = new Set<string>();
+    const uniq: typeof allPosts = [];
+    for (const p of base) {
+      const k = p.id || p.imageUrl;
+      if (seen.has(k)) continue;
+      seen.add(k);
+      uniq.push(p);
+    }
+    return toMediaItems(uniq);
+  })();
+
 
   // Auto-scroll Area B horizontally (marquee), pausing briefly on interaction.
   useEffect(() => {
@@ -846,7 +867,7 @@ export const GreetingSection = ({
                   </button>
                   <button
                     type="button"
-                    onClick={() => openAllVibes(0)}
+                    onClick={() => setShowcaseOpen(true)}
                     className="italic font-bold underline underline-offset-2 text-[13px] text-center leading-tight px-1 text-[hsl(212_95%_50%)] active:opacity-70 touch-manipulation"
                   >
                     Flex with more exciting Vibes
@@ -1028,7 +1049,7 @@ export const GreetingSection = ({
                 activeIdx={safeFeaturedIdx}
                 onSelect={(idx) => setFeaturedIdx(idx)}
                 moreLabel={tabMeta.moreLabel}
-                onSeeAll={() => setViewerOpen(true)}
+                onSeeAll={() => setShowcaseOpen(true)}
                 accent="0 84% 60%"
               />
             )}
@@ -1268,6 +1289,22 @@ export const GreetingSection = ({
         initialIndex={allVibesStartIdx}
         galleryType="post"
       />
+
+      {/* ── Full-window "see all" showcase with Filter (Stories / Vibes / Breaking News) ── */}
+      <FeedShowcaseDialog
+        open={showcaseOpen}
+        onOpenChange={setShowcaseOpen}
+        title={
+          activeFeedTab === "Breaking News"
+            ? "All Breaking News"
+            : activeFeedTab === "Vibes & Flexing"
+            ? "All Vibes & Flexing"
+            : "All Stories"
+        }
+        items={showcaseMediaItems}
+      />
+
+
 
 
 

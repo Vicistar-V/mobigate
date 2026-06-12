@@ -23,6 +23,7 @@ export interface MediaItem {
   description?: string;
   likes?: number;
   comments?: number;
+  views?: number;
   followers?: string;
   isLiked?: boolean;
   isOwner?: boolean;
