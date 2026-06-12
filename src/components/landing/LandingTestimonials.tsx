@@ -11,36 +11,49 @@ const testimonials = [
   { name: "Bola K.", role: "Fundraiser Host", body: "We hit our campaign target in days. Tracking contributions is a joy.", rating: 5 },
 ];
 
+const initials = (n: string) => n.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
+const avatarGrads = [
+  "from-violet-500 to-indigo-600",
+  "from-sky-500 to-blue-600",
+  "from-emerald-500 to-teal-600",
+  "from-amber-500 to-orange-600",
+  "from-fuchsia-500 to-purple-600",
+  "from-rose-500 to-pink-600",
+];
+
 export const LandingTestimonials = () => {
   const row = [...testimonials, ...testimonials];
   return (
-    <section className="relative overflow-hidden bg-[hsl(var(--lp-ink))] py-24">
+    <section id="loved" className="relative overflow-hidden lp-tint-bg py-24">
       <div className="mx-auto mb-12 max-w-2xl px-5 text-center">
         <Reveal>
-          <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-[hsl(var(--lp-cyan))]">
-            Loved by the community
-          </p>
-          <h2 className="text-3xl font-extrabold leading-tight text-white sm:text-5xl">
+          <p className="lp-eyebrow mb-3 text-xs font-bold uppercase">Loved by the community</p>
+          <h2 className="lp-display text-3xl font-extrabold leading-tight sm:text-5xl">
             Real people. <span className="lp-text-gradient">Real momentum.</span>
           </h2>
         </Reveal>
       </div>
 
       <div className="relative">
-        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-20 bg-gradient-to-r from-[hsl(var(--lp-ink))] to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-20 bg-gradient-to-l from-[hsl(var(--lp-ink))] to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-20 bg-gradient-to-r from-[hsl(var(--lp-bg-tint))] to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-20 bg-gradient-to-l from-[hsl(var(--lp-bg-tint))] to-transparent" />
         <div className="flex w-max lp-marquee-track gap-4 px-5">
           {row.map((t, i) => (
             <motion.div
               key={i}
-              className="w-[300px] flex-shrink-0 rounded-3xl lp-glass p-6"
+              className="w-[300px] flex-shrink-0 rounded-3xl lp-surface p-6"
             >
               <Quote className="mb-3 h-7 w-7 text-[hsl(var(--lp-violet))]" />
-              <p className="text-base leading-relaxed text-white/80">"{t.body}"</p>
+              <p className="text-base leading-relaxed text-[hsl(var(--lp-fg))]">"{t.body}"</p>
               <div className="mt-5 flex items-center justify-between">
-                <div>
-                  <p className="font-semibold text-white">{t.name}</p>
-                  <p className="text-sm text-white/55">{t.role}</p>
+                <div className="flex items-center gap-3">
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br ${avatarGrads[i % avatarGrads.length]} text-sm font-bold text-white shadow-md`}>
+                    {initials(t.name)}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-[hsl(var(--lp-fg))]">{t.name}</p>
+                    <p className="text-sm text-[hsl(var(--lp-faint))]">{t.role}</p>
+                  </div>
                 </div>
                 <div className="flex">
                   {Array.from({ length: t.rating }).map((_, s) => (
