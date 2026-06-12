@@ -33,6 +33,7 @@ import heroAdBanner from "@/assets/hero-ad-banner.jpg";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 import { WallBannerSlideshow } from "@/components/wall-banner/WallBannerSlideshow";
 import { WallBannerManagerDialog } from "@/components/wall-banner/WallBannerManagerDialog";
+import { getActiveSlidesFor } from "@/lib/wallBannerStorage";
 import { PostDetailDialog } from "@/components/PostDetailDialog";
 
 export const GreetingSection = ({
