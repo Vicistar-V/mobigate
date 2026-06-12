@@ -527,6 +527,9 @@ const UserProfile = () => {
 
           {/* Status tab */}
           <TabsContent value="status" className="space-y-6">
+            {/* Stories / Vibes & Flexing / Breaking News — read-only on another user's page */}
+            <GreetingSection embed profileUserId={userId} editable={false} />
+
             <PeopleYouMayKnow />
 
             <WallStatusCarousel
