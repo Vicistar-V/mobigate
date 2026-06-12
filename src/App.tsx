@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import Landing            from "./pages/Landing";
 import Index              from "./pages/Index";
 import MyProfile          from "./pages/MyProfile";
 import UserProfile        from "./pages/UserProfile";
