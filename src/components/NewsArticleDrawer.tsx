@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/drawer";
 import { useToast } from "@/hooks/use-toast";
 import { SendGiftDialog } from "@/components/chat/SendGiftDialog";
+import { ShareDialog } from "@/components/ShareDialog";
 import type { NewsArticle } from "@/data/trendingHeadlines";
 
 interface NewsArticleDrawerProps {
@@ -56,6 +57,9 @@ export const NewsArticleDrawer = ({ article, open, onOpenChange }: NewsArticleDr
   // Gifting
   const [showGift, setShowGift] = useState(false);
   const [giftCount, setGiftCount] = useState(0);
+
+  // Sharing
+  const [showShare, setShowShare] = useState(false);
 
   const galleryRef = useRef<HTMLDivElement>(null);
   const countedRef = useRef<string | null>(null);
@@ -113,17 +117,24 @@ export const NewsArticleDrawer = ({ article, open, onOpenChange }: NewsArticleDr
       text: article.content[0] ?? article.title,
       url: typeof window !== "undefined" ? window.location.href : "",
     };
-    try {
-      if (navigator.share) {
+    // Prefer the OS-native share sheet (WhatsApp, Messages, etc.) when available.
+    const canNativeShare =
+      typeof navigator !== "undefined" &&
+      typeof (navigator as any).share === "function";
+    if (canNativeShare) {
+      try {
         await navigator.share(shareData);
-      } else {
-        await navigator.clipboard?.writeText(shareData.url);
-        toast({ description: "Link copied to clipboard" });
+        return;
+      } catch (err: any) {
+        // User dismissed the native sheet — don't fall back, just stop.
+        if (err?.name === "AbortError") return;
+        // Otherwise fall through to the in-app share sheet.
       }
-    } catch {
-      /* dismissed — no-op */
     }
+    // Fallback: rich in-app share sheet with relevant channels.
+    setShowShare(true);
   };
+
 
   const handlePostComment = () => {
     const text = draft.trim();
@@ -395,6 +406,18 @@ export const NewsArticleDrawer = ({ article, open, onOpenChange }: NewsArticleDr
               // confirms + deducts the Mobi balance on success.
               setGiftCount((c) => c + 1);
             }}
+          />
+
+          {/* ── Share sheet (fallback when native share is unavailable) ── */}
+          <ShareDialog
+            open={showShare}
+            onOpenChange={setShowShare}
+            shareUrl={typeof window !== "undefined" ? window.location.href : ""}
+            title={article.title}
+            description={article.content[0] ?? ""}
+            imageUrl={article.imageUrl}
+            author={article.author}
+            postType={article.category}
           />
         </div>
       </DrawerContent>
