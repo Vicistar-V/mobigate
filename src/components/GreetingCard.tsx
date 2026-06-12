@@ -1079,7 +1079,7 @@ export const GreetingSection = () => {
               type="button"
               onClick={() => {
                 setOwnActionsOpen(false);
-                setEditPostOpen(true);
+                setEditPickerOpen(true);
               }}
               disabled={!featuredPost}
               className="w-full flex items-center gap-3 p-3 rounded-xl border-2 border-primary/30 bg-primary/5 hover:bg-primary/10 active:scale-[0.99] transition-all touch-manipulation text-left disabled:opacity-50"
@@ -1090,7 +1090,7 @@ export const GreetingSection = () => {
               <span className="min-w-0">
                 <span className="block text-[15px] font-bold text-foreground">Edit Post</span>
                 <span className="block text-[12px] text-muted-foreground leading-snug">
-                  Modify the images and/or text of this post.
+                  Pick any of your posts to edit its images and/or text.
                 </span>
               </span>
             </button>
