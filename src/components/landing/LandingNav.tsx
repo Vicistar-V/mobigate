@@ -6,8 +6,8 @@ import mobifaceLogo from "@/assets/mobiface-logo.png";
 
 const NAV_LINKS = [
   { label: "Ecosystem", href: "#ecosystem" },
-  { label: "Why Mobigate", href: "#features" },
   { label: "How it works", href: "#how" },
+  { label: "Loved by all", href: "#loved" },
   { label: "Apps", href: "#apps" },
 ];
 
@@ -31,7 +31,7 @@ export const LandingNav = () => {
     >
       <nav
         className={`mx-auto flex max-w-6xl items-center justify-between rounded-2xl px-4 py-2.5 transition-all duration-300 ${
-          scrolled ? "lp-glass shadow-2xl" : "bg-transparent"
+          scrolled ? "lp-surface backdrop-blur-xl" : "border border-transparent"
         }`}
       >
         <Link to="/" className="flex items-center gap-2">
@@ -43,7 +43,7 @@ export const LandingNav = () => {
             <a
               key={l.href}
               href={l.href}
-              className="text-sm font-medium text-white/75 transition-colors hover:text-white"
+              className="text-sm font-semibold text-[hsl(var(--lp-muted))] transition-colors hover:text-[hsl(var(--lp-violet))]"
             >
               {l.label}
             </a>
@@ -53,14 +53,14 @@ export const LandingNav = () => {
         <div className="flex items-center gap-2">
           <Link
             to="/dashboard"
-            className="group hidden items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[hsl(var(--lp-ink))] shadow-lg transition-transform hover:scale-105 active:scale-95 sm:inline-flex"
+            className="lp-btn-primary group hidden items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-bold sm:inline-flex"
           >
             Enter App
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
           <button
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-white lp-glass md:hidden"
+            className="lp-pill inline-flex h-10 w-10 items-center justify-center rounded-xl text-[hsl(var(--lp-fg))] md:hidden"
             aria-label="Toggle menu"
           >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -74,7 +74,7 @@ export const LandingNav = () => {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="mx-auto mt-2 max-w-6xl rounded-2xl lp-glass p-4 md:hidden"
+            className="mx-auto mt-2 max-w-6xl rounded-2xl lp-surface-lg p-4 md:hidden"
           >
             <div className="flex flex-col gap-1">
               {NAV_LINKS.map((l) => (
@@ -82,14 +82,14 @@ export const LandingNav = () => {
                   key={l.href}
                   href={l.href}
                   onClick={() => setOpen(false)}
-                  className="rounded-lg px-3 py-3 text-base font-medium text-white/85 hover:bg-white/10"
+                  className="rounded-lg px-3 py-3 text-base font-semibold text-[hsl(var(--lp-fg))] transition-colors hover:bg-[hsl(var(--lp-bg-tint))]"
                 >
                   {l.label}
                 </a>
               ))}
               <Link
                 to="/dashboard"
-                className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-xl bg-white px-4 py-3 text-base font-semibold text-[hsl(var(--lp-ink))]"
+                className="lp-btn-primary mt-2 inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-3 text-base font-bold"
               >
                 Enter App <ArrowRight className="h-4 w-4" />
               </Link>

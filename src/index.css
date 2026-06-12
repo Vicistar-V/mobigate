@@ -133,48 +133,150 @@ All colors MUST be HSL.
 }
 
 /* ============================================================
-   LANDING PAGE — premium tokens, gradients, glows, keyframes
+   LANDING PAGE — light-native premium design system
+   (scoped to .lp-light so the dashboard/app theme is untouched)
    ============================================================ */
-@layer base {
-  :root {
-    --lp-ink: 224 64% 8%;
-    --lp-violet: 256 90% 62%;
-    --lp-blue: 217 91% 50%;
-    --lp-cyan: 190 95% 50%;
-    --lp-pink: 326 90% 62%;
-    --lp-amber: 38 96% 56%;
-    --gradient-aurora: linear-gradient(120deg, hsl(217 91% 38%) 0%, hsl(256 90% 55%) 38%, hsl(326 90% 58%) 70%, hsl(38 96% 56%) 100%);
-    --gradient-hero: radial-gradient(120% 120% at 10% 0%, hsl(256 90% 18%) 0%, hsl(224 70% 7%) 45%, hsl(224 80% 4%) 100%);
-    --gradient-text: linear-gradient(95deg, hsl(190 95% 60%), hsl(256 90% 70%), hsl(326 90% 68%));
-    --gradient-card: linear-gradient(160deg, hsl(0 0% 100% / 0.10), hsl(0 0% 100% / 0.02));
-    --glow-violet: 0 0 60px -10px hsl(256 90% 62% / 0.55);
-    --glow-cyan: 0 0 60px -10px hsl(190 95% 50% / 0.5);
-  }
+.lp-light {
+  /* Surfaces */
+  --lp-bg: 228 100% 99%;
+  --lp-bg-tint: 230 60% 97%;
+  --lp-card: 0 0% 100%;
+  --lp-border: 226 32% 90%;
+
+  /* Text */
+  --lp-fg: 226 60% 11%;        /* headings */
+  --lp-muted: 222 16% 42%;     /* body */
+  --lp-faint: 222 12% 56%;     /* captions */
+
+  /* Brand spectrum (vivid, tuned for light backgrounds) */
+  --lp-violet: 256 90% 58%;
+  --lp-blue: 221 92% 54%;
+  --lp-cyan: 192 92% 42%;
+  --lp-pink: 326 86% 56%;
+  --lp-amber: 36 96% 50%;
+  --lp-emerald: 158 78% 38%;
+
+  /* Dark spotlight band (for dramatic contrast section) */
+  --lp-ink: 232 64% 9%;
+
+  /* Gradients */
+  --lp-brand-grad: linear-gradient(100deg, hsl(256 90% 56%), hsl(221 92% 52%), hsl(192 92% 44%));
+  --lp-brand-grad-soft: linear-gradient(120deg, hsl(256 90% 96%), hsl(221 92% 96%), hsl(192 92% 96%));
+  --lp-hero-wash: radial-gradient(115% 100% at 12% -5%, hsl(256 90% 95%) 0%, hsl(221 92% 96.5%) 42%, hsl(228 100% 99.5%) 100%);
+  --lp-aurora: linear-gradient(115deg, hsl(221 92% 50%) 0%, hsl(256 90% 56%) 40%, hsl(326 86% 56%) 72%, hsl(36 96% 54%) 100%);
+
+  /* Shadows / glows */
+  --lp-shadow-sm: 0 4px 16px -8px hsl(226 50% 30% / 0.18);
+  --lp-shadow: 0 18px 48px -22px hsl(226 55% 28% / 0.30);
+  --lp-shadow-lg: 0 34px 80px -30px hsl(226 60% 25% / 0.40);
+  --lp-glow-violet: 0 0 0 1px hsl(256 90% 58% / 0.18), 0 24px 60px -24px hsl(256 90% 58% / 0.45);
+
+  background: hsl(var(--lp-bg));
+  color: hsl(var(--lp-muted));
 }
 
+/* ---- Typography helpers ---- */
+.lp-display {
+  color: hsl(var(--lp-fg));
+  letter-spacing: -0.025em;
+}
 .lp-text-gradient {
-  background: var(--gradient-text);
+  background: var(--lp-brand-grad);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
 }
+.lp-eyebrow {
+  color: hsl(var(--lp-violet));
+  letter-spacing: 0.22em;
+}
 
-.lp-aurora-bg { background: var(--gradient-aurora); }
-.lp-hero-bg { background: var(--gradient-hero); }
+/* ---- Backgrounds ---- */
+.lp-hero-bg { background: var(--lp-hero-wash); }
+.lp-aurora-bg { background: var(--lp-aurora); background-size: 200% 200%; }
+.lp-tint-bg { background: hsl(var(--lp-bg-tint)); }
 
-/* Animated aurora blobs */
+/* Dark spotlight band */
+.lp-dark {
+  background:
+    radial-gradient(90% 120% at 85% -10%, hsl(256 90% 22%) 0%, transparent 55%),
+    radial-gradient(80% 120% at 0% 110%, hsl(221 92% 24%) 0%, transparent 55%),
+    hsl(var(--lp-ink));
+  color: hsl(0 0% 100% / 0.72);
+}
+.lp-dark .lp-display { color: #fff; }
+
+/* ---- Surfaces / cards ---- */
+.lp-surface {
+  background: hsl(var(--lp-card));
+  border: 1px solid hsl(var(--lp-border));
+  box-shadow: var(--lp-shadow-sm);
+}
+.lp-surface-lg {
+  background: hsl(var(--lp-card));
+  border: 1px solid hsl(var(--lp-border));
+  box-shadow: var(--lp-shadow);
+}
+.lp-glass-dark {
+  background: linear-gradient(160deg, hsl(0 0% 100% / 0.10), hsl(0 0% 100% / 0.03));
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid hsl(0 0% 100% / 0.12);
+}
+
+/* ---- Pills / chips ---- */
+.lp-pill {
+  background: hsl(0 0% 100%);
+  border: 1px solid hsl(var(--lp-border));
+  box-shadow: var(--lp-shadow-sm);
+}
+
+/* ---- Buttons ---- */
+.lp-btn-primary {
+  background: var(--lp-brand-grad);
+  background-size: 160% 160%;
+  color: #fff;
+  box-shadow: var(--lp-glow-violet);
+  transition: transform .25s cubic-bezier(.22,1,.36,1), filter .25s, background-position .6s;
+}
+.lp-btn-primary:hover { transform: translateY(-2px) scale(1.015); filter: brightness(1.06); background-position: 100% 50%; }
+.lp-btn-primary:active { transform: scale(.97); }
+.lp-btn-ghost {
+  background: hsl(0 0% 100%);
+  border: 1px solid hsl(var(--lp-border));
+  color: hsl(var(--lp-fg));
+  box-shadow: var(--lp-shadow-sm);
+  transition: transform .25s cubic-bezier(.22,1,.36,1), border-color .25s, box-shadow .25s;
+}
+.lp-btn-ghost:hover { transform: translateY(-2px); border-color: hsl(var(--lp-violet) / 0.4); box-shadow: var(--lp-shadow); }
+
+/* ---- Grid overlay (subtle) ---- */
+.lp-grid-overlay {
+  background-image:
+    linear-gradient(hsl(226 60% 11% / 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(226 60% 11% / 0.045) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask-image: radial-gradient(100% 80% at 50% 0%, #000 30%, transparent 75%);
+}
+.lp-dark .lp-grid-overlay {
+  background-image:
+    linear-gradient(hsl(0 0% 100% / 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(0 0% 100% / 0.06) 1px, transparent 1px);
+}
+
+/* ============================================================
+   Keyframes & animation utilities
+   ============================================================ */
 @keyframes lp-float {
   0%, 100% { transform: translate3d(0,0,0) scale(1); }
-  50% { transform: translate3d(0,-30px,0) scale(1.08); }
+  50% { transform: translate3d(0,-26px,0) scale(1.06); }
 }
 @keyframes lp-float-slow {
   0%, 100% { transform: translate3d(0,0,0); }
-  50% { transform: translate3d(20px,24px,0); }
+  50% { transform: translate3d(18px,22px,0); }
 }
-@keyframes lp-spin-slow {
-  to { transform: rotate(360deg); }
-}
+@keyframes lp-spin-slow { to { transform: rotate(360deg); } }
 @keyframes lp-marquee {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
@@ -185,94 +287,18 @@ All colors MUST be HSL.
   100% { background-position: 0% 50%; }
 }
 @keyframes lp-pulse-ring {
-  0% { box-shadow: 0 0 0 0 hsl(256 90% 62% / 0.5); }
-  70% { box-shadow: 0 0 0 18px hsl(256 90% 62% / 0); }
-  100% { box-shadow: 0 0 0 0 hsl(256 90% 62% / 0); }
-}
-@keyframes lp-shimmer-text {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
+  0% { box-shadow: 0 0 0 0 hsl(256 90% 58% / 0.45); }
+  70% { box-shadow: 0 0 0 18px hsl(256 90% 58% / 0); }
+  100% { box-shadow: 0 0 0 0 hsl(256 90% 58% / 0); }
 }
 
 .lp-animate-float { animation: lp-float 7s ease-in-out infinite; }
 .lp-animate-float-slow { animation: lp-float-slow 11s ease-in-out infinite; }
 .lp-animate-spin-slow { animation: lp-spin-slow 26s linear infinite; }
-.lp-marquee-track { animation: lp-marquee 32s linear infinite; }
+.lp-marquee-track { animation: lp-marquee 34s linear infinite; }
 .lp-marquee-track:hover { animation-play-state: paused; }
-.lp-animate-pan { background-size: 200% 200%; animation: lp-gradient-pan 8s ease infinite; }
-.lp-pulse-ring { animation: lp-pulse-ring 2.4s ease-out infinite; }
-
-.lp-glass {
-  background: var(--gradient-card);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid hsl(0 0% 100% / 0.12);
-}
-
-.lp-grid-overlay {
-  background-image:
-    linear-gradient(hsl(0 0% 100% / 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, hsl(0 0% 100% / 0.05) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: radial-gradient(100% 80% at 50% 0%, #000 30%, transparent 75%);
-}
-
-/* ============================================================
-   LANDING PAGE — LIGHT MODE (scoped to .lp-light so the rest
-   of the app / dashboard keep their own theme untouched)
-   ============================================================ */
-.lp-light {
-  /* lp-ink doubles as the page/section background here, so make it light.
-     Dark foreground text uses --lp-fg instead. */
-  --lp-ink: 220 100% 98.2%;
-  --lp-bg: 220 100% 98.2%;
-  --lp-fg: 224 64% 12%;
-  color: hsl(var(--lp-fg));
-}
-
-/* Hero + section gradients → soft, airy light wash */
-.lp-light .lp-hero-bg,
-.lp-light.lp-hero-bg {
-  background:
-    radial-gradient(120% 120% at 10% 0%,
-      hsl(256 90% 95%) 0%,
-      hsl(217 91% 96%) 45%,
-      hsl(220 100% 99%) 100%);
-}
-
-/* Glass panels → frosted white with soft shadow */
-.lp-light .lp-glass {
-  background: linear-gradient(160deg, hsl(0 0% 100% / 0.85), hsl(0 0% 100% / 0.6));
-  border: 1px solid hsl(224 30% 88%);
-  box-shadow: 0 10px 34px -16px hsl(224 40% 35% / 0.25);
-}
-
-/* Faint grid lines → dark hairlines on light */
-.lp-light .lp-grid-overlay {
-  background-image:
-    linear-gradient(hsl(224 64% 8% / 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, hsl(224 64% 8% / 0.05) 1px, transparent 1px);
-}
-
-/* Text colors that were tuned for dark → remap to light-mode equivalents */
-.lp-light .text-white { color: hsl(var(--lp-fg)) !important; }
-.lp-light [class*="text-white/"] { color: hsl(215 16% 45%) !important; }
-
-/* Translucent white surfaces → subtle light tint */
-.lp-light [class*="bg-white/"] { background-color: hsl(224 50% 95%) !important; }
-
-/* White hairline borders → light slate */
-.lp-light [class*="border-white/"] { border-color: hsl(224 30% 88%) !important; }
-
-/* Solid white CTAs/badges → dark ink buttons with white label for contrast */
-.lp-light .bg-white {
-  background-color: hsl(var(--lp-fg)) !important;
-  color: #fff !important;
-}
-.lp-light .bg-white :where(svg) { color: #fff !important; }
-
-/* hover:text-white would turn text invisible on a light bg → keep it dark */
-.lp-light [class*="hover:text-white"]:hover { color: hsl(var(--lp-fg)) !important; }
+.lp-animate-pan { animation: lp-gradient-pan 9s ease infinite; }
+.lp-pulse-ring { animation: lp-pulse-ring 2.6s ease-out infinite; }
 
 @media (prefers-reduced-motion: reduce) {
   .lp-animate-float, .lp-animate-float-slow, .lp-animate-spin-slow,
