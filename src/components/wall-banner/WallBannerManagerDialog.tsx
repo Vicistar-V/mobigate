@@ -263,121 +263,125 @@ export function WallBannerManagerDialog({
                 return (
                   <li
                     key={s.id}
-                    className={`flex gap-3 p-2 border rounded-md bg-card transition-colors ${
+                    className={`p-2 border rounded-md bg-card transition-colors ${
                       isSel ? "ring-2 ring-primary border-primary" : ""
                     }`}
                   >
-                    <div className="flex items-start pt-1">
-                      <Checkbox
-                        checked={isSel}
-                        onCheckedChange={() => toggleOne(s.id)}
-                        aria-label="Select slide"
-                      />
-                    </div>
-                    <div
-                      className="h-20 w-28 shrink-0 rounded-md overflow-hidden bg-muted cursor-pointer"
-                      onClick={() => toggleOne(s.id)}
-                    >
-                      {s.mediaType === "video" ? (
-                        <video
-                          src={s.mediaUrl}
-                          poster={s.posterUrl}
-                          className="w-full h-full object-cover"
-                          muted
+                    <div className="flex gap-2">
+                      <div className="flex items-start pt-1">
+                        <Checkbox
+                          checked={isSel}
+                          onCheckedChange={() => toggleOne(s.id)}
+                          aria-label="Select slide"
                         />
-                      ) : (
-                        <img
-                          src={s.mediaUrl}
-                          alt={s.caption || "slide"}
-                          className="w-full h-full object-cover"
-                        />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate">
-                        {s.caption ||
-                          (s.mediaType === "video"
-                            ? "Video slide"
-                            : "Photo slide")}
-                      </p>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {s.sponsored && (
-                          <Badge variant="secondary" className="text-[10px]">
-                            {s.sponsorLabel || "Sponsored"}
-                          </Badge>
-                        )}
-                        {s.paused && (
-                          <Badge variant="destructive" className="text-[10px]">
-                            Paused
-                          </Badge>
-                        )}
-                        <Badge variant="outline" className="text-[10px]">
-                          {s.mediaType}
-                        </Badge>
                       </div>
-                      <div className="mt-1.5 text-[11px] text-muted-foreground space-y-0.5">
-                        <p className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" /> {s.displaySeconds}s per view
-                        </p>
-                        <p className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" /> {formatRange(s)}
-                        </p>
-                        <p className="flex items-center gap-1 truncate">
-                          <Link2 className="h-3 w-3" /> {actionLabel(s)}
-                        </p>
+                      <div
+                        className="h-16 w-20 shrink-0 rounded-md overflow-hidden bg-muted cursor-pointer"
+                        onClick={() => toggleOne(s.id)}
+                      >
+                        {s.mediaType === "video" ? (
+                          <video
+                            src={s.mediaUrl}
+                            poster={s.posterUrl}
+                            className="w-full h-full object-cover"
+                            muted
+                          />
+                        ) : (
+                          <img
+                            src={s.mediaUrl}
+                            alt={s.caption || "slide"}
+                            className="w-full h-full object-cover"
+                          />
+                        )}
                       </div>
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-7 text-[11px]"
-                          onClick={() => {
-                            togglePauseSlide(s.id);
-                            toast({
-                              title: s.paused ? "Slide resumed" : "Slide paused",
-                            });
-                          }}
-                        >
-                          {s.paused ? (
-                            <>
-                              <Play className="h-3 w-3 mr-1" />
-                              Resume
-                            </>
-                          ) : (
-                            <>
-                              <Pause className="h-3 w-3 mr-1" />
-                              Pause
-                            </>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold break-words">
+                          {s.caption ||
+                            (s.mediaType === "video"
+                              ? "Video slide"
+                              : "Photo slide")}
+                        </p>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {s.sponsored && (
+                            <Badge variant="secondary" className="text-[10px]">
+                              {s.sponsorLabel || "Sponsored"}
+                            </Badge>
                           )}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-7 text-[11px]"
-                          onClick={() => setEditing(s)}
-                        >
-                          <Pencil className="h-3 w-3 mr-1" />
-                          Edit
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-7 text-[11px] text-destructive border-destructive/40"
-                          onClick={() => {
-                            if (
-                              confirm(
-                                "Delete this slide? This cannot be undone.",
-                              )
-                            ) {
-                              deleteSlide(s.id);
-                              toast({ title: "Slide deleted" });
-                            }
-                          }}
-                        >
-                          <Trash2 className="h-3 w-3 mr-1" />
-                          Delete
-                        </Button>
+                          {s.paused && (
+                            <Badge variant="destructive" className="text-[10px]">
+                              Paused
+                            </Badge>
+                          )}
+                          <Badge variant="outline" className="text-[10px]">
+                            {s.mediaType}
+                          </Badge>
+                        </div>
                       </div>
+                    </div>
+
+                    <div className="mt-1.5 text-xs text-muted-foreground space-y-0.5">
+                      <p className="flex items-center gap-1">
+                        <Clock className="h-3 w-3 shrink-0" /> {s.displaySeconds}s per view
+                      </p>
+                      <p className="flex items-center gap-1 break-all">
+                        <Calendar className="h-3 w-3 shrink-0" /> {formatRange(s)}
+                      </p>
+                      <p className="flex items-start gap-1 break-all">
+                        <Link2 className="h-3 w-3 shrink-0 mt-0.5" /> {actionLabel(s)}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-1 mt-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-9 w-full"
+                        onClick={() => {
+                          togglePauseSlide(s.id);
+                          toast({
+                            title: s.paused ? "Slide resumed" : "Slide paused",
+                          });
+                        }}
+                      >
+                        {s.paused ? (
+                          <>
+                            <Play className="h-3.5 w-3.5 mr-1 shrink-0" />
+                            Resume
+                          </>
+                        ) : (
+                          <>
+                            <Pause className="h-3.5 w-3.5 mr-1 shrink-0" />
+                            Pause
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-9 w-full"
+                        onClick={() => setEditing(s)}
+                      >
+                        <Pencil className="h-3.5 w-3.5 mr-1 shrink-0" />
+                        Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-9 w-full text-destructive border-destructive/40"
+                        onClick={() => {
+                          if (
+                            confirm(
+                              "Delete this slide? This cannot be undone.",
+                            )
+                          ) {
+                            deleteSlide(s.id);
+                            toast({ title: "Slide deleted" });
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5 mr-1 shrink-0" />
+                        Delete
+                      </Button>
                     </div>
                   </li>
                 );
