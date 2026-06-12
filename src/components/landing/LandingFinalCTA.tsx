@@ -5,14 +5,14 @@ import { ArrowRight } from "lucide-react";
 
 export const LandingFinalCTA = () => {
   return (
-    <section className="relative overflow-hidden bg-[hsl(var(--lp-ink))] px-5 py-24">
+    <section className="relative overflow-hidden bg-[hsl(var(--lp-bg))] px-5 py-24">
       <div className="mx-auto max-w-5xl">
         <Reveal>
-          <div className="relative overflow-hidden rounded-[2.5rem] p-10 text-center sm:p-16">
-            <div className="absolute inset-0 lp-aurora-bg lp-animate-pan opacity-90" />
-            <div className="pointer-events-none absolute inset-0 lp-grid-overlay opacity-40" />
+          <div className="relative overflow-hidden rounded-[2.5rem] p-10 text-center shadow-[var(--lp-shadow-lg)] sm:p-16">
+            <div className="absolute inset-0 lp-aurora-bg lp-animate-pan" />
+            <div className="pointer-events-none absolute inset-0 lp-grid-overlay opacity-30" />
             <div className="relative">
-              <h2 className="mx-auto max-w-2xl text-4xl font-black leading-[1.05] text-white sm:text-6xl">
+              <h2 className="mx-auto max-w-2xl text-4xl font-black leading-[1.05] text-white drop-shadow-sm sm:text-6xl">
                 Your world of endless possibilities is one tap away.
               </h2>
               <p className="mx-auto mt-5 max-w-xl text-lg text-white/85">
@@ -26,7 +26,7 @@ export const LandingFinalCTA = () => {
               >
                 <Link
                   to="/dashboard"
-                  className="group inline-flex items-center gap-2 rounded-2xl bg-white px-8 py-4 text-lg font-bold text-[hsl(var(--lp-ink))] shadow-2xl"
+                  className="group inline-flex items-center gap-2 rounded-2xl bg-white px-8 py-4 text-lg font-bold text-[hsl(var(--lp-violet))] shadow-2xl transition-transform"
                 >
                   Enter Mobigate now
                   <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
