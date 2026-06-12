@@ -25,6 +25,7 @@ import { HeadlinesYouDontWannaMiss } from "./HeadlinesYouDontWannaMiss";
 import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { ScrollableThumbStrip } from "@/components/feed/ScrollableThumbStrip";
+import { FeedShowcaseDialog } from "@/components/feed/FeedShowcaseDialog";
 import { UserTagBadges } from "./UserTagBadges";
 import { useUserProfile, useCurrentUserId, useFeedPosts } from "@/hooks/useWindowData";
 import { feedPosts as fallbackFeedPosts } from "@/data/posts";
