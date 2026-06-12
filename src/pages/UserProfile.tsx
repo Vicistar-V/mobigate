@@ -166,6 +166,29 @@ const UserProfile = () => {
     } catch { toast({ title: "Error", description: "Cannot reach server", variant: "destructive" }); }
   };
 
+  const handleCancelRequest = async () => {
+    if (!profile) return;
+    const prev = friendStatus;
+    setFriendStatus("none"); // optimistic
+    try {
+      const res  = await fetch(`${API_BASE}/friends/remove.php`, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ friend_id: profile.id }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: "Request cancelled", description: `Friend request to ${profile.name} was cancelled.` });
+      } else {
+        setFriendStatus(prev);
+        toast({ title: "Error", description: data.error || "Could not cancel request", variant: "destructive" });
+      }
+    } catch {
+      setFriendStatus(prev);
+      toast({ title: "Error", description: "Cannot reach server", variant: "destructive" });
+    }
+  };
+
   const handleUnfriend = async () => {
     if (!profile) return;
     // First click: show confirmation
