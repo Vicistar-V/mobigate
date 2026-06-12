@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { WallBannerEditDialog } from "./WallBannerEditDialog";
-import { PostSundryBar } from "@/components/feed/PostSundryBar";
 
 interface WallBannerSlideshowProps {
   ownerId: string;
