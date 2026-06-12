@@ -103,6 +103,110 @@ export const NotableDateDetailDialog = ({
     setActiveIdx(idx);
   };
 
+  const handleViewProfile = () => {
+    onClose();
+    navigate(`/profile/${person.id}`);
+  };
+
+  // Lightweight optimistic action handlers for the "more" menu.
+  const firstName = person.name.split(" ")[0];
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [willAttend, setWillAttend] = useState(false);
+
+  const moreActions = [
+    {
+      key: "view",
+      label: "View Profile",
+      icon: User,
+      run: handleViewProfile,
+    },
+    ...(friendState === "friend"
+      ? [
+          {
+            key: "unfriend",
+            label: "Unfriend",
+            icon: UserMinus,
+            run: () => {
+              onToggleFriend(person);
+              toast({ title: "Unfriended", description: `You are no longer friends with ${person.name}.` });
+            },
+          },
+        ]
+      : []),
+    {
+      key: "remove",
+      label: "Remove",
+      icon: UserX,
+      run: () => toast({ title: "Removed", description: `${person.name} removed from your list.` }),
+    },
+    {
+      key: "block",
+      label: "Block",
+      icon: Ban,
+      danger: true,
+      run: () => toast({ title: "Blocked", description: `${person.name} has been blocked.` }),
+    },
+    {
+      key: "report",
+      label: "Report",
+      icon: Flag,
+      danger: true,
+      run: () => toast({ title: "Reported", description: `Your report on ${person.name} was submitted.` }),
+    },
+    {
+      key: "comment",
+      label: "Comment",
+      icon: MessageCircle,
+      run: () => onMessage(person),
+    },
+    {
+      key: "like",
+      label: isLiked ? "Liked" : "Like",
+      icon: Heart,
+      run: () => {
+        setIsLiked((v) => !v);
+        toast({ title: isLiked ? "Like removed" : "Liked", description: `${firstName}'s ${isBirthday ? "birthday" : "event"}.` });
+      },
+    },
+    {
+      key: "share",
+      label: "Share",
+      icon: Share2,
+      run: async () => {
+        const shareData = {
+          title: person.name,
+          text: `Check out ${firstName}'s ${isBirthday ? "birthday" : person.eventLabel || "event"} on Mobigate!`,
+          url: typeof window !== "undefined" ? window.location.href : "",
+        };
+        if (typeof navigator !== "undefined" && typeof (navigator as any).share === "function") {
+          try { await navigator.share(shareData); return; } catch { /* dismissed */ return; }
+        }
+        await navigator.clipboard?.writeText(shareData.url);
+        toast({ title: "Link copied", description: "Share link copied to clipboard." });
+      },
+    },
+    {
+      key: "follow",
+      label: isFollowing ? "Following" : "Follow",
+      icon: Rss,
+      run: () => {
+        setIsFollowing((v) => !v);
+        toast({ title: isFollowing ? "Unfollowed" : "Following", description: `${person.name}` });
+      },
+    },
+    {
+      key: "attend",
+      label: willAttend ? "Attending" : "I will Attend",
+      icon: CalendarCheck,
+      run: () => {
+        setWillAttend((v) => !v);
+        toast({ title: willAttend ? "Attendance cancelled" : "You're attending!", description: `${firstName}'s ${isBirthday ? "birthday" : person.eventLabel || "event"}.` });
+      },
+    },
+  ];
+
+
   return (
     <Dialog open={isOpen} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-md p-0 overflow-hidden gap-0">
