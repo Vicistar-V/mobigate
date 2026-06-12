@@ -636,16 +636,19 @@ const MyProfile = () => {
             onManage={() => setWallBannerManagerOpen(true)}
             onChangeFallback={() => setWallBannerManagerOpen(true)}
             onOpenViewer={(slide: WallBannerSlide) => {
-              setGalleryItems([
-                {
-                  id: slide.id,
-                  url: slide.mediaUrl,
-                  type: slide.mediaType,
+              const active = getActiveSlidesFor(currentUserId, "profile");
+              const list = active.length ? active : [slide];
+              setGalleryItems(
+                list.map((s) => ({
+                  id: s.id,
+                  url: s.mediaUrl,
+                  type: s.mediaType,
                   author: userProfile.name,
-                  title: slide.caption,
-                } as MediaItem,
-              ]);
-              setGalleryInitialIndex(0);
+                  title: s.caption,
+                  durationMs: (s.displaySeconds || 5) * 1000,
+                }) as MediaItem),
+              );
+              setGalleryInitialIndex(Math.max(0, list.findIndex((s) => s.id === slide.id)));
               setGalleryType("banner");
               setMediaGalleryOpen(true);
             }}
