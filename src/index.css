@@ -217,6 +217,63 @@ All colors MUST be HSL.
   mask-image: radial-gradient(100% 80% at 50% 0%, #000 30%, transparent 75%);
 }
 
+/* ============================================================
+   LANDING PAGE — LIGHT MODE (scoped to .lp-light so the rest
+   of the app / dashboard keep their own theme untouched)
+   ============================================================ */
+.lp-light {
+  /* lp-ink doubles as the page/section background here, so make it light.
+     Dark foreground text uses --lp-fg instead. */
+  --lp-ink: 220 100% 98.2%;
+  --lp-bg: 220 100% 98.2%;
+  --lp-fg: 224 64% 12%;
+  color: hsl(var(--lp-fg));
+}
+
+/* Hero + section gradients → soft, airy light wash */
+.lp-light .lp-hero-bg,
+.lp-light.lp-hero-bg {
+  background:
+    radial-gradient(120% 120% at 10% 0%,
+      hsl(256 90% 95%) 0%,
+      hsl(217 91% 96%) 45%,
+      hsl(220 100% 99%) 100%);
+}
+
+/* Glass panels → frosted white with soft shadow */
+.lp-light .lp-glass {
+  background: linear-gradient(160deg, hsl(0 0% 100% / 0.85), hsl(0 0% 100% / 0.6));
+  border: 1px solid hsl(224 30% 88%);
+  box-shadow: 0 10px 34px -16px hsl(224 40% 35% / 0.25);
+}
+
+/* Faint grid lines → dark hairlines on light */
+.lp-light .lp-grid-overlay {
+  background-image:
+    linear-gradient(hsl(224 64% 8% / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(224 64% 8% / 0.05) 1px, transparent 1px);
+}
+
+/* Text colors that were tuned for dark → remap to light-mode equivalents */
+.lp-light .text-white { color: hsl(var(--lp-fg)) !important; }
+.lp-light [class*="text-white/"] { color: hsl(215 16% 45%) !important; }
+
+/* Translucent white surfaces → subtle light tint */
+.lp-light [class*="bg-white/"] { background-color: hsl(224 50% 95%) !important; }
+
+/* White hairline borders → light slate */
+.lp-light [class*="border-white/"] { border-color: hsl(224 30% 88%) !important; }
+
+/* Solid white CTAs/badges → dark ink buttons with white label for contrast */
+.lp-light .bg-white {
+  background-color: hsl(var(--lp-fg)) !important;
+  color: #fff !important;
+}
+.lp-light .bg-white :where(svg) { color: #fff !important; }
+
+/* hover:text-white would turn text invisible on a light bg → keep it dark */
+.lp-light [class*="hover:text-white"]:hover { color: hsl(var(--lp-fg)) !important; }
+
 @media (prefers-reduced-motion: reduce) {
   .lp-animate-float, .lp-animate-float-slow, .lp-animate-spin-slow,
   .lp-marquee-track, .lp-animate-pan, .lp-pulse-ring { animation: none !important; }

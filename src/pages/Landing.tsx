@@ -32,7 +32,7 @@ const Landing = () => {
   }, []);
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[hsl(var(--lp-ink))] antialiased">
+    <div className="lp-light relative min-h-screen overflow-x-hidden bg-[hsl(var(--lp-bg))] antialiased">
       {/* Scroll progress bar */}
       <motion.div
         style={{ scaleX }}
