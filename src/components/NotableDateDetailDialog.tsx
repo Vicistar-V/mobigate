@@ -337,29 +337,63 @@ export const NotableDateDetailDialog = ({
             </Button>
           </div>
 
-          <Button
-            variant={friendState === "none" ? "default" : "secondary"}
-            className="w-full"
-            disabled={friendState === "friend"}
-            onClick={() => onToggleFriend(person)}
-          >
-            {friendState === "friend" ? (
-              <>
-                <UserCheck className="h-4 w-4 mr-1.5" />
-                Friends
-              </>
-            ) : friendState === "requested" ? (
-              <>
-                <UserCheck className="h-4 w-4 mr-1.5" />
-                Request Sent — Undo
-              </>
-            ) : (
-              <>
-                <UserPlus className="h-4 w-4 mr-1.5" />
-                Add Friend
-              </>
-            )}
-          </Button>
+          {/* Friend status + View Profile + more menu */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant={friendState === "none" ? "default" : "secondary"}
+              className="flex-1"
+              disabled={friendState === "friend"}
+              onClick={() => onToggleFriend(person)}
+            >
+              {friendState === "friend" ? (
+                <>
+                  <UserCheck className="h-4 w-4 mr-1.5" />
+                  Friends
+                </>
+              ) : friendState === "requested" ? (
+                <>
+                  <UserCheck className="h-4 w-4 mr-1.5" />
+                  Request Sent — Undo
+                </>
+              ) : (
+                <>
+                  <UserPlus className="h-4 w-4 mr-1.5" />
+                  Add Friend
+                </>
+              )}
+            </Button>
+
+            <Button variant="outline" className="flex-1" onClick={handleViewProfile}>
+              <User className="h-4 w-4 mr-1.5" />
+              View Profile
+            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="shrink-0" aria-label="More actions">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                {moreActions.map((a, i) => {
+                  const Icon = a.icon;
+                  return (
+                    <div key={a.key}>
+                      {(a.key === "remove" || a.key === "comment") && <DropdownMenuSeparator />}
+                      <DropdownMenuItem
+                        onClick={a.run}
+                        className={a.danger ? "text-destructive focus:text-destructive" : ""}
+                      >
+                        <Icon className="h-4 w-4 mr-2" />
+                        {a.label}
+                      </DropdownMenuItem>
+                    </div>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
         </div>
       </DialogContent>
     </Dialog>
