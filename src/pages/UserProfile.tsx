@@ -452,8 +452,13 @@ const UserProfile = () => {
                   </Button>
                 )}
                 {friendStatus === "pending" && (
-                  <Button size="sm" variant="secondary" disabled>
-                    <Users className="h-4 w-4 mr-1" />Request Sent
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-1 border-amber-300 text-amber-600 hover:bg-amber-50 hover:text-amber-700 transition-colors"
+                    onClick={handleCancelRequest}
+                  >
+                    <UserX className="h-4 w-4 mr-1" />Cancel Request
                   </Button>
                 )}
                 {friendStatus === "accepted" && (
