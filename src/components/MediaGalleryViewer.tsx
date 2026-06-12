@@ -29,6 +29,8 @@ export interface MediaItem {
   isOwner?: boolean;
   /** Show the "✓Copyright" designation marker on this media (default true) */
   copyrightMarked?: boolean;
+  /** How long this slide stays on screen before auto-advancing (ms). Photos/audio only. */
+  durationMs?: number;
 }
 
 interface MediaGalleryViewerProps {
