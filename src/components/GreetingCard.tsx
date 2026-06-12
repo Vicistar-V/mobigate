@@ -1137,18 +1137,84 @@ export const GreetingSection = () => {
         </ActionDialogContent>
       </ActionDialog>
 
-      {/* ── Edit existing own post dialog ── */}
-      {featuredPost && (
+      {/* ── Edit existing own post dialog (edits the picked post, else latest) ── */}
+      {(postToEdit || featuredPost) && (
         <EditPostDialog
-          post={featuredPost as any}
+          post={(postToEdit || featuredPost) as any}
           open={editPostOpen}
-          onOpenChange={setEditPostOpen}
+          onOpenChange={(o) => {
+            setEditPostOpen(o);
+            if (!o) setPostToEdit(null);
+          }}
           onSave={() => {
             setEditPostOpen(false);
+            setPostToEdit(null);
             window.dispatchEvent(new CustomEvent("postUpdated"));
           }}
         />
       )}
+
+      {/* ── Edit picker — choose which of your posts to edit ── */}
+      <ActionDialog open={editPickerOpen} onOpenChange={setEditPickerOpen}>
+        <ActionDialogContent className="sm:max-w-lg rounded-2xl p-5 max-h-[85dvh] overflow-y-auto">
+          <ActionDialogHeader>
+            <ActionDialogTitle className="text-lg">Select a Post to Edit</ActionDialogTitle>
+            <ActionDialogDescription>
+              Tap any of your posts to open it in the editor.
+            </ActionDialogDescription>
+          </ActionDialogHeader>
+          {myOwnPosts.length === 0 ? (
+            <p className="mt-4 text-sm text-muted-foreground text-center py-6">
+              You haven't shared any posts yet.
+            </p>
+          ) : (
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              {myOwnPosts.map((post, i) => (
+                <button
+                  key={`edit-pick-${i}-${post.id ?? i}`}
+                  type="button"
+                  onClick={() => {
+                    setPostToEdit(post);
+                    setEditPickerOpen(false);
+                    setEditPostOpen(true);
+                  }}
+                  className="relative aspect-square rounded-lg overflow-hidden border border-border bg-muted active:scale-95 transition-transform touch-manipulation"
+                  aria-label={`Edit ${post.title || "post"}`}
+                >
+                  <img
+                    src={post.imageUrl}
+                    alt={post.title}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                  <span className="absolute inset-x-0 bottom-0 bg-black/55 text-white text-[10px] font-medium px-1 py-0.5 truncate">
+                    {post.title || "Untitled"}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </ActionDialogContent>
+      </ActionDialog>
+
+      {/* ── Viewer: all of MY posts (Area A enlarge + "View my Posts") ── */}
+      <MediaGalleryViewer
+        open={ownPostsViewerOpen}
+        onOpenChange={setOwnPostsViewerOpen}
+        items={toMediaItems(myOwnPosts)}
+        initialIndex={0}
+        galleryType="post"
+      />
+
+      {/* ── Viewer: ALL vibes by everybody ("Flex with more exciting Vibes") ── */}
+      <MediaGalleryViewer
+        open={allVibesViewerOpen}
+        onOpenChange={setAllVibesViewerOpen}
+        items={toMediaItems(communityVibes)}
+        initialIndex={allVibesStartIdx}
+        galleryType="post"
+      />
+
 
 
       {/* Service Unavailable Dialog */}
