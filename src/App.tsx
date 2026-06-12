@@ -58,7 +58,8 @@ const App = () => {
                     </Routes>
                   </div>
                 </div>
-              </SidebarProvider>
+                </SidebarProvider>
+              </AuthGuard>
             } />
           </Routes>
         </BrowserRouter>
