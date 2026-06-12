@@ -173,6 +173,121 @@ export const fallbackMissedHeadlines: MissedHeadline[] = [
     views: 894,
     comments: 22,
   },
+  {
+    id: "mh_4",
+    title: "Coastal Cities Unveil Bold Plan to Tame Rising Seas",
+    category: "WORLD",
+    excerpt:
+      "A coalition of coastal megacities announces a sweeping engineering programme to protect millions from flooding in the decades ahead.",
+    content: [
+      "A coalition of coastal megacities has announced a sweeping engineering programme to protect millions of residents from flooding in the decades ahead.",
+      "The plan combines floating neighbourhoods, restored wetlands, and next-generation sea walls designed to adapt as waters continue to rise.",
+      "Officials say the initiative will be funded through a mix of public investment and private partnerships, with the first projects breaking ground next year.",
+      "Climate experts welcomed the move but warned that adaptation alone cannot replace urgent cuts to global emissions.",
+    ],
+    imageUrl:
+      "https://images.unsplash.com/photo-1496450681664-3df85efbd29f?w=800&q=80",
+    author: "Tunde Adeyemi",
+    authorAvatar:
+      "https://api.dicebear.com/7.x/initials/svg?seed=Tunde%20Adeyemi&backgroundColor=16a085",
+    timeAgo: "10 Hours ago",
+    privacy: "Public",
+    likes: 372,
+    views: 765,
+    comments: 18,
+  },
+  {
+    id: "mh_5",
+    title: "Underdog Squad Stuns Champions in Final-Second Thriller",
+    category: "SPORTS",
+    excerpt:
+      "A last-gasp goal sends shockwaves through the league as the season's biggest favourites crash out in dramatic fashion.",
+    content: [
+      "A last-gasp goal sent shockwaves through the league as the season's biggest favourites crashed out in dramatic fashion.",
+      "The underdog squad, written off by pundits weeks ago, produced a performance of grit and flair that few will forget.",
+      "Fans flooded the streets in celebration, while the defeated champions were left to reflect on a campaign that promised so much.",
+      "The result reshapes the title race and sets up a tantalising run-in to the season's climax.",
+    ],
+    imageUrl:
+      "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=800&q=80",
+    author: "Ngozi Eze",
+    authorAvatar:
+      "https://api.dicebear.com/7.x/initials/svg?seed=Ngozi%20Eze&backgroundColor=c0392b",
+    timeAgo: "12 Hours ago",
+    privacy: "Public",
+    likes: 528,
+    views: 1042,
+    comments: 47,
+  },
+  {
+    id: "mh_6",
+    title: "New Health Study Rewrites the Rules on Daily Habits",
+    category: "HEALTH",
+    excerpt:
+      "A landmark study upends long-held assumptions about exercise, sleep, and nutrition, offering surprising guidance for everyday life.",
+    content: [
+      "A landmark study has upended long-held assumptions about exercise, sleep, and nutrition, offering surprising guidance for everyday life.",
+      "Researchers followed tens of thousands of participants over a decade, uncovering patterns that challenge popular wellness advice.",
+      "Among the findings: consistency matters far more than intensity, and small daily choices compound into outsized long-term benefits.",
+      "Doctors say the results could reshape public health messaging and empower people to make smarter, simpler decisions.",
+    ],
+    imageUrl:
+      "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=800&q=80",
+    author: "Ifeoma Nwosu",
+    authorAvatar:
+      "https://api.dicebear.com/7.x/initials/svg?seed=Ifeoma%20Nwosu&backgroundColor=2c3e50",
+    timeAgo: "14 Hours ago",
+    privacy: "Public",
+    likes: 689,
+    views: 1310,
+    comments: 63,
+  },
+  {
+    id: "mh_7",
+    title: "Streaming Wars Heat Up as New Platform Lands Blockbuster Deal",
+    category: "ENTERTAINMENT",
+    excerpt:
+      "A bold newcomer secures exclusive rights to a slate of major releases, shaking up an industry already fighting for attention.",
+    content: [
+      "A bold newcomer has secured exclusive rights to a slate of major releases, shaking up an industry already fighting for attention.",
+      "The deal signals an aggressive push into original content, with billions earmarked for production over the next three years.",
+      "Rivals are scrambling to respond, sparking fresh speculation about consolidation across the entertainment landscape.",
+      "For viewers, the competition could mean more choice — and more difficult decisions about where to spend their subscription dollars.",
+    ],
+    imageUrl:
+      "https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=800&q=80",
+    author: "Kelechi Obi",
+    authorAvatar:
+      "https://api.dicebear.com/7.x/initials/svg?seed=Kelechi%20Obi&backgroundColor=d35400",
+    timeAgo: "16 Hours ago",
+    privacy: "Public",
+    likes: 451,
+    views: 980,
+    comments: 29,
+  },
+  {
+    id: "mh_8",
+    title: "Startups Race to Build the Next Generation of AI Assistants",
+    category: "TECH",
+    excerpt:
+      "A new wave of startups is betting that smarter, more personal AI assistants will transform how we work and live.",
+    content: [
+      "A new wave of startups is betting that smarter, more personal AI assistants will transform how we work and live.",
+      "These tools promise to anticipate needs, automate routine tasks, and adapt to each user's unique style and preferences.",
+      "Investors are pouring capital into the space, even as questions about privacy, accuracy, and trust remain unresolved.",
+      "Whether any of them can dethrone today's tech giants is the question keeping the industry on edge.",
+    ],
+    imageUrl:
+      "https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=800&q=80",
+    author: "Zainab Yusuf",
+    authorAvatar:
+      "https://api.dicebear.com/7.x/initials/svg?seed=Zainab%20Yusuf&backgroundColor=2980b9",
+    timeAgo: "18 Hours ago",
+    privacy: "Public",
+    likes: 736,
+    views: 1502,
+    comments: 58,
+  },
 ];
 
 /** Side navigation links shown beside the feature card. */
