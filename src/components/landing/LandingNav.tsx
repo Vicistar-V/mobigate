@@ -14,6 +14,7 @@ const NAV_LINKS = [
 export const LandingNav = () => {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [appMenu, setAppMenu] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
