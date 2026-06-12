@@ -151,8 +151,8 @@ export function WallBannerManagerDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[92dvh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-2xl max-h-[92dvh] overflow-y-auto overflow-x-hidden p-4 sm:p-6">
+          <DialogHeader className="text-left">
             <DialogTitle>Manage Wall Banner</DialogTitle>
             <DialogDescription>
               Add, edit, pause or remove the photos and videos that rotate on
@@ -161,20 +161,20 @@ export function WallBannerManagerDialog({
           </DialogHeader>
 
           {/* Top toolbar */}
-          <div className="flex flex-wrap items-center justify-between gap-2 py-2">
-            <p className="text-xs text-muted-foreground">
+          <div className="flex flex-col gap-2 py-2">
+            <p className="text-sm text-muted-foreground">
               {slides.length} slide{slides.length === 1 ? "" : "s"}
               {selected.size > 0 && (
                 <> · <span className="text-primary font-semibold">{selected.size} selected</span></>
               )}
             </p>
-            <div className="flex flex-wrap items-center gap-2">
-              <Button size="sm" variant="outline" onClick={() => setAddOpen(true)}>
-                <Plus className="h-4 w-4 mr-1" />
+            <div className="grid grid-cols-2 gap-2">
+              <Button size="sm" variant="outline" className="w-full" onClick={() => setAddOpen(true)}>
+                <Plus className="h-4 w-4 mr-1 shrink-0" />
                 Add single
               </Button>
-              <Button size="sm" onClick={() => setBulkAddOpen(true)}>
-                <Images className="h-4 w-4 mr-1" />
+              <Button size="sm" className="w-full" onClick={() => setBulkAddOpen(true)}>
+                <Images className="h-4 w-4 mr-1 shrink-0" />
                 Bulk upload
               </Button>
             </div>
@@ -182,67 +182,69 @@ export function WallBannerManagerDialog({
 
           {/* Selection bar */}
           {slides.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2 p-2 rounded-md border bg-muted/30">
+            <div className="flex flex-col gap-2 p-2 rounded-md border bg-muted/30">
               <Button
                 type="button"
                 size="sm"
                 variant="ghost"
-                className="h-7 text-[11px] px-2"
+                className="h-9 justify-start px-2"
                 onClick={toggleAll}
               >
                 {allSelected ? (
-                  <CheckSquare className="h-4 w-4 mr-1" />
+                  <CheckSquare className="h-4 w-4 mr-1.5 shrink-0" />
                 ) : (
-                  <Square className="h-4 w-4 mr-1" />
+                  <Square className="h-4 w-4 mr-1.5 shrink-0" />
                 )}
                 {allSelected ? "Unselect all" : "Select all"}
               </Button>
 
-              <div className="h-5 w-px bg-border" />
+              <div className="h-px w-full bg-border" />
 
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-7 text-[11px]"
-                disabled={!singleSelected}
-                onClick={() => singleSelected && setEditing(singleSelected)}
-              >
-                <Pencil className="h-3 w-3 mr-1" />
-                Edit / Change
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-7 text-[11px]"
-                disabled={!selected.size || !anyPlaying}
-                onClick={() => handleBulkPause(true)}
-              >
-                <Pause className="h-3 w-3 mr-1" />
-                Pause
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-7 text-[11px]"
-                disabled={!selected.size || !anyPaused}
-                onClick={() => handleBulkPause(false)}
-              >
-                <Play className="h-3 w-3 mr-1" />
-                Resume
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-7 text-[11px] text-destructive border-destructive/40"
-                disabled={!selected.size}
-                onClick={handleBulkDelete}
-              >
-                <Trash2 className="h-3 w-3 mr-1" />
-                Delete
-              </Button>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-9 w-full"
+                  disabled={!singleSelected}
+                  onClick={() => singleSelected && setEditing(singleSelected)}
+                >
+                  <Pencil className="h-3.5 w-3.5 mr-1 shrink-0" />
+                  Edit / Change
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-9 w-full"
+                  disabled={!selected.size || !anyPlaying}
+                  onClick={() => handleBulkPause(true)}
+                >
+                  <Pause className="h-3.5 w-3.5 mr-1 shrink-0" />
+                  Pause
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-9 w-full"
+                  disabled={!selected.size || !anyPaused}
+                  onClick={() => handleBulkPause(false)}
+                >
+                  <Play className="h-3.5 w-3.5 mr-1 shrink-0" />
+                  Resume
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-9 w-full text-destructive border-destructive/40"
+                  disabled={!selected.size}
+                  onClick={handleBulkDelete}
+                >
+                  <Trash2 className="h-3.5 w-3.5 mr-1 shrink-0" />
+                  Delete
+                </Button>
+              </div>
 
               {selected.size > 1 && (
-                <span className="ml-auto text-[10px] text-muted-foreground">
+                <span className="text-xs text-muted-foreground">
                   Edit needs a single selection
                 </span>
               )}
