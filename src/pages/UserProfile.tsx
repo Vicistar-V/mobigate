@@ -542,6 +542,9 @@ const UserProfile = () => {
               {friendStatus === "accepted" && !unfriendConfirm && (
                 <p className="text-emerald-600 font-medium text-base">You are Friends with {profile.name}</p>
               )}
+              {friendStatus === "pending" && (
+                <p className="text-amber-600 text-sm font-medium">Friend request to {profile.name} is pending — tap "Cancel Request" to withdraw it.</p>
+              )}
               {unfriendConfirm && (
                 <p className="text-red-500 text-sm font-medium">Click "Confirm Unfriend" to remove {profile.name} as a friend.</p>
               )}
