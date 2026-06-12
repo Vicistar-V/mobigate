@@ -34,7 +34,8 @@ const App = () => {
 
             {/* Main app — inside sidebar layout */}
             <Route path="/*" element={
-              <SidebarProvider defaultOpen={true}>
+              <AuthGuard>
+                <SidebarProvider defaultOpen={true}>
                 <div className="flex min-h-screen w-full">
                   <AppSidebar />
                   <div className="flex-1 flex flex-col w-full">
