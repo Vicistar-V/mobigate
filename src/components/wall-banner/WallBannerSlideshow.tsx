@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { WallBannerEditDialog } from "./WallBannerEditDialog";
-import { PostSundryBar } from "@/components/feed/PostSundryBar";
 
 interface WallBannerSlideshowProps {
   ownerId: string;
@@ -62,9 +61,6 @@ export function WallBannerSlideshow({
   onOpenViewer,
   className,
   heightClass = "h-48",
-  showSundryBar = false,
-  authorName = "this user",
-  authorImage,
 }: WallBannerSlideshowProps) {
   const [slides, setSlides] = useState<WallBannerSlide[]>(() =>
     getActiveSlidesFor(ownerId, scope),
@@ -231,21 +227,8 @@ export function WallBannerSlideshow({
             className="w-full h-full object-cover"
           />
         )}
-        {showSundryBar && (
-          <div className="absolute left-2 right-14 bottom-2 z-20">
-            <PostSundryBar
-              postId={`${ownerId}-${scope}-banner`}
-              title={fallbackAlt}
-              author={authorName}
-              authorId={ownerId}
-              authorImage={authorImage}
-              imageUrl={fallbackImage}
-              postType="Banner"
-              isOwner={isOwner}
-              variant="overlay"
-            />
-          </div>
-        )}
+        {/* Sundry tools intentionally NOT shown on the inline banner. */}
+
         {isOwner && (
           <div className="absolute bottom-3 right-3 z-20">
             {renderOwnerPlusMenu(null)}
@@ -326,22 +309,9 @@ export function WallBannerSlideshow({
       {/* Caption intentionally hidden on the inline banner — it only shows in the full viewer. */}
 
 
-      {/* Universal sundry tools overlay */}
-      {showSundryBar && (
-        <div className="absolute left-2 right-14 bottom-2 z-20">
-          <PostSundryBar
-            postId={current.id}
-            title={current.caption || fallbackAlt}
-            author={authorName}
-            authorId={ownerId}
-            authorImage={authorImage}
-            imageUrl={current.mediaUrl}
-            postType="Banner"
-            isOwner={isOwner}
-            variant="overlay"
-          />
-        </div>
-      )}
+      {/* Sundry tools intentionally NOT shown on the inline banner —
+          they only appear in the full media viewer when a slide is opened. */}
+
 
       {/* Slide indicator dots */}
       {allSlideCount > 1 && (
