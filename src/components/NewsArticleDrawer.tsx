@@ -58,6 +58,9 @@ export const NewsArticleDrawer = ({ article, open, onOpenChange }: NewsArticleDr
   const [showGift, setShowGift] = useState(false);
   const [giftCount, setGiftCount] = useState(0);
 
+  // Sharing
+  const [showShare, setShowShare] = useState(false);
+
   const galleryRef = useRef<HTMLDivElement>(null);
   const countedRef = useRef<string | null>(null);
 
