@@ -383,6 +383,19 @@ export const NewsArticleDrawer = ({ article, open, onOpenChange }: NewsArticleDr
               </div>
             </div>
           )}
+
+          {/* ── Send Gift dialog ── */}
+          <SendGiftDialog
+            isOpen={showGift}
+            onClose={() => setShowGift(false)}
+            recipientName={article.author}
+            recipientId={(article as any).authorId}
+            onSendGift={() => {
+              // Optimistically bump the visible gift tally; the dialog itself
+              // confirms + deducts the Mobi balance on success.
+              setGiftCount((c) => c + 1);
+            }}
+          />
         </div>
       </DrawerContent>
     </Drawer>
