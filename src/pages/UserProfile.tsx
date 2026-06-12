@@ -44,6 +44,7 @@ import { ProfileContentsTab }  from "@/components/profile/ProfileContentsTab";
 import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
 import { WallBannerSlideshow } from "@/components/wall-banner/WallBannerSlideshow";
 import type { WallBannerSlide } from "@/types/wallBanner";
+import { getActiveSlidesFor } from "@/lib/wallBannerStorage";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
