@@ -323,15 +323,8 @@ export function WallBannerSlideshow({
         </span>
       )}
 
-      {/* Caption */}
-      {current.caption && (
-        <div className={cn(
-          "absolute left-0 right-0 px-3 py-2 bg-gradient-to-t from-black/70 via-black/30 to-transparent text-white text-xs sm:text-sm font-medium pointer-events-none",
-          showSundryBar ? "bottom-11" : "bottom-0",
-        )}>
-          <span className="line-clamp-2">{current.caption}</span>
-        </div>
-      )}
+      {/* Caption intentionally hidden on the inline banner — it only shows in the full viewer. */}
+
 
       {/* Universal sundry tools overlay */}
       {showSundryBar && (
