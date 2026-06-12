@@ -383,7 +383,7 @@ const UserProfile = () => {
                     className="w-32 h-32 rounded-full object-cover border-4 border-card cursor-pointer"
                     onClick={() => {
                       setGalleryItems([{ id: "photo", url: displayPhoto, type: "photo", author: profile.name }]);
-                      setGalleryIdx(0); setGalleryOpen(true);
+                      setGalleryIdx(0); setGalleryAutoAdvance(false); setGalleryOpen(true);
                     }}
                   />
                 </div>
