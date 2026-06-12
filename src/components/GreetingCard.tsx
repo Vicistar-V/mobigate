@@ -1048,7 +1048,7 @@ export const GreetingSection = ({
                 activeIdx={safeFeaturedIdx}
                 onSelect={(idx) => setFeaturedIdx(idx)}
                 moreLabel={tabMeta.moreLabel}
-                onSeeAll={() => setViewerOpen(true)}
+                onSeeAll={() => setShowcaseOpen(true)}
                 accent="0 84% 60%"
               />
             )}
