@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Heart, Share2, UserPlus, Check, X, MessageCircle, Send } from "lucide-react";
+import { Heart, Share2, UserPlus, Check, X, MessageCircle, Send, Gift } from "lucide-react";
 import {
   Drawer,
   DrawerContent,
   DrawerClose,
 } from "@/components/ui/drawer";
 import { useToast } from "@/hooks/use-toast";
+import { SendGiftDialog } from "@/components/chat/SendGiftDialog";
 import type { NewsArticle } from "@/data/trendingHeadlines";
 
 interface NewsArticleDrawerProps {
@@ -52,6 +53,10 @@ export const NewsArticleDrawer = ({ article, open, onOpenChange }: NewsArticleDr
   const [comments, setComments] = useState<ArticleComment[]>([]);
   const [draft, setDraft] = useState("");
 
+  // Gifting
+  const [showGift, setShowGift] = useState(false);
+  const [giftCount, setGiftCount] = useState(0);
+
   const galleryRef = useRef<HTMLDivElement>(null);
   const countedRef = useRef<string | null>(null);
 
@@ -66,6 +71,8 @@ export const NewsArticleDrawer = ({ article, open, onOpenChange }: NewsArticleDr
       setDraft("");
       setComments(seedComments(article));
       setViewCount(article.views ?? 0);
+      setShowGift(false);
+      setGiftCount(article.gifts ?? 0);
     }
   }, [article]);
 
@@ -259,47 +266,56 @@ export const NewsArticleDrawer = ({ article, open, onOpenChange }: NewsArticleDr
 
           {/* ── Fixed action bar (never moves) ── */}
           <div className="border-t border-border bg-card px-3 py-3">
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-5 gap-1.5">
               <button
                 type="button"
                 onClick={handleFollow}
                 aria-pressed={isFollowing}
-                className={`flex items-center justify-center gap-1 rounded-md px-1.5 py-2.5 text-[12px] font-semibold transition-colors active:scale-95 touch-manipulation ${
+                className={`flex min-w-0 items-center justify-center gap-1 rounded-md px-1 py-2.5 text-[11px] font-semibold transition-colors active:scale-95 touch-manipulation ${
                   isFollowing ? "bg-[hsl(142_71%_45%)] text-white" : "bg-foreground text-background"
                 }`}
               >
-                {isFollowing ? <Check className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
-                {isFollowing ? "Following" : "Follow"}
+                {isFollowing ? <Check className="h-4 w-4 shrink-0" /> : <UserPlus className="h-4 w-4 shrink-0" />}
+                <span className="truncate">{isFollowing ? "Following" : "Follow"}</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleLike}
                 aria-pressed={isLiked}
-                className={`flex items-center justify-center gap-1 rounded-md px-1.5 py-2.5 text-[12px] font-semibold transition-colors active:scale-95 touch-manipulation ${
+                className={`flex min-w-0 items-center justify-center gap-1 rounded-md px-1 py-2.5 text-[11px] font-semibold transition-colors active:scale-95 touch-manipulation ${
                   isLiked ? "bg-destructive text-destructive-foreground" : "bg-foreground text-background"
                 }`}
               >
-                <Heart className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`} />
-                {likeCount > 0 ? likeCount.toLocaleString() : "Like"}
+                <Heart className={`h-4 w-4 shrink-0 ${isLiked ? "fill-current" : ""}`} />
+                <span className="truncate">{likeCount > 0 ? likeCount.toLocaleString() : "Like"}</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setShowComments(true)}
-                className="flex items-center justify-center gap-1 rounded-md bg-foreground px-1.5 py-2.5 text-[12px] font-semibold text-background active:scale-95 touch-manipulation"
+                className="flex min-w-0 items-center justify-center gap-1 rounded-md bg-foreground px-1 py-2.5 text-[11px] font-semibold text-background active:scale-95 touch-manipulation"
               >
-                <MessageCircle className="h-4 w-4" />
-                {comments.length > 0 ? comments.length.toLocaleString() : "Comment"}
+                <MessageCircle className="h-4 w-4 shrink-0" />
+                <span className="truncate">{comments.length > 0 ? comments.length.toLocaleString() : "Comment"}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowGift(true)}
+                className="flex min-w-0 items-center justify-center gap-1 rounded-md bg-[hsl(280_70%_55%)] px-1 py-2.5 text-[11px] font-semibold text-white active:scale-95 touch-manipulation"
+              >
+                <Gift className="h-4 w-4 shrink-0" />
+                <span className="truncate">{giftCount > 0 ? giftCount.toLocaleString() : "Gift"}</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleShare}
-                className="flex items-center justify-center gap-1 rounded-md bg-foreground px-1.5 py-2.5 text-[12px] font-semibold text-background active:scale-95 touch-manipulation"
+                className="flex min-w-0 items-center justify-center gap-1 rounded-md bg-foreground px-1 py-2.5 text-[11px] font-semibold text-background active:scale-95 touch-manipulation"
               >
-                <Share2 className="h-4 w-4" />
-                Share
+                <Share2 className="h-4 w-4 shrink-0" />
+                <span className="truncate">Share</span>
               </button>
             </div>
           </div>
@@ -367,6 +383,19 @@ export const NewsArticleDrawer = ({ article, open, onOpenChange }: NewsArticleDr
               </div>
             </div>
           )}
+
+          {/* ── Send Gift dialog ── */}
+          <SendGiftDialog
+            isOpen={showGift}
+            onClose={() => setShowGift(false)}
+            recipientName={article.author}
+            recipientId={article.authorId}
+            onSendGift={() => {
+              // Optimistically bump the visible gift tally; the dialog itself
+              // confirms + deducts the Mobi balance on success.
+              setGiftCount((c) => c + 1);
+            }}
+          />
         </div>
       </DrawerContent>
     </Drawer>
