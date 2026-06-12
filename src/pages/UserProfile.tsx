@@ -68,6 +68,16 @@ const CREATOR_MIN_MONETIZED_CONTENTS = 1;
 
 const fmt = (n: number) => n >= 1000 ? `${(n/1000).toFixed(1)}k` : String(n);
 
+// Map the various values the backend may return for friendship state into the
+// three states the UI understands: "accepted" (already friends), "pending"
+// (a friend request that hasn't been confirmed yet) and "none".
+const normalizeFriendStatus = (raw?: string): "accepted" | "pending" | "none" => {
+  const v = (raw || "").toString().toLowerCase().trim();
+  if (["accepted", "friend", "friends", "active", "confirmed", "connected"].includes(v)) return "accepted";
+  if (["pending", "sent", "requested", "request_sent", "awaiting", "pending_sent", "pending_outgoing"].includes(v)) return "pending";
+  return "none";
+};
+
 const UserProfile = () => {
   const { id: userId } = useParams<{ id: string }>();
   const { toast }      = useToast();
@@ -102,7 +112,7 @@ const UserProfile = () => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data: ProfileData = await res.json();
       setProfile(data);
-      setFriendStatus(data.friendship_status || "none");
+      setFriendStatus(normalizeFriendStatus(data.friendship_status));
       setIsFollowing(data.is_following || false);
     } catch (e) {
       console.error("[UserProfile] fetch error:", e);
@@ -152,8 +162,43 @@ const UserProfile = () => {
       });
       const data = await res.json();
       if (data.success) { setFriendStatus("pending"); toast({ title: "Friend request sent!" }); }
-      else toast({ title: "Error", description: data.error || "Could not send request", variant: "destructive" });
+      else {
+        const err = (data.error || "").toString().toLowerCase();
+        // Backend already considers them friends/pending — sync the UI instead of erroring.
+        if (err.includes("already friends") || err.includes("already friend")) {
+          setFriendStatus("accepted");
+          toast({ title: "Already friends", description: `You are already friends with ${profile.name}.` });
+        } else if (err.includes("already") || err.includes("pending") || err.includes("sent")) {
+          setFriendStatus("pending");
+          toast({ title: "Request already sent" });
+        } else {
+          toast({ title: "Error", description: data.error || "Could not send request", variant: "destructive" });
+        }
+      }
     } catch { toast({ title: "Error", description: "Cannot reach server", variant: "destructive" }); }
+  };
+
+  const handleCancelRequest = async () => {
+    if (!profile) return;
+    const prev = friendStatus;
+    setFriendStatus("none"); // optimistic
+    try {
+      const res  = await fetch(`${API_BASE}/friends/remove.php`, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ friend_id: profile.id }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast({ title: "Request cancelled", description: `Friend request to ${profile.name} was cancelled.` });
+      } else {
+        setFriendStatus(prev);
+        toast({ title: "Error", description: data.error || "Could not cancel request", variant: "destructive" });
+      }
+    } catch {
+      setFriendStatus(prev);
+      toast({ title: "Error", description: "Cannot reach server", variant: "destructive" });
+    }
   };
 
   const handleUnfriend = async () => {
@@ -419,8 +464,13 @@ const UserProfile = () => {
                   </Button>
                 )}
                 {friendStatus === "pending" && (
-                  <Button size="sm" variant="secondary" disabled>
-                    <Users className="h-4 w-4 mr-1" />Request Sent
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-1 border-amber-300 text-amber-600 hover:bg-amber-50 hover:text-amber-700 transition-colors"
+                    onClick={handleCancelRequest}
+                  >
+                    <UserX className="h-4 w-4 mr-1" />Cancel Request
                   </Button>
                 )}
                 {friendStatus === "accepted" && (
@@ -491,6 +541,9 @@ const UserProfile = () => {
               {/* Friendship status message */}
               {friendStatus === "accepted" && !unfriendConfirm && (
                 <p className="text-emerald-600 font-medium text-base">You are Friends with {profile.name}</p>
+              )}
+              {friendStatus === "pending" && (
+                <p className="text-amber-600 text-sm font-medium">Friend request to {profile.name} is pending — tap "Cancel Request" to withdraw it.</p>
               )}
               {unfriendConfirm && (
                 <p className="text-red-500 text-sm font-medium">Click "Confirm Unfriend" to remove {profile.name} as a friend.</p>
