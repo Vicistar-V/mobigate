@@ -87,7 +87,7 @@ export const GreetingSection = ({
   };
 
   // The User's OWN most recent post — pinned to the TOP big image space (never changes via thumbs)
-  const myOwnPostsAll = allPosts.filter((p) => p.userId === currentUserId);
+  const myOwnPostsAll = allPosts.filter((p) => p.userId === ownerId);
   const myOwnTabMatches = myOwnPostsAll.filter(matchesTab);
   // Keep the area populated even when a tab has no exact matches.
   const myOwnPosts = myOwnTabMatches.length > 0 ? myOwnTabMatches : myOwnPostsAll;
