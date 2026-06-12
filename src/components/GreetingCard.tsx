@@ -96,7 +96,7 @@ export const GreetingSection = ({
   // Public/connection posts from OTHER users — drive the SECOND big image space
   const publicConnectionPosts = (() => {
     const others = allPosts.filter(
-      (p) => p.userId !== currentUserId && ((p as any).privacy ?? "Public") === "Public",
+      (p) => p.userId !== ownerId && ((p as any).privacy ?? "Public") === "Public",
     );
     const tabbed = others.filter(matchesTab);
     // Surface tab-relevant posts first, but always keep the strip well-populated
