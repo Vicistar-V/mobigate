@@ -23,6 +23,7 @@ import { CreatePostDialog } from "@/components/CreatePostDialog";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 import { useToast } from "@/hooks/use-toast";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
+import { GreetingSection } from "@/components/GreetingCard";
 import { ProfileAlbumsTab } from "@/components/profile/ProfileAlbumsTab";
 import { ProfileFriendsTab } from "@/components/profile/ProfileFriendsTab";
 import { FriendRequestsTab }    from "@/components/profile/FriendRequestsTab";
