@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react";
 
 export const LandingFinalCTA = () => {
   return (
-    <section className="relative overflow-hidden bg-[hsl(var(--lp-bg))] px-5 py-24">
+    <section className="relative overflow-hidden bg-[hsl(var(--lp-bg))] px-5 py-16 sm:py-24">
       <div className="mx-auto max-w-5xl">
         <Reveal>
           <div className="relative overflow-hidden rounded-[2.5rem] p-10 text-center shadow-[var(--lp-shadow-lg)] sm:p-16">

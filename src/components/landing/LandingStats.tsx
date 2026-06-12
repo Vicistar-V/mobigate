@@ -10,10 +10,10 @@ const stats = [
 
 export const LandingStats = () => {
   return (
-    <section className="relative overflow-hidden lp-dark py-24">
+    <section className="relative overflow-hidden lp-dark py-16 sm:py-24">
       <div className="pointer-events-none absolute inset-0 lp-grid-overlay opacity-60" />
       <div className="relative mx-auto max-w-5xl px-5">
-        <Reveal className="mx-auto mb-12 max-w-2xl text-center">
+        <Reveal className="mx-auto mb-9 sm:mb-12 max-w-2xl text-center">
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-[hsl(var(--lp-cyan))]">
             Trusted at scale
           </p>

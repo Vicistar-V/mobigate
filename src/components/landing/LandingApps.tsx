@@ -24,10 +24,10 @@ const apps = [
 
 export const LandingApps = () => {
   return (
-    <section id="apps" className="relative overflow-hidden bg-[hsl(var(--lp-bg))] py-24">
+    <section id="apps" className="relative overflow-hidden bg-[hsl(var(--lp-bg))] py-16 sm:py-24">
       <div className="pointer-events-none absolute left-1/2 top-0 h-96 w-96 -translate-x-1/2 rounded-full bg-[hsl(var(--lp-violet))] opacity-[0.10] blur-[140px]" />
       <div className="relative mx-auto max-w-6xl px-5">
-        <Reveal className="mx-auto mb-14 max-w-2xl text-center">
+        <Reveal className="mx-auto mb-10 sm:mb-14 max-w-2xl text-center">
           <p className="lp-eyebrow mb-3 text-xs font-bold uppercase">Take it everywhere</p>
           <h2 className="lp-display text-3xl font-extrabold leading-tight sm:text-5xl">
             Two apps. <span className="lp-text-gradient">One Mobigate.</span>
