@@ -285,14 +285,12 @@ export const NotableDateDetailDialog = ({
             <Clock3 className="h-4 w-4 text-red-600" />
             <span className="font-bold text-red-600">{person.dateLabel}</span>
             <span className="text-muted-foreground">·</span>
-            <span className="text-muted-foreground">
-              {friendState === "friend"
-                ? "Friend"
-                : friendState === "requested"
-                  ? "Request sent"
-                  : "Not connected"}
+            <span className="inline-flex items-center gap-1 font-semibold text-primary">
+              <CalendarCheck className="h-4 w-4" />
+              Attending ({42 + (willAttend ? 1 : 0)})
             </span>
           </div>
+
 
           <p className="text-sm text-muted-foreground leading-relaxed">
             {person.notes
