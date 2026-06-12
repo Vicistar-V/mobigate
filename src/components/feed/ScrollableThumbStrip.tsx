@@ -135,7 +135,7 @@ export const ScrollableThumbStrip = ({
               type="button"
               data-active={isActive}
               onClick={() => onSelect(i)}
-              className={`relative shrink-0 h-16 w-16 snap-start rounded-md overflow-hidden bg-muted active:scale-95 transition-all touch-manipulation ${
+              className={`relative shrink-0 h-44 w-[5.75rem] sm:h-52 sm:w-[6.5rem] snap-start rounded-lg overflow-hidden bg-muted active:scale-95 transition-all touch-manipulation ${
                 isActive
                   ? "ring-2 ring-red-500 border-2 border-red-500 shadow-md scale-[1.04]"
                   : "border border-foreground/30 opacity-90 hover:opacity-100"
