@@ -82,6 +82,8 @@ export const MediaGalleryViewer = ({
       setFollowerCount(
         currentItem.followers ? parseInt(currentItem.followers.replace(/[^0-9]/g, '')) || 0 : 0
       );
+      // Optimistically count this view (base count + the current viewer).
+      setViewCount((currentItem.views || 0) + 1);
       // Default to reader mode when there's substantive text; otherwise media-first
       const hasText = !!(currentItem.description && currentItem.description.trim().length > 40);
       setViewMode(hasText ? "reader" : "media");
