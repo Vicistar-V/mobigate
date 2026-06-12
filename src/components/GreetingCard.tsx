@@ -125,6 +125,8 @@ export const GreetingSection = ({
   // The SECOND big space rotates based on which thumbnail was tapped (any thumb, own or public)
   const [featuredPublicIdx, setFeaturedPublicIdx] = useState(0);
   const [viewerOpen, setViewerOpen] = useState(false);
+  // Full-window "see all" showcase with Filter (applies to every feed area).
+  const [showcaseOpen, setShowcaseOpen] = useState(false);
   const [viewerStartIndex, setViewerStartIndex] = useState(0);
   const [storyDetailOpen, setStoryDetailOpen] = useState(false);
   const [ownActionsOpen, setOwnActionsOpen] = useState(false);
