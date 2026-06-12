@@ -858,10 +858,23 @@ export const GreetingSection = () => {
                       <PenSquare className="h-3 w-3" />
                       Tap to edit
                     </span>
-                    {/* Persistent (+) badge as a visual affordance — non-interactive */}
+                    {/* (+) → action menu: Edit Post / Create New Post / View my Posts */}
                     <span
-                      aria-hidden="true"
-                      className="absolute bottom-1.5 right-1.5 h-7 w-7 rounded-full bg-foreground/85 text-background flex items-center justify-center shadow ring-2 ring-card pointer-events-none"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOwnActionsOpen(true);
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setOwnActionsOpen(true);
+                        }
+                      }}
+                      aria-label="Open post options"
+                      className="absolute bottom-1.5 right-1.5 h-7 w-7 rounded-full bg-foreground/85 text-background flex items-center justify-center shadow ring-2 ring-card active:scale-95 touch-manipulation"
                     >
                       <Plus className="h-4 w-4" />
                     </span>
