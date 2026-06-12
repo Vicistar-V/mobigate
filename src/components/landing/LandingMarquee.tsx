@@ -16,17 +16,17 @@ const items = [
 export const LandingMarquee = () => {
   const row = [...items, ...items];
   return (
-    <section className="relative border-y border-white/10 bg-[hsl(var(--lp-ink))] py-6">
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-[hsl(var(--lp-ink))] to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-[hsl(var(--lp-ink))] to-transparent" />
+    <section className="relative overflow-hidden border-y border-[hsl(var(--lp-border))] lp-tint-bg py-6">
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-[hsl(var(--lp-bg-tint))] to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-[hsl(var(--lp-bg-tint))] to-transparent" />
       <div className="flex w-max lp-marquee-track gap-4">
         {row.map((it, i) => (
           <div
             key={i}
-            className="flex items-center gap-2.5 rounded-full lp-glass px-5 py-2.5 text-white/85"
+            className="flex items-center gap-2.5 rounded-full lp-pill px-5 py-2.5"
           >
-            <it.icon className="h-5 w-5 text-[hsl(var(--lp-cyan))]" />
-            <span className="whitespace-nowrap text-sm font-semibold">{it.label}</span>
+            <it.icon className="h-5 w-5 text-[hsl(var(--lp-violet))]" />
+            <span className="whitespace-nowrap text-sm font-bold text-[hsl(var(--lp-fg))]">{it.label}</span>
           </div>
         ))}
       </div>
