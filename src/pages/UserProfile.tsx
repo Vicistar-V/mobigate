@@ -68,6 +68,16 @@ const CREATOR_MIN_MONETIZED_CONTENTS = 1;
 
 const fmt = (n: number) => n >= 1000 ? `${(n/1000).toFixed(1)}k` : String(n);
 
+// Map the various values the backend may return for friendship state into the
+// three states the UI understands: "accepted" (already friends), "pending"
+// (a friend request that hasn't been confirmed yet) and "none".
+const normalizeFriendStatus = (raw?: string): "accepted" | "pending" | "none" => {
+  const v = (raw || "").toString().toLowerCase().trim();
+  if (["accepted", "friend", "friends", "active", "confirmed", "connected"].includes(v)) return "accepted";
+  if (["pending", "sent", "requested", "request_sent", "awaiting", "pending_sent", "pending_outgoing"].includes(v)) return "pending";
+  return "none";
+};
+
 const UserProfile = () => {
   const { id: userId } = useParams<{ id: string }>();
   const { toast }      = useToast();
