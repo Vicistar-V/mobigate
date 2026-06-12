@@ -886,6 +886,9 @@ const MyProfile = () => {
           </ScrollArea>
 
           <TabsContent value="status" className="space-y-6">
+            {/* Stories / Vibes & Flexing / Breaking News — editable on your own page */}
+            <GreetingSection embed />
+
             {/* People You May Know - First Slot */}
             <PeopleYouMayKnow />
 
