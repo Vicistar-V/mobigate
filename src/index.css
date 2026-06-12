@@ -132,6 +132,97 @@ All colors MUST be HSL.
   }
 }
 
+/* ============================================================
+   LANDING PAGE — premium tokens, gradients, glows, keyframes
+   ============================================================ */
+@layer base {
+  :root {
+    --lp-ink: 224 64% 8%;
+    --lp-violet: 256 90% 62%;
+    --lp-blue: 217 91% 50%;
+    --lp-cyan: 190 95% 50%;
+    --lp-pink: 326 90% 62%;
+    --lp-amber: 38 96% 56%;
+    --gradient-aurora: linear-gradient(120deg, hsl(217 91% 38%) 0%, hsl(256 90% 55%) 38%, hsl(326 90% 58%) 70%, hsl(38 96% 56%) 100%);
+    --gradient-hero: radial-gradient(120% 120% at 10% 0%, hsl(256 90% 18%) 0%, hsl(224 70% 7%) 45%, hsl(224 80% 4%) 100%);
+    --gradient-text: linear-gradient(95deg, hsl(190 95% 60%), hsl(256 90% 70%), hsl(326 90% 68%));
+    --gradient-card: linear-gradient(160deg, hsl(0 0% 100% / 0.10), hsl(0 0% 100% / 0.02));
+    --glow-violet: 0 0 60px -10px hsl(256 90% 62% / 0.55);
+    --glow-cyan: 0 0 60px -10px hsl(190 95% 50% / 0.5);
+  }
+}
+
+.lp-text-gradient {
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.lp-aurora-bg { background: var(--gradient-aurora); }
+.lp-hero-bg { background: var(--gradient-hero); }
+
+/* Animated aurora blobs */
+@keyframes lp-float {
+  0%, 100% { transform: translate3d(0,0,0) scale(1); }
+  50% { transform: translate3d(0,-30px,0) scale(1.08); }
+}
+@keyframes lp-float-slow {
+  0%, 100% { transform: translate3d(0,0,0); }
+  50% { transform: translate3d(20px,24px,0); }
+}
+@keyframes lp-spin-slow {
+  to { transform: rotate(360deg); }
+}
+@keyframes lp-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes lp-gradient-pan {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes lp-pulse-ring {
+  0% { box-shadow: 0 0 0 0 hsl(256 90% 62% / 0.5); }
+  70% { box-shadow: 0 0 0 18px hsl(256 90% 62% / 0); }
+  100% { box-shadow: 0 0 0 0 hsl(256 90% 62% / 0); }
+}
+@keyframes lp-shimmer-text {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.lp-animate-float { animation: lp-float 7s ease-in-out infinite; }
+.lp-animate-float-slow { animation: lp-float-slow 11s ease-in-out infinite; }
+.lp-animate-spin-slow { animation: lp-spin-slow 26s linear infinite; }
+.lp-marquee-track { animation: lp-marquee 32s linear infinite; }
+.lp-marquee-track:hover { animation-play-state: paused; }
+.lp-animate-pan { background-size: 200% 200%; animation: lp-gradient-pan 8s ease infinite; }
+.lp-pulse-ring { animation: lp-pulse-ring 2.4s ease-out infinite; }
+
+.lp-glass {
+  background: var(--gradient-card);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid hsl(0 0% 100% / 0.12);
+}
+
+.lp-grid-overlay {
+  background-image:
+    linear-gradient(hsl(0 0% 100% / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(0 0% 100% / 0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(100% 80% at 50% 0%, #000 30%, transparent 75%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-animate-float, .lp-animate-float-slow, .lp-animate-spin-slow,
+  .lp-marquee-track, .lp-animate-pan, .lp-pulse-ring { animation: none !important; }
+}
+
+
 @keyframes sparkle {
   0% {
     transform: scale(0);
