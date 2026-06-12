@@ -242,7 +242,7 @@ export default function BuyVouchersPage() {
         return;
       } catch {}
     }
-    navigate("/");
+    navigate("/dashboard");
   };
 
 
@@ -988,7 +988,7 @@ export default function BuyVouchersPage() {
               </div>
             ))}
           </div>
-          <Button onClick={() => navigate("/")} className="w-full h-12 rounded-xl text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 touch-manipulation active:scale-[0.97]">
+          <Button onClick={() => navigate("/dashboard")} className="w-full h-12 rounded-xl text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 touch-manipulation active:scale-[0.97]">
             Done
           </Button>
         </div>

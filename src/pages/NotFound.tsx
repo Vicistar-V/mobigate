@@ -47,7 +47,7 @@ const NotFound = () => {
               size="lg"
               className="gap-2 bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-all duration-300 hover:scale-105"
             >
-              <Link to="/">
+              <Link to="/dashboard">
                 <Home className="h-5 w-5" />
                 Back to Home
               </Link>

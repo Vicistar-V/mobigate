@@ -42,7 +42,7 @@ export const Footer = () => {
             <CollapsibleContent className="pt-2">
               <ul className="space-y-1.5 text-xs">
                 <li>
-                  <Link to="/" className="text-muted-foreground hover:text-primary transition-colors">
+                  <Link to="/dashboard" className="text-muted-foreground hover:text-primary transition-colors">
                     Home
                   </Link>
                 </li>

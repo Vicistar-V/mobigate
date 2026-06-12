@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import Landing            from "./pages/Landing";
 import Index              from "./pages/Index";
 import MyProfile          from "./pages/MyProfile";
 import UserProfile        from "./pages/UserProfile";
@@ -26,7 +27,8 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Outside sidebar — no auth guard */}
+            {/* Standalone routes — no sidebar layout */}
+            <Route path="/" element={<Landing />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
             {/* Main app — inside sidebar layout */}
@@ -38,7 +40,7 @@ const App = () => {
                     <ScrollToTop />
                     <BackToTopButton />
                     <Routes>
-                      <Route path="/"              element={<Index />} />
+                      <Route path="/dashboard"     element={<Index />} />
                       <Route path="/profile"       element={<MyProfile />} />
                       <Route path="/profile/:id"   element={<UserProfile />} />
                       <Route path="/post/:id"      element={<PostPage />} />
@@ -50,7 +52,7 @@ const App = () => {
 
 
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                      <Route path="*" element={<Navigate to="/" replace />} />
+                      <Route path="*" element={<Navigate to="/dashboard" replace />} />
                     </Routes>
                   </div>
                 </div>

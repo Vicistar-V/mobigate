@@ -399,7 +399,7 @@ export function AppSidebar() {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="Dashboard" className="group relative overflow-hidden transition-all duration-200 hover:bg-accent/50">
-                <Link to="/" onClick={handleLinkClick}>
+                <Link to="/dashboard" onClick={handleLinkClick}>
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors bg-primary/10 text-primary group-hover:bg-primary/20">
                     <LayoutDashboard className="h-4 w-4" />
                   </div>

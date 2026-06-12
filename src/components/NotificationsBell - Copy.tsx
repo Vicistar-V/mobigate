@@ -103,7 +103,7 @@ export const NotificationsBell = () => {
     // Navigate based on type
     if (notif.entity_type === "post" && notif.entity_id) {
       // scroll to / open post — for now navigate to home
-      navigate("/");
+      navigate("/dashboard");
     } else if ((notif.entity_type === "user" || notif.type === "friend_request" || notif.type === "friend_accept" || notif.type === "follow" || notif.type === "profile_like") && notif.actor_id) {
       navigate(`/profile/${notif.actor_id}`);
     }

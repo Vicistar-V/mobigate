@@ -360,7 +360,7 @@ export default function MyQuizHistory() {
       {/* Header */}
       <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3">
         <div className="flex items-center gap-3">
-          <Link to="/" className="p-1.5 rounded-lg hover:bg-accent/50 transition-colors">
+          <Link to="/dashboard" className="p-1.5 rounded-lg hover:bg-accent/50 transition-colors">
             <ArrowLeft className="h-5 w-5 text-muted-foreground" />
           </Link>
           <div className="flex items-center gap-2 flex-1">

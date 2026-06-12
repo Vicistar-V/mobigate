@@ -304,7 +304,7 @@ const ForgotPasswordPage = () => {
                 <p className="text-sm text-muted-foreground">
                   Your password has been changed successfully. You can now log in with your new password.
                 </p>
-                <Button onClick={() => navigate("/")} className="w-full" size="lg">
+                <Button onClick={() => navigate("/dashboard")} className="w-full" size="lg">
                   Go to Login
                 </Button>
               </div>
