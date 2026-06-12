@@ -50,7 +50,7 @@ export default function ServiceUnavailable() {
                   className="justify-start h-auto py-3"
                   onClick={() => {
                     // Navigate to Terms (placeholder for now)
-                    navigate("/");
+                    navigate("/dashboard");
                   }}
                 >
                   <FileText className="h-5 w-5 mr-3" />
@@ -65,7 +65,7 @@ export default function ServiceUnavailable() {
                   className="justify-start h-auto py-3"
                   onClick={() => {
                     // Navigate to Standards (placeholder for now)
-                    navigate("/");
+                    navigate("/dashboard");
                   }}
                 >
                   <Shield className="h-5 w-5 mr-3" />
@@ -88,7 +88,7 @@ export default function ServiceUnavailable() {
                 Go Back
               </Button>
               <Button 
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/dashboard")}
                 className="gap-2"
               >
                 Return to Home

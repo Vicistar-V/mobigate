@@ -23,7 +23,7 @@ export const Header = () => {
           >
             <Menu />
           </Button>
-          <Link to="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
+          <Link to="/dashboard" className="flex items-center gap-2 transition-opacity hover:opacity-80">
             {/* Full logo with text on all screens */}
             <img 
               src={mobifaceLogo} 

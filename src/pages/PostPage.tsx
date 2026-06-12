@@ -72,7 +72,7 @@ const PostPage = () => {
           <p className="text-muted-foreground text-sm mb-4">
             This post may have been deleted or the link is invalid.
           </p>
-          <Button onClick={() => navigate("/")} className="gap-2">
+          <Button onClick={() => navigate("/dashboard")} className="gap-2">
             <ArrowLeft className="h-4 w-4" />Back to Feed
           </Button>
         </Card>
