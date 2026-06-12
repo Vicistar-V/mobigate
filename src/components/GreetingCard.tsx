@@ -34,10 +34,25 @@ import { WallBannerSlideshow } from "@/components/wall-banner/WallBannerSlidesho
 import { WallBannerManagerDialog } from "@/components/wall-banner/WallBannerManagerDialog";
 import { PostDetailDialog } from "@/components/PostDetailDialog";
 
-export const GreetingSection = () => {
+export const GreetingSection = ({
+  profileUserId,
+  editable,
+  embed = false,
+}: {
+  /** The owner of the profile being viewed. Defaults to the current user (home/own profile). */
+  profileUserId?: string;
+  /** Whether posting/editing affordances are shown. Defaults to true only on the owner's own page. */
+  editable?: boolean;
+  /** When true, render ONLY the posting area (Stories / Vibes / Breaking News) — no hero, nav, or search. */
+  embed?: boolean;
+} = {}) => {
   const profile = useUserProfile();
   const navigate = useNavigate();
   const currentUserId = useCurrentUserId();
+  // Whose posts power the "own" areas — the profile owner, not necessarily the viewer.
+  const ownerId = profileUserId ?? currentUserId;
+  // Editing is only allowed on your own page.
+  const canEdit = editable ?? (ownerId === currentUserId);
   const phpFeedPosts = useFeedPosts();
   const allPosts = phpFeedPosts || fallbackFeedPosts;
 
