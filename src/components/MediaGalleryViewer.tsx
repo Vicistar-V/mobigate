@@ -416,6 +416,9 @@ export const MediaGalleryViewer = ({
         {/* Main Content */}
         <div 
           {...swipeHandlers}
+          onPointerDown={() => autoAdvance && setPaused(true)}
+          onPointerUp={() => autoAdvance && setPaused(false)}
+          onPointerCancel={() => autoAdvance && setPaused(false)}
           className="relative w-full h-full flex items-center justify-center touch-pan-y"
         >
           {renderMedia()}
