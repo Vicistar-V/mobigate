@@ -20,16 +20,17 @@ export const LandingHero = () => {
   const scaleOrb = useTransform(scrollYProgress, [0, 1], [1, 1.35]);
 
   return (
-    <section ref={ref} className="relative min-h-[100svh] overflow-hidden lp-hero-bg pt-28 pb-20">
+    <section ref={ref} className="relative min-h-[100svh] overflow-hidden lp-hero-bg pt-24 pb-14 sm:pt-28 sm:pb-20">
       {/* Soft aurora orbs */}
       <motion.div style={{ scale: scaleOrb }} className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-32 left-1/4 h-[30rem] w-[30rem] rounded-full bg-[hsl(var(--lp-violet))] opacity-[0.16] blur-[130px] lp-animate-float" />
-        <div className="absolute top-10 right-0 h-[26rem] w-[26rem] rounded-full bg-[hsl(var(--lp-cyan))] opacity-[0.14] blur-[130px] lp-animate-float-slow" />
-        <div className="absolute bottom-0 left-0 h-[24rem] w-[24rem] rounded-full bg-[hsl(var(--lp-pink))] opacity-[0.12] blur-[130px] lp-animate-float" />
+        <div className="absolute -top-32 left-1/4 h-[22rem] w-[22rem] rounded-full bg-[hsl(var(--lp-violet))] opacity-[0.16] blur-[110px] lp-animate-float sm:h-[30rem] sm:w-[30rem]" />
+        <div className="absolute top-10 right-0 h-[20rem] w-[20rem] rounded-full bg-[hsl(var(--lp-cyan))] opacity-[0.14] blur-[110px] lp-animate-float-slow sm:h-[26rem] sm:w-[26rem]" />
+        <div className="absolute bottom-0 left-0 h-[20rem] w-[20rem] rounded-full bg-[hsl(var(--lp-pink))] opacity-[0.12] blur-[110px] lp-animate-float sm:h-[24rem] sm:w-[24rem]" />
       </motion.div>
       <div className="pointer-events-none absolute inset-0 lp-grid-overlay" />
 
-      <div className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-5 lg:grid-cols-[1.05fr_0.95fr]">
+      <div className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-5 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
+
         {/* Copy */}
         <motion.div style={{ y: yText, opacity }} className="text-center lg:text-left">
           <motion.div
