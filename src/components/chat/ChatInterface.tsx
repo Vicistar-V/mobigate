@@ -204,6 +204,9 @@ export const ChatInterface = ({
                   <DropdownMenuItem onClick={() => toast.info("Coming soon")}>
                     Settings
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => toast.success("User reported", { description: "Our team will review this account." })} className="text-destructive">
+                    Report User
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => toast.success("User blocked")} className="text-destructive">
                     Block User
                   </DropdownMenuItem>
