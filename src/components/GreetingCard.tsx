@@ -751,33 +751,37 @@ export const GreetingSection = ({
                       />
                     ) : (
                       <div className="aspect-[3/5] w-full flex items-center justify-center text-center text-[12px] text-muted-foreground px-2 pointer-events-none">
-                        Your vibes will show here. Tap + to post your first one.
+                        {canEdit
+                          ? "Your vibes will show here. Tap + to post your first one."
+                          : "No vibes posted yet."}
                       </div>
                     )}
                     <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded-md bg-black/55 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm pointer-events-none">
                       <Maximize2 className="h-3 w-3" />
-                      My Vibes
+                      {canEdit ? "My Vibes" : "Vibes"}
                     </span>
-                    {/* (+) → action menu: Edit Post / Create New Post / View my Posts */}
-                    <span
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setOwnActionsOpen(true);
-                      }}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
+                    {/* (+) → action menu: Edit Post / Create New Post / View my Posts (owner only) */}
+                    {canEdit && (
+                      <span
+                        onClick={(e) => {
                           e.stopPropagation();
                           setOwnActionsOpen(true);
-                        }
-                      }}
-                      aria-label="Open post options"
-                      className="absolute bottom-1.5 right-1.5 h-8 w-8 rounded-full bg-[hsl(212_95%_50%)] text-white flex items-center justify-center shadow ring-2 ring-card active:scale-95 touch-manipulation"
-                    >
-                      <Plus className="h-5 w-5" />
-                    </span>
+                        }}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setOwnActionsOpen(true);
+                          }
+                        }}
+                        aria-label="Open post options"
+                        className="absolute bottom-1.5 right-1.5 h-8 w-8 rounded-full bg-[hsl(212_95%_50%)] text-white flex items-center justify-center shadow ring-2 ring-card active:scale-95 touch-manipulation"
+                      >
+                        <Plus className="h-5 w-5" />
+                      </span>
+                    )}
                   </button>
 
                   {/* ===== Area B — everyone's vibes (auto-scrolling) ===== */}
