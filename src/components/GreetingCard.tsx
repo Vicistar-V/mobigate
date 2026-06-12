@@ -786,14 +786,16 @@ export const GreetingSection = ({
 
                   {/* ===== Area B — everyone's vibes (auto-scrolling) ===== */}
                   <div className="flex flex-col gap-2 min-w-0">
-                    <button
-                      type="button"
-                      onClick={openComposerBlank}
-                      className="bg-[hsl(212_95%_50%)] text-white rounded-md px-2.5 py-2.5 flex items-center justify-center gap-2 text-[13px] font-bold leading-tight active:opacity-90 touch-manipulation shadow-sm"
-                    >
-                      <span className="truncate">Post &amp; Share your Vibe now</span>
-                      <Images className="h-4 w-4 shrink-0" />
-                    </button>
+                    {canEdit && (
+                      <button
+                        type="button"
+                        onClick={openComposerBlank}
+                        className="bg-[hsl(212_95%_50%)] text-white rounded-md px-2.5 py-2.5 flex items-center justify-center gap-2 text-[13px] font-bold leading-tight active:opacity-90 touch-manipulation shadow-sm"
+                      >
+                        <span className="truncate">Post &amp; Share your Vibe now</span>
+                        <Images className="h-4 w-4 shrink-0" />
+                      </button>
+                    )}
 
                     <div
                       ref={vibeStripRef}
