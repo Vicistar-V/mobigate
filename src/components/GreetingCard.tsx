@@ -420,7 +420,8 @@ export const GreetingSection = ({
     <div className="space-y-3">
       {/* ============ HERO BLOCK ============ */}
       <Card className="overflow-hidden rounded-3xl shadow-[0_6px_20px_-8px_hsl(var(--primary)/0.45)]">
-        {/* Top Wall Banner — user-managed rotating slideshow */}
+        {/* Top Wall Banner — user-managed rotating slideshow (hidden in embedded/profile mode) */}
+        {!embed && (
         <div className="m-2 mb-0 border-[5px] border-[hsl(212_95%_50%)] rounded-2xl overflow-hidden">
           <WallBannerSlideshow
             ownerId={currentUserId}
