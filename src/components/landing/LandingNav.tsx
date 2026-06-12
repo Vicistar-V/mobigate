@@ -117,10 +117,18 @@ export const LandingNav = () => {
               ))}
               <Link
                 to="/dashboard"
+                onClick={() => setOpen(false)}
                 className="lp-btn-primary mt-2 inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-3 text-base font-bold"
               >
-                Enter App <ArrowRight className="h-4 w-4" />
+                Enter Mobi Face <ArrowRight className="h-4 w-4" />
               </Link>
+              <a
+                href="#"
+                onClick={() => setOpen(false)}
+                className="lp-btn-ghost mt-1 inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-3 text-base font-bold"
+              >
+                Enter Mobi-Store <ArrowRight className="h-4 w-4" />
+              </a>
             </div>
           </motion.div>
         )}
