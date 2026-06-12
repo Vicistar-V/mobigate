@@ -106,7 +106,7 @@ export const GreetingSection = ({
         ? [...tabbed, ...others.filter((o) => !tabbed.includes(o))]
         : others;
     // Fallback so the space is never empty
-    return base.length > 0 ? base.slice(0, 16) : allPosts.filter((p) => p.userId !== currentUserId).slice(0, 16);
+    return base.length > 0 ? base.slice(0, 16) : allPosts.filter((p) => p.userId !== ownerId).slice(0, 16);
   })();
 
   // Thumbnail strip — User's own + Public connection posts, de-duped
