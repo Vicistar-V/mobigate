@@ -61,9 +61,6 @@ export function WallBannerSlideshow({
   onOpenViewer,
   className,
   heightClass = "h-48",
-  showSundryBar = false,
-  authorName = "this user",
-  authorImage,
 }: WallBannerSlideshowProps) {
   const [slides, setSlides] = useState<WallBannerSlide[]>(() =>
     getActiveSlidesFor(ownerId, scope),
