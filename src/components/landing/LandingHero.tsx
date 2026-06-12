@@ -91,14 +91,14 @@ export const LandingHero = () => {
               to="/dashboard"
               className="lp-btn-primary lp-pulse-ring group inline-flex w-full items-center justify-center gap-2 rounded-2xl px-7 py-4 text-base font-bold sm:w-auto"
             >
-              Enter Mobigate
+              Enter mobiface
               <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Link>
             <a
-              href="#ecosystem"
+              href="#"
               className="lp-btn-ghost inline-flex w-full items-center justify-center gap-2 rounded-2xl px-7 py-4 text-base font-bold sm:w-auto"
             >
-              Explore ecosystem
+              Enter mobi-store
             </a>
           </motion.div>
 
