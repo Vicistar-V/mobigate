@@ -125,28 +125,29 @@ export const LandingHero = () => {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="relative mx-auto aspect-square w-full max-w-md"
+          className="relative mx-auto aspect-square w-full max-w-[16rem] xs:max-w-[18rem] sm:max-w-md"
         >
           {/* Central glowing emblem */}
-          <div className="absolute inset-[20%] rounded-[2.2rem] lp-aurora-bg lp-animate-pan opacity-95 blur-[3px]" />
-          <div className="absolute inset-[20%] flex items-center justify-center rounded-[2.2rem] lp-aurora-bg lp-animate-pan shadow-[var(--lp-glow-violet)]">
-            <span className="text-6xl font-black text-white drop-shadow-lg sm:text-7xl">M</span>
+          <div className="absolute inset-[22%] rounded-[2rem] lp-aurora-bg lp-animate-pan opacity-95 blur-[3px] sm:inset-[20%] sm:rounded-[2.2rem]" />
+          <div className="absolute inset-[22%] flex items-center justify-center rounded-[2rem] lp-aurora-bg lp-animate-pan shadow-[var(--lp-glow-violet)] sm:inset-[20%] sm:rounded-[2.2rem]">
+            <span className="text-5xl font-black text-white drop-shadow-lg sm:text-7xl">M</span>
           </div>
           <div className="lp-animate-spin-slow absolute inset-[8%] rounded-full border border-dashed border-[hsl(var(--lp-violet)/0.3)]" />
 
           {floatingCards.map((c) => (
             <div
               key={c.label}
-              className={`absolute ${c.cls} w-[46%] max-w-[180px] rounded-2xl lp-surface-lg p-3.5`}
+              className={`absolute ${c.cls} w-[44%] max-w-[160px] rounded-2xl lp-surface-lg p-2.5 sm:p-3.5`}
             >
-              <div className={`mb-2 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${c.ring} text-white shadow-md`}>
-                <c.icon className="h-5 w-5" />
+              <div className={`mb-1.5 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br ${c.ring} text-white shadow-md sm:mb-2 sm:h-9 sm:w-9 sm:rounded-xl`}>
+                <c.icon className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
-              <p className="text-sm font-bold text-[hsl(var(--lp-fg))]">{c.label}</p>
-              <p className="text-xs font-medium text-[hsl(var(--lp-muted))]">{c.sub}</p>
+              <p className="text-xs font-bold text-[hsl(var(--lp-fg))] sm:text-sm">{c.label}</p>
+              <p className="text-[0.7rem] font-medium leading-tight text-[hsl(var(--lp-muted))] sm:text-xs">{c.sub}</p>
             </div>
           ))}
         </motion.div>
+
       </div>
     </section>
   );
