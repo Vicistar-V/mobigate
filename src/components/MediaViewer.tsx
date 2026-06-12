@@ -233,7 +233,7 @@ export const MediaViewer = ({
                   <span className="text-sm sm:text-xl font-bold">{likeCount}</span>
                 </Button>
               </div>
-              {followers && !isOwner && (
+              {!isOwner && (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -245,7 +245,7 @@ export const MediaViewer = ({
                   }`}
                 >
                   <UserPlus className={`h-5 w-5 sm:h-7 sm:w-7 ${isFollowing ? "fill-current" : ""}`} />
-                  <span className="text-sm sm:text-xl font-bold">{formatFollowerCount(followerCount)}</span>
+                  <span className="text-sm sm:text-xl font-bold">{isFollowing ? "Following" : "Follow"}</span>
                 </Button>
               )}
               <Button
@@ -266,6 +266,12 @@ export const MediaViewer = ({
                 <Share2 className="h-5 w-5 sm:h-7 sm:w-7" />
                 <span className="text-sm sm:text-xl font-bold">Share</span>
               </Button>
+              {/* Views counter (read-only) */}
+              <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 px-3 py-2 sm:px-4 sm:py-3 text-white/90">
+                <Eye className="h-5 w-5 sm:h-7 sm:w-7" />
+                <span className="text-sm sm:text-xl font-bold">{formatFollowerCount(viewCount)}</span>
+              </div>
+
             </div>
           </div>
         )}
