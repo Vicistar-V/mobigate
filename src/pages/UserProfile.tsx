@@ -367,6 +367,7 @@ const UserProfile = () => {
                 }) as MediaItem),
               );
               setGalleryIdx(Math.max(0, list.findIndex((s) => s.id === slide.id)));
+              setGalleryAutoAdvance(true);
               setGalleryOpen(true);
             }}
           />
