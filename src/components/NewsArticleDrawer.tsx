@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Heart, Share2, UserPlus, Check, X, MessageCircle, Send } from "lucide-react";
+import { Heart, Share2, UserPlus, Check, X, MessageCircle, Send, Gift } from "lucide-react";
 import {
   Drawer,
   DrawerContent,
   DrawerClose,
 } from "@/components/ui/drawer";
 import { useToast } from "@/hooks/use-toast";
+import { SendGiftDialog } from "@/components/chat/SendGiftDialog";
 import type { NewsArticle } from "@/data/trendingHeadlines";
 
 interface NewsArticleDrawerProps {
