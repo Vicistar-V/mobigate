@@ -202,6 +202,38 @@ export const MediaGalleryViewer = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open, currentIndex]);
 
+  // Reset pause state whenever the viewer opens or the slide changes.
+  useEffect(() => {
+    setPaused(false);
+  }, [open, currentIndex]);
+
+  // Story-style auto-advance timer (photos/audio). Videos advance on "ended".
+  useEffect(() => {
+    if (!open || !autoAdvance || items.length <= 1) {
+      setProgress(0);
+      return;
+    }
+    // Don't auto-advance while reading text, commenting, paused, or watching a video.
+    if (viewMode === "reader" || commentDialogOpen || paused) return;
+    if (currentItem?.type === "video") return;
+
+    setProgress(0);
+    const duration = currentItem?.durationMs ?? 5000;
+    const start = Date.now();
+    const id = window.setInterval(() => {
+      const elapsed = Date.now() - start;
+      const pct = Math.min(100, (elapsed / duration) * 100);
+      setProgress(pct);
+      if (elapsed >= duration) {
+        window.clearInterval(id);
+        goToNext();
+      }
+    }, 50);
+    return () => window.clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, autoAdvance, currentIndex, viewMode, commentDialogOpen, paused, currentItem, items.length]);
+
+
   const renderMedia = () => {
     if (!currentItem) return null;
 
