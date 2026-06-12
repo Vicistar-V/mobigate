@@ -1290,6 +1290,22 @@ export const GreetingSection = ({
         galleryType="post"
       />
 
+      {/* ── Full-window "see all" showcase with Filter (Stories / Vibes / Breaking News) ── */}
+      <FeedShowcaseDialog
+        open={showcaseOpen}
+        onOpenChange={setShowcaseOpen}
+        title={
+          activeFeedTab === "Breaking News"
+            ? "All Breaking News"
+            : activeFeedTab === "Vibes & Flexing"
+            ? "All Vibes & Flexing"
+            : "All Stories"
+        }
+        items={showcaseMediaItems}
+      />
+
+
+
 
 
       {/* Service Unavailable Dialog */}
