@@ -311,8 +311,30 @@ export const MediaGalleryViewer = ({
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-[100vw] max-h-[100vh] w-full h-full p-0 gap-0 bg-black border-none !z-[200]" overlayClassName="!z-[200]">
+        {/* Story-style progress bar */}
+        {autoAdvance && items.length > 1 && (
+          <div className="absolute top-0 left-0 right-0 z-[60] flex gap-1 px-2 pt-2">
+            {items.map((_, i) => (
+              <div key={i} className="h-1 flex-1 overflow-hidden rounded-full bg-white/30">
+                <div
+                  className="h-full bg-white"
+                  style={{
+                    width:
+                      i < currentIndex
+                        ? "100%"
+                        : i === currentIndex
+                          ? `${currentItem?.type === "video" ? 0 : progress}%`
+                          : "0%",
+                    transition: i === currentIndex ? "width 60ms linear" : "none",
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Header */}
-        <div className="absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/80 to-transparent p-2 sm:p-4">
+        <div className={`absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/80 to-transparent p-2 sm:p-4 ${autoAdvance && items.length > 1 ? "pt-4 sm:pt-6" : ""}`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-3">
               {currentItem.author && (
