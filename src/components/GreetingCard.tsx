@@ -866,7 +866,7 @@ export const GreetingSection = ({
                   </button>
                   <button
                     type="button"
-                    onClick={() => openAllVibes(0)}
+                    onClick={() => setShowcaseOpen(true)}
                     className="italic font-bold underline underline-offset-2 text-[13px] text-center leading-tight px-1 text-[hsl(212_95%_50%)] active:opacity-70 touch-manipulation"
                   >
                     Flex with more exciting Vibes
