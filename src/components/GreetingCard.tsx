@@ -258,6 +258,23 @@ export const GreetingSection = ({
       isOwner: (p as any).userId === currentUserId,
     }));
 
+  // Every post belonging to the active feed area (own + connections + public),
+  // de-duped — feeds the full-window "see all" showcase with its Filter menu.
+  const showcaseMediaItems = (() => {
+    const tabbed = allPosts.filter(matchesTab);
+    const base = tabbed.length > 0 ? tabbed : allPosts;
+    const seen = new Set<string>();
+    const uniq: typeof allPosts = [];
+    for (const p of base) {
+      const k = p.id || p.imageUrl;
+      if (seen.has(k)) continue;
+      seen.add(k);
+      uniq.push(p);
+    }
+    return toMediaItems(uniq);
+  })();
+
+
   // Auto-scroll Area B horizontally (marquee), pausing briefly on interaction.
   useEffect(() => {
     if (activeFeedTab !== "Vibes & Flexing") return;
