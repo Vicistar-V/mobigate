@@ -678,7 +678,7 @@ const UserProfile = () => {
         onOpenChange={setGalleryOpen}
         items={galleryItems}
         initialIndex={galleryIdx}
-        showActions={false}
+        showActions={true}
         galleryType="post"
       />
 
