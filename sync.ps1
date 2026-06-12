@@ -55,7 +55,7 @@ try {
     }
 }
 catch {
-    Write-Host "`n�‼ Sync failed: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "`nSync failed: $($_.Exception.Message)" -ForegroundColor Red
     Write-Host "Resolve the issue above (e.g. merge/rebase conflicts) and run ./sync.ps1 again." -ForegroundColor Yellow
     exit 1
 }
