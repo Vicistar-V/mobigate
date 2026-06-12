@@ -34,10 +34,25 @@ import { WallBannerSlideshow } from "@/components/wall-banner/WallBannerSlidesho
 import { WallBannerManagerDialog } from "@/components/wall-banner/WallBannerManagerDialog";
 import { PostDetailDialog } from "@/components/PostDetailDialog";
 
-export const GreetingSection = () => {
+export const GreetingSection = ({
+  profileUserId,
+  editable,
+  embed = false,
+}: {
+  /** The owner of the profile being viewed. Defaults to the current user (home/own profile). */
+  profileUserId?: string;
+  /** Whether posting/editing affordances are shown. Defaults to true only on the owner's own page. */
+  editable?: boolean;
+  /** When true, render ONLY the posting area (Stories / Vibes / Breaking News) — no hero, nav, or search. */
+  embed?: boolean;
+} = {}) => {
   const profile = useUserProfile();
   const navigate = useNavigate();
   const currentUserId = useCurrentUserId();
+  // Whose posts power the "own" areas — the profile owner, not necessarily the viewer.
+  const ownerId = profileUserId ?? currentUserId;
+  // Editing is only allowed on your own page.
+  const canEdit = editable ?? (ownerId === currentUserId);
   const phpFeedPosts = useFeedPosts();
   const allPosts = phpFeedPosts || fallbackFeedPosts;
 
@@ -72,7 +87,7 @@ export const GreetingSection = () => {
   };
 
   // The User's OWN most recent post — pinned to the TOP big image space (never changes via thumbs)
-  const myOwnPostsAll = allPosts.filter((p) => p.userId === currentUserId);
+  const myOwnPostsAll = allPosts.filter((p) => p.userId === ownerId);
   const myOwnTabMatches = myOwnPostsAll.filter(matchesTab);
   // Keep the area populated even when a tab has no exact matches.
   const myOwnPosts = myOwnTabMatches.length > 0 ? myOwnTabMatches : myOwnPostsAll;
@@ -81,7 +96,7 @@ export const GreetingSection = () => {
   // Public/connection posts from OTHER users — drive the SECOND big image space
   const publicConnectionPosts = (() => {
     const others = allPosts.filter(
-      (p) => p.userId !== currentUserId && ((p as any).privacy ?? "Public") === "Public",
+      (p) => p.userId !== ownerId && ((p as any).privacy ?? "Public") === "Public",
     );
     const tabbed = others.filter(matchesTab);
     // Surface tab-relevant posts first, but always keep the strip well-populated
@@ -91,7 +106,7 @@ export const GreetingSection = () => {
         ? [...tabbed, ...others.filter((o) => !tabbed.includes(o))]
         : others;
     // Fallback so the space is never empty
-    return base.length > 0 ? base.slice(0, 16) : allPosts.filter((p) => p.userId !== currentUserId).slice(0, 16);
+    return base.length > 0 ? base.slice(0, 16) : allPosts.filter((p) => p.userId !== ownerId).slice(0, 16);
   })();
 
   // Thumbnail strip — User's own + Public connection posts, de-duped
@@ -275,6 +290,18 @@ export const GreetingSection = () => {
     setAllVibesViewerOpen(true);
   };
 
+  // Tapping the owner's own media: on your own page → Edit/Create/View menu;
+  // when viewing someone else's page → read-only viewer (no editing).
+  const handleOwnPrimary = () => {
+    if (canEdit) {
+      setOwnActionsOpen(true);
+    } else if (featuredPost) {
+      setOwnPostsViewerOpen(true);
+    }
+  };
+
+
+
 
 
 
@@ -393,7 +420,8 @@ export const GreetingSection = () => {
     <div className="space-y-3">
       {/* ============ HERO BLOCK ============ */}
       <Card className="overflow-hidden rounded-3xl shadow-[0_6px_20px_-8px_hsl(var(--primary)/0.45)]">
-        {/* Top Wall Banner — user-managed rotating slideshow */}
+        {/* Top Wall Banner — user-managed rotating slideshow (hidden in embedded/profile mode) */}
+        {!embed && (
         <div className="m-2 mb-0 border-[5px] border-[hsl(212_95%_50%)] rounded-2xl overflow-hidden">
           <WallBannerSlideshow
             ownerId={currentUserId}
@@ -419,9 +447,11 @@ export const GreetingSection = () => {
             }}
           />
         </div>
+        )}
 
         {/* Identity Row — overlapping avatar */}
-        <div className="px-3 pb-3 -mt-12 relative">
+        <div className={embed ? "px-3 pb-3 pt-3 relative" : "px-3 pb-3 -mt-12 relative"}>
+          {!embed && (<>
           <div className="flex items-end gap-3">
             {/* Avatar with online dot — nudged right, slightly larger */}
             <div className="relative shrink-0 ml-2">
@@ -671,6 +701,7 @@ export const GreetingSection = () => {
               <Search className="h-5 w-5" />
             </Button>
           </div>
+          </>)}
 
           {/* ============ POSTING AREA ============ */}
           <div className="mt-3">
@@ -724,45 +755,51 @@ export const GreetingSection = () => {
                       />
                     ) : (
                       <div className="aspect-[3/5] w-full flex items-center justify-center text-center text-[12px] text-muted-foreground px-2 pointer-events-none">
-                        Your vibes will show here. Tap + to post your first one.
+                        {canEdit
+                          ? "Your vibes will show here. Tap + to post your first one."
+                          : "No vibes posted yet."}
                       </div>
                     )}
                     <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded-md bg-black/55 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm pointer-events-none">
                       <Maximize2 className="h-3 w-3" />
-                      My Vibes
+                      {canEdit ? "My Vibes" : "Vibes"}
                     </span>
-                    {/* (+) → action menu: Edit Post / Create New Post / View my Posts */}
-                    <span
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setOwnActionsOpen(true);
-                      }}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
+                    {/* (+) → action menu: Edit Post / Create New Post / View my Posts (owner only) */}
+                    {canEdit && (
+                      <span
+                        onClick={(e) => {
                           e.stopPropagation();
                           setOwnActionsOpen(true);
-                        }
-                      }}
-                      aria-label="Open post options"
-                      className="absolute bottom-1.5 right-1.5 h-8 w-8 rounded-full bg-[hsl(212_95%_50%)] text-white flex items-center justify-center shadow ring-2 ring-card active:scale-95 touch-manipulation"
-                    >
-                      <Plus className="h-5 w-5" />
-                    </span>
+                        }}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setOwnActionsOpen(true);
+                          }
+                        }}
+                        aria-label="Open post options"
+                        className="absolute bottom-1.5 right-1.5 h-8 w-8 rounded-full bg-[hsl(212_95%_50%)] text-white flex items-center justify-center shadow ring-2 ring-card active:scale-95 touch-manipulation"
+                      >
+                        <Plus className="h-5 w-5" />
+                      </span>
+                    )}
                   </button>
 
                   {/* ===== Area B — everyone's vibes (auto-scrolling) ===== */}
                   <div className="flex flex-col gap-2 min-w-0">
-                    <button
-                      type="button"
-                      onClick={openComposerBlank}
-                      className="bg-[hsl(212_95%_50%)] text-white rounded-md px-2.5 py-2.5 flex items-center justify-center gap-2 text-[13px] font-bold leading-tight active:opacity-90 touch-manipulation shadow-sm"
-                    >
-                      <span className="truncate">Post &amp; Share your Vibe now</span>
-                      <Images className="h-4 w-4 shrink-0" />
-                    </button>
+                    {canEdit && (
+                      <button
+                        type="button"
+                        onClick={openComposerBlank}
+                        className="bg-[hsl(212_95%_50%)] text-white rounded-md px-2.5 py-2.5 flex items-center justify-center gap-2 text-[13px] font-bold leading-tight active:opacity-90 touch-manipulation shadow-sm"
+                      >
+                        <span className="truncate">Post &amp; Share your Vibe now</span>
+                        <Images className="h-4 w-4 shrink-0" />
+                      </button>
+                    )}
 
                     <div
                       ref={vibeStripRef}
@@ -833,19 +870,19 @@ export const GreetingSection = () => {
             {activeFeedTab !== "Vibes & Flexing" && featuredPost && (
               <div className="rounded-lg overflow-hidden">
                 <div className="grid grid-cols-[40%_1fr] gap-2 items-stretch">
-                  {/* Left: own image — opens Edit / Create New action sheet */}
+                  {/* Left: own image — opens Edit/Create on own page, viewer elsewhere */}
                   <div
                     role="button"
                     tabIndex={0}
-                    onClick={() => setOwnActionsOpen(true)}
+                    onClick={handleOwnPrimary}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
-                        setOwnActionsOpen(true);
+                        handleOwnPrimary();
                       }
                     }}
                     className="relative bg-muted rounded-lg overflow-hidden border-[3px] border-green-500/80 shadow-sm cursor-pointer active:scale-[0.98] transition-transform touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
-                    aria-label="Open post options: Edit Post or Create New Post"
+                    aria-label={canEdit ? "Open post options: Edit Post or Create New Post" : "View posts"}
                   >
                     <img
                       key={featuredPost.id || safeFeaturedIdx}
@@ -855,54 +892,58 @@ export const GreetingSection = () => {
                       loading="lazy"
                     />
                     <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded-md bg-black/55 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm pointer-events-none">
-                      <PenSquare className="h-3 w-3" />
-                      Tap to edit
+                      {canEdit ? <PenSquare className="h-3 w-3" /> : <Maximize2 className="h-3 w-3" />}
+                      {canEdit ? "Tap to edit" : "Tap to view"}
                     </span>
-                    {/* (+) → action menu: Edit Post / Create New Post / View my Posts */}
-                    <span
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setOwnActionsOpen(true);
-                      }}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
+                    {/* (+) → action menu: Edit Post / Create New Post / View my Posts (owner only) */}
+                    {canEdit && (
+                      <span
+                        onClick={(e) => {
                           e.stopPropagation();
                           setOwnActionsOpen(true);
-                        }
-                      }}
-                      aria-label="Open post options"
-                      className="absolute bottom-1.5 right-1.5 h-7 w-7 rounded-full bg-foreground/85 text-background flex items-center justify-center shadow ring-2 ring-card active:scale-95 touch-manipulation"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </span>
+                        }}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setOwnActionsOpen(true);
+                          }
+                        }}
+                        aria-label="Open post options"
+                        className="absolute bottom-1.5 right-1.5 h-7 w-7 rounded-full bg-foreground/85 text-background flex items-center justify-center shadow ring-2 ring-card active:scale-95 touch-manipulation"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </span>
+                    )}
                   </div>
 
                   {/* Right column: stacked button + storyline (storyline is read-only opener) */}
                   <div className="flex flex-col gap-2 min-w-0">
-                    {/* Post & Share button — quick shortcut to blank composer */}
-                    <button
-                      type="button"
-                      onClick={openComposerBlank}
-                      className="bg-primary text-primary-foreground rounded-md px-2.5 py-2.5 text-center text-[15px] font-bold leading-tight truncate active:opacity-90 touch-manipulation shadow-sm"
-                    >
-                      {tabMeta.composeCta}
-                    </button>
-                    {/* Storyline 1 — read-only div opener for Edit / Create New */}
+                    {/* Post & Share button — quick shortcut to blank composer (owner only) */}
+                    {canEdit && (
+                      <button
+                        type="button"
+                        onClick={openComposerBlank}
+                        className="bg-primary text-primary-foreground rounded-md px-2.5 py-2.5 text-center text-[15px] font-bold leading-tight truncate active:opacity-90 touch-manipulation shadow-sm"
+                      >
+                        {tabMeta.composeCta}
+                      </button>
+                    )}
+                    {/* Storyline 1 — read-only opener (Edit/Create on own page, viewer elsewhere) */}
                     <div
                       role="button"
                       tabIndex={0}
-                      onClick={() => setOwnActionsOpen(true)}
+                      onClick={handleOwnPrimary}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") {
                           e.preventDefault();
-                          setOwnActionsOpen(true);
+                          handleOwnPrimary();
                         }
                       }}
                       className="flex-1 bg-lime-200/70 text-foreground p-2.5 text-left rounded-md active:opacity-90 touch-manipulation cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 select-none"
-                      aria-label="Open post options: Edit Post or Create New Post"
+                      aria-label={canEdit ? "Open post options: Edit Post or Create New Post" : "View posts"}
                     >
                       <p className="text-[15px] font-bold leading-snug">
                         {featuredPost.title || "Your Post or Content Description or Storyline here."}
@@ -1004,8 +1045,8 @@ export const GreetingSection = () => {
         </div>
       </Card>
 
-      {/* People You May Know */}
-      <PeopleYouMayKnow />
+      {/* People You May Know (hidden in embedded/profile mode — the profile renders its own) */}
+      {!embed && <PeopleYouMayKnow />}
 
       {/* Breaking News extras — Top Trending Headlines + Headlines you don't wanna miss */}
       {activeFeedTab === "Breaking News" && (
