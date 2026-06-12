@@ -125,7 +125,7 @@ export const LandingHero = () => {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="relative mx-auto aspect-square w-full max-w-[16rem] xs:max-w-[18rem] sm:max-w-md"
+          className="relative mx-auto aspect-square w-full max-w-[17rem] sm:max-w-md"
         >
           {/* Central glowing emblem */}
           <div className="absolute inset-[22%] rounded-[2rem] lp-aurora-bg lp-animate-pan opacity-95 blur-[3px] sm:inset-[20%] sm:rounded-[2.2rem]" />
