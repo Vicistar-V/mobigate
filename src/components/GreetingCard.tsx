@@ -164,6 +164,119 @@ export const GreetingSection = () => {
   const myRecentPosts = thumbnailPosts;
   const setFeaturedIdx = setFeaturedPublicIdx;
 
+  // ────────────────────────────────────────────────────────────────────────
+  // VIBES & FLEXING data model
+  //  • Area A  → the User's OWN posts (latest on display; rest via the + menu)
+  //  • Area B  → everyone's posts (own + others), auto-scrolling. Ordering:
+  //              Newest (last 7 days) first, then Most Trending (engagement).
+  //  • "Flex with more exciting Vibes" → full window of ALL vibes by everybody.
+  // ────────────────────────────────────────────────────────────────────────
+  const [ownPostsViewerOpen, setOwnPostsViewerOpen] = useState(false);
+  const [allVibesViewerOpen, setAllVibesViewerOpen] = useState(false);
+  const [allVibesStartIdx, setAllVibesStartIdx] = useState(0);
+  const [editPickerOpen, setEditPickerOpen] = useState(false);
+  const [postToEdit, setPostToEdit] = useState<typeof allPosts[number] | null>(null);
+
+  const scoreEngagement = (p: any) =>
+    (Number(p.likes) || 0) +
+    (Number(p.views) || 0) +
+    (Number(p.comments) || 0) +
+    (Number(p.shares) || 0) +
+    (Number(p.followers) || 0);
+  const postTime = (p: any) => {
+    const t = Date.parse(p.timestamp || p.createdAt || p.date || "");
+    return Number.isNaN(t) ? 0 : t;
+  };
+  const sortNewestThenTrending = (posts: typeof allPosts) => {
+    const now = Date.now();
+    const WEEK = 7 * 24 * 60 * 60 * 1000;
+    const recent: typeof allPosts = [];
+    const rest: typeof allPosts = [];
+    posts.forEach((p) => {
+      const t = postTime(p);
+      if (t > 0 && now - t <= WEEK) recent.push(p);
+      else rest.push(p);
+    });
+    recent.sort((a, b) => postTime(b) - postTime(a));
+    rest.sort((a, b) => scoreEngagement(b) - scoreEngagement(a));
+    return [...recent, ...rest];
+  };
+
+  // Area B — everyone's vibes (own + others), de-duped & ordered.
+  const communityVibes = (() => {
+    const tabbed = allPosts.filter(matchesTab);
+    const base = tabbed.length > 1 ? tabbed : allPosts;
+    const seen = new Set<string>();
+    const uniq: typeof allPosts = [];
+    for (const p of base) {
+      const k = p.id || p.imageUrl;
+      if (seen.has(k)) continue;
+      seen.add(k);
+      uniq.push(p);
+    }
+    return sortNewestThenTrending(uniq).slice(0, 24);
+  })();
+
+  // Map feed posts → MediaGalleryViewer items (shared by the own + all viewers).
+  const toMediaItems = (posts: typeof allPosts): MediaItem[] =>
+    posts.map((p, i) => ({
+      id: p.id || `vibe-media-${i}`,
+      url: p.imageUrl,
+      type:
+        (p as any).type?.toLowerCase() === "video"
+          ? "video"
+          : (p as any).type?.toLowerCase() === "audio"
+          ? "audio"
+          : "photo",
+      title: p.title,
+      author: (p as any).author,
+      authorImage: (p as any).authorProfileImage,
+      authorUserId: (p as any).userId,
+      description: (p as any).description,
+      timestamp: (p as any).timestamp,
+      likes: Number((p as any).likes) || 0,
+      comments: Number((p as any).comments) || 0,
+      followers: (p as any).followers,
+      isOwner: (p as any).userId === currentUserId,
+    }));
+
+  // Auto-scroll Area B horizontally (marquee), pausing briefly on interaction.
+  useEffect(() => {
+    if (activeFeedTab !== "Vibes & Flexing") return;
+    const el = vibeStripRef.current;
+    if (!el) return;
+    let paused = false;
+    let resumeT: ReturnType<typeof setTimeout>;
+    const pause = () => {
+      paused = true;
+      clearTimeout(resumeT);
+      resumeT = setTimeout(() => {
+        paused = false;
+      }, 2500);
+    };
+    el.addEventListener("pointerdown", pause, { passive: true });
+    el.addEventListener("wheel", pause, { passive: true });
+    const id = setInterval(() => {
+      if (paused || !el) return;
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 2;
+      if (atEnd) el.scrollTo({ left: 0, behavior: "smooth" });
+      else el.scrollBy({ left: 1 });
+    }, 30);
+    return () => {
+      clearInterval(id);
+      clearTimeout(resumeT);
+      el.removeEventListener("pointerdown", pause);
+      el.removeEventListener("wheel", pause);
+    };
+  }, [activeFeedTab, communityVibes.length]);
+
+  const openAllVibes = (startIdx = 0) => {
+    setAllVibesStartIdx(startIdx);
+    setAllVibesViewerOpen(true);
+  };
+
+
+
 
 
 
@@ -591,32 +704,38 @@ export const GreetingSection = () => {
                 Image-first layout: one big featured vibe on the left with a (+)
                 badge, a "Post & Share" button top-right, and a compact grid of
                 vibe thumbnails below it. Footer cycles vibes with ◄ / ► arrows. */}
-            {activeFeedTab === "Vibes & Flexing" && featuredPublicPost && (
+            {activeFeedTab === "Vibes & Flexing" && (
               <div className="rounded-lg overflow-hidden">
                 <div className="grid grid-cols-[48%_1fr] gap-2 items-stretch">
-                  {/* Left: big featured vibe → enlarge in viewer */}
+                  {/* ===== Area A — the User's OWN vibes (latest on display) ===== */}
                   <button
                     type="button"
-                    onClick={() => setViewerOpen(true)}
+                    onClick={() => featuredPost && setOwnPostsViewerOpen(true)}
                     className="relative bg-muted rounded-lg overflow-hidden border-[3px] border-[hsl(212_95%_50%)] shadow-sm active:scale-[0.98] transition-transform touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(212_95%_50%)]"
-                    aria-label="Enlarge this vibe"
+                    aria-label="View your vibes"
                   >
-                    <img
-                      key={featuredPublicPost.id || `vibe-${safeFeaturedIdx}`}
-                      src={featuredPublicPost.imageUrl}
-                      alt={featuredPublicPost.title}
-                      className="w-full h-full object-cover aspect-[3/5] transition-opacity duration-300 pointer-events-none"
-                      loading="lazy"
-                    />
+                    {featuredPost ? (
+                      <img
+                        key={featuredPost.id || "my-latest-vibe"}
+                        src={featuredPost.imageUrl}
+                        alt={featuredPost.title}
+                        className="w-full h-full object-cover aspect-[3/5] transition-opacity duration-300 pointer-events-none"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="aspect-[3/5] w-full flex items-center justify-center text-center text-[12px] text-muted-foreground px-2 pointer-events-none">
+                        Your vibes will show here. Tap + to post your first one.
+                      </div>
+                    )}
                     <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded-md bg-black/55 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm pointer-events-none">
                       <Maximize2 className="h-3 w-3" />
-                      Tap to enlarge
+                      My Vibes
                     </span>
-                    {/* (+) create-vibe affordance */}
+                    {/* (+) → action menu: Edit Post / Create New Post / View my Posts */}
                     <span
                       onClick={(e) => {
                         e.stopPropagation();
-                        openComposerBlank();
+                        setOwnActionsOpen(true);
                       }}
                       role="button"
                       tabIndex={0}
@@ -624,49 +743,40 @@ export const GreetingSection = () => {
                         if (e.key === "Enter" || e.key === " ") {
                           e.preventDefault();
                           e.stopPropagation();
-                          openComposerBlank();
+                          setOwnActionsOpen(true);
                         }
                       }}
-                      aria-label="Create a new Vibe"
+                      aria-label="Open post options"
                       className="absolute bottom-1.5 right-1.5 h-8 w-8 rounded-full bg-[hsl(212_95%_50%)] text-white flex items-center justify-center shadow ring-2 ring-card active:scale-95 touch-manipulation"
                     >
                       <Plus className="h-5 w-5" />
                     </span>
                   </button>
 
-                  {/* Right: compose button + vibe thumbnail grid */}
+                  {/* ===== Area B — everyone's vibes (auto-scrolling) ===== */}
                   <div className="flex flex-col gap-2 min-w-0">
                     <button
                       type="button"
                       onClick={openComposerBlank}
                       className="bg-[hsl(212_95%_50%)] text-white rounded-md px-2.5 py-2.5 flex items-center justify-center gap-2 text-[13px] font-bold leading-tight active:opacity-90 touch-manipulation shadow-sm"
                     >
-                      <span className="truncate">Post &amp; Share something now</span>
+                      <span className="truncate">Post &amp; Share your Vibe now</span>
                       <Images className="h-4 w-4 shrink-0" />
                     </button>
 
                     <div
                       ref={vibeStripRef}
-                      className="flex flex-row gap-1.5 flex-1 min-h-0 overflow-x-auto overflow-y-hidden touch-pan-x overscroll-x-contain snap-x snap-mandatory [-webkit-overflow-scrolling:touch] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                      className="flex flex-row gap-1.5 flex-1 min-h-0 overflow-x-auto overflow-y-hidden touch-pan-x overscroll-x-contain [-webkit-overflow-scrolling:touch] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                     >
-                      {myRecentPosts.slice(0, 15).map((post, i) => {
-                        const realIdx = myRecentPosts.findIndex(
-                          (p) => (p.id || p.imageUrl) === (post.id || post.imageUrl),
-                        );
-                        const isActive = realIdx === safeFeaturedIdx;
+                      {communityVibes.map((post, i) => {
+                        const mine = (post as any).userId === currentUserId;
                         return (
                           <button
-                            key={`vibe-thumb-${i}-${post.id ?? i}`}
+                            key={`vibe-b-${i}-${post.id ?? i}`}
                             type="button"
-                            onClick={() => setFeaturedIdx(realIdx < 0 ? 0 : realIdx)}
-                            data-vibe-active={isActive}
-                            className={`relative shrink-0 h-full w-[46%] snap-start rounded-md overflow-hidden bg-muted active:scale-95 transition-all touch-manipulation ${
-                              isActive
-                                ? "ring-2 ring-[hsl(212_95%_50%)] border border-[hsl(212_95%_50%)]"
-                                : "border border-[hsl(212_95%_50%)]/30 opacity-90 hover:opacity-100"
-                            }`}
-                            aria-label={`Feature ${post.title} vibe`}
-                            aria-pressed={isActive}
+                            onClick={() => openAllVibes(i)}
+                            className="relative shrink-0 h-full w-[46%] rounded-md overflow-hidden bg-muted active:scale-95 transition-all touch-manipulation border border-[hsl(212_95%_50%)]/30 hover:opacity-100"
+                            aria-label={`Open ${post.title || "vibe"} by ${(post as any).author || "user"}`}
                           >
                             <img
                               src={post.imageUrl}
@@ -674,12 +784,11 @@ export const GreetingSection = () => {
                               className="h-full w-full object-cover"
                               loading="lazy"
                             />
-                            <span
-                              aria-hidden="true"
-                              className="absolute bottom-0.5 right-0.5 h-4 w-4 rounded-full bg-[hsl(212_95%_50%)]/90 text-white flex items-center justify-center"
-                            >
-                              <Plus className="h-2.5 w-2.5" />
-                            </span>
+                            {mine && (
+                              <span className="absolute top-0.5 left-0.5 rounded bg-[hsl(212_95%_50%)] text-white text-[8px] font-bold px-1 py-0.5">
+                                You
+                              </span>
+                            )}
                           </button>
                         );
                       })}
@@ -687,25 +796,20 @@ export const GreetingSection = () => {
                   </div>
                 </div>
 
-                {/* Footer — ◄ scroll · see-all · scroll ► (arrows scroll the strip,
-                    dim when exhausted; center text opens the full media window) */}
+                {/* Footer — ◄ scroll · see-all · scroll ► (arrows nudge the auto-scroll;
+                    center text opens the full window of everybody's vibes) */}
                 <div className="mt-3 flex items-center justify-center gap-3">
                   <button
                     type="button"
                     onClick={() => scrollVibeStrip("left")}
-                    disabled={!vibeCanLeft}
                     aria-label="Scroll vibes left"
-                    className={`h-8 w-8 rounded-full border flex items-center justify-center transition-all touch-manipulation ${
-                      vibeCanLeft
-                        ? "bg-foreground text-background border-foreground shadow-md active:scale-90"
-                        : "bg-muted text-muted-foreground/40 border-border cursor-not-allowed"
-                    }`}
+                    className="h-8 w-8 rounded-full border flex items-center justify-center transition-all touch-manipulation bg-foreground text-background border-foreground shadow-md active:scale-90"
                   >
-                    <ChevronLeft className="h-5 w-5" strokeWidth={vibeCanLeft ? 3 : 2} />
+                    <ChevronLeft className="h-5 w-5" strokeWidth={3} />
                   </button>
                   <button
                     type="button"
-                    onClick={() => setViewerOpen(true)}
+                    onClick={() => openAllVibes(0)}
                     className="italic font-bold underline underline-offset-2 text-[13px] text-center leading-tight px-1 text-[hsl(212_95%_50%)] active:opacity-70 touch-manipulation"
                   >
                     Flex with more exciting Vibes
@@ -713,19 +817,15 @@ export const GreetingSection = () => {
                   <button
                     type="button"
                     onClick={() => scrollVibeStrip("right")}
-                    disabled={!vibeCanRight}
                     aria-label="Scroll vibes right"
-                    className={`h-8 w-8 rounded-full border flex items-center justify-center transition-all touch-manipulation ${
-                      vibeCanRight
-                        ? "bg-foreground text-background border-foreground shadow-md active:scale-90"
-                        : "bg-muted text-muted-foreground/40 border-border cursor-not-allowed"
-                    }`}
+                    className="h-8 w-8 rounded-full border flex items-center justify-center transition-all touch-manipulation bg-foreground text-background border-foreground shadow-md active:scale-90"
                   >
-                    <ChevronRight className="h-5 w-5" strokeWidth={vibeCanRight ? 3 : 2} />
+                    <ChevronRight className="h-5 w-5" strokeWidth={3} />
                   </button>
                 </div>
               </div>
             )}
+
 
             {/* Featured post card — image left, [Post & Share button] + [storyline] stacked right.
                 Image X + Storyline 1 are READ-ONLY; tapping either opens an action sheet
@@ -979,7 +1079,7 @@ export const GreetingSection = () => {
               type="button"
               onClick={() => {
                 setOwnActionsOpen(false);
-                setEditPostOpen(true);
+                setEditPickerOpen(true);
               }}
               disabled={!featuredPost}
               className="w-full flex items-center gap-3 p-3 rounded-xl border-2 border-primary/30 bg-primary/5 hover:bg-primary/10 active:scale-[0.99] transition-all touch-manipulation text-left disabled:opacity-50"
@@ -990,7 +1090,7 @@ export const GreetingSection = () => {
               <span className="min-w-0">
                 <span className="block text-[15px] font-bold text-foreground">Edit Post</span>
                 <span className="block text-[12px] text-muted-foreground leading-snug">
-                  Modify the images and/or text of this post.
+                  Pick any of your posts to edit its images and/or text.
                 </span>
               </span>
             </button>
@@ -1018,9 +1118,10 @@ export const GreetingSection = () => {
               type="button"
               onClick={() => {
                 setOwnActionsOpen(false);
-                navigate(`/profile/${currentUserId}#status`);
+                setOwnPostsViewerOpen(true);
               }}
-              className="w-full flex items-center gap-3 p-3 rounded-xl border-2 border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/10 active:scale-[0.99] transition-all touch-manipulation text-left"
+              disabled={!featuredPost}
+              className="w-full flex items-center gap-3 p-3 rounded-xl border-2 border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/10 active:scale-[0.99] transition-all touch-manipulation text-left disabled:opacity-50"
             >
               <span className="h-10 w-10 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
                 <LayoutList className="h-5 w-5" />
@@ -1028,7 +1129,7 @@ export const GreetingSection = () => {
               <span className="min-w-0">
                 <span className="block text-[15px] font-bold text-foreground">View my Posts</span>
                 <span className="block text-[12px] text-muted-foreground leading-snug">
-                  See all the posts you've shared so far.
+                  Open all the posts you've shared in a full window.
                 </span>
               </span>
             </button>
@@ -1036,18 +1137,84 @@ export const GreetingSection = () => {
         </ActionDialogContent>
       </ActionDialog>
 
-      {/* ── Edit existing own post dialog ── */}
-      {featuredPost && (
+      {/* ── Edit existing own post dialog (edits the picked post, else latest) ── */}
+      {(postToEdit || featuredPost) && (
         <EditPostDialog
-          post={featuredPost as any}
+          post={(postToEdit || featuredPost) as any}
           open={editPostOpen}
-          onOpenChange={setEditPostOpen}
+          onOpenChange={(o) => {
+            setEditPostOpen(o);
+            if (!o) setPostToEdit(null);
+          }}
           onSave={() => {
             setEditPostOpen(false);
+            setPostToEdit(null);
             window.dispatchEvent(new CustomEvent("postUpdated"));
           }}
         />
       )}
+
+      {/* ── Edit picker — choose which of your posts to edit ── */}
+      <ActionDialog open={editPickerOpen} onOpenChange={setEditPickerOpen}>
+        <ActionDialogContent className="sm:max-w-lg rounded-2xl p-5 max-h-[85dvh] overflow-y-auto">
+          <ActionDialogHeader>
+            <ActionDialogTitle className="text-lg">Select a Post to Edit</ActionDialogTitle>
+            <ActionDialogDescription>
+              Tap any of your posts to open it in the editor.
+            </ActionDialogDescription>
+          </ActionDialogHeader>
+          {myOwnPosts.length === 0 ? (
+            <p className="mt-4 text-sm text-muted-foreground text-center py-6">
+              You haven't shared any posts yet.
+            </p>
+          ) : (
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              {myOwnPosts.map((post, i) => (
+                <button
+                  key={`edit-pick-${i}-${post.id ?? i}`}
+                  type="button"
+                  onClick={() => {
+                    setPostToEdit(post);
+                    setEditPickerOpen(false);
+                    setEditPostOpen(true);
+                  }}
+                  className="relative aspect-square rounded-lg overflow-hidden border border-border bg-muted active:scale-95 transition-transform touch-manipulation"
+                  aria-label={`Edit ${post.title || "post"}`}
+                >
+                  <img
+                    src={post.imageUrl}
+                    alt={post.title}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                  <span className="absolute inset-x-0 bottom-0 bg-black/55 text-white text-[10px] font-medium px-1 py-0.5 truncate">
+                    {post.title || "Untitled"}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </ActionDialogContent>
+      </ActionDialog>
+
+      {/* ── Viewer: all of MY posts (Area A enlarge + "View my Posts") ── */}
+      <MediaGalleryViewer
+        open={ownPostsViewerOpen}
+        onOpenChange={setOwnPostsViewerOpen}
+        items={toMediaItems(myOwnPosts)}
+        initialIndex={0}
+        galleryType="post"
+      />
+
+      {/* ── Viewer: ALL vibes by everybody ("Flex with more exciting Vibes") ── */}
+      <MediaGalleryViewer
+        open={allVibesViewerOpen}
+        onOpenChange={setAllVibesViewerOpen}
+        items={toMediaItems(communityVibes)}
+        initialIndex={allVibesStartIdx}
+        galleryType="post"
+      />
+
 
 
       {/* Service Unavailable Dialog */}
