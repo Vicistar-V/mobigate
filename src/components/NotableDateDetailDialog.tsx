@@ -72,6 +72,10 @@ export const NotableDateDetailDialog = ({
   const { toast } = useToast();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [willAttend, setWillAttend] = useState(false);
+
 
 
   // Reset to first slide whenever a different person opens.
