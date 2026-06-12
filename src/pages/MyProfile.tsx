@@ -39,6 +39,7 @@ import { useCurrentUserId, useUserPosts } from "@/hooks/useWindowData";
 import { WallBannerSlideshow } from "@/components/wall-banner/WallBannerSlideshow";
 import { WallBannerManagerDialog } from "@/components/wall-banner/WallBannerManagerDialog";
 import type { WallBannerSlide } from "@/types/wallBanner";
+import { getActiveSlidesFor } from "@/lib/wallBannerStorage";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
