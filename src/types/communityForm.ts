@@ -121,6 +121,7 @@ export interface CommunityFormData {
   // Community Identity
   name: string;
   shortDescription: string;
+  description?: string;
   
   // Classification & Type
   classification: CommunityClassification | "";
