@@ -88,7 +88,7 @@ export interface OfficialPosition {
   level: PositionLevel;
   adminId?: string;
   adminName?: string;
-  adminNumber?: string;
+  adminNumber?: number;
   customTitle?: string;
 }
 
