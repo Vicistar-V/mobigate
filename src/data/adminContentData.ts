@@ -1,513 +1,175 @@
-// Admin Content Moderation Data Types and Mock Data
+// src/data/adminContentData.ts
+// Mock data for community content moderation
 
-export type ContentType = 'news' | 'event' | 'article' | 'vibe';
-export type ContentStatus = 'draft' | 'pending' | 'approved' | 'published' | 'rejected';
+export type ContentType = "news" | "event" | "article" | "vibe";
 
 export interface AdminContentItem {
-  id: string;
-  type: ContentType;
-  title: string;
-  description: string;
-  content?: string;
-  thumbnail?: string;
-  authorId: string;
-  authorName: string;
-  authorAvatar: string;
-  status: ContentStatus;
-  category?: string;
+  id:           string;
+  type:         ContentType;
+  title:        string;
+  description?: string;
+  content?:     string;
+  thumbnail?:   string;
+  category?:    string;
+  tags?:        string[];
+  status:       "published" | "pending" | "draft" | "rejected";
+  featured?:    boolean;
+  spotlight?:   boolean;
+  authorName:   string;
+  authorAvatar?: string;
+  authorId?:    string;
   submittedAt?: Date;
   publishedAt?: Date;
   rejectionReason?: string;
-  views: number;
-  likes: number;
-  comments: number;
-  featured: boolean;
-  // Event specific fields
-  eventDate?: Date;
+  views:        number;
+  likes:        number;
+  comments:     number;
+  // Events
+  eventDate?:    Date;
   eventEndDate?: Date;
-  venue?: string;
-  venueType?: 'indoor' | 'outdoor' | 'virtual' | 'hybrid';
-  rsvpCount?: number;
-  capacity?: number;
-  // Vibe specific fields
-  mediaType?: 'video' | 'photo' | 'audio' | 'gallery';
-  duration?: string;
-  spotlight?: boolean;
-  // Article specific fields
-  readTime?: string;
-  tags?: string[];
+  venue?:        string;
+  venueType?:    "physical" | "online" | "hybrid";
+  capacity?:     number;
+  rsvpCount?:    number;
+  // Articles
+  readTime?:     string;
+  // Vibes
+  mediaType?:    "video" | "photo" | "audio" | "gallery";
+  duration?:     string;
+  mediaUrl?:     string;
 }
 
-export interface ContentApprovalAction {
-  id: string;
-  contentId: string;
-  contentTitle: string;
-  contentType: ContentType;
-  action: 'approve' | 'reject' | 'request_changes';
-  performedBy: string;
-  performedByAvatar: string;
-  reason?: string;
-  timestamp: Date;
-}
+const makeId = () => Math.random().toString(36).slice(2, 10);
 
-// Mock News Data for Admin
 export const mockAdminNews: AdminContentItem[] = [
   {
-    id: "news-1",
-    type: "news",
-    title: "Community Annual General Meeting 2025",
-    description: "Join us for our annual general meeting where we'll discuss achievements, plans, and community development initiatives.",
-    thumbnail: "/placeholder.svg",
-    authorId: "user-1",
-    authorName: "Sarah Johnson",
-    authorAvatar: "/placeholder.svg",
-    status: "published",
-    category: "announcements",
-    publishedAt: new Date("2025-01-15"),
-    views: 1250,
-    likes: 234,
-    comments: 45,
-    featured: true
+    id: makeId(), type: "news", title: "Community Development Fund Reaches ₦5M Milestone",
+    description: "The community development fund has successfully reached the 5 million naira milestone, thanks to generous contributions from members across all regions.",
+    category: "community news", featured: true, status: "published",
+    authorName: "Chukwudi Okafor", authorAvatar: "https://api.dicebear.com/7.x/initials/svg?seed=CO",
+    submittedAt: new Date(Date.now() - 3 * 86400000), publishedAt: new Date(Date.now() - 2 * 86400000),
+    views: 1240, likes: 89, comments: 23,
+    thumbnail: "https://images.unsplash.com/photo-1559526324-593bc073d938?w=400&h=250&fit=crop",
   },
   {
-    id: "news-2",
-    type: "news",
-    title: "New Community Center Opening Ceremony",
-    description: "Celebrate with us as we officially open our new state-of-the-art community center.",
-    thumbnail: "/placeholder.svg",
-    authorId: "user-2",
-    authorName: "Michael Chen",
-    authorAvatar: "/placeholder.svg",
-    status: "published",
-    category: "events",
-    publishedAt: new Date("2025-01-20"),
-    views: 2100,
-    likes: 456,
-    comments: 89,
-    featured: true
+    id: makeId(), type: "news", title: "Annual General Meeting Date Announced",
+    description: "The date for this year's Annual General Meeting has been officially announced. All members are required to attend.",
+    category: "announcement", status: "pending",
+    authorName: "Ngozi Eze", authorAvatar: "https://api.dicebear.com/7.x/initials/svg?seed=NE",
+    submittedAt: new Date(Date.now() - 86400000),
+    views: 0, likes: 0, comments: 0,
   },
   {
-    id: "news-3",
-    type: "news",
-    title: "Updated Community Guidelines and Policies",
-    description: "Please review our updated community guidelines that ensure a safe, respectful environment.",
-    thumbnail: "/placeholder.svg",
-    authorId: "user-3",
-    authorName: "Jennifer Taylor",
-    authorAvatar: "/placeholder.svg",
-    status: "pending",
-    category: "updates",
-    submittedAt: new Date("2025-01-18"),
-    views: 0,
-    likes: 0,
-    comments: 0,
-    featured: false
+    id: makeId(), type: "news", title: "New Youth Empowerment Programme Launched",
+    description: "A new skills acquisition and empowerment programme for community youth has been launched.",
+    category: "development", featured: false, status: "draft",
+    authorName: "Emeka Nwosu", authorAvatar: "https://api.dicebear.com/7.x/initials/svg?seed=EN",
+    submittedAt: new Date(Date.now() - 2 * 86400000),
+    views: 0, likes: 0, comments: 0,
   },
-  {
-    id: "news-4",
-    type: "news",
-    title: "Youth Sports Tournament Highlights",
-    description: "Watch the exciting highlights from last weekend's youth sports tournament.",
-    thumbnail: "/placeholder.svg",
-    authorId: "user-4",
-    authorName: "David Martinez",
-    authorAvatar: "/placeholder.svg",
-    status: "draft",
-    category: "events",
-    views: 0,
-    likes: 0,
-    comments: 0,
-    featured: false
-  },
-  {
-    id: "news-5",
-    type: "news",
-    title: "Emergency Infrastructure Update",
-    description: "Important update regarding road repairs and temporary traffic changes in our community.",
-    thumbnail: "/placeholder.svg",
-    authorId: "user-1",
-    authorName: "Sarah Johnson",
-    authorAvatar: "/placeholder.svg",
-    status: "pending",
-    category: "affairs",
-    submittedAt: new Date("2025-01-19"),
-    views: 0,
-    likes: 0,
-    comments: 0,
-    featured: false
-  }
 ];
 
-// Mock Events Data for Admin
 export const mockAdminEvents: AdminContentItem[] = [
   {
-    id: "event-1",
-    type: "event",
-    title: "Annual Community Gala Dinner",
-    description: "Join us for an elegant evening of celebration, networking, and community building.",
-    thumbnail: "/placeholder.svg",
-    authorId: "user-1",
-    authorName: "Sarah Johnson",
-    authorAvatar: "/placeholder.svg",
-    status: "published",
-    category: "celebration",
-    publishedAt: new Date("2025-01-10"),
-    eventDate: new Date("2025-02-15T18:00:00"),
-    eventEndDate: new Date("2025-02-15T23:00:00"),
-    venue: "Grand Ballroom, Community Center",
-    venueType: "indoor",
-    rsvpCount: 234,
-    capacity: 300,
-    views: 3456,
-    likes: 678,
-    comments: 145,
-    featured: true
+    id: makeId(), type: "event", title: "Annual General Meeting 2025",
+    description: "The most important gathering of the year. All members must attend. Minutes of last meeting will be adopted.",
+    status: "published", venue: "Community Hall, Lagos", venueType: "physical",
+    eventDate: new Date(Date.now() + 7 * 86400000),
+    eventEndDate: new Date(Date.now() + 7 * 86400000 + 4 * 3600000),
+    capacity: 500, rsvpCount: 342,
+    authorName: "President-General", authorAvatar: "https://api.dicebear.com/7.x/initials/svg?seed=PG",
+    submittedAt: new Date(Date.now() - 5 * 86400000), publishedAt: new Date(Date.now() - 4 * 86400000),
+    views: 890, likes: 120, comments: 45,
+    thumbnail: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=250&fit=crop",
   },
   {
-    id: "event-2",
-    type: "event",
-    title: "Youth Leadership Workshop Series",
-    description: "Empowering the next generation of leaders through interactive workshops.",
-    thumbnail: "/placeholder.svg",
-    authorId: "user-2",
-    authorName: "Michael Chen",
-    authorAvatar: "/placeholder.svg",
-    status: "published",
-    category: "workshop",
-    publishedAt: new Date("2025-01-05"),
-    eventDate: new Date("2025-02-10T10:00:00"),
-    eventEndDate: new Date("2025-02-10T16:00:00"),
-    venue: "Training Room B, Community Hub",
-    venueType: "indoor",
-    rsvpCount: 78,
-    capacity: 100,
-    views: 2890,
-    likes: 456,
-    comments: 98,
-    featured: true
+    id: makeId(), type: "event", title: "Community Health Walk & Fair",
+    description: "Join us for a 5km health walk followed by a health fair with free medical check-ups.",
+    status: "pending", venue: "City Park", venueType: "physical",
+    eventDate: new Date(Date.now() + 14 * 86400000), capacity: 200, rsvpCount: 0,
+    authorName: "Health Committee", authorAvatar: "https://api.dicebear.com/7.x/initials/svg?seed=HC",
+    submittedAt: new Date(Date.now() - 86400000),
+    views: 0, likes: 0, comments: 0,
   },
   {
-    id: "event-3",
-    type: "event",
-    title: "Virtual Town Hall Meeting",
-    description: "Monthly community discussion addressing local issues and development projects.",
-    thumbnail: "/placeholder.svg",
-    authorId: "user-4",
-    authorName: "David Martinez",
-    authorAvatar: "/placeholder.svg",
-    status: "pending",
-    category: "meetup",
-    submittedAt: new Date("2025-01-17"),
-    eventDate: new Date("2025-02-08T19:00:00"),
-    eventEndDate: new Date("2025-02-08T21:00:00"),
-    venue: "Mobi Meeting",
-    venueType: "virtual",
-    rsvpCount: 0,
-    capacity: 500,
-    views: 0,
-    likes: 0,
-    comments: 0,
-    featured: false
+    id: makeId(), type: "event", title: "Christmas Celebration Dinner",
+    description: "End-of-year gala dinner and awards night. Dress code: formal/traditional attire.",
+    status: "past" as any, venue: "Grand Hotel Ballroom", venueType: "physical",
+    eventDate: new Date(Date.now() - 30 * 86400000), capacity: 300, rsvpCount: 285,
+    authorName: "Social Committee", authorAvatar: "https://api.dicebear.com/7.x/initials/svg?seed=SC",
+    submittedAt: new Date(Date.now() - 45 * 86400000), publishedAt: new Date(Date.now() - 44 * 86400000),
+    views: 420, likes: 78, comments: 34,
+    thumbnail: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&h=250&fit=crop",
   },
-  {
-    id: "event-4",
-    type: "event",
-    title: "Family Fun Day at the Park",
-    description: "A day of family-friendly activities including games, face painting, and live music.",
-    thumbnail: "/placeholder.svg",
-    authorId: "user-8",
-    authorName: "James Wilson",
-    authorAvatar: "/placeholder.svg",
-    status: "draft",
-    category: "celebration",
-    eventDate: new Date("2025-03-10T11:00:00"),
-    eventEndDate: new Date("2025-03-10T17:00:00"),
-    venue: "Memorial Park",
-    venueType: "outdoor",
-    rsvpCount: 0,
-    capacity: 2000,
-    views: 0,
-    likes: 0,
-    comments: 0,
-    featured: false
-  }
 ];
 
-// Mock Articles Data for Admin
 export const mockAdminArticles: AdminContentItem[] = [
   {
-    id: "article-1",
-    type: "article",
-    title: "The Future of Community Development in the Digital Age",
-    description: "Exploring how technology is reshaping community engagement and governance.",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
-    thumbnail: "/placeholder.svg",
-    authorId: "user-1",
-    authorName: "Sarah Johnson",
-    authorAvatar: "/placeholder.svg",
-    status: "published",
-    category: "development",
-    publishedAt: new Date("2025-01-12"),
-    views: 4567,
-    likes: 892,
-    comments: 134,
-    featured: true,
-    readTime: "8 min",
-    tags: ["technology", "community", "development"]
+    id: makeId(), type: "article", title: "The Importance of Community Savings Schemes",
+    description: "An in-depth look at how community savings schemes have transformed lives in our community.",
+    content: "Community savings schemes, commonly known as 'esusu' or 'ajo' in many Nigerian cultures, have been a cornerstone of financial empowerment for generations...",
+    category: "education", featured: true, status: "published",
+    authorName: "Dr. Obiora Mensah", authorAvatar: "https://api.dicebear.com/7.x/initials/svg?seed=OM",
+    submittedAt: new Date(Date.now() - 10 * 86400000), publishedAt: new Date(Date.now() - 9 * 86400000),
+    readTime: "5 min", tags: ["finance", "community", "savings"],
+    views: 2340, likes: 187, comments: 52,
+    thumbnail: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=250&fit=crop",
   },
   {
-    id: "article-2",
-    type: "article",
-    title: "Preserving Our Cultural Heritage: Stories from Elders",
-    description: "A collection of oral histories and traditions passed down through generations.",
-    content: "Our community's rich cultural heritage...",
-    thumbnail: "/placeholder.svg",
-    authorId: "user-5",
-    authorName: "Lisa Anderson",
-    authorAvatar: "/placeholder.svg",
-    status: "published",
-    category: "culture",
-    publishedAt: new Date("2025-01-08"),
-    views: 3234,
-    likes: 678,
-    comments: 89,
-    featured: true,
-    readTime: "12 min",
-    tags: ["culture", "heritage", "history"]
+    id: makeId(), type: "article", title: "Preserving Our Cultural Heritage in the Digital Age",
+    description: "How our community is using technology to preserve and share cultural traditions.",
+    category: "culture", status: "pending",
+    authorName: "Adaeze Williams", authorAvatar: "https://api.dicebear.com/7.x/initials/svg?seed=AW",
+    submittedAt: new Date(Date.now() - 2 * 86400000),
+    readTime: "7 min", tags: ["culture", "tradition", "digital"],
+    views: 0, likes: 0, comments: 0,
   },
-  {
-    id: "article-3",
-    type: "article",
-    title: "Financial Literacy: Building Wealth for Future Generations",
-    description: "Expert advice on managing finances and creating generational wealth.",
-    content: "Financial literacy is the foundation...",
-    thumbnail: "/placeholder.svg",
-    authorId: "user-6",
-    authorName: "Robert Brown",
-    authorAvatar: "/placeholder.svg",
-    status: "pending",
-    category: "education",
-    submittedAt: new Date("2025-01-16"),
-    views: 0,
-    likes: 0,
-    comments: 0,
-    featured: false,
-    readTime: "10 min",
-    tags: ["finance", "education", "wealth"]
-  },
-  {
-    id: "article-4",
-    type: "article",
-    title: "Opinion: Why Community Unity Matters Now More Than Ever",
-    description: "A personal reflection on the importance of togetherness in challenging times.",
-    content: "In these unprecedented times...",
-    thumbnail: "/placeholder.svg",
-    authorId: "user-7",
-    authorName: "Emily Davis",
-    authorAvatar: "/placeholder.svg",
-    status: "pending",
-    category: "opinion",
-    submittedAt: new Date("2025-01-18"),
-    views: 0,
-    likes: 0,
-    comments: 0,
-    featured: false,
-    readTime: "5 min",
-    tags: ["opinion", "unity", "community"]
-  }
 ];
 
-// Mock Vibes Data for Admin
 export const mockAdminVibes: AdminContentItem[] = [
   {
-    id: "vibe-1",
-    type: "vibe",
-    title: "Community Celebration Highlights",
-    description: "Capturing the joy and spirit of our annual celebration event.",
-    thumbnail: "/placeholder.svg",
-    authorId: "user-3",
-    authorName: "Jennifer Taylor",
-    authorAvatar: "/placeholder.svg",
-    status: "published",
-    publishedAt: new Date("2025-01-14"),
-    views: 5678,
-    likes: 1234,
-    comments: 256,
-    featured: false,
-    mediaType: "video",
-    duration: "3:45",
-    spotlight: true
+    id: makeId(), type: "vibe", title: "Community Day Highlights 🎉",
+    description: "Amazing moments from our Community Day celebration. The energy was incredible!",
+    mediaType: "video", duration: "3:45", spotlight: true, status: "published",
+    authorName: "Media Team", authorAvatar: "https://api.dicebear.com/7.x/initials/svg?seed=MT",
+    submittedAt: new Date(Date.now() - 5 * 86400000), publishedAt: new Date(Date.now() - 4 * 86400000),
+    views: 3200, likes: 241, comments: 67,
+    thumbnail: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=400&h=400&fit=crop",
   },
   {
-    id: "vibe-2",
-    type: "vibe",
-    title: "Behind the Scenes: Community Center Construction",
-    description: "A photo gallery documenting the journey of building our new community center.",
-    thumbnail: "/placeholder.svg",
-    authorId: "user-2",
-    authorName: "Michael Chen",
-    authorAvatar: "/placeholder.svg",
-    status: "published",
-    publishedAt: new Date("2025-01-10"),
-    views: 3456,
-    likes: 789,
-    comments: 123,
-    featured: false,
-    mediaType: "gallery",
-    spotlight: false
+    id: makeId(), type: "vibe", title: "New Member Welcome Gallery",
+    description: "Welcome photos of our newest community members!",
+    mediaType: "gallery", spotlight: false, status: "pending",
+    authorName: "Membership Coordinator", authorAvatar: "https://api.dicebear.com/7.x/initials/svg?seed=MC",
+    submittedAt: new Date(Date.now() - 86400000),
+    views: 0, likes: 0, comments: 0,
   },
   {
-    id: "vibe-3",
-    type: "vibe",
-    title: "Elder's Stories: Oral History Recording",
-    description: "Audio recordings of community elders sharing their life experiences.",
-    thumbnail: "/placeholder.svg",
-    authorId: "user-5",
-    authorName: "Lisa Anderson",
-    authorAvatar: "/placeholder.svg",
-    status: "pending",
-    submittedAt: new Date("2025-01-17"),
-    views: 0,
-    likes: 0,
-    comments: 0,
-    featured: false,
-    mediaType: "audio",
-    duration: "15:30"
+    id: makeId(), type: "vibe", title: "Morning Motivation Audio",
+    description: "Start your day with wisdom from our elders.",
+    mediaType: "audio", duration: "2:15", status: "published",
+    authorName: "Wisdom Council", authorAvatar: "https://api.dicebear.com/7.x/initials/svg?seed=WC",
+    submittedAt: new Date(Date.now() - 3 * 86400000), publishedAt: new Date(Date.now() - 3 * 86400000),
+    views: 890, likes: 78, comments: 12,
   },
-  {
-    id: "vibe-4",
-    type: "vibe",
-    title: "Youth Dance Performance",
-    description: "Our talented youth group performing traditional and modern fusion dance.",
-    thumbnail: "/placeholder.svg",
-    authorId: "user-4",
-    authorName: "David Martinez",
-    authorAvatar: "/placeholder.svg",
-    status: "pending",
-    submittedAt: new Date("2025-01-19"),
-    views: 0,
-    likes: 0,
-    comments: 0,
-    featured: false,
-    mediaType: "video",
-    duration: "5:20"
-  },
-  {
-    id: "vibe-5",
-    type: "vibe",
-    title: "Community Garden Photo Series",
-    description: "Beautiful photographs from our community garden project.",
-    thumbnail: "/placeholder.svg",
-    authorId: "user-7",
-    authorName: "Emily Davis",
-    authorAvatar: "/placeholder.svg",
-    status: "draft",
-    views: 0,
-    likes: 0,
-    comments: 0,
-    featured: false,
-    mediaType: "photo",
-    spotlight: false
-  }
 ];
 
-// Mock Approval History
-export const mockApprovalHistory: ContentApprovalAction[] = [
-  {
-    id: "action-1",
-    contentId: "news-1",
-    contentTitle: "Community Annual General Meeting 2025",
-    contentType: "news",
-    action: "approve",
-    performedBy: "Admin Smith",
-    performedByAvatar: "/placeholder.svg",
-    timestamp: new Date("2025-01-14T10:30:00")
-  },
-  {
-    id: "action-2",
-    contentId: "event-1",
-    contentTitle: "Annual Community Gala Dinner",
-    contentType: "event",
-    action: "approve",
-    performedBy: "Admin Smith",
-    performedByAvatar: "/placeholder.svg",
-    timestamp: new Date("2025-01-09T14:45:00")
-  },
-  {
-    id: "action-3",
-    contentId: "article-rejected-1",
-    contentTitle: "Controversial Opinion Piece",
-    contentType: "article",
-    action: "reject",
-    performedBy: "Admin Johnson",
-    performedByAvatar: "/placeholder.svg",
-    reason: "Content violates community guidelines regarding respectful discourse.",
-    timestamp: new Date("2025-01-13T09:15:00")
-  },
-  {
-    id: "action-4",
-    contentId: "vibe-1",
-    contentTitle: "Community Celebration Highlights",
-    contentType: "vibe",
-    action: "approve",
-    performedBy: "Admin Smith",
-    performedByAvatar: "/placeholder.svg",
-    timestamp: new Date("2025-01-13T16:20:00")
-  },
-  {
-    id: "action-5",
-    contentId: "news-edited-1",
-    contentTitle: "Infrastructure Update Draft",
-    contentType: "news",
-    action: "request_changes",
-    performedBy: "Admin Johnson",
-    performedByAvatar: "/placeholder.svg",
-    reason: "Please add more specific dates and affected areas.",
-    timestamp: new Date("2025-01-17T11:00:00")
-  }
-];
-
-// Get all content combined
-export const getAllAdminContent = (): AdminContentItem[] => {
+export function getPendingApprovals(): AdminContentItem[] {
   return [
-    ...mockAdminNews,
-    ...mockAdminEvents,
-    ...mockAdminArticles,
-    ...mockAdminVibes
-  ];
-};
+    ...mockAdminNews.filter(n => n.status === "pending"),
+    ...mockAdminEvents.filter(e => e.status === "pending"),
+    ...mockAdminArticles.filter(a => a.status === "pending"),
+    ...mockAdminVibes.filter(v => v.status === "pending"),
+  ].sort((a, b) => (b.submittedAt?.getTime() ?? 0) - (a.submittedAt?.getTime() ?? 0));
+}
 
-// Get pending approvals
-export const getPendingApprovals = (): AdminContentItem[] => {
-  return getAllAdminContent().filter(item => item.status === 'pending');
-};
-
-// Stats summary for admin dashboard
-export const getContentAdminStats = () => {
-  const allContent = getAllAdminContent();
-  
+export function getContentAdminStats() {
+  const all = [...mockAdminNews, ...mockAdminEvents, ...mockAdminArticles, ...mockAdminVibes];
   return {
-    totalNews: mockAdminNews.length,
-    publishedNews: mockAdminNews.filter(n => n.status === 'published').length,
-    pendingNews: mockAdminNews.filter(n => n.status === 'pending').length,
-    draftNews: mockAdminNews.filter(n => n.status === 'draft').length,
-    
-    totalEvents: mockAdminEvents.length,
-    publishedEvents: mockAdminEvents.filter(e => e.status === 'published').length,
-    pendingEvents: mockAdminEvents.filter(e => e.status === 'pending').length,
-    draftEvents: mockAdminEvents.filter(e => e.status === 'draft').length,
-    
-    totalArticles: mockAdminArticles.length,
-    publishedArticles: mockAdminArticles.filter(a => a.status === 'published').length,
-    pendingArticles: mockAdminArticles.filter(a => a.status === 'pending').length,
-    featuredArticles: mockAdminArticles.filter(a => a.featured).length,
-    
-    totalVibes: mockAdminVibes.length,
-    publishedVibes: mockAdminVibes.filter(v => v.status === 'published').length,
-    spotlightVibes: mockAdminVibes.filter(v => v.spotlight).length,
-    
-    totalPending: allContent.filter(c => c.status === 'pending').length,
-    totalDraft: allContent.filter(c => c.status === 'draft').length,
-    totalPublished: allContent.filter(c => c.status === 'published').length
+    totalPending:   all.filter(i => i.status === "pending").length,
+    totalPublished: all.filter(i => i.status === "published").length,
+    totalDraft:     all.filter(i => i.status === "draft").length,
+    totalRejected:  all.filter(i => i.status === "rejected").length,
+    totalContent:   all.length,
   };
-};
+}

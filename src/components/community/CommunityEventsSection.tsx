@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Card } from "@/components/ui/card";
 import { ChevronDown, Eye, MessageSquare, Share2, Heart, Calendar, MapPin, Users, TrendingUp } from "lucide-react";
-import { mockEventsData, EventItem } from "@/data/eventsData";
+import { EventItem } from "@/data/eventsData";
+import { useCommunityContent } from "@/hooks/useCommunityContent";
 import { formatDistanceToNow } from "date-fns";
 import { EventDetailDialog } from "./EventDetailDialog";
 import { CreateEventForm } from "./CreateEventForm";
@@ -74,6 +75,7 @@ const spotlightFilters = [
 ];
 
 interface CommunityEventsSectionProps {
+  communityId?: string;
   className?: string;
   premiumAdSlots?: PremiumAdCardProps[];
   showPeopleYouMayKnow?: boolean;
@@ -81,6 +83,7 @@ interface CommunityEventsSectionProps {
 }
 
 export function CommunityEventsSection({ 
+  communityId,
   className,
   premiumAdSlots = [],
   showPeopleYouMayKnow = false,
@@ -106,7 +109,43 @@ export function CommunityEventsSection({
   
   // State for user-created events
   const [userEvents, setUserEvents] = useState<EventItem[]>([]);
-  
+
+  // ── Real events from API ──────────────────────────────────────────────
+  const { items: apiEvents, loading: eventsLoading, refresh: refreshEvents } = useCommunityContent(communityId, {
+    type: "event", status: "active", limit: 50,
+  });
+
+  const apiMapped: EventItem[] = useMemo(() => apiEvents.map(e => ({
+    id:              e.id,
+    title:           e.title,
+    description:     e.description || "",
+    eventType:       "general" as any,
+    venueType:       (e.venueType || "physical") as any,
+    venue:           e.venue || "",
+    address:         e.venue || "",
+    startDate:       e.eventDate ? new Date(e.eventDate) : new Date(),
+    endDate:         e.eventEndDate ? new Date(e.eventEndDate) : undefined,
+    date:            e.eventDate || new Date().toISOString(),
+    time:            e.eventDate ? new Date(e.eventDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "",
+    organizer:       e.authorName,
+    organizerAvatar: e.authorAvatar,
+    author:          e.authorName,
+    authorProfileImage: e.authorAvatar,
+    thumbnail:       e.thumbnail || e.mediaUrl || undefined,  // ← card reads thumbnail
+    imageUrl:        e.thumbnail || e.mediaUrl || undefined,
+    likes:           e.likes,
+    comments:        e.comments,
+    views:           e.views,
+    shares:          0,
+    rsvpCount:       e.rsvpCount || 0,
+    capacity:        e.capacity,
+    status:          "upcoming" as any,
+    isPrivate:       false,
+    isPremium:       false,
+    tags:            e.tags || [],
+    spotlight:       e.spotlight || false,
+  })), [apiEvents]);
+
   // Reset visible count when filters change
   useEffect(() => {
     setVisibleEventsCount(10);
@@ -114,8 +153,7 @@ export function CommunityEventsSection({
 
   // Filter and sort event items
   const filteredEvents = useMemo(() => {
-    // Combine user-created events with existing events data
-    let filtered = [...userEvents, ...mockEventsData];
+    let filtered = [...userEvents, ...apiMapped];
 
     // Event Type filter
     if (eventTypeFilter !== "all") {
@@ -126,64 +164,38 @@ export function CommunityEventsSection({
     if (dateTimeFilter !== "all") {
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const weekEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      const weekEnd  = new Date(now.getTime() + 7  * 24 * 60 * 60 * 1000);
       const monthEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
       filtered = filtered.filter((item) => {
-        const itemDate = new Date(item.date);
-        
+        const itemDate = new Date(item.date || item.startDate || Date.now());
         switch (dateTimeFilter) {
-          case "today":
-            return itemDate >= today && itemDate < new Date(today.getTime() + 24 * 60 * 60 * 1000);
-          case "this-week":
-            return itemDate >= now && itemDate <= weekEnd;
-          case "this-month":
-            return itemDate >= now && itemDate <= monthEnd;
-          case "upcoming":
-            return itemDate >= now;
-          case "past":
-            return itemDate < now;
-          default:
-            return true;
+          case "today":      return itemDate >= today && itemDate < new Date(today.getTime() + 86400000);
+          case "this-week":  return itemDate >= now && itemDate <= weekEnd;
+          case "this-month": return itemDate >= now && itemDate <= monthEnd;
+          case "upcoming":   return itemDate >= now;
+          case "past":       return itemDate < now;
+          default:           return true;
         }
       });
     }
 
-    // Venue Type filter
-    if (venueFilter !== "all") {
-      filtered = filtered.filter((item) => item.venueType === venueFilter);
-    }
+    if (venueFilter      !== "all") filtered = filtered.filter(i => i.venueType  === venueFilter);
+    if (audienceFilter   !== "all") filtered = filtered.filter(i => (i as any).audience === audienceFilter);
+    if (sponsorshipFilter !== "all") filtered = filtered.filter(i => (i as any).sponsorship === sponsorshipFilter);
 
-    // Audience filter
-    if (audienceFilter !== "all") {
-      filtered = filtered.filter((item) => item.audience === audienceFilter);
-    }
-
-    // Sponsorship filter
-    if (sponsorshipFilter !== "all") {
-      filtered = filtered.filter((item) => item.sponsorship === sponsorshipFilter);
-    }
-
-    // Spotlight filter
     if (spotlightFilter !== "all") {
       switch (spotlightFilter) {
-        case "spotlight":
-          filtered = filtered.filter((item) => item.spotlight);
-          break;
-        case "trending":
-          filtered = filtered.filter((item) => item.spotlight || item.views > 5000);
-          break;
-        case "most-rsvp":
-          filtered.sort((a, b) => b.rsvpCount - a.rsvpCount);
-          break;
-        case "latest":
-          filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-          break;
+        case "spotlight": filtered = filtered.filter(i => i.spotlight); break;
+        case "trending":  filtered = filtered.filter(i => i.spotlight || i.views > 5000); break;
+        case "most-rsvp": filtered.sort((a, b) => (b.rsvpCount || 0) - (a.rsvpCount || 0)); break;
+        case "latest":    filtered.sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()); break;
       }
     }
 
     return filtered;
-  }, [eventTypeFilter, dateTimeFilter, venueFilter, audienceFilter, sponsorshipFilter, spotlightFilter, userEvents]);
+  // apiMapped added so memo recomputes when API data arrives
+  }, [eventTypeFilter, dateTimeFilter, venueFilter, audienceFilter, sponsorshipFilter, spotlightFilter, userEvents, apiMapped]);
   
   // Pagination logic
   const displayedEvents = filteredEvents.slice(0, visibleEventsCount);
@@ -246,10 +258,10 @@ export function CommunityEventsSection({
       const newSet = new Set(prev);
       if (newSet.has(eventId)) {
         newSet.delete(eventId);
-        setEventLikes(p => ({ ...p, [eventId]: (p[eventId] || mockEventsData.find(n => n.id === eventId)?.likes || 0) - 1 }));
+        setEventLikes(p => ({ ...p, [eventId]: (p[eventId] || apiMapped.find(n => n.id === eventId)?.likes || 0) - 1 }));
       } else {
         newSet.add(eventId);
-        setEventLikes(p => ({ ...p, [eventId]: (p[eventId] || mockEventsData.find(n => n.id === eventId)?.likes || 0) + 1 }));
+        setEventLikes(p => ({ ...p, [eventId]: (p[eventId] || apiMapped.find(n => n.id === eventId)?.likes || 0) + 1 }));
       }
       return newSet;
     });
@@ -292,7 +304,9 @@ export function CommunityEventsSection({
       {/* Create Event Form */}
       {canPostEvents && (
         <CreateEventForm 
+          communityId={communityId}
           onEventCreated={handleEventCreated}
+          onRefresh={refreshEvents}
           canPost={canPostEvents}
         />
       )}
@@ -658,8 +672,8 @@ export function CommunityEventsSection({
       {displayedEvents.length > 0 && (
         <div className="mt-6 text-center text-sm text-muted-foreground">
           Showing {displayedEvents.length} of {filteredEvents.length} events
-          {filteredEvents.length < mockEventsData.length && 
-            ` (filtered from ${mockEventsData.length} total)`
+          {filteredEvents.length < apiMapped.length && 
+            ` (filtered from ${apiMapped.length} total)`
           }
         </div>
       )}

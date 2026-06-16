@@ -1,389 +1,375 @@
 import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-} from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-} from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Heart, MessageCircle, Share2, Eye, X, Calendar, MapPin, Users, TrendingUp } from "lucide-react";
-import { CommentSection } from "@/components/CommentSection";
 import { useNavigate } from "react-router-dom";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { EventItem } from "@/data/eventsData";
-import { formatDistanceToNow } from "date-fns";
-import { toast } from "@/hooks/use-toast";
+import { format, isPast, isToday, isFuture } from "date-fns";
+import {
+  Heart, MessageCircle, Share2, Bookmark,
+  Eye, X, ChevronLeft, ChevronRight,
+  MapPin, Calendar, Clock, Users, CheckCircle,
+  Send, CornerDownRight, ExternalLink, Loader2,
+} from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import type { EventItem } from "@/data/eventsData";
 
 interface EventDetailDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  event: EventItem;
-  onLike: (eventId: string) => void;
-  isLiked: boolean;
-  likeCount: number;
+  open:          boolean;
+  onOpenChange:  (v: boolean) => void;
+  event:         EventItem | null;
+  communityId?:  string;
+  onLike?:       (id: string, e?: React.MouseEvent) => void;
+  isLiked?:      boolean;
+  likeCount?:    number;
+  onPrev?:       () => void;
+  onNext?:       () => void;
+  hasPrev?:      boolean;
+  hasNext?:      boolean;
 }
 
-export const EventDetailDialog = ({
-  open,
-  onOpenChange,
-  event,
-  onLike,
-  isLiked,
-  likeCount,
-}: EventDetailDialogProps) => {
-  const isMobile = useIsMobile();
-  const navigate = useNavigate();
-  const [hasRSVPd, setHasRSVPd] = useState(false);
-  const [currentRSVPCount, setCurrentRSVPCount] = useState(event.rsvpCount);
+const VENUE_BADGE: Record<string, string> = {
+  physical: "bg-green-100 text-green-700",
+  online:   "bg-blue-100 text-blue-700",
+  hybrid:   "bg-purple-100 text-purple-700",
+};
 
-  const handleLike = () => {
-    onLike(event.id);
-  };
+interface Comment { id: string; author: string; avatar?: string; text: string; time: string; replies?: Comment[]; }
 
-  const handleRSVP = () => {
-    setHasRSVPd(!hasRSVPd);
-    setCurrentRSVPCount(prev => hasRSVPd ? prev - 1 : prev + 1);
-    toast({ 
-      description: hasRSVPd ? "RSVP cancelled" : "RSVP confirmed! See you at the event." 
-    });
-  };
+function CommentRow({ comment, depth = 0, onReply }: { comment: Comment; depth?: number; onReply: (id: string, text: string) => void }) {
+  const [showReply, setShowReply] = useState(false);
+  const [replyText, setReplyText]  = useState("");
+  const [showReplies, setShowReplies] = useState(true);
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: event.title,
-          text: event.description,
-          url: window.location.href,
-        });
-      } catch (error) {
-        // User cancelled or error occurred
-      }
-    } else {
-      await navigator.clipboard.writeText(window.location.href);
-      toast({ description: "Link copied to clipboard" });
-    }
-  };
-
-  const handleAuthorClick = () => {
-    onOpenChange(false);
-    if (event.authorId) {
-      navigate(`/profile/${event.authorId}`);
-    }
-  };
-
-  const getEventTypeColor = (type: EventItem["eventType"]) => {
-    switch (type) {
-      case "conference":
-        return "bg-blue-500/10 text-blue-600 dark:text-blue-400";
-      case "workshop":
-        return "bg-purple-500/10 text-purple-600 dark:text-purple-400";
-      case "meetup":
-        return "bg-green-500/10 text-green-600 dark:text-green-400";
-      case "celebration":
-        return "bg-orange-500/10 text-orange-600 dark:text-orange-400";
-      case "fundraiser":
-        return "bg-red-500/10 text-red-600 dark:text-red-400";
-      case "social":
-        return "bg-pink-500/10 text-pink-600 dark:text-pink-400";
-      default:
-        return "bg-muted text-muted-foreground";
-    }
-  };
-
-  const getVenueTypeColor = (type: EventItem["venueType"]) => {
-    switch (type) {
-      case "indoor":
-        return "bg-slate-500/10 text-slate-600 dark:text-slate-400";
-      case "outdoor":
-        return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
-      case "virtual":
-        return "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400";
-      case "hybrid":
-        return "bg-violet-500/10 text-violet-600 dark:text-violet-400";
-      default:
-        return "bg-muted text-muted-foreground";
-    }
-  };
-
-  // Shared content component for both mobile and desktop
-  const EventContent = () => (
-    <div className="flex flex-col h-full">
-      {/* Close button - top right */}
-      <button
-        onClick={() => onOpenChange(false)}
-        className="absolute top-3 right-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors md:hidden"
-        aria-label="Close"
-      >
-        <X className="h-5 w-5" />
-      </button>
-
-      <ScrollArea className="flex-1">
-        <div className="pb-24 md:pb-6">
-          {/* Hero Image */}
-          {event.thumbnail && (
-            <div className="relative w-full">
-              <AspectRatio ratio={16 / 9}>
-                <img
-                  src={event.thumbnail}
-                  alt={event.title}
-                  className="w-full h-full object-cover"
-                />
-                {event.spotlight && (
-                  <div className="absolute top-4 left-4">
-                    <Badge className="gap-1 bg-primary text-primary-foreground">
-                      <TrendingUp className="h-3 w-3" />
-                      SPOTLIGHT
-                    </Badge>
-                  </div>
-                )}
-              </AspectRatio>
+  return (
+    <div className={cn("flex gap-2.5", depth > 0 && "ml-8 mt-2")}>
+      {depth > 0 && <CornerDownRight className="h-3 w-3 text-muted-foreground/40 mt-1.5 shrink-0" />}
+      <div className="flex-1 min-w-0">
+        <div className="flex gap-2">
+          <Avatar className="h-7 w-7 shrink-0 mt-0.5">
+            <AvatarImage src={comment.avatar} />
+            <AvatarFallback className="text-xs">{comment.author[0]}</AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <div className="bg-muted/50 rounded-2xl px-3 py-2">
+              <p className="text-xs font-semibold leading-tight">{comment.author}</p>
+              <p className="text-sm mt-0.5 leading-snug whitespace-pre-wrap break-words">{comment.text}</p>
             </div>
-          )}
-
-          {/* Content Container */}
-          <div className="px-5 sm:px-6 py-4 space-y-4">
-            {/* Event Type and Venue Type Badges */}
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge className={getEventTypeColor(event.eventType)}>
-                {event.eventType.charAt(0).toUpperCase() + event.eventType.slice(1)}
-              </Badge>
-              <Badge className={getVenueTypeColor(event.venueType)}>
-                {event.venueType.charAt(0).toUpperCase() + event.venueType.slice(1)}
-              </Badge>
-              <Badge variant="outline" className="gap-1">
-                <Users className="h-3 w-3" />
-                {event.audience}
-              </Badge>
-              {event.sponsorship === "sponsored" && (
-                <Badge variant="secondary">Sponsored</Badge>
+            <div className="flex items-center gap-3 mt-1 px-1">
+              <span className="text-[10px] text-muted-foreground">{comment.time}</span>
+              {depth === 0 && (
+                <button className="text-[11px] font-semibold text-muted-foreground hover:text-primary"
+                  onClick={() => setShowReply(r => !r)}>Reply</button>
               )}
-              {event.sponsorship === "free" && (
-                <Badge variant="secondary" className="bg-green-500/10 text-green-600">Free</Badge>
+              {depth === 0 && (comment.replies?.length ?? 0) > 0 && (
+                <button className="text-[11px] text-primary font-medium hover:underline"
+                  onClick={() => setShowReplies(v => !v)}>
+                  {showReplies ? `Hide ${comment.replies!.length} repl${comment.replies!.length === 1 ? "y" : "ies"}`
+                               : `View ${comment.replies!.length} repl${comment.replies!.length === 1 ? "y" : "ies"}`}
+                </button>
               )}
             </div>
-
-            {/* Title */}
-            <h2 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
-              {event.title}
-            </h2>
-
-            {/* Event Details Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {/* Date & Time */}
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 border">
-                <Calendar className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase">Date & Time</p>
-                  <p className="text-sm font-medium text-foreground">
-                    {new Date(event.date).toLocaleDateString()}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {new Date(event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    {event.endDate && ` - ${new Date(event.endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
-                  </p>
-                </div>
+            {showReply && (
+              <div className="flex gap-2 items-center mt-2">
+                <Input placeholder={`Reply to ${comment.author}…`} value={replyText}
+                  className="h-8 text-sm flex-1 rounded-full"
+                  onChange={e => setReplyText(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter" && replyText.trim()) { onReply(comment.id, replyText.trim()); setReplyText(""); setShowReply(false); } }} />
+                <Button size="icon" className="h-8 w-8 rounded-full shrink-0"
+                  onClick={() => { if (replyText.trim()) { onReply(comment.id, replyText.trim()); setReplyText(""); setShowReply(false); } }}>
+                  <Send className="h-3.5 w-3.5" />
+                </Button>
               </div>
-
-              {/* Venue */}
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 border">
-                <MapPin className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase">Venue</p>
-                  <p className="text-sm font-medium text-foreground line-clamp-2">
-                    {event.venue}
-                  </p>
-                </div>
-              </div>
-
-              {/* RSVP Info */}
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 border">
-                <Users className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase">Attendance</p>
-                  <p className="text-sm font-medium text-foreground">
-                    {currentRSVPCount} / {event.capacity} RSVPs
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {event.capacity - currentRSVPCount} spots remaining
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Author Section */}
-            <button
-              onClick={handleAuthorClick}
-              className="flex items-center gap-3 w-full hover:opacity-80 transition-opacity"
-            >
-              <Avatar className="h-10 w-10 border-2 border-border">
-                <AvatarImage src={event.authorProfileImage} alt={event.author} />
-                <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                  {event.author.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 text-left">
-                <p className="font-semibold text-foreground text-sm">{event.author}</p>
-                <p className="text-xs text-muted-foreground">
-                  {formatDistanceToNow(new Date(event.date), { addSuffix: true })}
-                </p>
-              </div>
-            </button>
-
-            {/* Divider */}
-            <div className="border-t border-border" />
-
-            {/* Description */}
-            <div className="space-y-2">
-              <h3 className="font-semibold text-foreground">About this event</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                {event.description}
-              </p>
-            </div>
-
-            {/* Stats Row - Compact */}
-            <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
-              <div className="flex items-center gap-1">
-                <Eye className="h-3.5 w-3.5" />
-                <span>{event.views.toLocaleString()} views</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Heart className="h-3.5 w-3.5" />
-                <span>{likeCount.toLocaleString()} likes</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <MessageCircle className="h-3.5 w-3.5" />
-                <span>{event.comments.toLocaleString()} comments</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Share2 className="h-3.5 w-3.5" />
-                <span>{event.shares.toLocaleString()} shares</span>
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="border-t border-border" />
-
-            {/* Comments Section */}
-            <div className="space-y-2">
-              <h3 className="font-semibold text-foreground flex items-center gap-2 text-sm sm:text-base">
-                <MessageCircle className="h-4 w-4" />
-                Comments ({event.comments})
-              </h3>
-              <CommentSection postId={event.id} className="border-none p-0" showHeader={false} />
-            </div>
+            )}
+            {depth === 0 && showReplies && (comment.replies ?? []).map(r => (
+              <CommentRow key={r.id} comment={r} depth={1} onReply={onReply} />
+            ))}
           </div>
         </div>
-      </ScrollArea>
-
-      {/* Fixed Bottom Action Bar - Mobile */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-t border-border px-5 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] z-50">
-        <div className="flex items-center gap-2 max-w-md mx-auto">
-          <Button
-            variant={hasRSVPd ? "default" : "outline"}
-            onClick={handleRSVP}
-            className="flex-1"
-            disabled={currentRSVPCount >= event.capacity && !hasRSVPd}
-          >
-            <Users className="h-4 w-4 mr-2" />
-            {hasRSVPd ? "Cancel RSVP" : "RSVP"}
-          </Button>
-          
-          <button
-            onClick={handleLike}
-            className="flex flex-col items-center gap-1 min-w-[60px] touch-manipulation active:scale-95 transition-transform"
-          >
-            <Heart 
-              className={cn(
-                "h-6 w-6 transition-colors",
-                isLiked ? "fill-red-500 text-red-500" : "text-muted-foreground"
-              )} 
-            />
-            <span className="text-xs text-muted-foreground font-medium">{likeCount.toLocaleString()}</span>
-          </button>
-          
-          <button
-            onClick={handleShare}
-            className="flex flex-col items-center gap-1 min-w-[60px] touch-manipulation active:scale-95 transition-transform"
-          >
-            <Share2 className="h-6 w-6 text-muted-foreground" />
-            <span className="text-xs text-muted-foreground font-medium">Share</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Desktop Action Bar */}
-      <div className="hidden md:flex items-center gap-2 px-6 py-4 border-t border-border bg-card">
-        <Button
-          variant={hasRSVPd ? "default" : "outline"}
-          onClick={handleRSVP}
-          className="gap-2"
-          disabled={currentRSVPCount >= event.capacity && !hasRSVPd}
-        >
-          <Users className="h-4 w-4" />
-          {hasRSVPd ? "Cancel RSVP" : `RSVP (${currentRSVPCount}/${event.capacity})`}
-        </Button>
-
-        <Button
-          variant={isLiked ? "default" : "outline"}
-          size="sm"
-          onClick={handleLike}
-          className="gap-2"
-        >
-          <Heart className={cn("h-4 w-4", isLiked && "fill-current")} />
-          Like ({likeCount.toLocaleString()})
-        </Button>
-        
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            const commentInput = document.querySelector('textarea[placeholder*="comment"]') as HTMLTextAreaElement;
-            if (commentInput) {
-              commentInput.focus();
-            }
-          }}
-          className="gap-2"
-        >
-          <MessageCircle className="h-4 w-4" />
-          Comment ({event.comments.toLocaleString()})
-        </Button>
-        
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleShare}
-          className="gap-2"
-        >
-          <Share2 className="h-4 w-4" />
-          Share ({event.shares.toLocaleString()})
-        </Button>
       </div>
     </div>
   );
+}
+
+export function EventDetailDialog({
+  open, onOpenChange, event, communityId,
+  onLike, isLiked, likeCount,
+  onPrev, onNext, hasPrev, hasNext,
+}: EventDetailDialogProps) {
+  const navigate = useNavigate();
+  const [bookmarked,    setBookmarked]    = useState(false);
+  const [rsvped,        setRsvped]        = useState(false);
+  const [rsvpCount,     setRsvpCount]     = useState(0);
+  const [rsvpLoading,   setRsvpLoading]   = useState(false);
+  const [commentText,   setCommentText]   = useState("");
+  const [comments,      setComments]      = useState<Comment[]>([]);
+
+  if (!event) return null;
+
+  const startDate   = event.startDate ? new Date(event.startDate) : event.date ? new Date(event.date) : null;
+  const endDate     = event.endDate   ? new Date(event.endDate)   : null;
+  const realRsvp    = rsvpCount || event.rsvpCount || 0;
+  const realCap     = event.capacity || 0;
+  const rsvpPct     = realCap > 0 ? Math.min(100, (realRsvp / realCap) * 100) : 0;
+
+  const timing = !startDate ? { label: "No date", color: "text-muted-foreground" }
+    : isToday(startDate) ? { label: "Today",    color: "text-green-600" }
+    : isFuture(startDate) ? { label: "Upcoming", color: "text-blue-600" }
+    : { label: "Past",     color: "text-gray-400" };
+
+  const handleRsvp = async () => {
+    if (!communityId || !event.id) return;
+    setRsvpLoading(true);
+    try {
+      const res = await fetch("/api/community/content.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "rsvp", community_id: communityId, post_id: event.id }),
+      });
+      if (res.ok) {
+        const d = await res.json();
+        setRsvped(true);
+        setRsvpCount(d.rsvpCount ?? realRsvp + 1);
+        toast.success("You're going! 🎉");
+      }
+    } catch { toast.error("Could not RSVP. Try again."); }
+    finally { setRsvpLoading(false); }
+  };
+
+  const handleSendComment = () => {
+    if (!commentText.trim()) return;
+    setComments(prev => [...prev, { id: `c-${Date.now()}`, author: "You", text: commentText.trim(), time: "Just now", replies: [] }]);
+    setCommentText("");
+  };
+
+  const handleReply = (parentId: string, text: string) => {
+    setComments(prev => prev.map(c =>
+      c.id === parentId
+        ? { ...c, replies: [...(c.replies || []), { id: `r-${Date.now()}`, author: "You", text, time: "Just now" }] }
+        : c
+    ));
+  };
 
   return (
-    <>
-      {isMobile ? (
-        <Drawer open={open} onOpenChange={onOpenChange}>
-          <DrawerContent className="max-h-[95vh] h-[95vh] flex flex-col overflow-hidden p-0 touch-auto">
-            <EventContent />
-          </DrawerContent>
-        </Drawer>
-      ) : (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-          <DialogContent className="max-w-2xl max-h-[85vh] p-0 gap-0 overflow-hidden rounded-xl">
-            <EventContent />
-          </DialogContent>
-        </Dialog>
-      )}
-    </>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className="max-w-2xl w-full p-0 gap-0 rounded-2xl flex flex-col"
+        style={{ maxHeight: "90vh", height: "90vh" }}
+      >
+        <DialogTitle className="sr-only">Event Details</DialogTitle>
+        {/* ── FIXED HEADER ─────────────────────────────────────────────── */}
+        <div className="flex items-center justify-between px-4 py-3 border-b bg-background shrink-0">
+          <div className="flex items-center gap-1">
+            {onPrev && <Button variant="ghost" size="icon" className="h-8 w-8" disabled={!hasPrev} onClick={onPrev}><ChevronLeft className="h-4 w-4" /></Button>}
+            {onNext && <Button variant="ghost" size="icon" className="h-8 w-8" disabled={!hasNext} onClick={onNext}><ChevronRight className="h-4 w-4" /></Button>}
+          </div>
+          <div className="flex items-center gap-1">
+            <button className={cn("p-1.5 rounded-lg hover:bg-muted transition-colors", bookmarked && "text-primary")} onClick={() => setBookmarked(b => !b)}>
+              <Bookmark className={cn("h-5 w-5", bookmarked && "fill-primary")} />
+            </button>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onOpenChange(false)}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* ── SCROLLABLE BODY — native scroll for reliable mobile support ── */}
+        <div
+          className="flex-1 min-h-0 overflow-y-auto overscroll-contain"
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
+          <div className="px-4 md:px-5 py-4 space-y-4">
+
+            {/* Cover image */}
+            {(event.thumbnail || event.imageUrl) && (
+              <div className="relative aspect-video rounded-xl overflow-hidden bg-muted">
+                <img src={event.thumbnail || event.imageUrl} alt={event.title} className="w-full h-full object-cover" />
+                <div className="absolute top-2 left-2">
+                  <Badge className={cn("text-xs font-semibold", timing.color, "bg-background/90")}>{timing.label}</Badge>
+                </div>
+              </div>
+            )}
+
+            {/* Venue type + timing badges */}
+            <div className="flex flex-wrap gap-2">
+              {event.venueType && (
+                <Badge className={cn("text-xs rounded-full px-3 capitalize", VENUE_BADGE[event.venueType] || "bg-gray-100 text-gray-700")}>
+                  {event.venueType}
+                </Badge>
+              )}
+              {!event.thumbnail && !event.imageUrl && (
+                <Badge className={cn("text-xs font-semibold", timing.color, "bg-muted")}>{timing.label}</Badge>
+              )}
+              {event.spotlight && <Badge className="text-xs rounded-full px-3 bg-amber-100 text-amber-700">⭐ Spotlight</Badge>}
+            </div>
+
+            {/* Title */}
+            <h2 className="font-bold text-xl leading-snug">{event.title}</h2>
+
+            {/* Organizer row */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5 cursor-pointer"
+                onClick={() => (event as any).authorId && navigate(`/profile/${(event as any).authorId}`)}>
+                <Avatar className="h-9 w-9">
+                  <AvatarImage src={event.organizerAvatar || (event as any).authorProfileImage} />
+                  <AvatarFallback className="font-semibold text-sm">{(event.organizer || event.author || "U")[0]}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-sm font-semibold hover:text-primary">{event.organizer || event.author}</p>
+                  <p className="text-xs text-muted-foreground">Organizer</p>
+                </div>
+              </div>
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Eye className="h-3.5 w-3.5" /> {(event.views || 0).toLocaleString()}
+              </span>
+            </div>
+
+            <Separator />
+
+            {/* Event details */}
+            <div className="space-y-3">
+              {startDate && (
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex flex-col items-center justify-center shrink-0">
+                    <span className="text-[9px] font-medium text-primary uppercase">{format(startDate, "MMM")}</span>
+                    <span className="text-base font-bold text-primary leading-none">{format(startDate, "d")}</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">{format(startDate, "EEEE, MMMM d, yyyy")}</p>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                      <Clock className="h-3 w-3" />
+                      {format(startDate, "h:mm a")}
+                      {endDate && ` — ${format(endDate, "h:mm a")}`}
+                    </p>
+                  </div>
+                </div>
+              )}
+              {event.venue && (
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-orange-50 flex items-center justify-center shrink-0">
+                    <MapPin className="h-4 w-4 text-orange-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">{event.venue}</p>
+                    {event.venueType && (
+                      <p className="text-xs text-muted-foreground capitalize mt-0.5">{event.venueType} event</p>
+                    )}
+                  </div>
+                </div>
+              )}
+              {realCap > 0 && (
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                    <Users className="h-4 w-4 text-blue-500" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{realRsvp} / {realCap} attending</p>
+                    <Progress value={rsvpPct} className="h-1.5 mt-1.5" />
+                    <p className="text-xs text-muted-foreground mt-1">{Math.round(rsvpPct)}% capacity filled</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* Description */}
+            <div className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+              {event.description || ""}
+            </div>
+
+            {/* Tags */}
+            {(event.tags ?? []).length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {event.tags!.map(tag => (
+                  <Badge key={tag} variant="outline" className="text-xs rounded-full px-2.5">{tag}</Badge>
+                ))}
+              </div>
+            )}
+
+            <Separator />
+
+            {/* RSVP */}
+            {isFuture(startDate || new Date()) && !isPast(startDate || new Date()) && (
+              <Button
+                className={cn("w-full gap-2", rsvped && "bg-green-600 hover:bg-green-700")}
+                onClick={handleRsvp}
+                disabled={rsvped || rsvpLoading}
+              >
+                {rsvpLoading
+                  ? <Loader2 className="h-4 w-4 animate-spin" />
+                  : rsvped
+                    ? <><CheckCircle className="h-4 w-4" /> You're Going!</>
+                    : <><Calendar className="h-4 w-4" /> RSVP Now</>}
+              </Button>
+            )}
+
+            {/* Stats */}
+            <div className="flex items-center gap-6 text-sm">
+              {[
+                { label: "likes",    value: likeCount ?? event.likes ?? 0 },
+                { label: "comments", value: comments.length + (event.comments || 0) },
+                { label: "shares",   value: event.shares || 0 },
+              ].map(s => (
+                <div key={s.label} className="text-center">
+                  <p className="font-semibold">{s.value.toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground">{s.label}</p>
+                </div>
+              ))}
+            </div>
+
+            <Separator />
+
+            {/* Comments */}
+            <p className="font-semibold text-base">Comments</p>
+            {comments.length === 0 && (event.comments ?? 0) === 0 ? (
+              <p className="text-sm text-muted-foreground py-2">No comments yet — be the first!</p>
+            ) : (
+              <div className="space-y-4 pb-2">
+                {comments.map(c => <CommentRow key={c.id} comment={c} depth={0} onReply={handleReply} />)}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── FIXED FOOTER ─────────────────────────────────────────────── */}
+        <div className="border-t bg-background shrink-0">
+          <div className="flex items-center gap-1 px-4 py-2.5">
+            <button onClick={e => onLike?.(event.id, e)}
+              className={cn("p-2 rounded-full hover:bg-muted transition-colors", isLiked && "text-red-500")}>
+              <Heart className={cn("h-5 w-5", isLiked && "fill-red-500")} />
+            </button>
+            <button className="p-2 rounded-full hover:bg-muted"
+              onClick={() => document.getElementById("event-comment-input")?.focus()}>
+              <MessageCircle className="h-5 w-5" />
+            </button>
+            <button className="p-2 rounded-full hover:bg-muted"
+              onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success("Link copied!"); }}>
+              <Share2 className="h-5 w-5" />
+            </button>
+            <div className="flex-1" />
+            <span className="text-sm font-semibold">{(likeCount ?? event.likes ?? 0).toLocaleString()} likes</span>
+          </div>
+          <div className="flex items-center gap-2 px-4 pb-4">
+            <Input
+              id="event-comment-input"
+              placeholder="Add a comment…"
+              value={commentText}
+              className="flex-1 h-10 rounded-full bg-muted border-0 text-sm"
+              onChange={e => setCommentText(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter") handleSendComment(); }}
+            />
+            <Button size="icon" className="h-10 w-10 rounded-full bg-primary shrink-0"
+              disabled={!commentText.trim()} onClick={handleSendComment}>
+              <Send className="h-4 w-4 text-white" />
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
-};
+}

@@ -1,4 +1,3 @@
-
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { FeedPost } from "@/components/FeedPost";
@@ -79,8 +78,8 @@ import { DonationDialog } from "@/components/community/DonationDialog";
 import { CommunityPostDialog } from "@/components/community/CommunityPostDialog";
 import { RollCallsPage } from "@/pages/RollCallsPage";
 import { CommunityResourcesDialog } from "@/components/community/CommunityResourcesDialog";
-import { CommunityArticlesSection } from "@/components/community/CommunityArticlesSection";
-import { InsideCommunitySection } from "@/components/community/InsideCommunitySection";
+import { ArticlesPage } from "@/pages/ArticlesPage";
+import { InsideCommunityPage } from "@/pages/InsideCommunityPage";
 import { MembershipApplicationDrawer } from "@/components/community/MembershipApplicationDrawer";
 import { ExitCommunityDialog } from "@/components/community/ExitCommunityDialog";
 import { CreatePostTypeSelector, PostType } from "@/components/community/CreatePostTypeSelector";
@@ -937,8 +936,7 @@ const CommunityProfile = () => {
 
           {activeTab === "news" && (
             <div className="mt-6">
-              <CommunityNewsSection
-                communityId={communityId}
+              <CommunityNewsSection 
                 premiumAdSlots={premiumAdSlots}
                 showPeopleYouMayKnow={true}
                 canPostNews={true}
@@ -957,18 +955,13 @@ const CommunityProfile = () => {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Status
               </Button>
-              <CommunityArticlesSection
-                communityId={communityId}
-                isOwner={community?.isOwner}
-                isMember={isMember}
-              />
+              <ArticlesPage />
             </div>
           )}
 
           {activeTab === "gallery" && (
             <div className="mt-6">
-              <CommunityGallerySection
-                communityId={communityId}
+              <CommunityGallerySection 
                 isOwner={community.isOwner}
                 isGalleryManager={false}
                 isMember={isMember}
@@ -988,18 +981,13 @@ const CommunityProfile = () => {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Status
               </Button>
-              <InsideCommunitySection
-                communityId={communityId}
-                isOwner={community?.isOwner}
-                isMember={isMember}
-              />
+              <InsideCommunityPage />
             </div>
           )}
 
           {activeTab === "events" && (
             <div className="mt-6">
-              <CommunityEventsSection
-                communityId={communityId}
+              <CommunityEventsSection 
                 premiumAdSlots={premiumAdSlots}
                 showPeopleYouMayKnow={true}
                 canPostEvents={true}
@@ -1009,8 +997,7 @@ const CommunityProfile = () => {
 
           {activeTab === "vibes" && (
             <div className="mt-6">
-              <CommunityVibesSection
-                communityId={communityId}
+              <CommunityVibesSection 
                 isOwner={community.isOwner}
                 isAdmin={community.role === "Admin"}
               />

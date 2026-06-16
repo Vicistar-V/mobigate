@@ -12,8 +12,7 @@ const toMsg = (m: any): Message => ({
   timestamp:   new Date(m.timestamp),
   isRead:      !!m.isRead,
   isEdited:    !!m.isEdited,
-  // Map replyToId from server to replyTo object that the Message type expects
-  replyTo:     m.replyToId ? { senderName: m.replySenderName || "User", content: m.replyContent || "Message" } : undefined,
+  replyToId:   m.replyToId,
   attachments: m.attachments?.filter(Boolean),
   reactions:   m.reactions ?? [],
 });
@@ -123,70 +122,51 @@ export const useChat = () => {
     setActiveConvId(id);
     setSelectedMsgs(new Set());
     if (!id) return;
-    if (id.startsWith("local-")) return; // local-only thread — nothing to fetch
     await fetchMessages(id, false);
     startPoll(id);
   }, [fetchMessages, startPoll, stopPoll]);
 
   // ── startConversationWith ─────────────────────────────────────────────────────
-  const startConversationWith = useCallback(async (otherId: string, otherName?: string, otherAvatar?: string) => {
-    // Optimistic local fallback — always opens a chat thread immediately,
-    // even when the backend cannot resolve the user (e.g. demo/placeholder IDs).
-    const openLocal = () => {
-      const localId = `local-${otherId}`;
-      localIds.current.add(localId);
-      setConversations(prev => {
-        if (prev.find(c => c.id === localId)) return prev;
-        return [toConv({ id: localId, user: { id: otherId, name: otherName || "User", avatar: otherAvatar || null, isOnline: false }, lastMessage: "", lastMessageTime: null, unreadCount: 0 }), ...prev];
-      });
-      setActiveConvId(localId);
-      return localId;
-    };
+  const startConversationWith = useCallback(async (otherId: string, otherName?: string) => {
     try {
       const res = await fetch(`${API}/chat/start.php`, {
         method: "POST", credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ other_user_id: otherId }),
       });
-      if (!res.ok) return openLocal();
+      if (!res.ok) return null;
       const { conversation_id: convId } = await res.json();
-      if (!convId) return openLocal();
+      if (!convId) return null;
       localIds.current.add(convId);
       setConversations(prev => {
         if (prev.find(c => c.id === convId)) return prev;
-        return [toConv({ id: convId, user: { id: otherId, name: otherName || "...", avatar: otherAvatar || null, isOnline: false }, lastMessage: "", lastMessageTime: null, unreadCount: 0 }), ...prev];
+        return [toConv({ id: convId, user: { id: otherId, name: otherName || "...", avatar: null, isOnline: false }, lastMessage: "", lastMessageTime: null, unreadCount: 0 }), ...prev];
       });
       setActiveConvId(convId);
       await fetchMessages(convId, false);
       startPoll(convId);
       fetchConversations(true); // get real avatar in background
       return convId;
-    } catch { return openLocal(); }
+    } catch { return null; }
   }, [fetchConversations, fetchMessages, startPoll]);
 
   // ── sendMessage ───────────────────────────────────────────────────────────────
-  const sendMessage = useCallback(async (content: string, attachments?: Message["attachments"], replyToId?: string, replyToContent?: string, replyToSender?: string) => {
+  const sendMessage = useCallback(async (content: string, attachments?: Message["attachments"]) => {
     if (!activeConvId || (!content.trim() && !attachments?.length)) return;
     const tempId = `temp-${Date.now()}`;
-    const replyTo = replyToId ? { senderName: replyToSender || "User", content: replyToContent || "" } : undefined;
     setConversations(prev => prev.map(c => c.id === activeConvId
-      ? { ...c, messages: [...c.messages, { id: tempId, senderId: "me", content: content.trim(), timestamp: new Date(), isRead: true, attachments, replyTo } as Message],
+      ? { ...c, messages: [...c.messages, { id: tempId, senderId: "me", content: content.trim(), timestamp: new Date(), isRead: true, attachments } as Message],
           lastMessage: content.trim() || "📎", lastMessageTime: new Date() }
       : c
     ));
     setIsTypingMap(p => ({ ...p, [activeConvId]: true }));
     setTimeout(() => setIsTypingMap(p => ({ ...p, [activeConvId]: false })), 1500);
     const cid = activeConvId;
-    if (cid.startsWith("local-")) return; // local-only thread — keep optimistic message
     try {
       await fetch(`${API}/chat/messages.php`, {
         method: "POST", credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "send", conversation_id: cid,
-          content: content.trim(), attachments: attachments || [],
-          reply_to_id: replyToId || null,
-        }),
+        body: JSON.stringify({ action: "send", conversation_id: cid, content: content.trim(), attachments: attachments || [] }),
       });
       await fetchMessages(cid, true);
       setConversations(prev => prev.map(c => c.id === cid

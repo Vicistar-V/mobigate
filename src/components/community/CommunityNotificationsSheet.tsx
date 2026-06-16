@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Bell, Cake, UserPlus, Calendar, Video, Megaphone, Vote, Heart, MessageCircle, Gift, CheckCircle } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,6 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { 
   CommunityNotification, 
   NotificationType,
-  communityNotifications as initialNotifications,
   formatRelativeTime,
   groupNotificationsByTime 
 } from "@/data/communityNotificationsData";
@@ -74,12 +73,39 @@ export function CommunityNotificationsSheet({
   onOpenChange, 
   communityId 
 }: CommunityNotificationsSheetProps) {
-  const [notifications, setNotifications] = useState<CommunityNotification[]>(
-    initialNotifications.filter(n => n.communityId === communityId || n.communityId === "1")
-  );
-  const [activeFilter, setActiveFilter] = useState<string>("all");
+  const [notifications, setNotifications] = useState<CommunityNotification[]>([]);
+  const [loading,       setLoading]       = useState(true);
+  const [activeFilter,  setActiveFilter]  = useState<string>("all");
   const [selectedNotification, setSelectedNotification] = useState<CommunityNotification | null>(null);
   const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
+
+  // Fetch real notifications from API
+  const fetchNotifications = useCallback(async () => {
+    if (!communityId || !open) return;
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `/api/community/notifications.php?community_id=${communityId}&limit=50`,
+        { credentials: "include" }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        // Map API response to CommunityNotification type
+        const mapped: CommunityNotification[] = (data.notifications || []).map((n: any) => ({
+          ...n,
+          timestamp: new Date(n.timestamp),
+          isRead:    n.isRead ?? false,
+        }));
+        setNotifications(mapped);
+      }
+    } catch (e) {
+      console.error("Failed to fetch notifications", e);
+    } finally {
+      setLoading(false);
+    }
+  }, [communityId, open]);
+
+  useEffect(() => { fetchNotifications(); }, [fetchNotifications]);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
@@ -104,12 +130,14 @@ export function CommunityNotificationsSheet({
   };
 
   const filterOptions = [
-    { value: "all", label: "All" },
-    { value: "birthday", label: "🎂" },
-    { value: "new_member", label: "👤" },
-    { value: "event", label: "📅" },
-    { value: "meeting", label: "🗓️" },
-    { value: "announcement", label: "📢" },
+    { value: "all",              label: "All" },
+    { value: "birthday",         label: "🎂" },
+    { value: "new_member",       label: "👤" },
+    { value: "announcement",     label: "📢" },
+    { value: "event",            label: "📅" },
+    { value: "post_liked",       label: "❤️" },
+    { value: "post_commented",   label: "💬" },
+    { value: "membership_approved", label: "✅" },
   ];
 
   return (
@@ -142,6 +170,20 @@ export function CommunityNotificationsSheet({
                   Mark all read
                 </Button>
               )}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={fetchNotifications}
+                title="Refresh"
+              >
+                <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                  <path d="M21 3v5h-5"/>
+                  <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                  <path d="M3 21v-5h5"/>
+                </svg>
+              </Button>
             </div>
 
             {/* Filter Tabs */}
@@ -162,10 +204,15 @@ export function CommunityNotificationsSheet({
 
           <ScrollArea className="h-[calc(100vh-140px)]">
             <div className="p-4 space-y-6">
-              {groupedNotifications.length === 0 ? (
+              {loading ? (
+                <div className="flex justify-center py-12">
+                  <div className="h-7 w-7 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : groupedNotifications.length === 0 ? (
                 <div className="text-center py-12">
                   <Bell className="h-12 w-12 mx-auto text-muted-foreground/30 mb-3" />
-                  <p className="text-muted-foreground">No notifications</p>
+                  <p className="text-sm font-medium text-muted-foreground">No notifications yet</p>
+                  <p className="text-xs text-muted-foreground mt-1">Community activity will appear here</p>
                 </div>
               ) : (
                 groupedNotifications.map((group) => (

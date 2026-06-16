@@ -1,15 +1,9 @@
 import { Message } from "@/types/chat";
 import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuSub,
-  ContextMenuSubContent,
-  ContextMenuSubTrigger,
-  ContextMenuTrigger,
+  ContextMenu, ContextMenuContent, ContextMenuItem,
+  ContextMenuSeparator, ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { Reply, Forward, Edit, Trash2, Copy, Flag } from "lucide-react";
+import { Reply, Edit, Trash2, Copy } from "lucide-react";
 import { toast } from "sonner";
 
 interface MessageContextMenuProps {
@@ -22,91 +16,62 @@ interface MessageContextMenuProps {
   children: React.ReactNode;
 }
 
-const REACTION_EMOJIS = ["👍", "❤️", "😂", "😮", "😢"];
+const EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
 
 export const MessageContextMenu = ({
-  message,
-  isOwnMessage,
-  onReply,
-  onEdit,
-  onDelete,
-  onReact,
-  children,
+  message, isOwnMessage, onReply, onEdit, onDelete, onReact, children,
 }: MessageContextMenuProps) => {
+
   const handleCopy = () => {
-    navigator.clipboard.writeText(message.content);
-    toast.success("Message copied to clipboard");
-  };
-
-  const handleForward = () => {
-    toast.info("Forward feature coming soon");
-  };
-
-  const handleFlag = () => {
-    toast.info("Message reported");
+    if (message.content) {
+      navigator.clipboard.writeText(message.content);
+      toast.success("Copied");
+    }
   };
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
-      <ContextMenuContent className="w-56">
-        <ContextMenuItem onClick={() => onReply(message)}>
-          <Reply className="mr-2 h-4 w-4" />
-          Reply
-        </ContextMenuItem>
-        
-        <ContextMenuSub>
-          <ContextMenuSubTrigger>
-            <span className="mr-2">😊</span>
-            React
-          </ContextMenuSubTrigger>
-          <ContextMenuSubContent>
-            {REACTION_EMOJIS.map((emoji) => (
-              <ContextMenuItem
-                key={emoji}
-                onClick={() => onReact(message.id, emoji)}
-                className="text-2xl justify-center"
-              >
-                {emoji}
-              </ContextMenuItem>
-            ))}
-          </ContextMenuSubContent>
-        </ContextMenuSub>
+      <ContextMenuTrigger asChild>
+        <div className="inline-block w-full">{children}</div>
+      </ContextMenuTrigger>
 
-        <ContextMenuItem onClick={handleForward}>
-          <Forward className="mr-2 h-4 w-4" />
-          Forward
+      <ContextMenuContent className="w-56 bg-white dark:bg-[#2a2a2a] shadow-xl rounded-xl p-1">
+        {/* Emoji reaction row at top */}
+        <div className="flex justify-around px-1 py-2 border-b border-border mb-1">
+          {EMOJIS.map(emoji => (
+            <button
+              key={emoji}
+              onClick={() => onReact(message.id, emoji)}
+              className="text-xl hover:scale-125 transition-transform p-0.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              {emoji}
+            </button>
+          ))}
+        </div>
+
+        <ContextMenuItem onClick={() => onReply(message)} className="rounded-lg">
+          <Reply className="mr-2 h-4 w-4 text-[#00a884]" /> Reply
+        </ContextMenuItem>
+
+        <ContextMenuItem onClick={handleCopy} className="rounded-lg">
+          <Copy className="mr-2 h-4 w-4 text-gray-500" /> Copy
         </ContextMenuItem>
 
         {isOwnMessage && (
-          <>
-            <ContextMenuSeparator />
-            <ContextMenuItem onClick={() => onEdit(message.id)}>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit
-            </ContextMenuItem>
-            <ContextMenuItem
-              onClick={() => onDelete(message.id)}
-              className="text-destructive focus:text-destructive"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </ContextMenuItem>
-          </>
+          <ContextMenuItem onClick={() => onEdit(message.id)} className="rounded-lg">
+            <Edit className="mr-2 h-4 w-4 text-blue-500" /> Edit
+          </ContextMenuItem>
         )}
 
         <ContextMenuSeparator />
-        <ContextMenuItem onClick={handleCopy}>
-          <Copy className="mr-2 h-4 w-4" />
-          Copy Text
+
+        <ContextMenuItem
+          onClick={() => onDelete(message.id)}
+          className="text-destructive rounded-lg"
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          {isOwnMessage ? "Delete for everyone" : "Delete for me"}
         </ContextMenuItem>
-        
-        {!isOwnMessage && (
-          <ContextMenuItem onClick={handleFlag}>
-            <Flag className="mr-2 h-4 w-4" />
-            Report
-          </ContextMenuItem>
-        )}
       </ContextMenuContent>
     </ContextMenu>
   );

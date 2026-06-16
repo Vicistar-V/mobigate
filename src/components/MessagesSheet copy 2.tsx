@@ -50,7 +50,7 @@ export const MessagesSheet = () => {
   // Listen for custom event to open chat with specific user
   useEffect(() => {
     const handleOpenChat = async (event: CustomEvent) => {
-      const { conversationId, userId, userName, userAvatar } = event.detail;
+      const { conversationId, userId, userName } = event.detail;
 
       // If we have a direct conversationId, select it then open
       if (conversationId) {
@@ -62,14 +62,13 @@ export const MessagesSheet = () => {
       // If userId provided — create/find conversation first, THEN open sheet
       if (userId) {
         setIsOpen(true); // open immediately so user sees loading
-        const convId = await startConversationWith(userId, userName, userAvatar);
+        const convId = await startConversationWith(userId, userName);
         if (!convId) {
           // Still open but no conversation found — user sees empty list
           console.warn('[MessagesSheet] Could not start conversation with', userId);
         }
         return;
       }
-
 
       // Fallback: search by name in existing conversations
       if (userName) {
@@ -85,13 +84,9 @@ export const MessagesSheet = () => {
       }
     };
 
-    const handleCloseChat = () => setIsOpen(false);
-
     window.addEventListener('openChatWithUser' as any, handleOpenChat);
-    window.addEventListener('closeChatSheet' as any, handleCloseChat);
     return () => {
       window.removeEventListener('openChatWithUser' as any, handleOpenChat);
-      window.removeEventListener('closeChatSheet' as any, handleCloseChat);
     };
   }, [conversations, selectConversation, startConversationWith]);
 
@@ -148,7 +143,7 @@ export const MessagesSheet = () => {
             <ChatInterface
               conversation={activeConversation}
               isTyping={isTyping}
-              onSendMessage={(content, attachments, ...rest) => (sendMessage as any)(content, attachments, ...rest)}
+              onSendMessage={sendMessage}
               onEditMessage={editMessage}
               onDeleteMessage={deleteMessage}
               onReactToMessage={reactToMessage}

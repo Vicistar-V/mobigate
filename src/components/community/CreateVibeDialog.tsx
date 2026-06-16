@@ -22,9 +22,12 @@ interface CreateVibeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onVibeCreated?: (vibe: VibeItem) => void;
+  communityId?: string;
+  onPost?: (payload: { content: string; title?: string; type: string; mediaUrl?: string; mediaType?: string }) => Promise<boolean>;
+  uploadMedia?: (file: File) => Promise<{ url: string; type: string } | null>;
 }
 
-export function CreateVibeDialog({ open, onOpenChange, onVibeCreated }: CreateVibeDialogProps) {
+export function CreateVibeDialog({ open, onOpenChange, onVibeCreated, communityId, onPost, uploadMedia }: CreateVibeDialogProps) {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [legalAccepted, setLegalAccepted] = useState(false);
   const [title, setTitle] = useState("");
@@ -69,34 +72,40 @@ export function CreateVibeDialog({ open, onOpenChange, onVibeCreated }: CreateVi
     setIsPreviewMode(false);
   };
 
-  const handlePublish = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handlePublish = async () => {
     if (!title || !description) {
       toast.error("Please fill in all required fields");
       return;
     }
-
-    const newVibe: VibeItem = {
-      id: `vibe-${Date.now()}`,
-      title,
-      description,
-      mediaType,
-      mediaUrl: mediaPreview || undefined,
-      thumbnail: mediaPreview || undefined,
-      spotlight,
-      date: new Date().toISOString(),
-      views: 0,
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      author: "Current User",
-      authorProfileImage: "/placeholder.svg",
-      authorId: "current-user"
-    };
-
-    onVibeCreated?.(newVibe);
-    toast.success("Vibe published successfully!");
-    resetForm();
-    onOpenChange(false);
+    setIsSubmitting(true);
+    try {
+      // Upload media if file selected
+      let finalMediaUrl = mediaPreview || undefined;
+      let finalMediaType: string | undefined;
+      if (mediaFile && uploadMedia) {
+        const result = await uploadMedia(mediaFile);
+        if (result) { finalMediaUrl = result.url; finalMediaType = result.type; }
+      }
+      // Call real API if available
+      if (onPost) {
+        const ok = await onPost({ content: description, title, type: "vibe", mediaUrl: finalMediaUrl, mediaType: finalMediaType });
+        if (!ok) { setIsSubmitting(false); return; }
+      } else {
+        // Fallback: local callback only
+        const newVibe: VibeItem = {
+          id: `vibe-${Date.now()}`, title, description, mediaType,
+          mediaUrl: finalMediaUrl, thumbnail: finalMediaUrl, spotlight,
+          date: new Date().toISOString(), views: 0, likes: 0, comments: 0, shares: 0,
+          author: "Current User", authorProfileImage: "/placeholder.svg", authorId: "current-user"
+        };
+        onVibeCreated?.(newVibe);
+      }
+      toast.success("Vibe published successfully!");
+      resetForm();
+      onOpenChange(false);
+    } finally { setIsSubmitting(false); }
   };
 
   const getMediaTypeDisplay = (type: VibeItem["mediaType"]) => {
@@ -279,7 +288,7 @@ export function CreateVibeDialog({ open, onOpenChange, onVibeCreated }: CreateVi
                 </Button>
               </div>
               <LegalCopyrightAcceptance accepted={legalAccepted} onAcceptedChange={setLegalAccepted} />
-              <Button onClick={handlePublish} disabled={!title || !description || !legalAccepted} className="w-full">
+              <Button onClick={handlePublish} disabled={!title || !description || !legalAccepted || isSubmitting} className="w-full">
                 <Send className="w-4 h-4 mr-1" />
                 Publish Vibe
               </Button>

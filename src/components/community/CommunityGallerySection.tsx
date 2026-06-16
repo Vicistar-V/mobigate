@@ -1,4 +1,6 @@
-import { useState } from "react";
+import React from "react";
+import { useCommunityContent } from "@/hooks/useCommunityContent";
+import { useState, useEffect, useMemo } from "react";
 import {
   Heart,
   MessageCircle,
@@ -13,12 +15,15 @@ import {
   ChevronLeft,
   ChevronRight,
   Send,
+  Plus,
+  Loader2,
   Bookmark,
   MoveHorizontal,
   MoveVertical
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -28,6 +33,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -36,6 +42,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 import { useToast } from "@/hooks/use-toast";
 import {
   mockGalleryAlbums,
@@ -47,6 +54,7 @@ import {
 } from "@/data/communityGalleryData";
 
 interface CommunityGallerySectionProps {
+  communityId?: string;
   isOwner?: boolean;
   isGalleryManager?: boolean;
   isMember?: boolean;
@@ -54,6 +62,7 @@ interface CommunityGallerySectionProps {
 }
 
 export function CommunityGallerySection({
+  communityId,
   isOwner = false,
   isGalleryManager = false,
   isMember = true,
@@ -62,10 +71,58 @@ export function CommunityGallerySection({
   const { toast } = useToast();
   const [activeView, setActiveView] = useState<"all" | "photos" | "videos" | "albums">("all");
   const [selectedAlbum, setSelectedAlbum] = useState<string>("all");
-  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>(mockGalleryItems);
+  // ── Real gallery items from API ──────────────────────────────────────
+  const { items: apiGallery, loading: galleryLoading, refresh: refreshGallery } = useCommunityContent(communityId, {
+    type: "gallery", status: "active", limit: 100,
+  });
+
+  const apiMappedGallery = useMemo<GalleryItem[]>(() => apiGallery.map(g => ({
+    id:              g.id,
+    type:            (g.mediaType === "video" ? "video" : "photo") as any,
+    mediaType:       (g.mediaType === "video" ? "video" : "photo") as any,
+    url:             g.mediaUrl || g.thumbnail || "",
+    mediaUrl:        g.mediaUrl || g.thumbnail || "",
+    thumbnailUrl:    g.thumbnail || g.mediaUrl || "",
+    thumbnail:       g.thumbnail || g.mediaUrl || "",
+    title:           g.title || "",
+    description:     g.description || "",
+    uploadedBy:      g.authorName,
+    uploadedByAvatar:g.authorAvatar,
+    uploadedAt:      g.publishedAt || g.submittedAt || "",
+    albumId:         "all",
+    likes:           g.likes,
+    comments:        g.comments,
+    views:           g.views,
+    isLiked:         g.isLiked || false,
+    isFollowed:      false,
+    privacy:         "public" as const,
+    isHidden:        false,
+    tags:            g.tags || [],
+  })), [apiGallery]);
+
+  // Start empty — no mock data
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [albums] = useState<GalleryAlbum[]>(mockGalleryAlbums);
+
+  // Sync API data into galleryItems, preserving local interaction state (likes/follows)
+  useEffect(() => {
+    setGalleryItems(prev => {
+      // Merge: API items + any locally-added items not yet in API
+      const apiIds  = new Set(apiMappedGallery.map(i => i.id));
+      const localNew = prev.filter(i => !apiIds.has(i.id)); // items user just uploaded (optimistic)
+      // Carry over local interaction state (likes, follows)
+      const merged  = apiMappedGallery.map(apiItem => {
+        const existing = prev.find(p => p.id === apiItem.id);
+        return existing
+          ? { ...apiItem, isLiked: existing.isLiked, isFollowed: existing.isFollowed, likes: existing.likes }
+          : apiItem;
+      });
+      return [...merged, ...localNew];
+    });
+  }, [apiMappedGallery]);
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
-  const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const [showDetailDialog,  setShowDetailDialog]  = useState(false);
+  const [showUploadDialog,  setShowUploadDialog]  = useState(false);
   const [newComment, setNewComment] = useState("");
   const [visibleCount, setVisibleCount] = useState(9);
   const [viewOrientation, setViewOrientation] = useState<"horizontal" | "vertical">("horizontal");
@@ -271,7 +328,8 @@ export function CommunityGallerySection({
 
     return (
       <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
-        <DialogContent className="max-w-4xl max-h-[95vh] p-0 gap-0 overflow-hidden">
+        <DialogContent className="max-w-4xl w-full p-0 gap-0 rounded-2xl flex flex-col" style={{ maxHeight: "92vh" }}>
+          <DialogTitle className="sr-only">Gallery Item</DialogTitle>
           <div className="flex flex-col md:flex-row h-full max-h-[95vh]">
             {/* Media Section */}
             <div className="relative flex-1 bg-black flex items-center justify-center min-h-[300px] md:min-h-[500px]">
@@ -480,6 +538,11 @@ export function CommunityGallerySection({
               </>
             )}
           </Button>
+          {(isOwner || isGalleryManager || isMember) && (
+            <Button size="sm" className="gap-1.5" onClick={() => setShowUploadDialog(true)}>
+              <Plus className="h-4 w-4" /> Upload
+            </Button>
+          )}
         </div>
       </div>
 
@@ -592,9 +655,23 @@ export function CommunityGallerySection({
           )}
 
           {filteredItems.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">
-              <ImageIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p>No gallery items found</p>
+            <div className="col-span-3 text-center py-12">
+              {galleryLoading ? (
+                <div className="flex flex-col items-center gap-3">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <p className="text-sm text-muted-foreground">Loading gallery…</p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-3">
+                  <ImageIcon className="h-12 w-12 text-muted-foreground/30" />
+                  <p className="text-sm font-medium text-muted-foreground">No photos or videos yet</p>
+                  {(isOwner || isGalleryManager || isMember) && (
+                    <Button size="sm" onClick={() => setShowUploadDialog(true)} className="gap-1.5">
+                      <Plus className="h-4 w-4" /> Upload the first photo
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -613,6 +690,138 @@ export function CommunityGallerySection({
 
       {/* Detail Dialog */}
       <ItemDetailDialog />
+
+      {/* ── Upload Dialog ─────────────────────────────────────────── */}
+      <GalleryUploadDialog
+        communityId={communityId}
+        open={showUploadDialog}
+        onOpenChange={setShowUploadDialog}
+        onUploaded={() => { setShowUploadDialog(false); refreshGallery(); }}
+      />
     </div>
+  );
+}
+
+/* ── Inline Upload Dialog component ──────────────────────────────────────── */
+function GalleryUploadDialog({ communityId, open, onOpenChange, onUploaded }: {
+  communityId?: string; open: boolean; onOpenChange: (v: boolean) => void; onUploaded: () => void;
+}) {
+  const [files,       setFiles]       = useState<File[]>([]);
+  const [previews,    setPreviews]    = useState<string[]>([]);
+  const [caption,     setCaption]     = useState("");
+  const [privacy,     setPrivacy]     = useState("public");
+  const [submitting,  setSubmitting]  = useState(false);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = Array.from(e.target.files || []);
+    const valid    = selected.filter(f => f.type.startsWith("image/") || f.type.startsWith("video/"));
+    setFiles(prev => [...prev, ...valid]);
+    setPreviews(prev => [...prev, ...valid.map(f => URL.createObjectURL(f))]);
+    if (e.target) e.target.value = "";
+  };
+
+  const removeFile = (i: number) => {
+    setFiles(prev => prev.filter((_, idx) => idx !== i));
+    setPreviews(prev => prev.filter((_, idx) => idx !== i));
+  };
+
+  const handleUpload = async () => {
+    if (!files.length) { toast("Please select at least one file"); return; }
+    if (!communityId)  { toast.error("Community not found"); return; }
+    setSubmitting(true);
+    try {
+      for (const file of files) {
+        // Upload file
+        const fd = new FormData();
+        fd.append("file", file);
+        fd.append("community_id", communityId);
+        const upRes = await fetch("/api/community/upload_post_media.php", { method: "POST", credentials: "include", body: fd });
+        if (!upRes.ok) continue;
+        const upData = await upRes.json();
+
+        // Create gallery post
+        await fetch("/api/community/content.php", {
+          method: "POST", credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "create", community_id: communityId,
+            type:    file.type.startsWith("video/") ? "video" : "photo",
+            title:   caption || file.name.replace(/\.[^.]+$/, ""),
+            content: caption,
+            mediaUrl:  upData.url,
+            mediaType: file.type.startsWith("video/") ? "video" : "photo",
+            thumbnail: upData.thumbnail || upData.url,
+            status: "pending",
+          }),
+        });
+      }
+      toast.success(`${files.length} item${files.length > 1 ? "s" : ""} uploaded! Pending approval.`);
+      setFiles([]); setPreviews([]); setCaption(""); setPrivacy("public");
+      onUploaded();
+    } catch { toast.error("Upload failed. Please try again."); }
+    finally { setSubmitting(false); }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg w-full p-0 gap-0 rounded-2xl flex flex-col" style={{ maxHeight: "85vh" }}>
+        <DialogTitle className="sr-only">Upload to Gallery</DialogTitle>
+        <div className="flex items-center justify-between px-4 py-3 border-b shrink-0">
+          <h2 className="font-bold text-lg">Upload to Gallery</h2>
+          <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}><X className="h-4 w-4" /></Button>
+        </div>
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-4 space-y-4" style={{ WebkitOverflowScrolling: "touch" }}>
+          {/* Drop zone */}
+          <div
+            className="border-2 border-dashed rounded-xl p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
+            onClick={() => inputRef.current?.click()}
+          >
+            <input ref={inputRef} type="file" multiple accept="image/*,video/*" className="hidden" onChange={handleFileSelect} />
+            <ImageIcon className="h-10 w-10 mx-auto text-muted-foreground/50 mb-2" />
+            <p className="text-sm font-medium">Click to upload photos or videos</p>
+            <p className="text-xs text-muted-foreground mt-1">PNG, JPG, GIF, MP4 up to 50MB each</p>
+          </div>
+
+          {/* Previews */}
+          {previews.length > 0 && (
+            <div className="grid grid-cols-3 gap-2">
+              {previews.map((src, i) => (
+                <div key={i} className="relative aspect-square rounded-lg overflow-hidden bg-muted group">
+                  {files[i]?.type.startsWith("video/")
+                    ? <video src={src} className="w-full h-full object-cover" />
+                    : <img src={src} className="w-full h-full object-cover" />}
+                  <button
+                    className="absolute top-1 right-1 w-5 h-5 rounded-full bg-destructive text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => removeFile(i)}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+              <button
+                className="aspect-square rounded-lg border-2 border-dashed border-border flex items-center justify-center hover:border-primary/50"
+                onClick={() => inputRef.current?.click()}
+              >
+                <Plus className="h-5 w-5 text-muted-foreground" />
+              </button>
+            </div>
+          )}
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium">Caption (optional)</label>
+            <Textarea placeholder="Add a caption…" value={caption} rows={3} onChange={e => setCaption(e.target.value)} className="resize-none" />
+          </div>
+        </div>
+        <div className="border-t px-4 py-3 shrink-0 flex gap-2">
+          <Button variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button className="flex-1" disabled={!files.length || submitting} onClick={handleUpload}>
+            {submitting
+              ? <><Loader2 className="h-4 w-4 animate-spin mr-1" />Uploading…</>
+              : <><Send className="h-4 w-4 mr-1" />Upload {files.length > 0 ? `(${files.length})` : ""}</>}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

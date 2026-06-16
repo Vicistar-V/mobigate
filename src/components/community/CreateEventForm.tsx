@@ -15,7 +15,9 @@ import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcce
 import { toast } from "sonner";
 
 interface CreateEventFormProps {
+  communityId?: string;
   onEventCreated?: (event: EventItem) => void;
+  onRefresh?: () => void;
   canPost?: boolean;
   className?: string;
 }
@@ -25,10 +27,11 @@ interface MediaFile {
   type: "image" | "video";
 }
 
-export const CreateEventForm = ({ onEventCreated, canPost = true, className }: CreateEventFormProps) => {
+export const CreateEventForm = ({ communityId, onEventCreated, onRefresh, canPost = true, className }: CreateEventFormProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [legalAccepted, setLegalAccepted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   
   // Form state
@@ -110,40 +113,82 @@ export const CreateEventForm = ({ onEventCreated, canPost = true, className }: C
     setIsPreviewMode(false);
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (!title || !description || !venue || !eventDate) {
       toast.error("Please fill in all required fields");
       return;
     }
+    if (!legalAccepted) {
+      toast.error("Please accept the legal & copyright terms to continue");
+      return;
+    }
+    if (!communityId) { toast.error("Community not found"); return; }
+    setIsSubmitting(true);
+    try {
+      // Upload thumbnail if file selected
+      let uploadedThumbUrl = thumbnail;
+      if (thumbnailFile) {
+        const fd = new FormData();
+        fd.append("file", thumbnailFile);
+        fd.append("community_id", communityId);
+        const upRes = await fetch("/api/community/upload_post_media.php", {
+          method: "POST", credentials: "include", body: fd,
+        });
+        if (upRes.ok) {
+          const upData = await upRes.json();
+          uploadedThumbUrl = upData.url || thumbnail;
+        }
+      }
 
-    const newEvent: EventItem = {
-      id: `event-${Date.now()}`,
-      title,
-      description,
-      eventType,
-      venue,
-      venueType,
-      audience,
-      sponsorship,
-      spotlight,
-      date: eventDate,
-      endDate: eventEndDate || undefined,
-      views: 0,
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      rsvpCount: 0,
-      capacity: parseInt(capacity) || 100,
-      thumbnail: thumbnail || undefined,
-      author: "Current User",
-      authorProfileImage: "/placeholder.svg",
-      authorId: "current-user"
-    };
+      const res = await fetch("/api/community/content.php", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action:       "create",
+          community_id: communityId,
+          type:         "event",
+          title,
+          content:      description,
+          thumbnail:    uploadedThumbUrl || "",
+          status:       "pending",
+          eventDate,
+          eventEndDate: eventEndDate || "",
+          venue,
+          venueType,
+          capacity:     parseInt(capacity) || 100,
+          spotlight:    spotlight ? 1 : 0,
+        }),
+      });
 
-    onEventCreated?.(newEvent);
-    toast.success("Event published successfully!");
-    handleDelete();
-    setIsExpanded(false);
+      if (!res.ok) throw new Error("Failed");
+      const data = await res.json();
+
+      const newEvent: EventItem = {
+        id:                 data.id || `event-${Date.now()}`,
+        title, description, eventType, venue, venueType,
+        audience, sponsorship, spotlight,
+        date:               eventDate,
+        endDate:            eventEndDate || undefined,
+        views: 0, likes: 0, comments: 0, shares: 0,
+        rsvpCount:          0,
+        capacity:           parseInt(capacity) || 100,
+        thumbnail:          uploadedThumbUrl || undefined,
+        author:             "You",
+        authorProfileImage: "/placeholder.svg",
+        authorId:           "me",
+      };
+
+      onEventCreated?.(newEvent);
+      onRefresh?.();
+      toast.success("Event submitted! Pending admin approval.");
+      handleDelete();
+      setIsExpanded(false);
+    } catch {
+      toast.error("Failed to post event. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const getEventTypeDisplay = (type: EventItem["eventType"]) => {
@@ -523,11 +568,13 @@ export const CreateEventForm = ({ onEventCreated, canPost = true, className }: C
                     <Button
                       type="button"
                       onClick={handlePublish}
-                      disabled={!title || !description || !venue || !eventDate || !legalAccepted}
+                      disabled={!title || !description || !venue || !eventDate || isSubmitting}
                       className="w-full gap-2"
                     >
-                      <Send className="w-4 h-4" />
-                      PUBLISH NOW
+                      {isSubmitting
+                        ? <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" />
+                        : <Send className="w-4 h-4" />}
+                      {isSubmitting ? "Posting..." : "PUBLISH NOW"}
                     </Button>
                   </div>
                 </div>
@@ -649,11 +696,13 @@ export const CreateEventForm = ({ onEventCreated, canPost = true, className }: C
                     <Button
                       type="button"
                       onClick={handlePublish}
-                      disabled={!legalAccepted}
+                      disabled={isSubmitting}
                       className="w-full gap-2"
                     >
-                      <Send className="w-4 h-4" />
-                      PUBLISH NOW
+                      {isSubmitting
+                        ? <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" />
+                        : <Send className="w-4 h-4" />}
+                      {isSubmitting ? "Posting..." : "PUBLISH NOW"}
                     </Button>
                   </div>
                 </div>

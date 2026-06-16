@@ -15,7 +15,9 @@ import { MediaUploadDialog } from "./MediaUploadDialog";
 import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
 
 interface CreateVibeFormProps {
+  communityId?: string;
   onVibeCreated?: (vibe: VibeItem) => void;
+  onRefresh?: () => void;
   canPost?: boolean;
   className?: string;
 }
@@ -25,10 +27,11 @@ interface MediaFile {
   type: "image" | "video";
 }
 
-export const CreateVibeForm = ({ onVibeCreated, canPost = true, className }: CreateVibeFormProps) => {
+export const CreateVibeForm = ({ communityId, onVibeCreated, onRefresh, canPost = true, className }: CreateVibeFormProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [legalAccepted, setLegalAccepted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Form state
   const [title, setTitle] = useState("");
@@ -89,34 +92,76 @@ export const CreateVibeForm = ({ onVibeCreated, canPost = true, className }: Cre
     setIsPreviewMode(false);
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (!title || !description) {
       toast.error("Please fill in all required fields");
       return;
     }
+    if (!legalAccepted) {
+      toast.error("Please accept the legal & copyright terms to continue");
+      return;
+    }
+    if (!communityId) { toast.error("Community not found"); return; }
+    setIsSubmitting(true);
+    try {
+      // Upload media file if selected
+      let uploadedMediaUrl = mediaPreview;
+      let uploadedThumb   = mediaPreview;
+      if (mediaFile) {
+        const fd = new FormData();
+        fd.append("file", mediaFile);
+        fd.append("community_id", communityId);
+        const upRes = await fetch("/api/community/upload_post_media.php", {
+          method: "POST", credentials: "include", body: fd,
+        });
+        if (upRes.ok) {
+          const upData = await upRes.json();
+          uploadedMediaUrl = upData.url || mediaPreview;
+          uploadedThumb    = upData.thumbnail || upData.url || mediaPreview;
+        }
+      }
 
-    const newVibe: VibeItem = {
-      id: `vibe-${Date.now()}`,
-      title,
-      description,
-      mediaType,
-      mediaUrl: mediaPreview || undefined,
-      thumbnail: mediaPreview || undefined,
-      spotlight,
-      date: new Date().toISOString(),
-      views: 0,
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      author: "Current User",
-      authorProfileImage: "/placeholder.svg",
-      authorId: "current-user"
-    };
+      const res = await fetch("/api/community/content.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action:       "create",
+          community_id: communityId,
+          type:         "vibe",
+          title,
+          content:      description,
+          mediaUrl:     uploadedMediaUrl || "",
+          mediaType:    mediaType,
+          thumbnail:    uploadedThumb || "",
+          spotlight:    spotlight ? 1 : 0,
+          status:       "pending",
+        }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      const data = await res.json();
 
-    onVibeCreated?.(newVibe);
-    toast.success("Vibe published successfully!");
-    handleDelete();
-    setIsExpanded(false);
+      const newVibe: VibeItem = {
+        id:                 data.id || `vibe-${Date.now()}`,
+        title, description, mediaType,
+        mediaUrl:           uploadedMediaUrl || undefined,
+        thumbnail:          uploadedThumb    || undefined,
+        spotlight,
+        date:               new Date().toISOString(),
+        views: 0, likes: 0, comments: 0, shares: 0,
+        author:             "You",
+        authorProfileImage: "/placeholder.svg",
+        authorId:           "me",
+      };
+      onVibeCreated?.(newVibe);
+      onRefresh?.();
+      toast.success("Vibe submitted! Pending admin approval.");
+      handleDelete();
+      setIsExpanded(false);
+    } catch {
+      toast.error("Failed to post vibe. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const getMediaTypeDisplay = (type: VibeItem["mediaType"]) => {
@@ -364,11 +409,13 @@ export const CreateVibeForm = ({ onVibeCreated, canPost = true, className }: Cre
                     <Button
                       type="button"
                       onClick={handlePublish}
-                      disabled={!title || !description || !legalAccepted}
+                      disabled={!title || !description || isSubmitting}
                       className="w-full gap-2"
                     >
-                      <Send className="w-4 h-4" />
-                      PUBLISH NOW
+                      {isSubmitting
+                        ? <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" />
+                        : <Send className="w-4 h-4" />}
+                      {isSubmitting ? "Posting..." : "PUBLISH NOW"}
                     </Button>
                   </div>
                 </div>

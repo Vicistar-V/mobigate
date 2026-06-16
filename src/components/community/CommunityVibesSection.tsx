@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,8 @@ import { MemberPreviewDialog } from "@/components/community/MemberPreviewDialog"
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PremiumAdCardProps } from "@/components/PremiumAdCard";
-import { mockVibesData, VibeItem } from "@/data/communityVibesData";
+import { VibeItem } from "@/data/communityVibesData";
+import { useCommunityContent } from "@/hooks/useCommunityContent";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ViewToggleButton, ViewMode } from "@/components/ui/ViewToggleButton";
@@ -68,17 +69,40 @@ const premiumAdBanner: PremiumAdCardProps = {
 };
 
 interface CommunityVibesSectionProps {
+  communityId?: string;
   isOwner?: boolean;
   isAdmin?: boolean;
   className?: string;
 }
 
 export const CommunityVibesSection = ({ 
+  communityId,
   isOwner = false, 
   isAdmin = false,
   className 
 }: CommunityVibesSectionProps) => {
-  const [vibes, setVibes] = useState<VibeItem[]>(mockVibesData);
+  const { items: apiVibes, refresh: refreshVibes } = useCommunityContent(communityId, {
+    type: "vibe", status: "active", limit: 50,
+  });
+  const apiMapped: VibeItem[] = useMemo(() => apiVibes.map(v => ({
+    id:               v.id,
+    title:            v.title,
+    description:      v.description || "",
+    mediaType:        (v.mediaType || "photo") as any,
+    mediaUrl:         v.mediaUrl || v.thumbnail || "",
+    thumbnail:        v.thumbnail || v.mediaUrl || "",
+    spotlight:        v.spotlight || false,
+    date:             v.publishedAt || v.submittedAt || new Date().toISOString(),
+    views:            v.views,
+    likes:            v.likes,
+    comments:         v.comments,
+    shares:           0,
+    author:           v.authorName,
+    authorProfileImage: v.authorAvatar,
+    authorId:         v.authorId,
+    duration:         undefined as any,
+  })), [apiVibes]);
+  const [vibes, setVibes] = useState<VibeItem[]>([]);
   const [mediaFilter, setMediaFilter] = useState<string>("all");
   const [visibleVibeCount, setVisibleVibeCount] = useState(12);
   const [likedVibes, setLikedVibes] = useState<Record<string, boolean>>({});
@@ -127,10 +151,16 @@ export const CommunityVibesSection = ({
     toast.success(`Invitation sent to ${memberName}`);
   };
 
-  // Filter vibes by media type
-  const filteredVibes = mediaFilter === "all"
-    ? vibes
-    : vibes.filter(vibe => vibe.mediaType === mediaFilter);
+  // Combine local + API vibes, filter by media type
+  const allVibes = useMemo(() => {
+    const apiIds = new Set(apiMapped.map(v => v.id));
+    const localOnly = vibes.filter(v => !apiIds.has(v.id));
+    return [...apiMapped, ...localOnly];
+  }, [apiMapped, vibes]);
+
+  const filteredVibes = useMemo(() =>
+    mediaFilter === "all" ? allVibes : allVibes.filter(v => v.mediaType === mediaFilter),
+  [allVibes, mediaFilter]);
 
   const displayedVibes = filteredVibes.slice(0, visibleVibeCount);
 
@@ -147,7 +177,9 @@ export const CommunityVibesSection = ({
     <div className={cn("space-y-6 pb-6", className)}>
       {/* 1. Create Vibe Form */}
       <CreateVibeForm 
+        communityId={communityId}
         onVibeCreated={handleVibeCreated}
+        onRefresh={refreshVibes}
         canPost={canPost}
       />
 

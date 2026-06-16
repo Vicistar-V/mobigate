@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Card } from "@/components/ui/card";
 import { ChevronDown, Eye, MessageSquare, Share2, Video, Image as ImageIcon, FileText, TrendingUp, Heart, Play } from "lucide-react";
-import { mockNewsData, NewsItem } from "@/data/newsData";
+import { NewsItem } from "@/data/newsData";
+import { useCommunityContent } from "@/hooks/useCommunityContent";
 import { formatDistanceToNow } from "date-fns";
 import { NewsDetailDialog } from "./NewsDetailDialog";
 import { CreateNewsForm } from "./CreateNewsForm";
@@ -56,6 +57,7 @@ const sortByFilters = [
 ];
 
 interface CommunityNewsSectionProps {
+  communityId?: string;
   className?: string;
   premiumAdSlots?: PremiumAdCardProps[];
   showPeopleYouMayKnow?: boolean;
@@ -63,6 +65,7 @@ interface CommunityNewsSectionProps {
 }
 
 export function CommunityNewsSection({ 
+  communityId,
   className,
   premiumAdSlots = [],
   showPeopleYouMayKnow = false,
@@ -86,7 +89,36 @@ export function CommunityNewsSection({
   
   // State for user-created news
   const [userNews, setUserNews] = useState<NewsItem[]>([]);
-  
+
+  // ── Real news from API ────────────────────────────────────────────────
+  const { items: apiNews, refresh: refreshNews } = useCommunityContent(communityId, {
+    type: "news", status: "active", limit: 50,
+  });
+  const apiMapped: NewsItem[] = useMemo(() => apiNews.map(n => ({
+    id:           n.id,
+    title:        n.title,
+    description:  n.description || n.content || "",   // card reads news.description
+    summary:      n.description || "",
+    content:      n.content || n.description || "",
+    category:     (n.category || "general") as any,
+    mediaType:    (n.mediaType || "article") as any,
+    thumbnail:    n.thumbnail || n.mediaUrl || undefined, // card reads news.thumbnail
+    imageUrl:     n.thumbnail || n.mediaUrl || undefined,
+    author:       n.authorName,
+    authorAvatar: n.authorAvatar,
+    authorProfileImage: n.authorAvatar,
+    date:         n.publishedAt || n.submittedAt || new Date().toISOString(),
+    publishedAt:  n.publishedAt || n.submittedAt || new Date().toISOString(),
+    likes:        n.likes,
+    comments:     n.comments,
+    views:        n.views,
+    shares:       0,
+    trending:     false,
+    featured:     n.featured || false,
+    tags:         n.tags || [],
+    isBreaking:   false,
+  })), [apiNews]);
+
   // Reset visible count when filters change
   useEffect(() => {
     setVisibleNewsCount(10);
@@ -94,8 +126,8 @@ export function CommunityNewsSection({
 
   // Filter and sort news items
   const filteredNews = useMemo(() => {
-    // Combine user-created news with existing news data
-    let filtered = [...userNews, ...mockNewsData];
+    // Combine user-created news with API news
+    let filtered = [...userNews, ...apiMapped];
 
     // Category filter
     if (categoryFilter !== "all") {
@@ -113,8 +145,8 @@ export function CommunityNewsSection({
       const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
 
       filtered = filtered.filter((item) => {
-        const itemDate = new Date(item.date);
-        
+        const itemDate = new Date(item.date || item.publishedAt || Date.now());
+
         switch (dateTimeFilter) {
           case "today":
             return itemDate >= today;
@@ -152,16 +184,17 @@ export function CommunityNewsSection({
           filtered.sort((a, b) => b.comments - a.comments);
           break;
         case "shared":
-          filtered.sort((a, b) => b.shares - a.shares);
+          filtered.sort((a, b) => (b.shares || 0) - (a.shares || 0));
           break;
         case "latest":
-          filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          filtered.sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
           break;
       }
     }
 
     return filtered;
-  }, [categoryFilter, dateTimeFilter, mediaTypeFilter, sortByFilter, userNews]);
+  // ← apiMapped added so the memo recomputes when API data arrives
+  }, [categoryFilter, dateTimeFilter, mediaTypeFilter, sortByFilter, userNews, apiMapped]);
   
   // Pagination logic
   const displayedNews = filteredNews.slice(0, visibleNewsCount);
@@ -218,10 +251,10 @@ export function CommunityNewsSection({
       const newSet = new Set(prev);
       if (newSet.has(newsId)) {
         newSet.delete(newsId);
-        setNewsLikes(p => ({ ...p, [newsId]: (p[newsId] || mockNewsData.find(n => n.id === newsId)?.likes || 0) - 1 }));
+        setNewsLikes(p => ({ ...p, [newsId]: (p[newsId] || apiMapped.find(n => n.id === newsId)?.likes || 0) - 1 }));
       } else {
         newSet.add(newsId);
-        setNewsLikes(p => ({ ...p, [newsId]: (p[newsId] || mockNewsData.find(n => n.id === newsId)?.likes || 0) + 1 }));
+        setNewsLikes(p => ({ ...p, [newsId]: (p[newsId] || apiMapped.find(n => n.id === newsId)?.likes || 0) + 1 }));
       }
       return newSet;
     });
@@ -264,7 +297,9 @@ export function CommunityNewsSection({
       {/* Create News Form */}
       {canPostNews && (
         <CreateNewsForm 
+          communityId={communityId}
           onNewsCreated={handleNewsCreated}
+          onRefresh={refreshNews}
           canPost={canPostNews}
         />
       )}
@@ -450,11 +485,11 @@ export function CommunityNewsSection({
                     </p>
                   </div>
 
-                  {/* Thumbnail for media items */}
-                  {news.thumbnail && (news.mediaType === "video" || news.mediaType === "photo") && (
+                  {/* Thumbnail — show for any news that has one */}
+                  {(news.thumbnail || news.imageUrl) && (
                     <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
                       <img
-                        src={news.thumbnail}
+                        src={news.thumbnail || news.imageUrl}
                         alt={news.title}
                         className="w-full h-full object-cover"
                       />
@@ -563,8 +598,8 @@ export function CommunityNewsSection({
       {displayedNews.length > 0 && (
         <div className="mt-6 text-center text-sm text-muted-foreground">
           Showing {displayedNews.length} of {filteredNews.length} news items
-          {filteredNews.length < mockNewsData.length && 
-            ` (filtered from ${mockNewsData.length} total)`
+          {filteredNews.length < apiMapped.length && 
+            ` (filtered from ${apiMapped.length} total)`
           }
         </div>
       )}

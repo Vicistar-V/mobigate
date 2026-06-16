@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { X, Calendar, Image, Users, Lock, ImagePlus, Video, Play, Upload } from "lucide-react";
+import React, { useState, useRef } from "react";
+import { X, Calendar, Image, Users, Lock, ImagePlus, Video, Play, Upload, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,11 +16,16 @@ import { MediaUploadDialog } from "./MediaUploadDialog";
 interface CreateSpecialEventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
+  onPost?: (payload: { content: string; title?: string; type: string; mediaUrl?: string; mediaType?: string }) => Promise<boolean>;
+  uploadMedia?: (file: File) => Promise<{ url: string; type: string } | null>;
 }
 
 interface MediaFile {
-  url: string;
+  url: string;        // preview URL (object URL or server URL)
+  serverUrl?: string; // set after real upload
   type: "image" | "video";
+  file?: File;        // original File for upload
 }
 
 const eventTypes = [
@@ -43,7 +48,7 @@ const privacyOptions = [
   { value: "private", label: "Private", description: "Only you" }
 ];
 
-export function CreateSpecialEventDialog({ open, onOpenChange }: CreateSpecialEventDialogProps) {
+export function CreateSpecialEventDialog({ open, onOpenChange, communityId, onPost, uploadMedia }: CreateSpecialEventDialogProps) {
   const { toast } = useToast();
   const [eventType, setEventType] = useState("");
   const [eventDate, setEventDate] = useState<Date>();
@@ -94,29 +99,58 @@ export function CreateSpecialEventDialog({ open, onOpenChange }: CreateSpecialEv
     });
   };
 
-  const handlePost = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleDirectFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const valid = files.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+    valid.forEach(file => {
+      const preview = URL.createObjectURL(file);
+      const type: "image" | "video" = file.type.startsWith('video/') ? 'video' : 'image';
+      setMediaFiles(prev => [...prev, { url: preview, type, file }]);
+    });
+    if (e.target) e.target.value = '';
+  };
+
+  const handlePost = async () => {
     if (!eventType || !eventDate || !caption.trim()) {
-      toast({
-        title: "Incomplete Post",
-        description: "Please fill in all required fields",
-        variant: "destructive"
-      });
+      toast({ title: "Incomplete Post", description: "Please fill in all required fields", variant: "destructive" });
       return;
     }
-
-    toast({
-      title: "Special Event Posted! 🎉",
-      description: "Your special event has been shared with the community",
-    });
-    
-    // Reset form
-    setEventType("");
-    setEventDate(undefined);
-    setCaption("");
-    setTaggedMembers("");
-    setPrivacy("public");
-    setMediaFiles([]);
-    onOpenChange(false);
+    setIsSubmitting(true);
+    try {
+      // Upload first media file to server using uploadMedia prop
+      let mediaUrl: string | undefined;
+      let mediaTypeStr: string | undefined;
+      if (mediaFiles.length > 0) {
+        const firstMedia = mediaFiles[0];
+        if (firstMedia.serverUrl) {
+          // Already uploaded
+          mediaUrl = firstMedia.serverUrl;
+          mediaTypeStr = firstMedia.type;
+        } else if (firstMedia.file && uploadMedia) {
+          // Upload the File object to server
+          const result = await uploadMedia(firstMedia.file);
+          if (result) { mediaUrl = result.url; mediaTypeStr = result.type; }
+          else { mediaUrl = firstMedia.url; mediaTypeStr = firstMedia.type; }
+        } else {
+          // Fallback: use preview URL (won't work as server URL)
+          mediaUrl = firstMedia.url;
+          mediaTypeStr = firstMedia.type;
+        }
+      }
+      const eventLabel = eventTypes.find(e => e.value === eventType)?.label || eventType;
+      const titleStr = `${eventLabel} 🎉`;
+      const content = caption;
+      if (onPost) {
+        const ok = await onPost({ content, title: titleStr, type: "special-event", mediaUrl, mediaType: mediaTypeStr });
+        if (!ok) { setIsSubmitting(false); return; }
+      }
+      toast({ title: "Special Event Posted! 🎉", description: "Your special event has been shared with the community" });
+      setEventType(""); setEventDate(undefined); setCaption(""); setTaggedMembers(""); setPrivacy("public"); setMediaFiles([]);
+      onOpenChange(false);
+    } finally { setIsSubmitting(false); }
   };
 
   return (
@@ -210,7 +244,7 @@ export function CreateSpecialEventDialog({ open, onOpenChange }: CreateSpecialEv
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
-                  onClick={() => setShowMediaUpload(true)}
+                  onClick={() => fileInputRef.current?.click()}
                   className={cn(
                     "border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer",
                     isDragging ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"
@@ -268,7 +302,7 @@ export function CreateSpecialEventDialog({ open, onOpenChange }: CreateSpecialEv
                     
                     {/* Add More Button */}
                     <button
-                      onClick={() => setShowMediaUpload(true)}
+                      onClick={() => fileInputRef.current?.click()}
                       className="aspect-square rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center gap-1 hover:border-primary/50 transition-colors"
                     >
                       <ImagePlus className="h-6 w-6 text-muted-foreground" />
@@ -325,13 +359,22 @@ export function CreateSpecialEventDialog({ open, onOpenChange }: CreateSpecialEv
               <Button onClick={() => onOpenChange(false)} variant="outline" className="flex-1">
                 Cancel
               </Button>
-              <Button onClick={handlePost} className="flex-1">
-                Post Event 🎉
+              <Button onClick={handlePost} disabled={isSubmitting} className="flex-1">
+                {isSubmitting ? "Posting..." : "Post Event 🎉"}
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept="image/*,video/*"
+        className="hidden"
+        onChange={handleDirectFileSelect}
+      />
 
       <MediaUploadDialog
         open={showMediaUpload}

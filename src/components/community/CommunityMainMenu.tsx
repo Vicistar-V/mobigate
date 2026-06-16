@@ -264,7 +264,10 @@ export function CommunityMainMenu({
         <h2 className="text-lg font-semibold">Community Menu</h2>
       </div>
       
-      <ScrollArea className="flex-1">
+      <div
+        className="flex-1 min-h-0 overflow-y-auto overscroll-contain"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
         <div className="pb-6 pt-2">
           <Accordion type="single" collapsible className="w-full px-4 space-y-1">
             {/* Community Content - New unified section for top items */}
@@ -1238,7 +1241,7 @@ export function CommunityMainMenu({
             </AccordionItem>
           </Accordion>
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 
@@ -1250,13 +1253,13 @@ export function CommunityMainMenu({
 
       {isMobile ? (
         <Drawer open={open} onOpenChange={setOpen}>
-          <DrawerContent className="h-[85vh] overflow-hidden touch-auto">
+          <DrawerContent className="h-[90vh] flex flex-col overflow-hidden touch-auto">
             <MenuContent />
           </DrawerContent>
         </Drawer>
       ) : (
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="max-w-md max-h-[85vh] overflow-hidden p-0">
+          <DialogContent className="max-w-md p-0 flex flex-col" style={{ height: "85vh", maxHeight: "85vh" }}>
             <MenuContent />
           </DialogContent>
         </Dialog>

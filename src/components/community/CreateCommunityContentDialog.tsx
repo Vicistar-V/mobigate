@@ -23,6 +23,9 @@ import {
 interface CreateCommunityContentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
+  onPost?: (payload: { content: string; title?: string; type: string; mediaUrl?: string; mediaType?: string }) => Promise<boolean>;
+  uploadMedia?: (file: File) => Promise<{ url: string; type: string } | null>;
 }
 
 const contentTypes = [
@@ -34,7 +37,8 @@ const contentTypes = [
 
 export function CreateCommunityContentDialog({ 
   open, 
-  onOpenChange 
+  onOpenChange,
+  communityId, onPost, uploadMedia
 }: CreateCommunityContentDialogProps) {
   const { toast } = useToast();
   const [legalAccepted, setLegalAccepted] = useState(false);
@@ -75,22 +79,27 @@ export function CreateCommunityContentDialog({
     setMonetization(defaultMonetizationValue());
   };
 
-  const handleSubmit = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
     if (!title.trim()) {
-      toast({
-        title: "Title Required",
-        description: "Please enter a title for your content",
-        variant: "destructive",
-      });
+      toast({ title: "Title Required", description: "Please enter a title for your content", variant: "destructive" });
       return;
     }
-
-    toast({
-      title: "Content Created!",
-      description: "Your monetized content has been published",
-    });
-    resetForm();
-    onOpenChange(false);
+    setIsSubmitting(true);
+    try {
+      let mediaUrl: string | undefined;
+      let mediaTypeStr: string | undefined = contentType;
+      if (mediaPreview) { mediaUrl = mediaPreview; }
+      if (onPost) {
+        const content = description || subtitle || title;
+        const ok = await onPost({ content, title, type: "content", mediaUrl, mediaType: mediaTypeStr });
+        if (!ok) { setIsSubmitting(false); return; }
+      }
+      toast({ title: "Content Published!", description: "Your content has been published to the community" });
+      resetForm();
+      onOpenChange(false);
+    } finally { setIsSubmitting(false); }
   };
 
   const getAcceptedFileTypes = () => {
@@ -226,8 +235,8 @@ export function CreateCommunityContentDialog({
         {/* Footer Actions */}
         <div className="p-4 border-t bg-background space-y-3">
           <LegalCopyrightAcceptance accepted={legalAccepted} onAcceptedChange={setLegalAccepted} />
-          <Button onClick={handleSubmit} disabled={!legalAccepted} className="w-full">
-            Publish Monetized Content
+          <Button onClick={handleSubmit} disabled={!legalAccepted || isSubmitting} className="w-full">
+            {isSubmitting ? "Publishing..." : "Publish Monetized Content"}
           </Button>
         </div>
       </DrawerContent>

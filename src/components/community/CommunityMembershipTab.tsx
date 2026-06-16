@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -55,7 +55,9 @@ import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PremiumAdCardProps } from "@/components/PremiumAdCard";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { communityPeople } from "@/data/communityPeopleData";
-import { wallStatusPosts, feedPosts } from "@/data/posts";
+import { wallStatusPosts } from "@/data/posts";
+import { useCommunityPosts, type CommunityPost } from "@/hooks/useCommunityPosts";
+import { CommunityPostCard } from "@/components/community/CommunityPostCard";
 import { CreateSpecialEventDialog } from "@/components/community/CreateSpecialEventDialog";
 import { SendGiftDialog, GiftSelection } from "@/components/chat/SendGiftDialog";
 import { ActiveCallDialog } from "@/components/chat/ActiveCallDialog";
@@ -396,7 +398,13 @@ const specialEventPosts = [
   },
 ];
 
-export function CommunityMembershipTab() {
+interface CommunityMembershipTabProps {
+  communityId?: string;
+  memberCount?: number;
+  onPostClick?: (post: CommunityPost) => void;
+}
+
+export function CommunityMembershipTab({ communityId, memberCount, onPostClick }: CommunityMembershipTabProps = {}) {
   const [showSpecialEventDialog, setShowSpecialEventDialog] = useState(false);
   
   // Member filter states
@@ -409,7 +417,30 @@ export function CommunityMembershipTab() {
 
   // Birthday states
   const [birthdayFilter, setBirthdayFilter] = useState<string>("today");
-  const [birthdayView, setBirthdayView] = useState<"normal" | "large">("normal");
+  const [birthdayView, setBirthdayView]   = useState<"normal" | "large">("normal");
+
+  // Real birthday data from API
+  const [birthdayMembers,   setBirthdayMembers]   = useState<any[]>([]);
+  const [birthdayCounts,    setBirthdayCounts]    = useState<Record<string,number>>({});
+  const [birthdayLoading,   setBirthdayLoading]   = useState(false);
+
+  const fetchBirthdays = useCallback(async (period: string) => {
+    if (!communityId) return;
+    setBirthdayLoading(true);
+    try {
+      const res = await fetch(
+        `/api/community/birthdays.php?community_id=${communityId}&period=${encodeURIComponent(period)}`,
+        { credentials: 'include' }
+      );
+      if (res.ok) {
+        const d = await res.json();
+        setBirthdayMembers(d.members || []);
+        if (d.counts) setBirthdayCounts(d.counts);
+      }
+    } catch {} finally { setBirthdayLoading(false); }
+  }, [communityId]);
+
+  useEffect(() => { fetchBirthdays(birthdayFilter); }, [communityId, birthdayFilter]);
 
   // E-Library states
   const [eLibraryFilter, setELibraryFilter] = useState<string>("all");
@@ -455,14 +486,47 @@ export function CommunityMembershipTab() {
     committee: "executive"
   });
 
-  // Handle member card click
+  // ── Real members from API ──────────────────────────────────────────────
+  const [realMembers, setRealMembers] = useState<CommunityMember[] | null>(null);
+  const [membersLoading, setMembersLoading] = useState(false);
+
+  useEffect(() => {
+    if (!communityId) return;
+    setMembersLoading(true);
+    fetch(`/api/community/members.php?community_id=${communityId}`, { credentials: "include" })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!Array.isArray(data)) return;
+        setRealMembers(data.map((m: any) => ({
+          id:            m.user_id,
+          name:          m.name || ('@' + m.username),
+          avatar:        m.profile_photo || '',
+          gender:        m.gender === 'female' ? 'female' : 'male',
+          memberSince:   m.joined_at ? new Date(m.joined_at).getFullYear().toString() : '2024',
+          mutualFriends: 0,
+          isOnline:      false,
+        })));
+      })
+      .catch(() => {})
+      .finally(() => setMembersLoading(false));
+  }, [communityId]);
+
+  // Use real members when available, fall back to mock data
+  const activeMembers: CommunityMember[] = realMembers ?? communityMembers;
+
+// Handle member card click
   const handleMemberClick = (member: CommunityMember) => {
     setSelectedMemberForPreview(convertToExecutiveMember(member));
     setShowMemberPreview(true);
   };
 
   // Filter members by gender
-  const filteredMembers = communityMembers.filter((member) => {
+  // Compute real counts from activeMembers
+  const menCount    = activeMembers.filter(m => m.gender === 'male').length;
+  const womenCount  = activeMembers.filter(m => m.gender === 'female').length;
+  const totalMemberCount = memberCount ?? activeMembers.length;
+
+  const filteredMembers = activeMembers.filter((member) => {
     if (memberGenderFilter === "all") return true;
     if (memberGenderFilter === "men") return member.gender === "male";
     if (memberGenderFilter === "women") return member.gender === "female";
@@ -558,21 +622,30 @@ export function CommunityMembershipTab() {
   };
 
   // Filter content based on active filter
-  const filteredContent = eLibraryFilter === "all" 
-    ? feedPosts 
-    : feedPosts.filter(post => post.type.toLowerCase() === eLibraryFilter);
+  // ── Real community posts from API ─────────────────────────────────────
+  const { posts: realPosts, loading: postsLoading, hasMore: postsHasMore,
+          loadMore: loadMorePosts, createPost, likePost, deletePost, commentOnPost, viewPost,
+          uploadMedia, refresh: refreshPosts } = useCommunityPosts(communityId);
+
+  // Filter by eLibraryFilter type
+  const filteredContent = eLibraryFilter === "all"
+    ? realPosts
+    : realPosts.filter(p => p.type?.toLowerCase() === eLibraryFilter);
 
   const displayedContent = filteredContent.slice(0, visibleContentCount);
 
   // Birthday filter options
   const birthdayFilters = [
-    { value: "today", label: "Today", count: 3 },
-    { value: "this-week", label: "This Week", count: 20 },
-    { value: "next-week", label: "Next Week", count: 26 },
-    { value: "last-week", label: "Last Week", count: 18 },
-    { value: "last-month", label: "Last Month", count: 82 },
-    { value: "this-month", label: "This Month", count: 95 },
-    { value: "next-month", label: "Next Month", count: 88 },
+    { value: "today",              label: "Today" },
+    { value: "this-week",          label: "This Week" },
+    { value: "next-week",          label: "Next Week" },
+    { value: "last-week",          label: "Last Week" },
+    { value: "this-month",         label: "This Month" },
+    { value: "next-month",         label: "Next Month" },
+    { value: "last-month",         label: "Last Month" },
+    { value: "this-three-months",  label: "This 3 Months" },
+    { value: "next-three-months",  label: "Next 3 Months" },
+    { value: "last-three-months",  label: "Last 3 Months" },
   ];
 
   return (
@@ -583,7 +656,7 @@ export function CommunityMembershipTab() {
       {/* 2. View All Members Section */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl sm:text-2xl font-bold">View All Members (527)</h2>
+          <h2 className="text-xl sm:text-2xl font-bold">{`View All Members (${totalMemberCount.toLocaleString()})`}</h2>
           <button
             onClick={toggleMembersView}
             className="p-2 rounded-md hover:bg-muted transition-colors"
@@ -605,7 +678,7 @@ export function CommunityMembershipTab() {
             onClick={() => setMemberGenderFilter("men")}
             className="rounded-full text-base font-semibold px-4"
           >
-            Men (312)
+            {`Men (${menCount})`}
           </Button>
           <span className="text-lg font-bold text-muted-foreground">|</span>
           <Button
@@ -614,7 +687,7 @@ export function CommunityMembershipTab() {
             onClick={() => setMemberGenderFilter("women")}
             className="rounded-full text-base font-semibold px-4"
           >
-            Women (215)
+            {`Women (${womenCount})`}
           </Button>
           {memberGenderFilter !== "all" && (
             <>
@@ -876,7 +949,17 @@ export function CommunityMembershipTab() {
         </div>
       </button>
       
-      <CreateSpecialEventDialog open={showSpecialEventDialog} onOpenChange={setShowSpecialEventDialog} />
+      <CreateSpecialEventDialog
+        open={showSpecialEventDialog}
+        onOpenChange={setShowSpecialEventDialog}
+        communityId={communityId}
+        onPost={async (payload) => {
+          const ok = await createPost(payload);
+          if (ok) refreshPosts();
+          return ok;
+        }}
+        uploadMedia={uploadMedia}
+      />
 
       {/* Send Gift Dialog */}
       <SendGiftDialog
@@ -992,25 +1075,46 @@ export function CommunityMembershipTab() {
 
         {/* 4. Special Events Section */}
         <WallStatusCarousel
-          items={specialEventPosts as any}
+          items={(realPosts.filter(p => p.type === 'special-event' || p.type === 'event')).map(p => ({
+            id: p.id, title: p.title || p.description || 'Special Event',
+            imageUrl: p.imageUrl, description: p.description,
+            author: p.author, authorImage: p.authorImage, timestamp: p.timestamp,
+            likes: p.likes, comments: p.comments, views: String(p.views || 0),
+            type: p.type, userId: p.authorId, isOwner: p.isOwner,
+          }))}
           title="Special Events"
           view={specialEventsView}
           filter={specialEventsFilter}
           onViewChange={setSpecialEventsView}
           onFilterChange={setSpecialEventsFilter}
+          onDelete={deletePost}
+          onItemClick={(item) => onPostClick && onPostClick(realPosts.find(p => p.id === item.id) || {
+            id: item.id, title: item.title || '', description: item.description || '',
+            type: item.type || 'event', imageUrl: item.imageUrl, videoUrl: undefined,
+            author: item.author || '', authorId: item.userId || '', authorImage: item.authorImage,
+            userId: item.userId || '', timestamp: item.timestamp || '', likes: item.likes || 0,
+            comments: item.comments || 0, views: 0, isPinned: false, isLiked: false, isOwner: false,
+          } as any)}
           showViewToggle={true}
           showFilterCounts={true}
         />
 
       {/* 5. Members' Birthdays Section */}
       <section className="space-y-4">
-        <div className="flex items-center gap-2">
-          <h2 className="text-lg sm:text-xl font-semibold">Members' Birthdays</h2>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg sm:text-xl font-semibold">Members' Birthdays 🎂</h2>
+            {birthdayCounts[birthdayFilter] !== undefined && (
+              <Badge variant="secondary" className="text-xs">
+                {birthdayCounts[birthdayFilter]}
+              </Badge>
+            )}
+          </div>
           <Button
             variant="outline"
             size="sm"
             onClick={() => setBirthdayView(birthdayView === "normal" ? "large" : "normal")}
-            className="gap-1.5 transition-all duration-200"
+            className="gap-1.5"
             title={birthdayView === "normal" ? "Switch to Vertical View" : "Switch to Horizontal View"}
           >
             {birthdayView === "normal" ? (
@@ -1021,57 +1125,117 @@ export function CommunityMembershipTab() {
           </Button>
         </div>
 
-        {/* Birthday Filter Tabs */}
+        {/* Birthday Filter Tabs — first 4 visible, rest in dropdown */}
         <div className="flex flex-wrap gap-2">
-          {birthdayFilters.slice(0, 4).map((filter) => (
-            <Button
-              key={filter.value}
-              variant={birthdayFilter === filter.value ? "default" : "outline"}
-              size="sm"
-              onClick={() => setBirthdayFilter(filter.value)}
-              className="text-xs sm:text-sm"
-            >
-              {filter.label}
-              {filter.count > 0 && (
-                <Badge variant="secondary" className="ml-2 text-xs">
-                  {filter.count}
-                </Badge>
-              )}
-            </Button>
-          ))}
-          
+          {birthdayFilters.slice(0, 4).map((filter) => {
+            const count = birthdayCounts[filter.value] ?? 0;
+            return (
+              <Button
+                key={filter.value}
+                variant={birthdayFilter === filter.value ? "default" : "outline"}
+                size="sm"
+                onClick={() => setBirthdayFilter(filter.value)}
+                className="text-xs sm:text-sm"
+              >
+                {filter.label}
+                {count > 0 && (
+                  <Badge variant={birthdayFilter === filter.value ? "secondary" : "outline"} className="ml-1.5 text-[10px] h-4 px-1">
+                    {count}
+                  </Badge>
+                )}
+              </Button>
+            );
+          })}
+
           {/* More Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="text-xs sm:text-sm">
-                ...More
+              <Button
+                variant={birthdayFilters.slice(4).some(f => f.value === birthdayFilter) ? "default" : "outline"}
+                size="sm"
+                className="text-xs sm:text-sm"
+              >
+                More ···
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              {birthdayFilters.slice(4).map((filter) => (
-                <DropdownMenuItem
-                  key={filter.value}
-                  onClick={() => setBirthdayFilter(filter.value)}
-                >
-                  {filter.label} ({filter.count})
-                </DropdownMenuItem>
-              ))}
+            <DropdownMenuContent align="start" className="min-w-[180px]">
+              {birthdayFilters.slice(4).map((filter) => {
+                const count = birthdayCounts[filter.value] ?? 0;
+                return (
+                  <DropdownMenuItem
+                    key={filter.value}
+                    onClick={() => setBirthdayFilter(filter.value)}
+                    className={birthdayFilter === filter.value ? "bg-primary text-primary-foreground" : ""}
+                  >
+                    <span className="flex-1">{filter.label}</span>
+                    {count > 0 && (
+                      <Badge variant="secondary" className="ml-2 text-[10px]">{count}</Badge>
+                    )}
+                  </DropdownMenuItem>
+                );
+              })}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
 
-        {/* Birthday Posts Carousel */}
-        <WallStatusCarousel
-          items={birthdayPosts as any}
-          title=""
-          view={birthdayView}
-          filter="all"
-          onViewChange={setBirthdayView}
-          onFilterChange={() => {}}
-          showViewToggle={true}
-          showFilterCounts={false}
-          showFilters={false}
-        />
+        {/* Birthday Members */}
+        {birthdayLoading ? (
+          <div className="flex justify-center py-8">
+            <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : birthdayMembers.length === 0 ? (
+          <div className="text-center py-10 space-y-2">
+            <p className="text-3xl">🎂</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              No birthdays for{" "}
+              {birthdayFilters.find(f => f.value === birthdayFilter)?.label ?? birthdayFilter}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Members' birthday dates are filled in from their profile
+            </p>
+          </div>
+        ) : (
+          <div className={birthdayView === "normal"
+            ? "flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-muted"
+            : "grid grid-cols-2 sm:grid-cols-3 gap-3"}>
+            {birthdayMembers.map((member) => (
+              <div
+                key={member.id}
+                className={`shrink-0 snap-start ${birthdayView === "normal" ? "w-36" : "w-full"} relative`}
+              >
+                <div className="relative rounded-xl overflow-hidden border border-border bg-card hover:shadow-md transition-shadow group">
+                  {/* Avatar */}
+                  <div className="relative aspect-[3/4] bg-gradient-to-b from-primary/10 to-muted overflow-hidden">
+                    {member.profile_photo ? (
+                      <img
+                        src={member.profile_photo}
+                        alt={member.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-muted-foreground/30">
+                        {(member.name || "?")[0]}
+                      </div>
+                    )}
+                    {/* Today badge */}
+                    {member.is_today && (
+                      <div className="absolute top-2 left-0 right-0 flex justify-center">
+                        <span className="bg-yellow-400 text-yellow-900 text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+                          🎂 Today!
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  {/* Info */}
+                  <div className="p-2 text-center">
+                    <p className="text-xs font-semibold truncate">{member.name}</p>
+                    <p className="text-[10px] text-primary font-medium mt-0.5">{member.birthday_display}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
         {/* 6. Community Content */}
@@ -1082,23 +1246,25 @@ export function CommunityMembershipTab() {
         />
 
         {/* Community Content Items */}
+        {postsLoading && realPosts.length === 0 ? (
+          <div className="flex justify-center py-8">
+            <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : realPosts.length === 0 ? (
+          <div className="text-center py-10 text-sm text-muted-foreground">
+            No community content yet
+          </div>
+        ) : null}
         <div className="space-y-6">
           {displayedContent.map((post, index) => (
             <div key={post.id}>
-              <FeedPost
-                id={post.id}
-                title={post.title}
-                subtitle={post.subtitle}
-                description={post.description}
-                author={post.author}
-                authorProfileImage={post.authorProfileImage}
-                userId={post.userId}
-                status={post.status}
-                views={post.views}
-                comments={post.comments}
-                likes={post.likes}
-                type={post.type}
-                imageUrl={post.imageUrl}
+              <CommunityPostCard
+                post={post}
+                onLike={likePost}
+                onDelete={deletePost}
+                onComment={commentOnPost}
+                onView={viewPost}
+                onOpenDetail={onPostClick}
               />
               {/* Insert premium ad after every 4 posts */}
               {(index + 1) % 4 === 0 && index < displayedContent.length - 1 && (

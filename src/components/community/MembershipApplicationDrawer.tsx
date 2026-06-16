@@ -1,468 +1,279 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, CheckCircle2, Loader2, X } from "lucide-react";
-import { howHeardOptions, genderOptions, nigerianStates, countriesList } from "@/data/membershipData";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
+import { CheckCircle2, Loader2, Users, FileText } from "lucide-react";
+import { joinCommunity, submitMembershipApplication } from "@/hooks/useCommunity";
+import { nigerianStates, genderOptions } from "@/data/membershipData";
 
 interface MembershipApplicationDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
+  communityName?: string;
+  membershipChoice?: string;
+  onJoined?: () => void;
 }
 
 export function MembershipApplicationDrawer({
-  open,
-  onOpenChange,
+  open, onOpenChange, communityId, communityName = "this community",
+  membershipChoice = "voluntary", onJoined,
 }: MembershipApplicationDrawerProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [referenceNumber, setReferenceNumber] = useState("");
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [acceptTerms, setAcceptTerms] = useState(false);
+  const isMobile    = useIsMobile();
+  const navigate    = useNavigate();
+  const { toast }   = useToast();
 
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    dateOfBirth: "",
-    gender: "",
-    nationality: "",
-    countryOfResidence: "",
-    stateOfResidence: "",
-    lgaOfResidence: "",
-    stateOfOrigin: "",
-    cityOfResidence: "",
-    occupation: "",
-    howHeard: "",
-    sponsorName: "",
-    motivation: "",
+  const [step,         setStep]         = useState<"confirm" | "form" | "success">("confirm");
+  const [submitting,   setSubmitting]   = useState(false);
+  const [refNumber,    setRefNumber]    = useState("");
+  const [acceptTerms,  setAcceptTerms]  = useState(false);
+
+  const [form, setForm] = useState({
+    fullName: "", email: "", phone: "", dateOfBirth: "",
+    gender: "", stateOfOrigin: "", cityOfResidence: "",
+    occupation: "", howHeard: "", sponsorName: "", motivation: "",
   });
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const isVoluntary = !membershipChoice || ["voluntary", "open", "auto"].includes(membershipChoice.toLowerCase());
+  const needsApplication = !isVoluntary;
+
+  const update = (field: string, value: string) =>
+    setForm(p => ({ ...p, [field]: value }));
+
+  const isFormValid = form.fullName && form.email && form.phone && form.gender && form.motivation && acceptTerms;
+
+  const handleJoinDirectly = async () => {
+    if (!communityId) return;
+    setSubmitting(true);
+    try {
+      const res = await joinCommunity(communityId);
+      if (res.success) {
+        toast({ title: "Joined!", description: `You are now a member of ${communityName}` });
+        onJoined?.();
+        onOpenChange(false);
+      } else {
+        toast({ title: "Error", description: res.error || "Could not join", variant: "destructive" });
+      }
+    } finally { setSubmitting(false); }
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleSubmitApplication = async () => {
+    if (!communityId || !isFormValid) return;
+    setSubmitting(true);
+    try {
+      const res = await submitMembershipApplication(communityId, form);
+      if (res.success) {
+        setRefNumber(res.reference_number || "");
+        setStep("success");
+        toast({ title: "Application submitted!", description: "You will be notified when it is reviewed." });
+      } else {
+        toast({ title: "Error", description: res.error || "Submission failed", variant: "destructive" });
+      }
+    } finally { setSubmitting(false); }
   };
 
-  const generateReferenceNumber = () => {
-    const year = new Date().getFullYear();
-    const random = Math.floor(10000 + Math.random() * 90000);
-    return `APP-${year}-${random}`;
-  };
-
-  const handleSubmit = () => {
-    setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
-      setReferenceNumber(generateReferenceNumber());
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-    }, 2000);
-  };
-
-  const handleClose = () => {
-    setIsSubmitted(false);
-    setFormData({
-      fullName: "",
-      email: "",
-      phone: "",
-      dateOfBirth: "",
-      gender: "",
-      nationality: "",
-      countryOfResidence: "",
-      stateOfResidence: "",
-      lgaOfResidence: "",
-      stateOfOrigin: "",
-      cityOfResidence: "",
-      occupation: "",
-      howHeard: "",
-      sponsorName: "",
-      motivation: "",
-    });
-    setPhotoPreview(null);
+  const handleReset = () => {
+    setStep("confirm");
+    setForm({ fullName:"",email:"",phone:"",dateOfBirth:"",gender:"",stateOfOrigin:"",cityOfResidence:"",occupation:"",howHeard:"",sponsorName:"",motivation:"" });
     setAcceptTerms(false);
-    onOpenChange(false);
+    setRefNumber("");
   };
 
-  // Show Nigerian states if Nigeria is selected as country of residence
-  const showNigerianStates = formData.countryOfResidence === "Nigeria";
+  const Content = () => (
+    <ScrollArea className="flex-1 overflow-auto">
+      <div className="p-4 space-y-4 pb-10">
 
-  const isFormValid = 
-    formData.fullName && 
-    formData.email && 
-    formData.phone && 
-    formData.gender &&
-    formData.nationality &&
-    formData.countryOfResidence &&
-    formData.motivation && 
-    acceptTerms;
+        {/* ── Step: Confirm join ── */}
+        {step === "confirm" && (
+          <div className="space-y-4">
+            <div className="text-center py-4">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                <Users className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="font-semibold text-lg">{communityName}</h3>
+              <Badge variant="outline" className="mt-1">
+                {isVoluntary ? "Open Membership" : "Application Required"}
+              </Badge>
+            </div>
 
-  if (isSubmitted) {
-    return (
-      <Drawer open={open} onOpenChange={handleClose}>
-        <DrawerContent className="max-h-[85vh]">
-          <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
-            <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mb-4">
-              <CheckCircle2 className="h-10 w-10 text-emerald-500" />
-            </div>
-            <h2 className="text-xl font-semibold mb-2">Application Submitted</h2>
-            <p className="text-muted-foreground mb-4">
-              Your membership application is pending review by the community administrators.
-            </p>
-            <div className="bg-muted/50 rounded-lg px-4 py-3 mb-4">
-              <p className="text-sm text-muted-foreground">Reference Number</p>
-              <p className="font-mono font-semibold text-lg">{referenceNumber}</p>
-            </div>
-            <p className="text-sm text-muted-foreground mb-6">
-              You will receive a notification once your application is approved.
-            </p>
-            <Button onClick={handleClose} className="w-full bg-cyan-600 hover:bg-cyan-700">
-              Close
+            {isVoluntary ? (
+              <>
+                <p className="text-sm text-muted-foreground text-center">
+                  This community has open membership. You can join immediately.
+                </p>
+                <Button className="w-full" onClick={handleJoinDirectly} disabled={submitting}>
+                  {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Join Now
+                </Button>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground text-center">
+                  Membership requires an application. Fill in your details and submit for review.
+                </p>
+                <Button className="w-full" onClick={() => setStep("form")}>
+                  <FileText className="h-4 w-4 mr-2" /> Fill Application Form
+                </Button>
+                <p className="text-xs text-center text-muted-foreground">
+                  Or go to the{" "}
+                  <button
+                    className="text-primary underline"
+                    onClick={() => { onOpenChange(false); navigate(`/community/${communityId}/apply`); }}
+                  >
+                    full application page
+                  </button>
+                </p>
+              </>
+            )}
+            <Button variant="outline" className="w-full" onClick={() => onOpenChange(false)}>
+              Cancel
             </Button>
           </div>
-        </DrawerContent>
-      </Drawer>
-    );
-  }
+        )}
 
-  return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[90vh] flex flex-col touch-auto overflow-hidden">
-        <DrawerHeader className="bg-zinc-900 text-white rounded-t-lg">
-          <div className="flex items-center justify-between">
-            <DrawerTitle className="text-white">Apply for Membership</DrawerTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-white hover:bg-zinc-800"
-              onClick={() => onOpenChange(false)}
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
-        </DrawerHeader>
+        {/* ── Step: Application form ── */}
+        {step === "form" && (
+          <div className="space-y-4">
+            <p className="text-xs text-muted-foreground">All fields marked * are required</p>
 
-        <ScrollArea className="flex-1 overflow-y-auto min-h-0 touch-auto p-4 space-y-4">
-          {/* Photo Upload */}
-          <div className="flex flex-col items-center mb-4">
-            <Label className="mb-2 text-sm">Passport Photograph</Label>
-            <div className="relative">
-              <Avatar className="h-24 w-24 border-2 border-dashed border-muted-foreground/50">
-                <AvatarImage src={photoPreview || undefined} />
-                <AvatarFallback className="bg-muted">
-                  <Camera className="h-8 w-8 text-muted-foreground" />
-                </AvatarFallback>
-              </Avatar>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handlePhotoUpload}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              />
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">Tap to upload</p>
-          </div>
-
-          {/* Personal Information */}
-          <div className="space-y-3">
-            <div>
-              <Label htmlFor="fullName" className="text-sm">Full Name *</Label>
-              <Input
-                id="fullName"
-                placeholder="Enter your full name"
-                value={formData.fullName}
-                onChange={(e) => handleInputChange("fullName", e.target.value)}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="email" className="text-sm">Email Address *</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="phone" className="text-sm">Phone Number *</Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="+234 XXX XXX XXXX"
-                value={formData.phone}
-                onChange={(e) => handleInputChange("phone", e.target.value)}
-              />
+            <div className="space-y-2">
+              <Label>Full Name *</Label>
+              <Input value={form.fullName} onChange={e => update("fullName", e.target.value)} placeholder="Your full name" />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label htmlFor="dob" className="text-sm">Date of Birth</Label>
-                <Input
-                  id="dob"
-                  type="date"
-                  value={formData.dateOfBirth}
-                  onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
-                />
+              <div className="space-y-2">
+                <Label>Email *</Label>
+                <Input type="email" value={form.email} onChange={e => update("email", e.target.value)} placeholder="email@example.com" />
               </div>
-              <div>
-                <Label className="text-sm">Gender *</Label>
-                <Select
-                  value={formData.gender}
-                  onValueChange={(value) => handleInputChange("gender", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {genderOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="space-y-2">
+                <Label>Phone *</Label>
+                <Input value={form.phone} onChange={e => update("phone", e.target.value)} placeholder="+234..." />
               </div>
             </div>
-          </div>
 
-          {/* Location */}
-          <div className="space-y-3">
-            {/* Nationality */}
-            <div>
-              <Label className="text-sm">Nationality *</Label>
-              <Select
-                value={formData.nationality}
-                onValueChange={(value) => handleInputChange("nationality", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select your nationality" />
-                </SelectTrigger>
-                <SelectContent className="max-h-[280px]">
-                  {countriesList.map((country) => (
-                    <SelectItem key={country} value={country}>
-                      {country}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Country of Residence */}
-            <div>
-              <Label className="text-sm">Country of Residence *</Label>
-              <Select
-                value={formData.countryOfResidence}
-                onValueChange={(value) => {
-                  handleInputChange("countryOfResidence", value);
-                  // Reset state/province when country changes
-                  if (value !== "Nigeria") {
-                    handleInputChange("stateOfResidence", "");
-                  }
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select country of residence" />
-                </SelectTrigger>
-                <SelectContent className="max-h-[280px]">
-                  {countriesList.map((country) => (
-                    <SelectItem key={country} value={country}>
-                      {country}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* State/Province of Residence */}
-            <div>
-              <Label className="text-sm">State/Province of Residence</Label>
-              {showNigerianStates ? (
-                <Select
-                  value={formData.stateOfResidence}
-                  onValueChange={(value) => handleInputChange("stateOfResidence", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select state" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-[280px]">
-                    {nigerianStates.map((state) => (
-                      <SelectItem key={state} value={state}>
-                        {state}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Gender *</Label>
+                <Select value={form.gender} onValueChange={v => update("gender", v)}>
+                  <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                  <SelectContent>{genderOptions.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
                 </Select>
-              ) : (
-                <Input
-                  placeholder="Enter your state or province"
-                  value={formData.stateOfResidence}
-                  onChange={(e) => handleInputChange("stateOfResidence", e.target.value)}
-                />
-              )}
+              </div>
+              <div className="space-y-2">
+                <Label>Date of Birth</Label>
+                <Input type="date" value={form.dateOfBirth} onChange={e => update("dateOfBirth", e.target.value)} />
+              </div>
             </div>
 
-            {/* Local Government/County of Residence */}
-            <div>
-              <Label htmlFor="lga" className="text-sm">Local Government/County of Residence</Label>
-              <Input
-                id="lga"
-                placeholder={showNigerianStates ? "Enter your LGA" : "Enter your county or district"}
-                value={formData.lgaOfResidence}
-                onChange={(e) => handleInputChange("lgaOfResidence", e.target.value)}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>State of Origin</Label>
+                <Select value={form.stateOfOrigin} onValueChange={v => update("stateOfOrigin", v)}>
+                  <SelectTrigger><SelectValue placeholder="Select state" /></SelectTrigger>
+                  <SelectContent>{nigerianStates.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>City of Residence</Label>
+                <Input value={form.cityOfResidence} onChange={e => update("cityOfResidence", e.target.value)} placeholder="City" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Occupation</Label>
+              <Input value={form.occupation} onChange={e => update("occupation", e.target.value)} placeholder="Your occupation" />
+            </div>
+
+            <div className="space-y-2">
+              <Label>How did you hear about us?</Label>
+              <Input value={form.howHeard} onChange={e => update("howHeard", e.target.value)} placeholder="Social media, friend, etc." />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Sponsor / Referrer Name</Label>
+              <Input value={form.sponsorName} onChange={e => update("sponsorName", e.target.value)} placeholder="If invited by someone" />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Why do you want to join? *</Label>
+              <Textarea
+                value={form.motivation}
+                onChange={e => update("motivation", e.target.value)}
+                placeholder="Tell us why you want to join this community..."
+                rows={3}
               />
             </div>
 
-            {/* City/Town of Residence */}
-            <div>
-              <Label htmlFor="city" className="text-sm">City/Town of Residence</Label>
-              <Input
-                id="city"
-                placeholder="Enter your city or town"
-                value={formData.cityOfResidence}
-                onChange={(e) => handleInputChange("cityOfResidence", e.target.value)}
-              />
+            <div className="flex items-start gap-3">
+              <Checkbox id="terms" checked={acceptTerms} onCheckedChange={v => setAcceptTerms(!!v)} />
+              <label htmlFor="terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
+                I agree to abide by the community's rules and code of conduct
+              </label>
             </div>
 
-            {/* State of Origin (only for Nigeria) */}
-            {formData.nationality === "Nigeria" && (
-              <div>
-                <Label className="text-sm">State of Origin</Label>
-                <Select
-                  value={formData.stateOfOrigin}
-                  onValueChange={(value) => handleInputChange("stateOfOrigin", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select state of origin" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-[280px]">
-                    {nigerianStates.map((state) => (
-                      <SelectItem key={state} value={state}>
-                        {state}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          </div>
-
-          {/* Professional */}
-          <div>
-            <Label htmlFor="occupation" className="text-sm">Occupation/Profession</Label>
-            <Input
-              id="occupation"
-              placeholder="Enter your occupation"
-              value={formData.occupation}
-              onChange={(e) => handleInputChange("occupation", e.target.value)}
-            />
-          </div>
-
-          {/* Community Connection */}
-          <div className="space-y-3">
-            <div>
-              <Label className="text-sm">How did you hear about us?</Label>
-              <Select
-                value={formData.howHeard}
-                onValueChange={(value) => handleInputChange("howHeard", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select an option" />
-                </SelectTrigger>
-                <SelectContent>
-                  {howHeardOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="sponsor" className="text-sm">Sponsor/Guarantor (Optional)</Label>
-              <Input
-                id="sponsor"
-                placeholder="Name of existing member recommending you"
-                value={formData.sponsorName}
-                onChange={(e) => handleInputChange("sponsorName", e.target.value)}
-              />
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <Button variant="outline" onClick={() => setStep("confirm")} disabled={submitting}>Back</Button>
+              <Button onClick={handleSubmitApplication} disabled={!isFormValid || submitting}>
+                {submitting ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Submitting...</> : "Submit Application"}
+              </Button>
             </div>
           </div>
+        )}
 
-          {/* Motivation */}
-          <div>
-            <Label htmlFor="motivation" className="text-sm">Why do you want to join? *</Label>
-            <Textarea
-              id="motivation"
-              placeholder="Tell us why you want to be part of this community (max 200 words)"
-              value={formData.motivation}
-              onChange={(e) => handleInputChange("motivation", e.target.value)}
-              className="min-h-[100px]"
-              maxLength={1000}
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              {formData.motivation.split(/\s+/).filter(Boolean).length}/200 words
+        {/* ── Step: Success ── */}
+        {step === "success" && (
+          <div className="text-center space-y-4 py-6">
+            <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto" />
+            <h3 className="font-bold text-lg">Application Submitted!</h3>
+            <p className="text-sm text-muted-foreground">
+              Your application to join <strong>{communityName}</strong> has been received.
+              You will be notified once it is reviewed.
             </p>
-          </div>
-
-          {/* Terms */}
-          <div className="flex items-start space-x-2 py-2">
-            <Checkbox
-              id="terms"
-              checked={acceptTerms}
-              onCheckedChange={(checked) => setAcceptTerms(checked as boolean)}
-            />
-            <Label htmlFor="terms" className="text-sm leading-tight cursor-pointer">
-              I accept the Community's Terms & Conditions and agree to abide by the Community rules
-            </Label>
-          </div>
-
-          {/* Submit Button */}
-          <Button
-            onClick={handleSubmit}
-            disabled={!isFormValid || isSubmitting}
-            className="w-full bg-cyan-600 hover:bg-cyan-700 text-white"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Submitting...
-              </>
-            ) : (
-              "Submit Application"
+            {refNumber && (
+              <div className="bg-muted rounded-lg p-3">
+                <p className="text-xs text-muted-foreground">Reference Number</p>
+                <p className="font-mono font-bold text-primary">{refNumber}</p>
+              </div>
             )}
-          </Button>
-        </ScrollArea>
+            <Button className="w-full" onClick={() => { onOpenChange(false); handleReset(); }}>
+              Done
+            </Button>
+          </div>
+        )}
+      </div>
+    </ScrollArea>
+  );
+
+  const title = step === "success" ? "Application Submitted"
+    : step === "form" ? "Membership Application"
+    : "Join Community";
+
+  if (isMobile) return (
+    <Drawer open={open} onOpenChange={v => { if (!v) handleReset(); onOpenChange(v); }}>
+      <DrawerContent className="h-[90vh] flex flex-col">
+        <DrawerHeader><DrawerTitle>{title}</DrawerTitle></DrawerHeader>
+        <Content />
       </DrawerContent>
     </Drawer>
+  );
+
+  return (
+    <Sheet open={open} onOpenChange={v => { if (!v) handleReset(); onOpenChange(v); }}>
+      <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col">
+        <SheetHeader className="px-4 pt-4"><SheetTitle>{title}</SheetTitle></SheetHeader>
+        <Content />
+      </SheetContent>
+    </Sheet>
   );
 }

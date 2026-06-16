@@ -79,8 +79,8 @@ import { DonationDialog } from "@/components/community/DonationDialog";
 import { CommunityPostDialog } from "@/components/community/CommunityPostDialog";
 import { RollCallsPage } from "@/pages/RollCallsPage";
 import { CommunityResourcesDialog } from "@/components/community/CommunityResourcesDialog";
-import { CommunityArticlesSection } from "@/components/community/CommunityArticlesSection";
-import { InsideCommunitySection } from "@/components/community/InsideCommunitySection";
+import { ArticlesPage } from "@/pages/ArticlesPage";
+import { InsideCommunityPage } from "@/pages/InsideCommunityPage";
 import { MembershipApplicationDrawer } from "@/components/community/MembershipApplicationDrawer";
 import { ExitCommunityDialog } from "@/components/community/ExitCommunityDialog";
 import { CreatePostTypeSelector, PostType } from "@/components/community/CreatePostTypeSelector";
@@ -957,11 +957,7 @@ const CommunityProfile = () => {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Status
               </Button>
-              <CommunityArticlesSection
-                communityId={communityId}
-                isOwner={community?.isOwner}
-                isMember={isMember}
-              />
+              <ArticlesPage />
             </div>
           )}
 
@@ -988,11 +984,7 @@ const CommunityProfile = () => {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Status
               </Button>
-              <InsideCommunitySection
-                communityId={communityId}
-                isOwner={community?.isOwner}
-                isMember={isMember}
-              />
+              <InsideCommunityPage />
             </div>
           )}
 

@@ -1,18 +1,24 @@
-const API_BASE = (import.meta.env.VITE_API_URL as string) || "/api";
-
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Send, Camera, Mic, Gift, Gamepad2, Play, MoreVertical } from "lucide-react";
+import { X, Send, Mic, Gift, Gamepad2, MoreVertical, Camera, ImageIcon, FileIcon, Video } from "lucide-react";
 import { useRef, useState } from "react";
 import { SendGiftDialog, GiftSelection } from "./SendGiftDialog";
-import { AttachmentMenu } from "./AttachmentMenu";
 import { InlineVoiceRecorder } from "./InlineVoiceRecorder";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-
 import { toast } from "sonner";
 
+const API = "/api";
+
+interface Attachment {
+  type: 'image' | 'file' | 'gift' | 'audio' | 'video';
+  url: string;
+  name: string;
+  duration?: number;
+  giftData?: any;
+}
+
 interface ChatInputProps {
-  onSendMessage: (message: string, attachments?: { type: 'image' | 'file' | 'gift' | 'audio' | 'video'; url: string; name: string; duration?: number; giftData?: any }[]) => void;
+  onSendMessage: (message: string, attachments?: Attachment[], replyToId?: string) => void;
   disabled?: boolean;
   replyTo?: { messageId: string; content: string; senderName: string } | null;
   onCancelReply?: () => void;
@@ -20,545 +26,208 @@ interface ChatInputProps {
   onStartQuiz?: () => void;
 }
 
+// Upload any file to the server and return the public URL
+async function uploadFile(file: File): Promise<{ url: string; name: string; type: string } | null> {
+  try {
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch(`${API}/chat/upload.php`, { method: "POST", credentials: "include", body: fd });
+    const data = await res.json();
+    if (!data.url) throw new Error(data.error || "Upload failed");
+    return { url: data.url, name: data.name || file.name, type: data.type || "file" };
+  } catch (e: any) {
+    toast.error(e.message || "Upload failed");
+    return null;
+  }
+}
+
 export const ChatInput = ({ onSendMessage, disabled, replyTo, onCancelReply, recipientName = "User", onStartQuiz }: ChatInputProps) => {
-  const [message, setMessage] = useState("");
-  const [attachments, setAttachments] = useState<{ type: 'image' | 'file' | 'gift' | 'audio' | 'video'; url: string; name: string; duration?: number; giftData?: any }[]>([]);
-  const [isGiftDialogOpen, setIsGiftDialogOpen] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
+  const [message,         setMessage]         = useState("");
+  const [attachments,     setAttachments]      = useState<Attachment[]>([]);
+  const [isGiftOpen,      setIsGiftOpen]       = useState(false);
+  const [isRecording,     setIsRecording]      = useState(false);
+  const [uploading,       setUploading]        = useState(false);
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const imageInputRef = useRef<HTMLInputElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
-  const videoInputRef = useRef<HTMLInputElement>(null);
+  const imageRef    = useRef<HTMLInputElement>(null);
+  const fileRef     = useRef<HTMLInputElement>(null);
+  const videoRef    = useRef<HTMLInputElement>(null);
+  const cameraRef   = useRef<HTMLInputElement>(null);
 
   const handleSend = () => {
-    if (message.trim() || attachments.length > 0) {
-      onSendMessage(message, attachments);
-      setMessage("");
-      setAttachments([]);
-      if (textareaRef.current) {
-        textareaRef.current.style.height = "auto";
-      }
-    }
+    if (!message.trim() && !attachments.length) return;
+    onSendMessage(message, attachments, replyTo?.messageId);
+    setMessage("");
+    setAttachments([]);
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
-  // Upload file to server
-  const uploadToServer = async (file: File): Promise<{ url: string; name: string; type: string } | null> => {
-    const fd = new FormData();
-    fd.append("file", file);
-    try {
-      const res  = await fetch(`${API_BASE}/chat/upload.php`, { method: "POST", credentials: "include", body: fd });
-      const data = await res.json();
-      return data.success ? { url: data.url, name: data.name, type: data.type } : null;
-    } catch { return null; }
-  };
-
-
-  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    console.log('[ChatInput] Image upload started:', files.length, 'file(s)');
-    
-    const newAttachments: typeof attachments = [];
-    let processedCount = 0;
-    const totalFiles = Math.min(files.length, 5);
-
-    for (let i = 0; i < totalFiles; i++) {
-      const file = files[i];
-      console.log(`[ChatInput] Processing file ${i + 1}:`, file.name, file.type, file.size);
-      
-      if (file.size > 10 * 1024 * 1024) {
-        console.error('[ChatInput] File too large:', file.name);
-        processedCount++;
-        continue;
-      }
-
-      if (!file.type.startsWith('image/')) {
-        console.error('[ChatInput] Not an image:', file.name, file.type);
-        processedCount++;
-        continue;
-      }
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        console.log('[ChatInput] File read success:', file.name);
-        const url = e.target?.result as string;
-        newAttachments.push({
-          type: 'image' as const,
-          url,
-          name: file.name,
-        });
-        
-        processedCount++;
-        console.log(`[ChatInput] Progress: ${processedCount}/${totalFiles}, newAttachments:`, newAttachments.length);
-        
-        if (processedCount === totalFiles) {
-          console.log('[ChatInput] All files processed, updating state');
-          setAttachments(prev => [...prev, ...newAttachments].slice(0, 5));
-        }
-      };
-      reader.onerror = (error) => {
-        console.error('[ChatInput] FileReader error:', file.name, error);
-        processedCount++;
-        
-        if (processedCount === totalFiles) {
-          console.log('[ChatInput] All files processed (with errors)');
-          if (newAttachments.length > 0) {
-            setAttachments(prev => [...prev, ...newAttachments].slice(0, 5));
-          }
-        }
-      };
-      
-      try {
-        reader.readAsDataURL(file);
-      } catch (error) {
-        console.error('[ChatInput] Exception reading file:', file.name, error);
-        processedCount++;
-      }
-    }
-
-    e.target.value = "";
-  };
-
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-
-    const newAttachments = [];
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      if (file.size > 50 * 1024 * 1024) {
-        continue;
-      }
-
-      newAttachments.push({
-        type: 'file' as const,
-        url: URL.createObjectURL(file),
-        name: file.name,
-      });
-    }
-
-    if (newAttachments.length > 0) {
-      setAttachments(prev => [...prev, ...newAttachments].slice(0, 5));
-    }
-    e.target.value = "";
-  };
-
-  const removeAttachment = (index: number) => {
-    setAttachments(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const handleGiftSend = (giftData: GiftSelection) => {
-    if (!giftData) return;
-    
-    const giftAttachment = {
-      type: 'gift' as const,
-      url: '',
-      name: giftData.giftData.name,
-      giftData: giftData.giftData
-    };
-    
-    onSendMessage(
-      `🎁 Sent a gift: ${giftData.giftData.name}`,
-      [giftAttachment]
-    );
-    
-    setIsGiftDialogOpen(false);
-  };
-
-  const handleCameraClick = () => {
-    cameraInputRef.current?.click();
-  };
-
-  const handleCameraCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    if (file.size > 10 * 1024 * 1024) {
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const url = e.target?.result as string;
-      setAttachments(prev => [...prev, {
-        type: 'image' as const,
-        url,
-        name: file.name,
-      }].slice(0, 5));
-    };
-    reader.readAsDataURL(file);
-    e.target.value = "";
-  };
-
-  const handleVideoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    
-    const newAttachments: typeof attachments = [];
-
-    for (let i = 0; i < files.length && i < 2; i++) {
-      const file = files[i];
-      
-      if (file.size > 100 * 1024 * 1024) {
-        continue;
-      }
-
-      if (!file.type.startsWith('video/')) {
-        continue;
-      }
-
-      newAttachments.push({
-        type: 'video' as const,
-        url: URL.createObjectURL(file),
-        name: file.name,
-      });
-    }
-
-    if (newAttachments.length > 0) {
-      setAttachments(prev => [...prev, ...newAttachments].slice(0, 5));
-    }
-
-    e.target.value = "";
-  };
-
-  const formatDuration = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  const handleAudioSend = (audioData: { url: string; name: string; duration: number }) => {
-    const audioAttachment = {
-      type: 'audio' as const,
-      url: audioData.url,
-      name: audioData.name,
-      duration: audioData.duration,
-    };
-    
-    onSendMessage(
-      `🎤 Voice message (${formatDuration(audioData.duration)})`,
-      [audioAttachment]
-    );
-    
-    setIsRecording(false);
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(e.target.value);
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    e.target.style.height = "auto";
+    e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
+  };
+
+  // Generic file upload handler — uploads to server, stores permanent URL
+  const handleFilesSelected = async (files: FileList | null, expectedType?: string) => {
+    if (!files || !files.length) return;
+    if (attachments.length >= 5) { toast.error("Max 5 attachments"); return; }
+    setUploading(true);
+    const toProcess = Array.from(files).slice(0, 5 - attachments.length);
+    const results: Attachment[] = [];
+    for (const file of toProcess) {
+      if (file.size > 100 * 1024 * 1024) { toast.error(`${file.name} too large (max 100MB)`); continue; }
+      toast.loading(`Uploading ${file.name}...`, { id: file.name });
+      const result = await uploadFile(file);
+      toast.dismiss(file.name);
+      if (result) {
+        results.push({ type: result.type as Attachment["type"], url: result.url, name: result.name });
+        toast.success(`${file.name} uploaded`);
+      }
     }
+    if (results.length) setAttachments(prev => [...prev, ...results].slice(0, 5));
+    setUploading(false);
+  };
+
+  // Voice message — upload blob to server, then send
+  const handleAudioSend = async (audioData: { url: string; name: string; duration: number; blob: Blob }) => {
+    setIsRecording(false);
+    setUploading(true);
+    toast.loading("Sending voice message...", { id: "voice" });
+    const file   = new File([audioData.blob], audioData.name, { type: audioData.blob.type });
+    const result = await uploadFile(file);
+    toast.dismiss("voice");
+    setUploading(false);
+    if (result) {
+      onSendMessage("", [{ type: "audio", url: result.url, name: result.name, duration: audioData.duration }], replyTo?.messageId);
+    } else {
+      toast.error("Failed to send voice message");
+    }
+  };
+
+  const handleGiftSend = (giftData: GiftSelection) => {
+    onSendMessage(`🎁 Sent a gift: ${giftData.giftData.name}`, [{ type: "gift", url: "", name: giftData.giftData.name, giftData: giftData.giftData }]);
+    setIsGiftOpen(false);
+  };
+
+  const removeAttachment = (i: number) => setAttachments(prev => prev.filter((_, idx) => idx !== i));
+
+  const previewIcon = (att: Attachment) => {
+    if (att.type === "image") return <img src={att.url} className="h-full w-full object-cover" alt={att.name} />;
+    if (att.type === "video") return <video src={att.url} className="h-full w-full object-cover" />;
+    if (att.type === "audio") return <div className="flex items-center justify-center h-full"><Mic className="h-6 w-6 text-[#00a884]" /></div>;
+    if (att.type === "gift") return <div className="flex items-center justify-center h-full text-lg">🎁</div>;
+    return <div className="flex items-center justify-center h-full"><FileIcon className="h-6 w-6 text-blue-500" /></div>;
   };
 
   return (
     <>
       <SendGiftDialog
-        isOpen={isGiftDialogOpen}
-        onClose={() => setIsGiftDialogOpen(false)}
+        isOpen={isGiftOpen}
+        onClose={() => setIsGiftOpen(false)}
         recipientName={recipientName}
         onSendGift={handleGiftSend}
       />
-      
-      <div className="p-3 sm:p-4 border-t border-border bg-card relative">
+
+      <div className="relative px-2 py-2 bg-[#f0f2f5] dark:bg-[#1e1e1e] border-t border-border">
+        {/* Reply preview */}
         {replyTo && (
-          <div className="mb-2 p-2 bg-muted/50 rounded-lg flex items-center justify-between">
+          <div className="flex items-center gap-2 mb-2 bg-white dark:bg-[#2a2a2a] rounded-lg px-3 py-2 border-l-4 border-[#00a884]">
             <div className="flex-1 min-w-0">
-              <p className="text-base text-muted-foreground">Replying to {replyTo.senderName}</p>
-              <p className="text-base truncate">{replyTo.content}</p>
+              <p className="text-xs font-semibold text-[#00a884]">{replyTo.senderName}</p>
+              <p className="text-xs text-muted-foreground truncate">{replyTo.content}</p>
             </div>
-            <Button
-              onClick={onCancelReply}
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 shrink-0"
-            >
+            <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={onCancelReply}>
               <X className="h-4 w-4" />
             </Button>
           </div>
         )}
 
+        {/* Attachment previews */}
         {attachments.length > 0 && (
-          <div className="mb-3 flex flex-wrap gap-2">
-            {attachments.map((attachment, index) => (
-              <div key={index} className="relative group">
-                {attachment.type === 'video' ? (
-                  <div className="relative w-32 h-20 rounded-lg overflow-hidden border-2 border-border">
-                    <video 
-                      src={attachment.url} 
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                      <Play className="h-6 w-6 text-white" />
-                    </div>
-                    <button
-                      onClick={() => removeAttachment(index)}
-                      className="absolute top-1 right-1 bg-destructive/90 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ) : attachment.type === 'image' ? (
-                  <div className="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-border">
-                    <img 
-                      src={attachment.url} 
-                      alt={attachment.name}
-                      className="w-full h-full object-cover"
-                    />
-                    <button
-                      onClick={() => removeAttachment(index)}
-                      className="absolute top-1 right-1 bg-destructive/90 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ) : attachment.type === 'audio' ? (
-                  <div className="flex items-center gap-2 p-2 pr-8 rounded-lg border-2 border-border bg-muted/50 relative min-w-[180px]">
-                    <Mic className="h-4 w-4 text-[#00a884]" />
-                    <div className="flex-1">
-                      <span className="text-base font-medium">Voice message</span>
-                      {attachment.duration && (
-                        <span className="text-base text-muted-foreground ml-2">
-                          {formatDuration(attachment.duration)}
-                        </span>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => removeAttachment(index)}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 text-destructive hover:bg-destructive/10 rounded-full p-1"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 p-2 pr-8 rounded-lg border-2 border-border bg-muted/50 relative">
-                    <X className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-base truncate max-w-[150px]">{attachment.name}</span>
-                    <button
-                      onClick={() => removeAttachment(index)}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 text-destructive hover:bg-destructive/10 rounded-full p-1"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
+          <div className="flex gap-2 mb-2 flex-wrap">
+            {attachments.map((att, i) => (
+              <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 border border-border">
+                {previewIcon(att)}
+                <button
+                  onClick={() => removeAttachment(i)}
+                  className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs hover:bg-black/80"
+                >×</button>
+                {att.type === "audio" && att.duration && (
+                  <span className="absolute bottom-0.5 left-0 right-0 text-center text-[10px] text-white bg-black/50">{Math.floor(att.duration / 60)}:{String(att.duration % 60).padStart(2, "0")}</span>
                 )}
               </div>
             ))}
           </div>
         )}
 
-        {/* Inline Voice Recorder */}
+        {/* Voice recorder */}
         {isRecording && (
-          <InlineVoiceRecorder
-            onSend={handleAudioSend}
-            onCancel={() => setIsRecording(false)}
-          />
+          <InlineVoiceRecorder onSend={handleAudioSend} onCancel={() => setIsRecording(false)} />
         )}
 
-        <div className="flex items-end gap-2">
-          <div className="flex-1 flex items-end gap-0.5 px-2 py-1">
-            <div className="flex gap-0">
-              {/* Hidden file inputs */}
-              <input
-                ref={imageInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={handleImageSelect}
-              />
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                className="hidden"
-                onChange={handleFileSelect}
-              />
-              <input
-                ref={cameraInputRef}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="hidden"
-                onChange={handleCameraCapture}
-              />
-              <input
-                ref={videoInputRef}
-                type="file"
-                accept="video/*"
-                multiple
-                className="hidden"
-                onChange={handleVideoSelect}
-              />
+        {/* Input row */}
+        <div className="flex items-end gap-1">
+          {/* Hidden inputs */}
+          <input ref={imageRef}  type="file" accept="image/*"  multiple className="hidden" onChange={e => handleFilesSelected(e.target.files)} />
+          <input ref={fileRef}   type="file" multiple          className="hidden" onChange={e => handleFilesSelected(e.target.files)} />
+          <input ref={videoRef}  type="file" accept="video/*"  multiple className="hidden" onChange={e => handleFilesSelected(e.target.files)} />
+          <input ref={cameraRef} type="file" accept="image/*"  capture="environment" className="hidden" onChange={e => handleFilesSelected(e.target.files)} />
 
-              {/* Plus Button - More Tools */}
-              <AttachmentMenu
-                onImageSelect={() => imageInputRef.current?.click()}
-                onFileSelect={() => fileInputRef.current?.click()}
-                onVideoSelect={() => videoInputRef.current?.click()}
-                disabled={disabled || isRecording}
-              />
-              
-              {/* More Options Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    disabled={disabled || isRecording}
-                    className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 text-[#54656f] hover:text-foreground"
-                  >
-                    <MoreVertical className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="z-50 bg-white dark:bg-gray-800">
-                  <DropdownMenuItem onClick={handleCameraClick}>
-                    <Camera className="h-4 w-4 mr-2" />
-                    Camera
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setIsGiftDialogOpen(true)}>
-                    <Gift className="h-4 w-4 mr-2" />
-                    Send Gift
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => onStartQuiz?.()}>
-                    <Gamepad2 className="h-4 w-4 mr-2" />
-                    Start Quiz
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+          {/* Attachment button (+) */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" disabled={disabled || isRecording || uploading} className="h-9 w-9 shrink-0 text-[#54656f] hover:text-foreground">
+                <span className="text-xl font-light">+</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="bg-white dark:bg-gray-800 z-50">
+              <DropdownMenuItem onClick={() => imageRef.current?.click()}>
+                <ImageIcon className="h-4 w-4 mr-2 text-pink-500" /> Photo
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => videoRef.current?.click()}>
+                <Video className="h-4 w-4 mr-2 text-blue-500" /> Video
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => fileRef.current?.click()}>
+                <FileIcon className="h-4 w-4 mr-2 text-orange-500" /> File / Document
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => cameraRef.current?.click()}>
+                <Camera className="h-4 w-4 mr-2 text-green-500" /> Camera
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTimeout(() => setIsGiftOpen(true), 150)}>
+                <Gift className="h-4 w-4 mr-2 text-purple-500" /> Send Gift
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onStartQuiz?.()}>
+                <Gamepad2 className="h-4 w-4 mr-2 text-indigo-500" /> Start Quiz
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-              {/* Text Input */}
-              <Textarea
-                ref={textareaRef}
-                value={message}
-                onChange={handleTextareaChange}
-                onKeyDown={handleKeyDown}
-                placeholder="Type a message..."
-                disabled={disabled || isRecording}
-                allowImagePaste={true}
-                className="flex-1 min-h-[40px] max-h-[120px] resize-none border-0 bg-[#f0f2f5] dark:bg-[#2a2a2a] rounded-lg focus-visible:ring-0 focus-visible:ring-offset-0 py-2 px-2 text-base placeholder:text-[#667781]"
-                rows={1}
-                onPaste={(e) => {
-                  const items = e.clipboardData?.items;
-                  if (!items) return;
-                  
-                  console.debug('[ChatInput] Paste event detected');
-                  
-                  // Check for image files in clipboard
-                  const imageItems = Array.from(items).filter(
-                    (item) => item.kind === "file" && item.type.startsWith("image/")
-                  );
-                  
-                  if (imageItems.length === 0) {
-                    console.debug('[ChatInput] No image items found in paste');
-                    return; // Allow text paste
-                  }
-                  
-                  console.debug(`[ChatInput] Found ${imageItems.length} image(s) in paste`);
-                  e.preventDefault(); // Prevent junk text in textarea
-                  
-                  // Check if we're at attachment limit
-                  if (attachments.length >= 5) {
-                    toast.error("Maximum 5 attachments allowed");
-                    return;
-                  }
-                  
-                  const newAttachments: typeof attachments = [];
-                  let processedCount = 0;
-                  const totalImages = Math.min(imageItems.length, 5 - attachments.length);
-                  
-                  for (let i = 0; i < totalImages; i++) {
-                    const item = imageItems[i];
-                    const file = item.getAsFile();
-                    
-                    if (!file) {
-                      console.debug(`[ChatInput] Could not get file from item ${i}`);
-                      processedCount++;
-                      continue;
-                    }
-                    
-                    console.debug(`[ChatInput] Processing pasted image ${i + 1}:`, file.name, file.type, file.size);
-                    
-                    // Enforce 10MB limit
-                    if (file.size > 10 * 1024 * 1024) {
-                      console.warn('[ChatInput] Pasted image too large:', file.name);
-                      toast.error(`Image "${file.name}" is too large (max 10MB)`);
-                      processedCount++;
-                      continue;
-                    }
-                    
-                    // Read image as Data URL
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                      console.debug('[ChatInput] Pasted image read success:', file.name);
-                      const url = e.target?.result as string;
-                      newAttachments.push({
-                        type: 'image' as const,
-                        url,
-                        name: file.name || `pasted-image-${Date.now()}.${file.type.split('/')[1]}`,
-                      });
-                      
-                      processedCount++;
-                      console.debug(`[ChatInput] Paste progress: ${processedCount}/${totalImages}`);
-                      
-                      if (processedCount === totalImages) {
-                        console.debug(`[ChatInput] All pasted images processed: ${newAttachments.length} added`);
-                        setAttachments(prev => [...prev, ...newAttachments].slice(0, 5));
-                        
-                        if (newAttachments.length > 0) {
-                          toast.success(`Added ${newAttachments.length} image${newAttachments.length !== 1 ? 's' : ''} from paste`);
-                        }
-                      }
-                    };
-                    
-                    reader.onerror = (error) => {
-                      console.error('[ChatInput] Pasted image read error:', file.name, error);
-                      processedCount++;
-                      
-                      if (processedCount === totalImages && newAttachments.length > 0) {
-                        setAttachments(prev => [...prev, ...newAttachments].slice(0, 5));
-                        toast.success(`Added ${newAttachments.length} image${newAttachments.length !== 1 ? 's' : ''} from paste`);
-                      }
-                    };
-                    
-                    try {
-                      reader.readAsDataURL(file);
-                    } catch (error) {
-                      console.error('[ChatInput] Exception reading pasted image:', file.name, error);
-                      processedCount++;
-                    }
-                  }
-                }}
-              />
-            </div>
-          </div>
+          {/* Text area */}
+          <Textarea
+            ref={textareaRef}
+            value={message}
+            onChange={handleTextareaChange}
+            onKeyDown={handleKeyDown}
+            placeholder={uploading ? "Uploading..." : "Type a message..."}
+            disabled={disabled || isRecording || uploading}
+            className="flex-1 min-h-[40px] max-h-[120px] resize-none border-0 bg-white dark:bg-[#2a2a2a] rounded-lg focus-visible:ring-0 py-2 px-3 text-sm placeholder:text-[#667781]"
+            rows={1}
+          />
 
-          {/* Dynamic Send/Voice Button */}
+          {/* Send / Mic */}
           {message.trim() || attachments.length > 0 ? (
-            <Button
-              onClick={handleSend}
-              disabled={disabled || isRecording}
-              size="icon"
-              className="h-10 w-10 shrink-0 rounded-full bg-[#00a884] hover:bg-[#00a884]/90 text-white"
-            >
+            <Button onClick={handleSend} disabled={disabled || uploading} size="icon"
+              className="h-10 w-10 shrink-0 rounded-full bg-[#00a884] hover:bg-[#00a884]/90 text-white">
               <Send className="h-5 w-5" />
             </Button>
           ) : (
-            <Button
-              onClick={() => setIsRecording(true)}
-              disabled={disabled || isRecording}
-              size="icon"
-              className="h-10 w-10 shrink-0 rounded-full bg-[#00a884] hover:bg-[#00a884]/90 text-white"
-            >
+            <Button onClick={() => setIsRecording(true)} disabled={disabled || isRecording || uploading} size="icon"
+              className="h-10 w-10 shrink-0 rounded-full bg-[#00a884] hover:bg-[#00a884]/90 text-white">
               <Mic className="h-5 w-5" />
             </Button>
           )}

@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Camera, CheckCircle2, Loader2, ArrowLeft, Users } from "lucide-react";
 import { howHeardOptions, genderOptions, nigerianStates } from "@/data/membershipData";
 import { getCommunityById } from "@/data/communityProfileData";
+import { useCommunityProfile, submitMembershipApplication } from "@/hooks/useCommunity";
 import { useToast } from "@/hooks/use-toast";
 
 const CommunityMembershipApplication = () => {
@@ -31,7 +32,9 @@ const CommunityMembershipApplication = () => {
   const inviteCode = searchParams.get("invite");
   const inviterName = searchParams.get("from");
   
-  const community = getCommunityById(communityId || "1");
+  const { profile: apiCommunity } = useCommunityProfile(communityId);
+  const mockCommunity = getCommunityById(communityId || "");
+  const community = apiCommunity ?? mockCommunity;
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -84,18 +87,37 @@ const CommunityMembershipApplication = () => {
     return `APP-${year}-${random}`;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!communityId) return;
     setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
-      setReferenceNumber(generateReferenceNumber());
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-      toast({
-        title: "Application Submitted",
-        description: "Your membership application has been submitted successfully.",
+    try {
+      const res = await submitMembershipApplication(communityId, {
+        ...formData,
+        inviteCode: inviteCode || "",
       });
-    }, 2000);
+      if (res.success) {
+        setReferenceNumber(res.reference_number || generateReferenceNumber());
+        setIsSubmitted(true);
+        toast({
+          title: "Application Submitted",
+          description: "Your membership application has been submitted successfully.",
+        });
+      } else {
+        toast({
+          title: "Submission Failed",
+          description: res.error || "Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const isFormValid = 
