@@ -379,6 +379,7 @@ export const ChatInterface = ({
                 <span key={d}
                   className="w-2 h-2 bg-[#667781] rounded-full animate-bounce"
                   style={{ animationDelay: `${d}ms` }} />
+              ))}
             </div>
           </div>
         )}
