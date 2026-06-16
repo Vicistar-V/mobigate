@@ -170,15 +170,15 @@ echo.
 echo === Pushing to origin/%BRANCH% ===
 git push origin "%BRANCH%"
 if errorlevel 1 (
-    echo    [WARN] Push rejected ^(remote moved^). Re-fetching and replaying on top...
-    git fetch origin --prune
-    git rebase "origin/%BRANCH%"
+    echo    [WARN] Push rejected ^(remote moved^). Pulling latest and merging...
+    git pull --no-rebase --no-edit origin "%BRANCH%"
     if errorlevel 1 (
         for /f "delims=" %%f in ('git diff --name-only --diff-filter=U 2^>nul') do (
+            echo    keeping LOCAL version of: %%f
             git checkout --ours -- "%%f" >nul 2>&1
             git add -- "%%f" >nul 2>&1
         )
-        git rebase --continue >nul 2>&1
+        git commit --no-edit >nul 2>&1
     )
     git push origin "%BRANCH%"
 )
