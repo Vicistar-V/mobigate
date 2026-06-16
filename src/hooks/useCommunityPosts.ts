@@ -182,5 +182,3 @@ export function useCommunityPosts(communityId: string | undefined) {
     createPost, likePost, deletePost, commentOnPost, viewPost, getPostComments, uploadMedia,
   };
 }
-
-export type { CommunityPost };
