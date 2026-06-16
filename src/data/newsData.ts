@@ -2,16 +2,24 @@ export interface NewsItem {
   id: string;
   title: string;
   description: string;
-  category: "announcements" | "events" | "updates" | "general" | "affairs";
-  mediaType: "video" | "photo" | "article";
+  category: "announcements" | "events" | "updates" | "general" | "affairs" | string;
+  mediaType: "video" | "photo" | "article" | "audio";
   thumbnail?: string;
+  imageUrl?: string;
   date: string;
+  publishedAt?: Date | string;
+  content?: string;
+  summary?: string;
   views: number;
   comments: number;
   shares: number;
   likes: number;
   trending: boolean;
+  isBreaking?: boolean;
+  featured?: boolean;
+  tags?: string[];
   author: string;
+  authorAvatar?: string;
   authorProfileImage?: string;
   authorId?: string;
 }
