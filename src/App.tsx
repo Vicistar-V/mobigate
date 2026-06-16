@@ -12,15 +12,12 @@ import MyProfile          from "./pages/MyProfile";
 import UserProfile        from "./pages/UserProfile";
 import PostPage           from "./pages/PostPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-<<<<<<< Updated upstream
 import CopyrightDocumentsPage from "./pages/admin/CopyrightDocumentsPage";
 import AccountVerificationPage from "./pages/AccountVerificationPage";
 import BuyVouchersPage     from "./pages/BuyVouchersPage";
-=======
 import Community          from "./pages/Community";
 import CommunityProfile   from "./pages/CommunityProfile";
 import CommunityMembershipApplication from "./pages/CommunityMembershipApplication";
->>>>>>> Stashed changes
 import { ScrollToTop }    from "./components/ScrollToTop";
 import { BackToTopButton } from "./components/BackToTopButton";
 import { lazy, Suspense } from "react";
