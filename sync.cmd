@@ -130,7 +130,30 @@ if defined DIDSTASH (
     )
 )
 
-REM --- 6. stage + commit -----------------------------------------------------
+REM --- 5b. keep dependencies in sync (fixes "Failed to resolve import") --------
+REM   After landing remote changes, package.json may list new packages that your
+REM   local node_modules doesn't have yet (e.g. framer-motion). Auto-install so
+REM   the dev server never breaks with a missing-module error.
+if exist "package.json" (
+    echo.
+    echo === Syncing dependencies ^(npm install^) ===
+    where npm >nul 2>&1
+    if errorlevel 1 (
+        echo    [WARN] npm not found on PATH - skipping. Run "npm install" manually.
+    ) else (
+        if exist "package-lock.json" (
+            call npm install --no-audit --no-fund
+        ) else (
+            call npm install --no-audit --no-fund
+        )
+        if errorlevel 1 (
+            echo    [WARN] npm install hit an issue - try running it manually.
+        ) else (
+            echo    Dependencies are up to date.
+        )
+    )
+)
+
 echo.
 echo === Staging and committing ===
 git add -A
