@@ -367,51 +367,6 @@ export const ChatInterface = ({
                   </div>
                 </MessageContextMenu>
               </div>
-<<<<<<< Updated upstream
-              <div className="flex-1 min-w-0 max-w-full overflow-hidden">
-                <h3 className="font-semibold text-[#111b21] text-lg truncate max-w-[55vw] md:max-w-full">{conversation.user.name.split(' ')[0]}...</h3>
-                <p className="text-[15px]" style={{ color: conversation.user.isOnline ? '#00a884' : '#667781' }}>
-                  {isGameMode
-                    ? <span className="flex items-center gap-1"><Gamepad2 className="h-3 w-3" /> Playing Quiz</span>
-                    : conversation.user.isOnline ? "Online" : "Offline"}
-                </p>
-              </div>
-            </Link>
-            <div className="flex items-center">
-              <Button variant="ghost" className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] ml-2" onClick={handleVideoCall}>
-                <Video className="h-6 w-6" />
-              </Button>
-              <Button variant="ghost" className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] ml-2" onClick={handleVoiceCall}>
-                <Phone className="h-6 w-6" />
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-auto w-auto p-2 rounded-full text-[#54656f] hover:bg-[#e9e9e9] ml-2">
-                    <MoreVertical className="h-6 w-6" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => toast.info("View contact info")}>
-                    View Contact
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => toast.success("Notifications muted")}>
-                    Mute Notifications
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => toast.success("Chat cleared")}>
-                    Clear Chat
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => toast.info("Coming soon")}>
-                    Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => toast.success("User reported", { description: "Our team will review this account." })} className="text-destructive">
-                    Report User
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => toast.success("User blocked")} className="text-destructive">
-                    Block User
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-=======
             </div>
           );
         })}
@@ -424,8 +379,6 @@ export const ChatInterface = ({
                 <span key={d}
                   className="w-2 h-2 bg-[#667781] rounded-full animate-bounce"
                   style={{ animationDelay: `${d}ms` }} />
-              ))}
->>>>>>> Stashed changes
             </div>
           </div>
         )}
