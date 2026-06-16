@@ -28,7 +28,7 @@ export interface AdminContentItem {
   eventDate?:    Date;
   eventEndDate?: Date;
   venue?:        string;
-  venueType?:    "physical" | "online" | "hybrid";
+  venueType?:    "physical" | "online" | "hybrid" | "indoor" | "outdoor" | "virtual";
   capacity?:     number;
   rsvpCount?:    number;
   // Articles
