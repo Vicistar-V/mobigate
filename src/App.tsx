@@ -12,15 +12,12 @@ import MyProfile          from "./pages/MyProfile";
 import UserProfile        from "./pages/UserProfile";
 import PostPage           from "./pages/PostPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-<<<<<<< Updated upstream
 import CopyrightDocumentsPage from "./pages/admin/CopyrightDocumentsPage";
 import AccountVerificationPage from "./pages/AccountVerificationPage";
 import BuyVouchersPage     from "./pages/BuyVouchersPage";
-=======
 import Community          from "./pages/Community";
 import CommunityProfile   from "./pages/CommunityProfile";
 import CommunityMembershipApplication from "./pages/CommunityMembershipApplication";
->>>>>>> Stashed changes
 import { ScrollToTop }    from "./components/ScrollToTop";
 import { BackToTopButton } from "./components/BackToTopButton";
 import { lazy, Suspense } from "react";
@@ -46,12 +43,8 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
-<<<<<<< Updated upstream
             {/* Standalone routes — no sidebar layout */}
             <Route path="/" element={<Landing />} />
-=======
-            {/* Outside sidebar */}
->>>>>>> Stashed changes
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
             {/* Main app — inside sidebar layout */}
@@ -64,7 +57,6 @@ const App = () => {
                     <ScrollToTop />
                     <BackToTopButton />
                     <Routes>
-<<<<<<< Updated upstream
                       <Route path="/dashboard"     element={<Index />} />
                       <Route path="/profile"       element={<MyProfile />} />
                       <Route path="/profile/:id"   element={<UserProfile />} />
@@ -72,17 +64,6 @@ const App = () => {
                       <Route path="/verify-account" element={<AccountVerificationPage />} />
                       <Route path="/admin/copyright-documents" element={<CopyrightDocumentsPage />} />
                       <Route path="/buy-vouchers"  element={<BuyVouchersPage />} />
-
-
-
-
-                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                      <Route path="*" element={<Navigate to="/dashboard" replace />} />
-=======
-                      <Route path="/"                       element={<Index />} />
-                      <Route path="/profile"                element={<MyProfile />} />
-                      <Route path="/profile/:id"            element={<UserProfile />} />
-                      <Route path="/post/:id"               element={<PostPage />} />
                       {/* Community routes */}
                       <Route path="/community"              element={<Community />} />
                       <Route path="/community/:communityId"       element={<CommunityProfile />} />
@@ -97,8 +78,9 @@ const App = () => {
                           <CreateCommunityPage />
                         </Suspense>
                       } />
-                      <Route path="*" element={<Navigate to="/" replace />} />
->>>>>>> Stashed changes
+
+                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                      <Route path="*" element={<Navigate to="/dashboard" replace />} />
                     </Routes>
                   </div>
                 </div>

@@ -17,6 +17,7 @@ export interface CommunityListItem {
   status: string;
   location?: string;
   designation?: string;
+  membershipChoice?: "mandatory" | "voluntary" | string;
 }
 
 export function useCommunityList() {

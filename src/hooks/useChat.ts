@@ -13,7 +13,7 @@ const toMsg = (m: any): Message => ({
   isRead:      !!m.isRead,
   isEdited:    !!m.isEdited,
   // Map replyToId from server to replyTo object that the Message type expects
-  replyTo:     m.replyToId ? { senderName: m.replySenderName || "User", content: m.replyContent || "Message" } : undefined,
+  replyTo:     m.replyToId ? { messageId: m.replyToId, senderName: m.replySenderName || "User", content: m.replyContent || "Message" } : undefined,
   attachments: m.attachments?.filter(Boolean),
   reactions:   m.reactions ?? [],
 });

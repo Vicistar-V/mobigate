@@ -223,7 +223,7 @@ export function CommunityGallerySection({
     return mockGalleryComments.filter(c => c.itemId === itemId);
   };
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: Date | string) => {
     return new Date(date).toLocaleDateString('en-NG', {
       year: 'numeric',
       month: 'short',

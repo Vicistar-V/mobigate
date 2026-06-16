@@ -85,9 +85,10 @@ export type GuestAccessType = "allowed" | "not-allowed";
 export interface OfficialPosition {
   id: string;
   title: string;
-  level: PositionLevel;
+  level?: PositionLevel;
   adminId?: string;
   adminName?: string;
+  adminNumber?: number;
   customTitle?: string;
 }
 
@@ -120,6 +121,7 @@ export interface CommunityFormData {
   // Community Identity
   name: string;
   shortDescription: string;
+  description?: string;
   
   // Classification & Type
   classification: CommunityClassification | "";
