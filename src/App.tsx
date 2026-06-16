@@ -43,12 +43,8 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
-<<<<<<< Updated upstream
             {/* Standalone routes — no sidebar layout */}
             <Route path="/" element={<Landing />} />
-=======
-            {/* Outside sidebar */}
->>>>>>> Stashed changes
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
             {/* Main app — inside sidebar layout */}
