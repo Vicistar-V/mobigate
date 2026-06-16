@@ -7,15 +7,10 @@ import { cn } from "@/lib/utils";
 import { ChatInput } from "./ChatInput";
 import { MessageContextMenu } from "./MessageContextMenu";
 import { EditMessageDialog } from "./EditMessageDialog";
-<<<<<<< Updated upstream
-import { Video, Phone, MoreVertical, ArrowLeft, X, CheckCheck, Check, Paperclip, Gift, Mic, Play, Pause, Gamepad2 } from "lucide-react";
-import mobichatLogo from "@/assets/mobiface-logo.png";
-=======
 import {
   Video, Phone, MoreVertical, ArrowLeft, X,
   CheckCheck, Check, Paperclip, Play, Pause, Gamepad2,
 } from "lucide-react";
->>>>>>> Stashed changes
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
