@@ -57,7 +57,6 @@ const App = () => {
                     <ScrollToTop />
                     <BackToTopButton />
                     <Routes>
-<<<<<<< Updated upstream
                       <Route path="/dashboard"     element={<Index />} />
                       <Route path="/profile"       element={<MyProfile />} />
                       <Route path="/profile/:id"   element={<UserProfile />} />
@@ -65,17 +64,6 @@ const App = () => {
                       <Route path="/verify-account" element={<AccountVerificationPage />} />
                       <Route path="/admin/copyright-documents" element={<CopyrightDocumentsPage />} />
                       <Route path="/buy-vouchers"  element={<BuyVouchersPage />} />
-
-
-
-
-                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                      <Route path="*" element={<Navigate to="/dashboard" replace />} />
-=======
-                      <Route path="/"                       element={<Index />} />
-                      <Route path="/profile"                element={<MyProfile />} />
-                      <Route path="/profile/:id"            element={<UserProfile />} />
-                      <Route path="/post/:id"               element={<PostPage />} />
                       {/* Community routes */}
                       <Route path="/community"              element={<Community />} />
                       <Route path="/community/:communityId"       element={<CommunityProfile />} />
@@ -90,8 +78,9 @@ const App = () => {
                           <CreateCommunityPage />
                         </Suspense>
                       } />
-                      <Route path="*" element={<Navigate to="/" replace />} />
->>>>>>> Stashed changes
+
+                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                      <Route path="*" element={<Navigate to="/dashboard" replace />} />
                     </Routes>
                   </div>
                 </div>
