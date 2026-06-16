@@ -1,7 +1,7 @@
 export interface GalleryItem {
   id: string;
   title: string;
-  caption: string;
+  caption?: string;
   description: string;
   mediaType: "photo" | "video";
   mediaUrl: string;
@@ -11,15 +11,15 @@ export interface GalleryItem {
   // Engagement
   likes: number;
   comments: number;
-  shares: number;
+  shares?: number;
   views: number;
   isLiked?: boolean;
   isFollowed?: boolean;
   
   // Metadata
   uploadedBy: string;
-  uploadedByPhoto: string;
-  uploadedAt: Date;
+  uploadedByPhoto?: string;
+  uploadedAt: Date | string;
   
   // Admin controls
   isHidden: boolean;
