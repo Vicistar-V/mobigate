@@ -76,7 +76,7 @@ export const LandingNav = () => {
                     Mobi Face <ArrowRight className="h-4 w-4" />
                   </Link>
                   <a
-                    href="#"
+                    href="https://mobistore.mobi"
                     onClick={() => setAppMenu(false)}
                     className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold text-[hsl(var(--lp-fg))] transition-colors hover:bg-[hsl(var(--lp-bg-tint))]"
                   >
@@ -123,7 +123,7 @@ export const LandingNav = () => {
                 Enter Mobi Face <ArrowRight className="h-4 w-4" />
               </Link>
               <a
-                href="#"
+                href="https://mobistore.mobi"
                 onClick={() => setOpen(false)}
                 className="lp-btn-ghost mt-1 inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-3 text-base font-bold"
               >
