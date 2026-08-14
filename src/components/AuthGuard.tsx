@@ -1,14 +1,21 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LoginModal } from "@/components/LoginModal";
 import { Loader2 } from "lucide-react";
+
+// Pages that don't require authentication and shouldn't redirect to /login
+const PUBLIC_PATHS = ["/login", "/forgot-password"];
 
 export const AuthGuard = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
-  const [dismissed, setDismissed] = useState(false);
+  const navigate = useNavigate();
+  const isPublicPath = PUBLIC_PATHS.includes(window.location.pathname);
 
-  // Don't show LoginModal on the forgot-password page
-  const isForgotPassword = window.location.pathname === "/forgot-password";
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated && !isPublicPath) {
+      navigate("/login", { replace: true });
+    }
+  }, [isLoading, isAuthenticated, isPublicPath, navigate]);
 
   if (isLoading) {
     return (
@@ -21,22 +28,16 @@ export const AuthGuard = ({ children }: { children: ReactNode }) => {
     );
   }
 
-  // On forgot-password page, just render children without auth check
-  if (isForgotPassword) {
+  // Public pages (including /login itself) always render their own content
+  if (isPublicPath) {
     return <>{children}</>;
   }
 
-  const showLogin = !isAuthenticated && !dismissed;
+  // Not authenticated and not yet redirected — render nothing rather than a
+  // flash of protected content while the redirect above takes effect
+  if (!isAuthenticated) {
+    return null;
+  }
 
-  return (
-    <>
-      <div
-        className={showLogin ? "select-none opacity-30" : ""}
-        aria-hidden={showLogin}
-      >
-        {children}
-      </div>
-      {showLogin && <LoginModal onClose={() => setDismissed(true)} />}
-    </>
-  );
+  return <>{children}</>;
 };

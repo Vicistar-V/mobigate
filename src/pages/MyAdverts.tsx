@@ -72,8 +72,55 @@ export default function MyAdverts() {
   }, []);
 
   const loadAdverts = () => {
-    const userAdverts = loadUserAdverts(currentUserId);
-    setAdverts(userAdverts);
+    fetch(`/api/adverts/advertisements.php?filter=mine`, { credentials: "include" })
+      .then(async (r) => {
+        const d = await r.json().catch(() => null);
+        if (!r.ok || !d) throw new Error(d?.error || `Failed to load adverts (HTTP ${r.status})`);
+        return d;
+      })
+      .then((d) => {
+        const mapped: SavedAdvert[] = (d.ads ?? []).map((a: any) => {
+          const meta = a.metadata || {};
+          return {
+            id: a.id,
+            userId: a.advertiser_id,
+            category: meta.category ?? a.category,
+            type: meta.type ?? "text",
+            size: meta.size ?? "medium",
+            dpdPackage: meta.dpdPackage ?? "basic",
+            extendedExposure: meta.extendedExposure,
+            recurrentAfter: meta.recurrentAfter,
+            recurrentEvery: meta.recurrentEvery,
+            catchmentMarket: meta.catchmentMarket ?? "",
+            launchDate: meta.launchDate ? new Date(meta.launchDate) : new Date(a.start_date),
+            fileUrls: a.media ?? [],
+            status: a.status === "pending_payment" ? "pending" : a.status,
+            pricing: {
+              setupFee: a.base_fee, subscriptionMonths: Math.max(1, Math.round(a.duration_days / 30)),
+              monthlyDpdCost: 0, subscriptionDiscount: 0, subscriptionDiscountAmount: 0,
+              totalDpdCost: 0, dpdCost: 0, extendedExposureCost: a.audience_premium,
+              recurrentAfterCost: 0, recurrentEveryCost: 0,
+              totalCost: a.total_fee_mobi, totalCostMobi: a.total_fee_mobi, totalSubscriptionCost: a.total_fee_mobi,
+              displayPerDay: 0, displayFrequency: "",
+            },
+            statistics: {
+              impressions: a.views, clicks: a.clicks, views: a.views,
+              revenue: 0, displayedToday: 0,
+            },
+            createdAt: new Date(a.created_at),
+            updatedAt: new Date(a.updated_at),
+            approvedAt: a.status === "active" ? new Date(a.updated_at) : undefined,
+            expiresAt: a.end_date ? new Date(a.end_date) : undefined,
+            contactPhone: a.phone1 || undefined,
+            contactMethod: meta.contactMethod,
+          } as SavedAdvert;
+        });
+        setAdverts(mapped);
+      })
+      .catch((e) => {
+        setAdverts([]);
+        toast({ title: "Couldn't Load Your Adverts", description: e.message, variant: "destructive" });
+      });
   };
 
   const handleDelete = (advert: SavedAdvert) => {
@@ -83,20 +130,27 @@ export default function MyAdverts() {
 
   const confirmDelete = () => {
     if (selectedAdvert) {
-      try {
-        deleteAdvert(selectedAdvert.id);
-        toast({
-          title: "Advert deleted",
-          description: "Your advert has been successfully deleted.",
+      fetch("/api/adverts/advertisements.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", ad_id: selectedAdvert.id }),
+      })
+        .then((r) => r.json().then((d) => ({ ok: r.ok, d })))
+        .then(({ ok, d }) => {
+          if (!ok) throw new Error(d.error || "Failed to delete advert");
+          toast({
+            title: "Advert deleted",
+            description: "Your advert has been successfully deleted.",
+          });
+          loadAdverts();
+        })
+        .catch((error: any) => {
+          toast({
+            title: "Error",
+            description: error.message || "Failed to delete advert. Please try again.",
+            variant: "destructive",
+          });
         });
-        loadAdverts();
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to delete advert. Please try again.",
-          variant: "destructive",
-        });
-      }
     }
     setDeleteDialogOpen(false);
     setSelectedAdvert(null);

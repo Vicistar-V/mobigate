@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ArrowLeft, Trophy, Users, Zap, Play, TrendingUp, History, ChevronRight, Wallet, BadgeCheck, Gamepad2, Target, Gift } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, Trophy, Users, Zap, Play, TrendingUp, History, ChevronRight, Wallet, BadgeCheck, Gamepad2, Target, Gift, Loader2 } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,39 +7,90 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MobifaceQuizHub } from "@/components/community/mobiface-quiz/MobifaceQuizHub";
-import { mockMerchants, mockSeasons } from "@/data/mobifaceInteractiveQuizData";
+import { InteractiveQuizMerchantSheet } from "@/components/community/mobiface-quiz/InteractiveQuizMerchantSheet";
 import { allLocationMerchants } from "@/data/nigerianLocationsData";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
-const approvedMerchants = mockMerchants.filter((m) => m.applicationStatus === "approved");
-
-// Mock stats
-const quizStats = {
-  gamesPlayed: 47,
-  gamesWon: 28,
-  winRate: 59.6,
-  totalEarnings: 182500,
-  streak: 3,
-};
+interface RealMerchant { id: string; name: string; category?: string; is_verified: number; active_seasons: number; }
+interface RealSeason {
+  id: string; merchant_id: string; name: string; quiz_status: string;
+  first_prize: string; second_prize: string; third_prize: string;
+  consolation_prize_per_player: string; consolation_prize_count: string;
+}
 
 export default function MobiQuizGames() {
   const [showQuizHub, setShowQuizHub] = useState(false);
+  const [showCommunityPicker, setShowCommunityPicker] = useState(false);
+  const [myCommunities, setMyCommunities] = useState<{ id: string; name: string }[]>([]);
+  const [selectedCommunityId, setSelectedCommunityId] = useState<string | undefined>();
+  const [approvedMerchants, setApprovedMerchants] = useState<RealMerchant[]>([]);
+  const [seasonsByMerchant, setSeasonsByMerchant] = useState<Record<string, RealSeason[]>>({});
+  const [quizStats, setQuizStats] = useState({ gamesPlayed: 0, gamesWon: 0, winRate: 0, totalEarnings: 0, streak: 0 });
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [selectedMerchantId, setSelectedMerchantId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const refMerchantId = searchParams.get("ref");
+
+  useEffect(() => {
+    setLoading(true);
+    fetch(`/api/quiz/my_history.php`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => { if (d.stats) setQuizStats(d.stats); })
+      .catch(() => {});
+
+    fetch(`/api/quiz/interactive.php?action=merchants`, { credentials: "include" })
+      .then((r) => r.json())
+      .then(async (d) => {
+        const merchants: RealMerchant[] = d.merchants ?? [];
+        setApprovedMerchants(merchants);
+        const seasonsMap: Record<string, RealSeason[]> = {};
+        await Promise.all(merchants.map(async (m) => {
+          const sd = await fetch(`/api/quiz/interactive.php?action=seasons&merchant_id=${m.id}`, { credentials: "include" }).then((r) => r.json()).catch(() => ({ seasons: [] }));
+          seasonsMap[m.id] = (sd.seasons ?? []).filter((s: any) => s.quiz_status === "active");
+        }));
+        setSeasonsByMerchant(seasonsMap);
+      })
+      .catch(() => setApprovedMerchants([]))
+      .finally(() => setLoading(false));
+
+    fetch(`/api/community/my_communities.php`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => setMyCommunities(Array.isArray(d) ? d : []))
+      .catch(() => setMyCommunities([]));
+
+    fetch(`/api/profile/wallet.php?action=overview`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => setWalletBalance(parseFloat(d.main_balance) || 0))
+      .catch(() => setWalletBalance(0));
+  }, []);
 
   // Look up referring retail merchant name
   const referringMerchant = refMerchantId
     ? allLocationMerchants.find(m => m.id === refMerchantId)
     : null;
 
-  const getMerchantActiveSeasons = (merchantId: string) =>
-    mockSeasons.filter((s) => s.merchantId === merchantId && s.quizStatus === "active");
+  const getMerchantActiveSeasons = (merchantId: string) => seasonsByMerchant[merchantId] ?? [];
+
+  const seasonTotalPrizes = (s: RealSeason) =>
+    (parseFloat(s.first_prize) || 0) + (parseFloat(s.second_prize) || 0) + (parseFloat(s.third_prize) || 0) +
+    (parseFloat(s.consolation_prize_per_player) || 0) * (parseFloat(s.consolation_prize_count) || 0);
 
   const getBestSeason = (merchantId: string) => {
     const seasons = getMerchantActiveSeasons(merchantId);
     if (!seasons.length) return null;
-    return seasons.reduce((best, s) => (s.totalWinningPrizes > best.totalWinningPrizes ? s : best), seasons[0]);
+    return seasons.reduce((best, s) => (seasonTotalPrizes(s) > seasonTotalPrizes(best) ? s : best), seasons[0]);
+  };
+
+  const handleStartPlaying = () => {
+    if (selectedCommunityId) { setShowQuizHub(true); return; }
+    if (myCommunities.length === 1) { setSelectedCommunityId(myCommunities[0].id); setShowQuizHub(true); return; }
+    if (myCommunities.length === 0) {
+      navigate("/communities");
+      return;
+    }
+    setShowCommunityPicker(true);
   };
 
   return (
@@ -109,7 +160,7 @@ export default function MobiQuizGames() {
               <p className="text-xs text-muted-foreground mt-0.5">Browse all quiz modes in one place!</p>
             </div>
             <Button
-              onClick={() => setShowQuizHub(true)}
+              onClick={handleStartPlaying}
               className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg active:scale-[0.97] touch-manipulation"
               size="lg"
             >
@@ -139,7 +190,7 @@ export default function MobiQuizGames() {
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Wallet Balance</p>
-                <p className="font-bold text-sm">₦15,000</p>
+                <p className="font-bold text-sm">{formatLocalAmount(walletBalance, "NGN")}</p>
               </div>
             </CardContent>
           </Card>
@@ -176,40 +227,36 @@ export default function MobiQuizGames() {
             {approvedMerchants.map((merchant) => {
               const seasons = getMerchantActiveSeasons(merchant.id);
               const bestSeason = getBestSeason(merchant.id);
-              const totalParticipants = seasons.reduce((sum, s) => sum + s.totalParticipants, 0);
 
               return (
                 <Card
                   key={merchant.id}
                   className="overflow-hidden cursor-pointer active:scale-[0.98] transition-all touch-manipulation border-border/60 hover:shadow-md"
-                  onClick={() => navigate(`/mobi-quiz-games/merchant/${merchant.id}`)}
+                  onClick={() => setSelectedMerchantId(merchant.id)}
                 >
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
                       <Avatar className="h-12 w-12 shrink-0 border-2 border-primary/20">
-                        <AvatarImage src={merchant.logo} alt={merchant.name} />
                         <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm">
-                          {merchant.name.slice(0, 2).toUpperCase()}
+                          {(merchant.name ?? "?").slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5 mb-0.5">
                           <h3 className="font-bold text-sm truncate">{merchant.name}</h3>
-                          {merchant.isVerified && (
+                          {!!merchant.is_verified && (
                             <BadgeCheck className="h-4 w-4 text-blue-500 shrink-0" />
                           )}
                         </div>
-                        <p className="text-xs text-muted-foreground mb-2">{merchant.category}</p>
+                        {merchant.category && (
+                          <p className="text-xs text-muted-foreground mb-2">{merchant.category}</p>
+                        )}
 
                         <div className="flex items-center gap-3 text-xs">
                           <span className="flex items-center gap-1 text-muted-foreground">
                             <Gamepad2 className="h-3.5 w-3.5" />
                             {seasons.length} season{seasons.length !== 1 ? "s" : ""}
-                          </span>
-                          <span className="flex items-center gap-1 text-muted-foreground">
-                            <Users className="h-3.5 w-3.5" />
-                            {totalParticipants.toLocaleString()}
                           </span>
                         </div>
                       </div>
@@ -222,7 +269,7 @@ export default function MobiQuizGames() {
                               <span className="text-xs text-amber-700 font-medium">Top Prize</span>
                             </div>
                             <p className="text-xs font-bold text-amber-700">
-                              {formatLocalAmount(bestSeason.totalWinningPrizes, "NGN")}
+                              {formatLocalAmount(seasonTotalPrizes(bestSeason), "NGN")}
                             </p>
                           </div>
                         )}
@@ -238,7 +285,34 @@ export default function MobiQuizGames() {
       </div>
 
       {/* Mobi Quiz Game Hub Dialog */}
-      <MobifaceQuizHub open={showQuizHub} onOpenChange={setShowQuizHub} hideInteractive />
+      <MobifaceQuizHub open={showQuizHub} onOpenChange={setShowQuizHub} hideInteractive communityId={selectedCommunityId} />
+
+      <InteractiveQuizMerchantSheet
+        open={!!selectedMerchantId}
+        onOpenChange={(v) => { if (!v) setSelectedMerchantId(null); }}
+        initialMerchantId={selectedMerchantId ?? undefined}
+      />
+
+      {/* Community Picker — quiz wallets/stats are per-community, so pick which one to play in */}
+      {showCommunityPicker && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center" onClick={() => setShowCommunityPicker(false)}>
+          <div className="bg-background rounded-t-2xl sm:rounded-2xl w-full sm:max-w-sm max-h-[70vh] overflow-y-auto p-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-bold text-lg mb-3">Choose a Community to Play In</h3>
+            <div className="space-y-2">
+              {myCommunities.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => { setSelectedCommunityId(c.id); setShowCommunityPicker(false); setShowQuizHub(true); }}
+                  className="w-full text-left p-3 rounded-xl border hover:bg-muted transition-colors flex items-center justify-between"
+                >
+                  <span className="font-medium">{c.name}</span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

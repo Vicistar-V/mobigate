@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Vote, Settings, Plus, Gavel } from "lucide-react";
+import { ArrowLeft, Vote, Settings, Plus, Gavel, ShieldAlert, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { useCommunityProfile } from "@/hooks/useCommunity";
 import { AdminNominationsTab } from "@/components/admin/election/AdminNominationsTab";
 import { AdminCampaignsTab } from "@/components/admin/election/AdminCampaignsTab";
 import { AdminElectionProcessesTab } from "@/components/admin/election/AdminElectionProcessesTab";
@@ -20,6 +21,32 @@ export default function ElectionManagementPage() {
   const { communityId } = useParams();
   const navigate = useNavigate();
   const [showDeclareElection, setShowDeclareElection] = useState(false);
+
+  // Real access control — only an assigned admin or the owner may manage elections
+  const { profile: roleProfile, loading: roleLoading } = useCommunityProfile(communityId);
+  const isRealOwner = !!roleProfile?.isOwner;
+  const isRealAdmin = isRealOwner || roleProfile?.role === "Admin" || roleProfile?.role === "admin";
+
+  if (roleLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!isRealAdmin) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 text-center">
+        <ShieldAlert className="h-12 w-12 text-destructive mb-4" />
+        <h1 className="text-lg font-bold mb-1">Admin Access Required</h1>
+        <p className="text-sm text-muted-foreground mb-6 max-w-xs">
+          You need to be an assigned admin or the owner of this community to manage elections.
+        </p>
+        <Button onClick={() => navigate(`/community/${communityId}`)}>Back to Community</Button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
@@ -104,29 +131,29 @@ export default function ElectionManagementPage() {
 
         <div className="px-2 py-3 sm:p-4 overflow-hidden">
           <TabsContent value="declare" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-            <AdminDeclareElectionTab onDeclareElection={() => setShowDeclareElection(true)} />
+            <AdminDeclareElectionTab onDeclareElection={() => setShowDeclareElection(true)} communityId={communityId} />
           </TabsContent>
           <TabsContent value="campaigns" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
             <AdminCampaignsTab />
           </TabsContent>
           <TabsContent value="processes" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-            <AdminElectionProcessesTab />
+            <AdminElectionProcessesTab communityId={communityId} />
           </TabsContent>
           <TabsContent value="accreditation" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-            <AdminAccreditationTab />
+            <AdminAccreditationTab communityId={communityId} />
           </TabsContent>
           <TabsContent value="clearances" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-            <AdminClearancesTab />
+            <AdminClearancesTab communityId={communityId} />
           </TabsContent>
           <TabsContent value="winners" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-            <AdminWinnersAnnouncementTab />
+            <AdminWinnersAnnouncementTab communityId={communityId} />
           </TabsContent>
           <TabsContent value="impeachment" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-            <AdminImpeachmentTab />
+            <AdminImpeachmentTab communityId={communityId} />
           </TabsContent>
           <TabsContent value="settings" className="mt-0 focus-visible:outline-none focus-visible:ring-0 space-y-6">
             <CommunityNominationFeeSettings communityName="this community" />
-            <ElectionSettingsSection />
+            <ElectionSettingsSection communityId={communityId} />
           </TabsContent>
         </div>
       </Tabs>
@@ -135,6 +162,7 @@ export default function ElectionManagementPage() {
       <DeclareElectionDrawer
         open={showDeclareElection}
         onOpenChange={setShowDeclareElection}
+        communityId={communityId}
       />
     </div>
   );

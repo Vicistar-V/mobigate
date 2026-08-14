@@ -143,19 +143,48 @@ export default function IndividualMerchantApplication() {
 
   const totalFee = waiverMode ? 100000 : 50000; // Application fee + waiver fee if applicable
 
-  const handleSubmit = () => {
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
     if (!isFormValid) {
       toast({ title: "Incomplete Form", description: "Please fill all required fields and accept the terms.", variant: "destructive" });
       return;
     }
-    const ref = generateTransactionReference("MERCH-IND");
-    setRefNumber(ref);
-    setSubmitted(true);
-    const feeDesc = waiverMode
-      ? `Application Fee: ${formatMobi(50000)} + Waiver Fee: ${formatMobi(50000)} = ${formatMobi(totalFee)}`
-      : `Fee: ${formatMobi(50000)}`;
-    toast({ title: waiverMode ? "Application + Waiver Submitted!" : "Application Submitted!", description: `${feeDesc}. Ref: ${ref}` });
-    localStorage.removeItem("mobigate-ind-merchant-draft");
+    setSubmitting(true);
+    try {
+      const dob = dobYear && dobMonth && dobDay ? `${dobYear}-${dobMonth.padStart(2, "0")}-${dobDay.padStart(2, "0")}` : "";
+      const res = await fetch("/api/merchant/application.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "submit_individual",
+          first_name: firstName, middle_name: middleName, last_name: lastName, gender, dob,
+          birth_town: birthTown, birth_lga: birthLGA, birth_state: birthState,
+          marital_status: maritalStatus, profession,
+          hometown_address: hometownAddress, nearest_town: nearestTown, lga_of_origin: lgaOfOrigin, state_of_origin: stateOfOrigin,
+          nationality, current_address: currentAddress,
+          town_of_residence: townOfResidence, lga_of_residence: lgaOfResidence,
+          state_of_residence: stateOfResidence, country_of_residence: countryOfResidence,
+          phone1, phone2, email, bank_entries: bankEntries, preferred_currency: preferredCurrency,
+          verifications, waiver_requested: waiverMode, waiver_context: waiverContext,
+        }),
+      });
+      const d = await res.json().catch(() => null);
+      if (!res.ok || !d?.success) throw new Error(d?.error || `Failed to submit application (HTTP ${res.status})`);
+
+      const ref = d.id.slice(0, 12).toUpperCase();
+      setRefNumber(ref);
+      setSubmitted(true);
+      const feeDesc = waiverMode
+        ? `Application Fee: ${formatMobi(50000)} + Waiver Fee: ${formatMobi(50000)} = ${formatMobi(d.total_fee)}`
+        : `Fee: ${formatMobi(d.total_fee)}`;
+      toast({ title: waiverMode ? "Application + Waiver Submitted!" : "Application Submitted!", description: `${feeDesc}. Ref: ${ref}` });
+      localStorage.removeItem("mobigate-ind-merchant-draft");
+    } catch (e: any) {
+      toast({ title: "Couldn't Submit Application", description: e.message, variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const IND_STORAGE_KEY = "mobigate-ind-merchant-draft";
@@ -644,7 +673,7 @@ export default function IndividualMerchantApplication() {
               </Button>
             </div>
 
-            <Button onClick={handleSubmit} className="w-full h-auto py-3 flex-col gap-0.5" disabled={!acceptedPolicies}>
+            <Button onClick={handleSubmit} className="w-full h-auto py-3 flex-col gap-0.5" disabled={!acceptedPolicies || submitting}>
               <span className="flex items-center gap-2 text-sm font-semibold">
                 <Store className="h-4 w-4" />
                 {waiverMode ? 'Submit Application + Waiver' : 'Submit Application'}

@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar, Users, Plus, Eye, MessageSquare, Globe, UserCircle, Store, UsersRound, Wallet, Building2 } from "lucide-react";
 import { EnhancedCampaign, CampaignAudience } from "@/types/campaignSystem";
-import { mockEnhancedCampaigns } from "@/data/campaignSystemData";
 import { formatMobiAmount } from "@/lib/campaignFeeDistribution";
 import { CampaignFullViewSheet } from "./CampaignFullViewSheet";
 import { CampaignFeedbackDialog } from "./CampaignFeedbackDialog";
@@ -13,6 +12,7 @@ import { format } from "date-fns";
 
 interface CampaignsViewProps {
   onLaunchCampaign?: () => void;
+  communityId?: string;
 }
 
 const audienceIcons: Record<CampaignAudience, React.ReactNode> = {
@@ -31,14 +31,58 @@ const audienceLabels: Record<CampaignAudience, string> = {
   mobi_store_marketplace: "Store"
 };
 
-export const CampaignsView = ({ onLaunchCampaign }: CampaignsViewProps) => {
+export const CampaignsView = ({ onLaunchCampaign, communityId }: CampaignsViewProps) => {
   const [selectedCampaign, setSelectedCampaign] = useState<EnhancedCampaign | null>(null);
   const [showFullView, setShowFullView] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackCampaign, setFeedbackCampaign] = useState<EnhancedCampaign | null>(null);
+  const [campaigns, setCampaigns] = useState<EnhancedCampaign[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // Use enhanced campaigns
-  const campaigns = mockEnhancedCampaigns.filter(c => c.status === "active");
+  useEffect(() => {
+    if (!communityId) return;
+    setLoading(true);
+    Promise.all([
+      fetch(`/api/community/elections.php?community_id=${communityId}`, { credentials: "include" }).then((r) => r.json()),
+      fetch(`/api/community/elections.php?action=campaigns&community_id=${communityId}`, { credentials: "include" }).then((r) => r.json()),
+    ])
+      .then(([overview, campaignsRes]) => {
+        const officesById: Record<string, string> = {};
+        (overview.offices ?? []).forEach((o: any) => { officesById[o.id] = o.name; });
+        const postsByCandidate: Record<string, number> = {};
+        (campaignsRes.posts ?? []).forEach((p: any) => {
+          postsByCandidate[p.candidate_id] = (postsByCandidate[p.candidate_id] ?? 0) + 1;
+        });
+
+        const candidatesWithCampaigns = (overview.candidates ?? []).filter((c: any) => c.manifesto || c.campaign_slogan);
+        const mapped: EnhancedCampaign[] = candidatesWithCampaigns.map((c: any) => ({
+          id: c.id,
+          candidateId: c.id,
+          candidateName: c.name?.trim() || "Candidate",
+          candidatePhoto: c.profile_photo || undefined,
+          communityName: "This Community",
+          office: officesById[c.office_id] || c.position || "Office",
+          tagline: c.campaign_slogan || "",
+          manifesto: c.manifesto || "",
+          campaignImage: c.campaign_image || undefined,
+          priorities: c.key_priorities ? JSON.parse(c.key_priorities) : [],
+          audienceTargets: ["community_interface"] as CampaignAudience[],
+          durationDays: 30 as any,
+          startDate: new Date(c.registered_at),
+          endDate: new Date(new Date(c.registered_at).getTime() + 30 * 24 * 60 * 60 * 1000),
+          baseFee: 0, audiencePremium: 0, totalFeeInMobi: 0, communityShare: 0, mobifaceShare: 0,
+          paymentStatus: "paid" as const,
+          views: 0, clicks: 0,
+          feedbackCount: postsByCandidate[c.id] ?? 0,
+          status: "active" as const,
+          createdAt: new Date(c.registered_at), updatedAt: new Date(c.registered_at),
+          feedbacks: [],
+        }));
+        setCampaigns(mapped);
+      })
+      .catch(() => setCampaigns([]))
+      .finally(() => setLoading(false));
+  }, [communityId]);
 
   const handleViewCampaign = (campaign: EnhancedCampaign) => {
     setSelectedCampaign(campaign);

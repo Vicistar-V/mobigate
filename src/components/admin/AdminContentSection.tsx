@@ -115,6 +115,7 @@ const StatBadge = ({ value, label, icon: Icon }: StatBadgeProps) => (
 type ContentActionType = "publish" | "remove" | "publish_news" | "publish_event" | "publish_announcement" | "remove_content";
 
 interface AdminContentSectionProps {
+  communityId?: string;
   stats: AdminStats;
   recentContent: RecentContent[];
   onManageNews: () => void;
@@ -124,6 +125,7 @@ interface AdminContentSectionProps {
 }
 
 export function AdminContentSection({
+  communityId,
   stats,
   recentContent,
   onManageNews,
@@ -149,14 +151,17 @@ export function AdminContentSection({
     });
   };
 
-  const handleRemove = (id: string) => {
+  const handleRemove = async (id: string) => {
+    if (!communityId) return;
     const content = recentContent.find(c => c.id === id);
-    setAuthAction({
-      type: "remove_content",
-      contentId: id,
-      contentTitle: content?.title || "Content",
-    });
-    setAuthDrawerOpen(true);
+    try {
+      await fetch("/api/community/content.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", community_id: communityId, post_id: id }),
+      });
+      toast({ title: "Content Removed", description: `"${content?.title}" has been removed.` });
+    } catch { toast({ title: "Error removing content", variant: "destructive" } as any); }
   };
 
   const handlePublish = (id: string) => {

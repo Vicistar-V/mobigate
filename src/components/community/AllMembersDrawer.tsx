@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
@@ -52,13 +52,41 @@ const mockMembers: Member[] = [
 interface AllMembersDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
 }
 
-export function AllMembersDrawer({ open, onOpenChange }: AllMembersDrawerProps) {
+export function AllMembersDrawer({ open, onOpenChange, communityId }: AllMembersDrawerProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
+  const [realMembers, setRealMembers] = useState<Member[] | null>(null);
+  const [loadingMembers, setLoadingMembers] = useState(false);
 
-  const filteredMembers = mockMembers.filter((member) => {
+  useEffect(() => {
+    if (!open || !communityId) return;
+    setLoadingMembers(true);
+    fetch(`/api/community/manage_members.php?community_id=${communityId}`, { credentials: "include" })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data?.members) {
+          setRealMembers(data.members.map((m: any): Member => ({
+            id: m.user_id,
+            name: m.name,
+            avatar: m.profile_photo || "/placeholder.svg",
+            role: m.role !== "Member" ? m.role : undefined,
+            memberSince: m.joined_at ? new Date(m.joined_at).getFullYear().toString() : "—",
+            isOnline: false,
+            status: "active",
+          })));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingMembers(false));
+  }, [open, communityId]);
+
+  // Falls back to mock data only if no communityId was provided (legacy usage)
+  const sourceMembers = realMembers ?? (communityId ? [] : mockMembers);
+
+  const filteredMembers = sourceMembers.filter((member) => {
     const matchesSearch = member.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || member.status === statusFilter;
     return matchesSearch && matchesStatus;
@@ -85,7 +113,7 @@ export function AllMembersDrawer({ open, onOpenChange }: AllMembersDrawerProps) 
             <SheetTitle className="text-lg font-semibold flex items-center gap-2">
               <Users className="h-5 w-5 text-primary" />
               All Members
-              <Badge variant="secondary" className="ml-1">{mockMembers.length}</Badge>
+              <Badge variant="secondary" className="ml-1">{sourceMembers.length}</Badge>
             </SheetTitle>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -116,7 +144,12 @@ export function AllMembersDrawer({ open, onOpenChange }: AllMembersDrawerProps) 
 
         <ScrollArea className="h-[calc(85vh-120px)]">
           <div className="p-3 space-y-2">
-            {filteredMembers.length === 0 ? (
+            {loadingMembers ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Users className="h-10 w-10 mx-auto mb-2 opacity-40 animate-pulse" />
+                <p className="text-sm">Loading members…</p>
+              </div>
+            ) : filteredMembers.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Users className="h-10 w-10 mx-auto mb-2 opacity-40" />
                 <p className="text-sm">No members found</p>

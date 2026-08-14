@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { Header } from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,35 +20,10 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import useEmblaCarousel from "embla-carousel-react";
 
-// ── Mock wallet data ──
-const LOCAL_WALLET = {
-  balance: 347250.00,
-  currency: "NGN",
-  symbol: "₦",
-  monthlyIn: 125000,
-  monthlyOut: 78400,
-};
-
-const MOBI_WALLET = {
-  balance: 347250.00,
-  currency: "Mobi",
-  symbol: "M",
-  monthlyIn: 125000,
-  monthlyOut: 78400,
-};
-
-// Sundry Wallet: holds Mobi earned from Quiz wins, Services, Active Engagements,
-// Royalties, Referrals, and other sundry income. ONLY this wallet's balance can
-// be liquidated to Local Currency (at the prevailing Selling Rate).
-// Mobi from Voucher Recharges sits in MOBI_WALLET and is NOT liquidatable —
-// it can only be spent on the platform/network. This guards against arbitrage.
-const SUNDRY_WALLET = {
-  balance: 86420.00,
-  currency: "Mobi",
-  symbol: "M",
-  monthlyIn: 42500,
-  monthlyOut: 12000,
-};
+// ── Fallback shape (used only until the real balances load) ──
+const LOCAL_WALLET_DEFAULT = { balance: 0, currency: "NGN", symbol: "₦", monthlyIn: 0, monthlyOut: 0 };
+const MOBI_WALLET_DEFAULT = { balance: 0, currency: "Mobi", symbol: "M", monthlyIn: 0, monthlyOut: 0 };
+const SUNDRY_WALLET_DEFAULT = { balance: 0, currency: "Mobi", symbol: "M", monthlyIn: 0, monthlyOut: 0 };
 
 // Dual exchange rates — Buying Rate (Local → Mobi via Voucher Recharge) is always
 // MORE FAVOURABLE than Selling Rate (Mobi → Local via Liquidation), preserving
@@ -68,20 +44,7 @@ interface WalletTransaction {
   counterparty?: string;
 }
 
-const MOCK_TRANSACTIONS: WalletTransaction[] = [
-  { id: "wt-1", type: "credit", description: "Voucher Purchase - Mobi Merchant", amount: 50000, date: new Date(Date.now() - 1 * 60 * 60 * 1000), status: "completed", category: "Top-Up", reference: "TXN-20260228-001", counterparty: "QuickMart NG" },
-  { id: "wt-2", type: "debit", description: "Quiz Entry Stake — Champions League", amount: 5000, date: new Date(Date.now() - 3 * 60 * 60 * 1000), status: "completed", category: "Quiz", reference: "TXN-20260228-002", counterparty: "Mobiface Quiz" },
-  { id: "wt-3", type: "credit", description: "Quiz Winnings — History Masters", amount: 25000, date: new Date(Date.now() - 8 * 60 * 60 * 1000), status: "completed", category: "Winnings", reference: "TXN-20260227-003", counterparty: "Mobiface Quiz" },
-  { id: "wt-4", type: "debit", description: "Community Monthly Dues", amount: 5000, date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), status: "completed", category: "Dues", reference: "TXN-20260227-004", counterparty: "Lagos Devs Community" },
-  { id: "wt-5", type: "debit", description: "Transfer to @chioma_blessed", amount: 12000, date: new Date(Date.now() - 1.5 * 24 * 60 * 60 * 1000), status: "completed", category: "Transfer", reference: "TXN-20260226-005", counterparty: "chioma_blessed" },
-  { id: "wt-6", type: "credit", description: "Wallet Top-Up via Voucher", amount: 100000, date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), status: "completed", category: "Top-Up", reference: "TXN-20260226-006", counterparty: "Mobiface Merchant" },
-  { id: "wt-7", type: "debit", description: "Advert Submission Fee", amount: 8500, date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), status: "completed", category: "Platform Fee", reference: "TXN-20260225-007", counterparty: "Mobiface Platform" },
-  { id: "wt-8", type: "credit", description: "Referral Bonus", amount: 2500, date: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000), status: "completed", category: "Bonus", reference: "TXN-20260224-008", counterparty: "Mobiface Rewards" },
-  { id: "wt-9", type: "debit", description: "Community Event Fee", amount: 15000, date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), status: "pending", category: "Events", reference: "TXN-20260223-009", counterparty: "Lagos Devs Community" },
-  { id: "wt-10", type: "debit", description: "Failed Transfer Attempt", amount: 3000, date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000), status: "failed", category: "Transfer", reference: "TXN-20260222-010", counterparty: "unknown_user" },
-  { id: "wt-11", type: "credit", description: "Quiz Refund — Cancelled Game", amount: 5000, date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), status: "completed", category: "Refund", reference: "TXN-20260221-011", counterparty: "Mobiface Quiz" },
-  { id: "wt-12", type: "credit", description: "Gift from @tunde_official", amount: 10000, date: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000), status: "completed", category: "Gift", reference: "TXN-20260220-012", counterparty: "tunde_official" },
-];
+const MOCK_TRANSACTIONS: WalletTransaction[] = [];
 
 const QUICK_FUND_AMOUNTS = [5000, 10000, 25000, 50000, 100000];
 
@@ -128,6 +91,39 @@ export default function WalletPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
+
+  // ── Real wallet balances + transactions (shadows the old mock constants) ──
+  const [LOCAL_WALLET, setLocalWallet] = useState(LOCAL_WALLET_DEFAULT);
+  const [MOBI_WALLET, setMobiWallet] = useState(MOBI_WALLET_DEFAULT);
+  const [SUNDRY_WALLET, setSundryWallet] = useState(SUNDRY_WALLET_DEFAULT);
+  const [MOCK_TRANSACTIONS, setTransactions] = useState<WalletTransaction[]>([]);
+  const [walletLoading, setWalletLoading] = useState(false);
+
+  const loadWallet = useCallback(() => {
+    setWalletLoading(true);
+    fetch(`/api/profile/wallet.php?action=overview`, { credentials: "include" })
+      .then(async (r) => {
+        const d = await r.json().catch(() => null);
+        if (!r.ok || !d) throw new Error(d?.error || `Failed to load wallet (HTTP ${r.status})`);
+        return d;
+      })
+      .then((d) => {
+        setLocalWallet((prev) => ({ ...prev, balance: parseFloat(d.local_balance) || 0 }));
+        setMobiWallet((prev) => ({ ...prev, balance: parseFloat(d.main_balance) || 0 }));
+        setSundryWallet((prev) => ({ ...prev, balance: parseFloat(d.bonus_balance) || 0 }));
+        setTransactions((d.transactions ?? []).map((t: any) => ({
+          id: t.id, type: t.type, description: t.description, amount: parseFloat(t.amount) || 0,
+          date: new Date(t.created_at), status: t.status, category: t.category,
+          reference: t.reference, counterparty: t.counterparty || undefined,
+        })));
+      })
+      .catch((e) => {
+        toast({ title: "Couldn't Load Wallet", description: e.message, variant: "destructive" });
+      })
+      .finally(() => setWalletLoading(false));
+  }, [toast]);
+
+  useEffect(() => { loadWallet(); }, [loadWallet]);
 
   // Embla carousel
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: "center", containScroll: false });
@@ -182,12 +178,30 @@ export default function WalletPage() {
     ];
     setWithdrawProcessingMsg(msgs[0]);
     let i = 0;
-    const interval = setInterval(() => {
-      i++;
-      if (i < msgs.length) setWithdrawProcessingMsg(msgs[i]);
-      else { clearInterval(interval); setWithdrawStep("success"); }
-    }, 650);
-  }, []);
+    const interval = setInterval(() => { i++; if (i < msgs.length) setWithdrawProcessingMsg(msgs[i]); }, 650);
+
+    fetch("/api/profile/wallet.php", {
+      method: "POST", credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "withdraw_local", amount: withdrawAmountNum, bank_name: withdrawBank, account_number: withdrawAccount }),
+    })
+      .then((r) => r.json().then((d) => ({ ok: r.ok, d })))
+      .then(({ ok, d }) => {
+        clearInterval(interval);
+        if (!ok) {
+          setWithdrawStep("input");
+          toast({ title: "Couldn't Withdraw", description: d.error || "Please try again", variant: "destructive" });
+          return;
+        }
+        setWithdrawStep("success");
+        loadWallet();
+      })
+      .catch(() => {
+        clearInterval(interval);
+        setWithdrawStep("input");
+        toast({ title: "Couldn't Withdraw", description: "Please check your connection and try again", variant: "destructive" });
+      });
+  }, [withdrawAmountNum, withdrawBank, withdrawAccount, toast, loadWallet]);
 
   // Fund Mobi wallet drawer
   const [fundMobiDrawerOpen, setFundMobiDrawerOpen] = useState(false);
@@ -229,19 +243,34 @@ export default function WalletPage() {
 
   const handleProcessLiquidate = useCallback(() => {
     setLiquidateStep("processing");
-    const msgs = [
-      "Verifying Sundry Wallet balance...",
-      "Applying current Selling Rate...",
-      "Crediting your Local Currency Wallet...",
-    ];
+    const msgs = ["Verifying Sundry Wallet balance...", "Applying current Selling Rate..."];
     let i = 0;
     setLiquidateProcessingMsg(msgs[0]);
-    const interval = setInterval(() => {
-      i++;
-      if (i < msgs.length) setLiquidateProcessingMsg(msgs[i]);
-      else { clearInterval(interval); setLiquidateStep("success"); }
-    }, 850);
-  }, []);
+    const interval = setInterval(() => { i++; if (i < msgs.length) setLiquidateProcessingMsg(msgs[i]); }, 700);
+
+    fetch("/api/profile/wallet.php", {
+      method: "POST", credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "liquidate_sundry", amount: liquidateMobiNum }),
+    })
+      .then((r) => r.json().then((d) => ({ ok: r.ok, d })))
+      .then(({ ok, d }) => {
+        clearInterval(interval);
+        if (!ok) {
+          setLiquidateStep("input");
+          toast({ title: "Couldn't Liquidate", description: d.error || "Please try again", variant: "destructive" });
+          return;
+        }
+        setLiquidateProcessingMsg("Crediting your Local Currency Wallet...");
+        setLiquidateStep("success");
+        loadWallet();
+      })
+      .catch(() => {
+        clearInterval(interval);
+        setLiquidateStep("input");
+        toast({ title: "Couldn't Liquidate", description: "Please check your connection and try again", variant: "destructive" });
+      });
+  }, [liquidateMobiNum, toast, loadWallet]);
 
   const resetLiquidateDrawer = () => {
     setLiquidateStep("input");
@@ -312,70 +341,96 @@ export default function WalletPage() {
     }, 800);
   }, [bankAccountNumber]);
 
-  // Voucher PIN validation simulation
+  // Voucher PIN validation (real check against mobi_vouchers)
   const handleValidateVoucher = useCallback(() => {
     if (voucherPin.length < 12) return;
     setVoucherValidating(true);
     setVoucherValid(false);
-    const msgs = ["Validating voucher PIN...", "Checking denomination...", "Confirming availability..."];
-    let i = 0;
-    setProcessingMsg(msgs[0]);
-    const interval = setInterval(() => {
-      i++;
-      if (i < msgs.length) setProcessingMsg(msgs[i]);
-      else {
-        clearInterval(interval);
+    setProcessingMsg("Validating voucher PIN...");
+    fetch("/api/profile/wallet.php", {
+      method: "POST", credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "validate_voucher", pin: voucherPin }),
+    })
+      .then((r) => r.json().then((d) => ({ ok: r.ok, d })))
+      .then(({ ok, d }) => {
         setVoucherValidating(false);
-        setVoucherValid(true);
-        const denom = [1000, 2000, 5000, 10000, 20000][Math.floor(Math.random() * 5)];
-        setVoucherDenomination(denom);
-        setFundAmount(denom);
         setProcessingMsg("");
-      }
-    }, 700);
-    }, [voucherPin]);
+        if (!ok) {
+          toast({ title: "Invalid Voucher", description: d.error || "Please check the PIN and try again", variant: "destructive" });
+          return;
+        }
+        setVoucherValid(true);
+        setVoucherDenomination(d.denomination);
+        setFundAmount(d.denomination);
+      })
+      .catch(() => {
+        setVoucherValidating(false);
+        setProcessingMsg("");
+        toast({ title: "Couldn't Validate Voucher", description: "Please check your connection and try again", variant: "destructive" });
+      });
+  }, [voucherPin, toast]);
 
-  // Mobi Voucher PIN validation simulation
+  // Mobi Voucher PIN validation (real check against mobi_vouchers)
   const handleValidateMobiVoucher = useCallback(() => {
     if (mobiVoucherPin.length < 12) return;
     setMobiVoucherValidating(true);
     setMobiVoucherValid(false);
-    const msgs = ["Validating voucher PIN...", "Checking Mobi denomination...", "Confirming availability..."];
-    let i = 0;
-    setMobiProcessingMsg(msgs[0]);
-    const interval = setInterval(() => {
-      i++;
-      if (i < msgs.length) setMobiProcessingMsg(msgs[i]);
-      else {
-        clearInterval(interval);
+    setMobiProcessingMsg("Validating voucher PIN...");
+    fetch("/api/profile/wallet.php", {
+      method: "POST", credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "validate_voucher", pin: mobiVoucherPin }),
+    })
+      .then((r) => r.json().then((d) => ({ ok: r.ok, d })))
+      .then(({ ok, d }) => {
         setMobiVoucherValidating(false);
-        setMobiVoucherValid(true);
-        const denom = [1000, 2000, 5000, 10000, 20000][Math.floor(Math.random() * 5)];
-        setMobiVoucherDenomination(denom);
         setMobiProcessingMsg("");
-      }
-    }, 700);
-  }, [mobiVoucherPin]);
+        if (!ok) {
+          toast({ title: "Invalid Voucher", description: d.error || "Please check the PIN and try again", variant: "destructive" });
+          return;
+        }
+        setMobiVoucherValid(true);
+        setMobiVoucherDenomination(d.denomination);
+      })
+      .catch(() => {
+        setMobiVoucherValidating(false);
+        setMobiProcessingMsg("");
+        toast({ title: "Couldn't Validate Voucher", description: "Please check your connection and try again", variant: "destructive" });
+      });
+  }, [mobiVoucherPin, toast]);
 
-  // Process Mobi voucher redemption
+  // Process Mobi voucher redemption (real credit to main_balance)
   const handleProcessMobiVoucher = useCallback(() => {
     setMobiFundStep("processing");
-    const msgs = [
-      "Connecting to Mobi Network...",
-      "Authenticating voucher...",
-      "Crediting your Mobi Wallet...",
-    ];
-    let i = 0;
+    const msgs = ["Connecting to Mobi Network...", "Authenticating voucher..."];
     setMobiProcessingMsg(msgs[0]);
-    const interval = setInterval(() => {
-      i++;
-      if (i < msgs.length) setMobiProcessingMsg(msgs[i]);
-      else {
+    let i = 0;
+    const interval = setInterval(() => { i++; if (i < msgs.length) setMobiProcessingMsg(msgs[i]); }, 700);
+
+    fetch("/api/profile/wallet.php", {
+      method: "POST", credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "fund_mobi", method: "voucher", pin: mobiVoucherPin }),
+    })
+      .then((r) => r.json().then((d) => ({ ok: r.ok, d })))
+      .then(({ ok, d }) => {
         clearInterval(interval);
+        if (!ok) {
+          setMobiFundStep("options");
+          toast({ title: "Couldn't Redeem Voucher", description: d.error || "Please try again", variant: "destructive" });
+          return;
+        }
+        setMobiProcessingMsg("Crediting your Mobi Wallet...");
         setMobiFundStep("success");
-      }
-    }, 900);
-  }, []);
+        loadWallet();
+      })
+      .catch(() => {
+        clearInterval(interval);
+        setMobiFundStep("options");
+        toast({ title: "Couldn't Redeem Voucher", description: "Please check your connection and try again", variant: "destructive" });
+      });
+  }, [mobiVoucherPin, toast, loadWallet]);
 
   const resetMobiFundDrawer = () => {
     setMobiFundStep("options");
@@ -387,27 +442,39 @@ export default function WalletPage() {
     setFundMobiDrawerOpen(false);
   };
 
-  // Process payment
+  // Process payment (real credit to local_balance)
   const handleProcessPayment = useCallback(() => {
     setFundStep("processing");
     const gatewayLabel = PAYMENT_GATEWAYS.find(g => g.id === selectedGateway)?.label || "Payment";
-    const msgs = [
-      `Connecting to ${gatewayLabel}...`,
-      "Authenticating transaction...",
-      "Processing your deposit...",
-      "Crediting your Local Wallet...",
-    ];
+    const msgs = [`Connecting to ${gatewayLabel}...`, "Authenticating transaction...", "Processing your deposit..."];
     let i = 0;
     setProcessingMsg(msgs[0]);
-    const interval = setInterval(() => {
-      i++;
-      if (i < msgs.length) setProcessingMsg(msgs[i]);
-      else {
+    const interval = setInterval(() => { i++; if (i < msgs.length) setProcessingMsg(msgs[i]); }, 700);
+
+    const amountToFund = selectedGateway === "voucher" ? voucherDenomination : fundAmount;
+    fetch("/api/profile/wallet.php", {
+      method: "POST", credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "fund_local", amount: amountToFund, method: selectedGateway || "card" }),
+    })
+      .then((r) => r.json().then((d) => ({ ok: r.ok, d })))
+      .then(({ ok, d }) => {
         clearInterval(interval);
+        if (!ok) {
+          setFundStep("input");
+          toast({ title: "Couldn't Fund Wallet", description: d.error || "Please try again", variant: "destructive" });
+          return;
+        }
+        setProcessingMsg("Crediting your Local Wallet...");
         setFundStep("success");
-      }
-    }, 900);
-  }, [selectedGateway]);
+        loadWallet();
+      })
+      .catch(() => {
+        clearInterval(interval);
+        setFundStep("input");
+        toast({ title: "Couldn't Fund Wallet", description: "Please check your connection and try again", variant: "destructive" });
+      });
+  }, [selectedGateway, fundAmount, voucherDenomination, toast, loadWallet]);
 
   // Check if gateway form is valid
   const isGatewayFormValid = useCallback(() => {
@@ -473,6 +540,7 @@ export default function WalletPage() {
 
   return (
     <div className="min-h-screen bg-background pb-6">
+      <Header />
       {/* ── Header ── */}
       <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md border-b border-border/50 px-4 py-3">
         <div className="flex items-center gap-3">

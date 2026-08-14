@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { GraduationCap, Zap, AlertTriangle, Calculator, BookOpen } from "lucide-react";
+import { GraduationCap, Zap, Calculator, BookOpen } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,9 +13,10 @@ import { ScholarshipQuizPlayDialog } from "./ScholarshipQuizPlayDialog";
 interface ScholarshipQuizSetupSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
 }
 
-export function ScholarshipQuizSetupSheet({ open, onOpenChange }: ScholarshipQuizSetupSheetProps) {
+export function ScholarshipQuizSetupSheet({ open, onOpenChange, communityId }: ScholarshipQuizSetupSheetProps) {
   const { toast } = useToast();
   const [selectedTier, setSelectedTier] = useState<ScholarshipTier | null>(null);
   const [customBudget, setCustomBudget] = useState("");
@@ -29,7 +30,6 @@ export function ScholarshipQuizSetupSheet({ open, onOpenChange }: ScholarshipQui
       toast({ title: "Set Budget", description: "Select a tier or enter a custom budget", variant: "destructive" });
       return;
     }
-    toast({ title: "🎓 Scholarship Quiz!", description: `${formatLocalAmount(stakeAmount, "NGN")} deducted.` });
     setShowPlay(true);
   };
 
@@ -45,7 +45,6 @@ export function ScholarshipQuizSetupSheet({ open, onOpenChange }: ScholarshipQui
           </DrawerHeader>
 
           <div className="px-4 pb-4 space-y-4 overflow-y-auto touch-auto max-h-[65vh]">
-            {/* Preset Tiers */}
             <div className="space-y-2">
               <h4 className="text-xs font-semibold text-muted-foreground uppercase">Education Tiers</h4>
               {mockScholarshipTiers.map((tier) => (
@@ -77,7 +76,6 @@ export function ScholarshipQuizSetupSheet({ open, onOpenChange }: ScholarshipQui
               ))}
             </div>
 
-            {/* Custom Budget */}
             <div className="space-y-2">
               <h4 className="text-xs font-semibold text-muted-foreground uppercase">Or Enter Custom Budget</h4>
               <Input
@@ -137,7 +135,7 @@ export function ScholarshipQuizSetupSheet({ open, onOpenChange }: ScholarshipQui
         open={showPlay}
         onOpenChange={(v) => { if (!v) { setShowPlay(false); onOpenChange(false); } }}
         budget={budget}
-        stakeAmount={stakeAmount}
+        communityId={communityId}
       />
     </>
   );

@@ -1,17 +1,18 @@
+import { useSearchParams } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { FeedPost } from "@/components/FeedPost";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Phone, Heart, Gift, MessageCircle, MoreVertical, Camera, Share2, UserX, AlertCircle, Users, UserPlus, UserMinus, UserCheck, Image as ImageIcon, FileText, ThumbsUp, Gamepad2, BookOpen, Network, Store, Briefcase, Building2, GraduationCap } from "lucide-react";
+import { Phone, Heart, Gift, MessageCircle, MoreVertical, Camera, Share2, UserX, AlertCircle, Users, UserPlus, UserMinus, UserCheck, Image as ImageIcon, FileText, ThumbsUp, Gamepad2, BookOpen, Network, Store, Briefcase, Building2, GraduationCap, FilePlus2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AdCard } from "@/components/AdCard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { ELibrarySection } from "@/components/ELibrarySection";
 import { MetaTags } from "@/components/MetaTags";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { getPostsByUserId, Post, mockProfilePictures, mockBannerImages, wallStatusPosts, feedPosts } from "@/data/posts";
+import { getPostsByUserId, Post, mockProfilePictures, mockBannerImages } from "@/data/posts";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PremiumAdCardProps } from "@/components/PremiumAdCard";
 import profileBanner from "@/assets/profile-banner.jpg";
@@ -50,7 +51,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const MyProfile = () => {
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<string>("status");
+  const autoOpenFriendAction = searchParams.get("action") as "find" | "invite" | null;
+  const friendRequestsSubTab = searchParams.get("sub") === "sent" ? "sent" : "received";
   const [contentFilter, setContentFilter] = useState<string>("all");
   const [wallStatusFilter, setWallStatusFilter] = useState<string>("all");
   const [wallStatusView, setWallStatusView] = useState<"normal" | "large">("normal");
@@ -74,6 +78,57 @@ const MyProfile = () => {
   // Always use the logged-in user's ID for own profile
   const fallbackUserId = useCurrentUserId();
   const currentUserId = user?.id || fallbackUserId || "";
+
+  const [wallStatusPosts, setWallStatusPosts] = useState<import("@/data/posts").WallStatusPost[]>([]);
+  const [feedPosts, setFeedPosts] = useState<Post[]>([]);
+  const [libraryCounts, setLibraryCounts] = useState<Record<string, number>>({});
+  useEffect(() => {
+    if (!currentUserId) return;
+    fetch(`${API_BASE}/posts/feed.php?user_id=${currentUserId}&limit=100`, { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: any[]) => {
+        // Wall status: photo/video only, for the carousel
+        const wallMapped = data
+          .filter((p) => p.post_type === "photo" || p.post_type === "video")
+          .map((p) => ({
+            id: p.id, url: p.thumbnail_url || p.media_url || "", type: p.post_type as "photo" | "video",
+            title: p.title, author: p.author_name?.trim() || "Me", authorImage: p.author_profile_photo || "/placeholder.svg",
+            timestamp: p.created_at, description: p.content,
+            likes: p.like_count || 0, comments: p.comment_count || 0, isLiked: !!p.is_liked,
+            followers: String(p.author_follower_count || 0), userId: p.user_id,
+            status: "Online" as const, views: String(p.view_count || 0),
+            fee: p.access_fee ? String(p.access_fee) : undefined,
+            copyrightMarked: p.copyright_marked ?? p.copyrightMarked,
+          }));
+        setWallStatusPosts(wallMapped);
+
+        // Full feed: every type, for the E-Library section below the fold
+        const typeMap: Record<string, Post["type"]> = {
+          photo: "Photo", video: "Video", audio: "Audio", article: "Article",
+          blog: "Article", pdf: "PDF", url: "URL", status: "Article",
+        };
+        const feedMapped: Post[] = data.map((p) => ({
+          id: p.id, title: p.title || "", subtitle: p.subtitle, description: p.content,
+          author: p.author_name?.trim() || "Me", authorProfileImage: p.author_profile_photo || "/placeholder.svg",
+          userId: p.user_id, status: "Online" as const,
+          views: String(p.view_count || 0), comments: String(p.comment_count || 0), likes: String(p.like_count || 0),
+          followers: String(p.author_follower_count || 0),
+          type: typeMap[p.post_type] || "Article",
+          imageUrl: p.thumbnail_url || p.media_url || undefined,
+          fee: p.access_fee > 0 ? String(p.access_fee) : undefined,
+          isOwner: true,
+        }));
+        setFeedPosts(feedMapped);
+
+        // Real counts per content type for the E-Library filter buttons
+        const counts: Record<string, number> = { all: data.length };
+        for (const p of data) {
+          counts[p.post_type] = (counts[p.post_type] || 0) + 1;
+        }
+        setLibraryCounts(counts);
+      })
+      .catch(() => { setWallStatusPosts([]); setFeedPosts([]); setLibraryCounts({}); });
+  }, [currentUserId, API_BASE]);
   
   // Ref for tabs section to enable auto-scroll
   const tabsSectionRef = useRef<HTMLDivElement>(null);
@@ -894,7 +949,7 @@ const MyProfile = () => {
             <GreetingSection embed />
 
             {/* People You May Know - First Slot */}
-            <PeopleYouMayKnow />
+            <PeopleYouMayKnow showNotableDates />
 
             {/* Create Monetized Post - Directly above Wall Status */}
             <CreatePostDialog />
@@ -916,10 +971,20 @@ const MyProfile = () => {
 
             {/* Feed Posts with Filter */}
             <div id="e-library-section" className="space-y-0 scroll-mt-24">
-              <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} />
+              <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} counts={libraryCounts} />
               
               <div className="space-y-6 mt-6">
-                {displayedPosts.map((post, index) => (
+                {displayedPosts.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center text-center py-14 px-4 rounded-xl border border-dashed border-border bg-muted/30">
+                    <FilePlus2 className="h-10 w-10 text-muted-foreground mb-3" />
+                    <p className="font-semibold text-base mb-1">No content yet</p>
+                    <p className="text-sm text-muted-foreground max-w-xs mb-4">
+                      You haven't posted any status or content{contentFilter !== "all" ? " of this type" : ""} yet. Share something to get started.
+                    </p>
+                    <CreatePostDialog />
+                  </div>
+                ) : (
+                  displayedPosts.map((post, index) => (
                 <div key={post.id || index}>
                   <FeedPost 
                     {...post}
@@ -941,7 +1006,8 @@ const MyProfile = () => {
                     </div>
                   )}
                 </div>
-                ))}
+                  ))
+                )}
               </div>
 
               {/* Pagination Controls */}
@@ -977,11 +1043,11 @@ const MyProfile = () => {
           </TabsContent>
 
           <TabsContent value="friends">
-            <ProfileFriendsTab userName={userProfile.name} userId={user?.id || ""} />
+            <ProfileFriendsTab userName={userProfile.name} userId={user?.id || ""} autoOpen={autoOpenFriendAction ?? undefined} />
           </TabsContent>
 
           <TabsContent value="friend-requests">
-            <FriendRequestsTab />
+            <FriendRequestsTab defaultSubTab={friendRequestsSubTab} />
           </TabsContent>
 
           <TabsContent value="albums" className="space-y-6">

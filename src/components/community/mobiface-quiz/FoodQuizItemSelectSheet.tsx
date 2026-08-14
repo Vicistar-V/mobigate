@@ -1,31 +1,45 @@
-import { useState } from "react";
-import { ShoppingCart, Check, Zap, AlertTriangle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ShoppingCart, Check, Zap, AlertTriangle, Loader2 } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-
-import { mockGroceryItems, FOOD_QUIZ_STAKE_PERCENTAGE, GroceryItem } from "@/data/mobifaceFoodQuizData";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
 import { FoodQuizPlayDialog } from "./FoodQuizPlayDialog";
 
+const API = "/api/quiz/food.php";
+const STAKE_PERCENT = 0.20;
+
+interface FoodItem { id: string; name: string; category: string; market_price: string; image: string; unit: string }
+
 interface FoodQuizItemSelectSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
 }
 
-export function FoodQuizItemSelectSheet({ open, onOpenChange }: FoodQuizItemSelectSheetProps) {
+export function FoodQuizItemSelectSheet({ open, onOpenChange, communityId }: FoodQuizItemSelectSheetProps) {
   const { toast } = useToast();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showPlay, setShowPlay] = useState(false);
+  const [items, setItems] = useState<FoodItem[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const selectedItems = mockGroceryItems.filter(g => selectedIds.includes(g.id));
-  const totalValue = selectedItems.reduce((sum, item) => sum + item.marketPrice, 0);
-  const stakeAmount = Math.round(totalValue * FOOD_QUIZ_STAKE_PERCENTAGE);
+  useEffect(() => {
+    if (!open) return;
+    setLoading(true);
+    fetch(`${API}?action=items`, { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d) => setItems(d.items ?? []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [open]);
+
+  const selectedItems = items.filter((g) => selectedIds.includes(g.id));
+  const totalValue = selectedItems.reduce((sum, item) => sum + parseFloat(item.market_price), 0);
+  const stakeAmount = Math.round(totalValue * STAKE_PERCENT);
 
   const toggleItem = (id: string) => {
-    setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
   const handleStart = () => {
@@ -33,11 +47,10 @@ export function FoodQuizItemSelectSheet({ open, onOpenChange }: FoodQuizItemSele
       toast({ title: "Select Items", description: "Select at least one item to play", variant: "destructive" });
       return;
     }
-    toast({ title: "🛒 Game Starting!", description: `${formatLocalAmount(stakeAmount, "NGN")} deducted.` });
     setShowPlay(true);
   };
 
-  const categories = [...new Set(mockGroceryItems.map(g => g.category))];
+  const categories = [...new Set(items.map((g) => g.category))];
 
   return (
     <>
@@ -51,12 +64,15 @@ export function FoodQuizItemSelectSheet({ open, onOpenChange }: FoodQuizItemSele
           </DrawerHeader>
 
           <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4">
+            {loading ? (
+              <div className="flex justify-center py-10"><Loader2 className="h-7 w-7 animate-spin text-green-500" /></div>
+            ) : (
             <div className="space-y-4 pb-4">
-              {categories.map(cat => (
+              {categories.map((cat) => (
                 <div key={cat}>
                   <h4 className="text-sm font-semibold text-muted-foreground uppercase mb-2">{cat}</h4>
                   <div className="space-y-2">
-                    {mockGroceryItems.filter(g => g.category === cat).map(item => {
+                    {items.filter((g) => g.category === cat).map((item) => {
                       const isSelected = selectedIds.includes(item.id);
                       return (
                         <button
@@ -72,8 +88,8 @@ export function FoodQuizItemSelectSheet({ open, onOpenChange }: FoodQuizItemSele
                             <p className="text-xs text-muted-foreground">per {item.unit}</p>
                           </div>
                           <div className="text-right shrink-0">
-                            <p className="text-sm font-bold">{formatMobiAmount(item.marketPrice)}</p>
-                            <p className="text-xs text-muted-foreground">{formatLocalAmount(item.marketPrice, "NGN")}</p>
+                            <p className="text-sm font-bold">{formatMobiAmount(parseFloat(item.market_price))}</p>
+                            <p className="text-xs text-muted-foreground">{formatLocalAmount(parseFloat(item.market_price), "NGN")}</p>
                           </div>
                           <div className={`w-5 h-5 rounded flex items-center justify-center shrink-0 ${isSelected ? "bg-green-500" : "border-2 border-muted"}`}>
                             {isSelected && <Check className="h-3 w-3 text-white" />}
@@ -85,9 +101,9 @@ export function FoodQuizItemSelectSheet({ open, onOpenChange }: FoodQuizItemSele
                 </div>
               ))}
             </div>
+            )}
           </div>
 
-          {/* Summary */}
           <div className="px-4 pb-4 pt-3 border-t space-y-3">
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="p-2 bg-muted/50 rounded-lg">
@@ -106,7 +122,7 @@ export function FoodQuizItemSelectSheet({ open, onOpenChange }: FoodQuizItemSele
 
             <div className="flex items-start gap-2 p-2.5 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 rounded-lg text-xs">
               <AlertTriangle className="h-3.5 w-3.5 text-amber-600 mt-0.5 shrink-0" />
-              <p className="text-muted-foreground">15 questions (10 objective + 5 typed). 100% correct wins items. 70-80% correct qualifies for bonus questions.</p>
+              <p className="text-muted-foreground">15 questions (10 objective + 5 typed). 100% correct wins items. 70-99% correct qualifies for bonus questions.</p>
             </div>
 
             <Button
@@ -123,10 +139,9 @@ export function FoodQuizItemSelectSheet({ open, onOpenChange }: FoodQuizItemSele
 
       <FoodQuizPlayDialog
         open={showPlay}
-        onOpenChange={(v) => { if (!v) { setShowPlay(false); onOpenChange(false); } }}
-        selectedItems={selectedItems}
-        stakeAmount={stakeAmount}
-        totalValue={totalValue}
+        onOpenChange={(v) => { if (!v) { setShowPlay(false); setSelectedIds([]); onOpenChange(false); } }}
+        selectedItemIds={selectedIds}
+        communityId={communityId}
       />
     </>
   );

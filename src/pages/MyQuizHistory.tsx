@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Trophy, Gamepad2, TrendingUp, XCircle, Calendar, ArrowLeft, Clock, Users, Coins, Target, ChevronRight, Hash, Award, Zap, BookOpen, Home, GraduationCap, Filter, ArrowUpDown, X, CalendarDays, ChevronDown, Eye, Wallet, AlertTriangle, Loader2, CheckCircle2, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
@@ -262,6 +262,54 @@ const sortLabels: Record<SortOption, string> = {
 export default function MyQuizHistory() {
   const [selectedGame, setSelectedGame] = useState<GameEntry | null>(null);
   const [showQuestions, setShowQuestions] = useState(false);
+  const [history, setHistory] = useState<GameEntry[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
+  useEffect(() => {
+    setLoadingHistory(true);
+    fetch("/api/quiz/my_history.php", { credentials: "include" })
+      .then(async (r) => {
+        const d = await r.json().catch(() => null);
+        if (!r.ok || !d) throw new Error(d?.error || `Failed to load quiz history (HTTP ${r.status})`);
+        return d;
+      })
+      .then((d) => {
+        const plays: any[] = d.plays ?? [];
+        const modeMap: Record<string, GameEntry["mode"]> = {
+          "Standard Quiz": "Standard Solo",
+          "Group Quiz": "Group Quiz",
+          "Interactive Quiz": "Interactive",
+          "Food for Home": "Food for Home",
+          "Scholarship Quiz": "Scholarship",
+          "Toggle Quiz": "Standard Solo", // no dedicated tab yet — closest existing bucket
+        };
+        const mapped: GameEntry[] = plays.map((p, idx) => {
+          const createdAt = new Date(p.created_at);
+          return {
+            id: idx + 1,
+            mode: modeMap[p.mode] ?? "Standard Solo",
+            date: createdAt.toISOString().slice(0, 10),
+            time: createdAt.toTimeString().slice(0, 5),
+            score: "—",
+            scoreNum: 0,
+            scoreTotal: 0,
+            stake: p.stake ?? 0,
+            prize: p.winnings ?? 0,
+            won: p.outcome === "won",
+            duration: "—",
+            category: p.title || p.mode,
+            tier: p.mode,
+            questions: [],
+          };
+        });
+        setHistory(mapped);
+      })
+      .catch((e) => {
+        setHistory([]);
+        toast({ title: "Couldn't Load Quiz History", description: e.message, variant: "destructive" });
+      })
+      .finally(() => setLoadingHistory(false));
+  }, []);
 
   // Payment gate state
   const { toast } = useToast();
@@ -293,7 +341,7 @@ export default function MyQuizHistory() {
   };
 
   const filteredAndSorted = useMemo(() => {
-    let result = [...mockHistory];
+    let result = [...history];
 
     // Filter by mode
     if (filterMode !== "all") {
@@ -320,7 +368,7 @@ export default function MyQuizHistory() {
     });
 
     return result;
-  }, [filterMode, filterResult, dateFrom, dateTo, sortBy]);
+  }, [history, filterMode, filterResult, dateFrom, dateTo, sortBy]);
 
   // Dynamic stats based on filtered results
   const totalGames = filteredAndSorted.length;
@@ -550,11 +598,20 @@ export default function MyQuizHistory() {
           )}
         </div>
 
-        {filteredAndSorted.length === 0 ? (
+        {loadingHistory ? (
+          <div className="py-12 text-center">
+            <Loader2 className="h-8 w-8 mx-auto mb-2 animate-spin text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">Loading your quiz history...</p>
+          </div>
+        ) : filteredAndSorted.length === 0 ? (
           <div className="py-12 text-center">
             <Gamepad2 className="h-10 w-10 mx-auto mb-2 text-muted-foreground/30" />
-            <p className="text-sm font-medium text-muted-foreground">No games match your filters</p>
-            <button onClick={clearFilters} className="mt-2 text-xs text-primary font-medium">Clear all filters</button>
+            <p className="text-sm font-medium text-muted-foreground">
+              {history.length === 0 ? "No quiz games played yet" : "No games match your filters"}
+            </p>
+            {history.length > 0 && (
+              <button onClick={clearFilters} className="mt-2 text-xs text-primary font-medium">Clear all filters</button>
+            )}
           </div>
         ) : (
           filteredAndSorted.map(game => {

@@ -5,35 +5,41 @@ import { ProfileDropdown } from "./ProfileDropdown";
 import { NotificationsSheet } from "./NotificationsSheet";
 import { MessagesSheet } from "./MessagesSheet";
 import { useSidebar } from "@/components/ui/sidebar";
-import mobifaceIcon from "@/assets/mobiface-icon.svg";
-import mobifaceLogo from "@/assets/mobiface-logo.png";
+import { useLogo } from "@/hooks/useLogo";
 
 export const Header = () => {
   const { toggleSidebar } = useSidebar();
+  const { app_name, app_logo_url } = useLogo();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-card shadow-sm">
-      <div className="flex h-[var(--header-height)] items-center justify-between px-4">
-        <div className="flex items-center gap-3">
-          <Button 
-            variant="ghost" 
-            size="iconLg"
+    <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur-sm shadow-sm">
+      <div className="flex h-[var(--header-height)] items-center justify-between px-3 sm:px-4">
+
+        {/* Left — hamburger + logo */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={toggleSidebar}
-            className="hover:bg-primary/10"
+            className="h-9 w-9 hover:bg-primary/10 rounded-lg"
+            aria-label="Toggle menu"
           >
-            <Menu />
+            <Menu className="h-5 w-5" />
           </Button>
-          <Link to="/dashboard" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-            {/* Full logo with text on all screens */}
-            <img 
-              src={mobifaceLogo} 
-              alt="Mobiface" 
-              className="h-12 w-auto"
-            />
+
+          <Link to="/dashboard" className="flex items-center transition-opacity hover:opacity-80">
+            {app_logo_url ? (
+              <img src={app_logo_url} alt={app_name} className="h-7 w-auto max-w-[130px] object-contain" />
+            ) : (
+              <span className="font-extrabold text-lg tracking-tight text-foreground">
+                <span className="text-primary">M</span>{app_name.slice(1)}
+              </span>
+            )}
           </Link>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Right — notifications, messages, profile */}
+        <div className="flex items-center gap-1">
           <NotificationsSheet />
           <MessagesSheet />
           <ProfileDropdown />

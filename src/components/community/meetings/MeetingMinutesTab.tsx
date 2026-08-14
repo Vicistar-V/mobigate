@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,8 +21,6 @@ import {
   Info,
 } from "lucide-react";
 import {
-  mockMeetingMinutes,
-  mockMinutesSettings,
   MeetingMinutes,
 } from "@/data/meetingsData";
 import { format, formatDistanceToNow, differenceInDays } from "date-fns";
@@ -36,11 +34,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 interface MeetingMinutesTabProps {
   isAdmin?: boolean;
   isSecretary?: boolean;
+  communityId?: string;
 }
 
 export const MeetingMinutesTab = ({
   isAdmin = false,
   isSecretary = true, // For demo, set to true
+  communityId,
 }: MeetingMinutesTabProps) => {
   const { toast } = useToast();
   const [selectedMinutes, setSelectedMinutes] = useState<MeetingMinutes | null>(null);
@@ -48,6 +48,42 @@ export const MeetingMinutesTab = ({
   const [showDownloadDialog, setShowDownloadDialog] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  const [mockMeetingMinutes, setMockMeetingMinutes] = useState<MeetingMinutes[]>([]);
+  const [mockMinutesSettings, setMockMinutesSettings] = useState({
+    downloadFeeDefault: 500, adoptionThreshold: 60, attendanceGracePeriodDays: 90,
+  });
+
+  const loadMinutes = useCallback(() => {
+    if (!communityId) return;
+    fetch(`/api/community/meetings_admin.php?action=minutes&community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const mapped: MeetingMinutes[] = (d.minutes ?? []).map((m: any) => ({
+          id: m.id, meetingId: m.meeting_id, meetingName: m.meeting_title, meetingDate: new Date(m.meeting_date),
+          uploadedBy: m.uploaded_by_name?.trim() || "Secretary", uploadedByAvatar: m.uploaded_by_avatar || "/placeholder.svg",
+          uploadedAt: new Date(m.created_at), fileUrl: m.file_url, fileName: m.file_name, fileSize: m.file_size,
+          fileType: m.file_type, status: m.status,
+          adoptionPercentage: parseInt(m.total_voters, 10) > 0 ? Math.round((parseInt(m.adopted_votes, 10) / parseInt(m.total_voters, 10)) * 100) : 0,
+          totalVoters: parseInt(m.total_voters, 10) || 0, adoptedVotes: parseInt(m.adopted_votes, 10) || 0,
+          rejectedVotes: parseInt(m.rejected_votes, 10) || 0, adoptionThreshold: parseInt(m.adoption_threshold, 10) || 60,
+          adoptedAt: m.adopted_at ? new Date(m.adopted_at) : undefined,
+          downloadFee: parseFloat(m.download_fee) || 0, downloadCount: parseInt(m.download_count, 10) || 0,
+          attendanceDeadline: m.attendance_deadline ? new Date(m.attendance_deadline) : undefined,
+        }));
+        setMockMeetingMinutes(mapped);
+        if (d.settings) {
+          setMockMinutesSettings({
+            downloadFeeDefault: parseFloat(d.settings.download_fee_default) || 500,
+            adoptionThreshold: parseInt(d.settings.adoption_threshold, 10) || 60,
+            attendanceGracePeriodDays: parseInt(d.settings.attendance_grace_period_days, 10) || 90,
+          });
+        }
+      })
+      .catch(() => setMockMeetingMinutes([]));
+  }, [communityId]);
+
+  useEffect(() => { loadMinutes(); }, [loadMinutes]);
 
   // Check if previous meeting minutes are adopted (for new meeting button logic)
   const latestCompletedMeetingMinutes = mockMeetingMinutes.find(
@@ -386,11 +422,15 @@ export const MeetingMinutesTab = ({
             open={showAdoptionDialog}
             onOpenChange={setShowAdoptionDialog}
             minutes={selectedMinutes}
+            communityId={communityId}
+            onVoted={loadMinutes}
           />
           <MinutesDownloadDialog
             open={showDownloadDialog}
             onOpenChange={setShowDownloadDialog}
             minutes={selectedMinutes}
+            communityId={communityId}
+            onDownloaded={loadMinutes}
           />
         </>
       )}
@@ -398,6 +438,8 @@ export const MeetingMinutesTab = ({
       <SecretaryUploadMinutesDialog
         open={showUploadDialog}
         onOpenChange={setShowUploadDialog}
+        communityId={communityId}
+        onUploaded={loadMinutes}
       />
     </div>
   );

@@ -1,22 +1,45 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FinancialSummaryTable } from "./FinancialSummaryTable";
 import { OtherMembersFinancialSection } from "./OtherMembersFinancialSection";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
-import { mockMemberFinancialRecord } from "@/data/financialData";
 import { contentsAdSlots } from "@/data/profileAds";
 import { DownloadFormatSheet, type DownloadFormat } from "@/components/common/DownloadFormatSheet";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface FinancialSummaryTabProps {
   onClose?: () => void;
+  communityId?: string;
 }
 
-export const FinancialSummaryTab = ({ onClose }: FinancialSummaryTabProps) => {
+export const FinancialSummaryTab = ({ onClose, communityId }: FinancialSummaryTabProps) => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [sortFilter, setSortFilter] = useState("all");
   const [showDownloadSheet, setShowDownloadSheet] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [memberRecord, setMemberRecord] = useState({
+    memberId: user?.id || "", memberName: user?.name || "Member", memberRegistration: (user?.id || "").slice(0, 8).toUpperCase(),
+    avatar: user?.avatar, items: [] as any[],
+  });
+
+  useEffect(() => {
+    if (!communityId) return;
+    fetch(`/api/community/finance.php?action=my_obligations&community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const items = (d.obligations ?? []).map((o: any) => ({
+          itemId: o.id,
+          periods: [{
+            year: new Date().getFullYear(), amount: o.amount,
+            date: o.status === "paid" ? o.dueDate : null, status: o.status,
+          }],
+        }));
+        setMemberRecord((prev) => ({ ...prev, items }));
+      })
+      .catch(() => {});
+  }, [communityId]);
 
   const handleDownload = async (format: DownloadFormat) => {
     setIsDownloading(true);
@@ -39,7 +62,7 @@ export const FinancialSummaryTab = ({ onClose }: FinancialSummaryTabProps) => {
 
       {/* Financial Summary Table */}
       <FinancialSummaryTable 
-        member={mockMemberFinancialRecord}
+        member={memberRecord}
         sortFilter={sortFilter}
         onSortChange={setSortFilter}
         onDownload={() => setShowDownloadSheet(true)}

@@ -85,25 +85,46 @@ export default function SubMerchantApplicationPage() {
     }));
   };
 
-  const handleConfirmPayment = () => {
+  const handleConfirmPayment = async () => {
+    if (!merchantId) return;
     setProcessing(true);
     setProcessingStep(0);
-    const ref = `SM-APP-${Date.now().toString(36).toUpperCase()}`;
-    setTxnRef(ref);
 
-    // Beast-mode multi-step processing
-    setTimeout(() => setProcessingStep(1), 600);
-    setTimeout(() => setProcessingStep(2), 1400);
-    setTimeout(() => setProcessingStep(3), 2200);
-    setTimeout(() => {
-      setProcessing(false);
-      setShowConfirmDrawer(false);
-      setSubmitted(true);
-      toast({
-        title: "Application Submitted!",
-        description: `₦${APPLICATION_FEE.toLocaleString()}.00 debited from Mobi Wallet. Ref: ${ref}`,
+    const steps = [1, 2, 3];
+    steps.forEach((s, i) => setTimeout(() => setProcessingStep(s), (i + 1) * 700));
+
+    try {
+      const res = await fetch("/api/merchant/application.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "submit_sub_merchant",
+          parent_merchant_id: merchantId,
+          full_name: form.fullName, business_name: form.businessName,
+          phone: form.phone, email: form.email, city: form.city, state: form.state,
+          business_types: form.businessTypes, description: form.description,
+          years_in_business: form.yearsInBusiness, retail_shop_address: form.retailShopAddress,
+          online_store_url: form.onlineStoreUrl, mobi_shop_url: form.mobiShopUrl,
+        }),
       });
-    }, 2800);
+      const d = await res.json().catch(() => null);
+      if (!res.ok || !d?.success) throw new Error(d?.error || "Failed to submit application");
+
+      const ref = d.id.slice(0, 12).toUpperCase();
+      setTimeout(() => {
+        setProcessing(false);
+        setShowConfirmDrawer(false);
+        setSubmitted(true);
+        setTxnRef(ref);
+        toast({
+          title: "Application Submitted!",
+          description: `₦${APPLICATION_FEE.toLocaleString()}.00 debited from Mobi Wallet. Ref: ${ref}`,
+        });
+      }, 2400);
+    } catch (e: any) {
+      setProcessing(false);
+      toast({ title: "Couldn't Submit Application", description: e.message, variant: "destructive" });
+    }
   };
 
   const processingMessages = [

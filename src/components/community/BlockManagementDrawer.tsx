@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { 
   X, Search, Ban, Shield, ShieldOff, Clock, Calendar, 
   User, Users, Globe, Mail, Wifi, Hash, AlertTriangle,
@@ -46,21 +46,22 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { 
-  mockOnlineMembers, 
-  mockBlockedUsers, 
   mockNonMembers,
   blockDurationOptions,
   commonBlockReasons,
   BlockedUser,
+  Member,
   UserType,
   BlockDuration
 } from "@/data/membershipData";
+import { toast as sonnerToast } from "sonner";
 import { useToast } from "@/hooks/use-toast";
 import { format, formatDistanceToNow, addDays, addYears, isPast } from "date-fns";
 
 interface BlockManagementDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
 }
 
 // User type badge colors and labels
@@ -73,7 +74,7 @@ const userTypeBadgeConfig: Record<UserType, { label: string; className: string; 
   external: { label: "External", className: "bg-red-500/20 text-red-600 dark:text-red-400", icon: AlertTriangle },
 };
 
-export function BlockManagementDrawer({ open, onOpenChange }: BlockManagementDrawerProps) {
+export function BlockManagementDrawer({ open, onOpenChange, communityId }: BlockManagementDrawerProps) {
   const [activeTab, setActiveTab] = useState("blocked");
   const [searchQuery, setSearchQuery] = useState("");
   const [blockReason, setBlockReason] = useState("");
@@ -87,9 +88,51 @@ export function BlockManagementDrawer({ open, onOpenChange }: BlockManagementDra
   const [editingBlock, setEditingBlock] = useState<BlockedUser | null>(null);
   const { toast } = useToast();
 
+  // ── Real data from the server (replaces mockOnlineMembers / mockBlockedUsers) ──
+  const [realMembers, setRealMembers] = useState<Member[]>([]);
+  const [realBlockedUsers, setRealBlockedUsers] = useState<BlockedUser[]>([]);
+  const [loadingBlockData, setLoadingBlockData] = useState(false);
+  const [blockSubmitting, setBlockSubmitting] = useState(false);
+
+  const fetchBlockData = async () => {
+    if (!communityId) return;
+    setLoadingBlockData(true);
+    try {
+      const res = await fetch(`/api/community/manage_members.php?community_id=${communityId}`, { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setRealMembers((data.members || []).map((m: any): Member => ({
+          id: m.user_id,
+          name: m.name,
+          avatar: m.profile_photo || "/placeholder.svg",
+          isOnline: false,
+          role: m.role,
+        })));
+        setRealBlockedUsers((data.blockedMembers || []).map((b: any): BlockedUser => ({
+          id: b.user_id,
+          name: b.name,
+          avatar: b.profile_photo || "/placeholder.svg",
+          userType: "member",
+          email: b.email,
+          blockedDate: b.blocked_at ? new Date(b.blocked_at) : new Date(),
+          blockedBy: "Admin",
+          reason: b.blocked_reason || "No reason provided",
+          duration: "permanent",
+          isPermaBan: true,
+          blockCount: 1,
+        })));
+      }
+    } catch { /* keep previous state on failure */ }
+    finally { setLoadingBlockData(false); }
+  };
+
+  useEffect(() => {
+    if (open && communityId) fetchBlockData();
+  }, [open, communityId]);
+
   // Filter blocked users
   const filteredBlockedUsers = useMemo(() => {
-    return mockBlockedUsers.filter(user => {
+    return realBlockedUsers.filter(user => {
       const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.ipAddress?.includes(searchQuery) ||
@@ -99,14 +142,14 @@ export function BlockManagementDrawer({ open, onOpenChange }: BlockManagementDra
       
       return matchesSearch && matchesFilter;
     });
-  }, [searchQuery, filterUserType]);
+  }, [searchQuery, filterUserType, realBlockedUsers]);
 
   // Filter members for blocking
   const filteredMembers = useMemo(() => {
-    return mockOnlineMembers.filter(member =>
+    return realMembers.filter(member =>
       member.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [searchQuery, realMembers]);
 
   // Filter non-members for blocking
   const filteredNonMembers = useMemo(() => {
@@ -137,7 +180,7 @@ export function BlockManagementDrawer({ open, onOpenChange }: BlockManagementDra
   };
 
   // Handle blocking a member
-  const handleBlockMember = (memberName: string, memberId: string) => {
+  const handleBlockMember = async (memberName: string, memberId: string) => {
     if (!blockReason.trim()) {
       toast({
         title: "Reason Required",
@@ -146,26 +189,33 @@ export function BlockManagementDrawer({ open, onOpenChange }: BlockManagementDra
       });
       return;
     }
+    if (!communityId) { toast({ title: "Community not found", variant: "destructive" }); return; }
 
-    const expiryDate = calculateExpiryDate(selectedDuration);
-    
-    toast({
-      title: "User Blocked",
-      description: (
-        <div className="space-y-1">
-          <p className="font-medium">{memberName} has been blocked</p>
-          <p className="text-xs text-muted-foreground">
-            Duration: {blockDurationOptions.find(d => d.value === selectedDuration)?.label}
-            {expiryDate && ` (until ${format(expiryDate, "PPP")})`}
-          </p>
-        </div>
-      ),
-    });
-    
-    // Reset form
-    setBlockReason("");
-    setSelectedDuration("30d");
-    setSelectedReasonPreset("");
+    setBlockSubmitting(true);
+    try {
+      const res = await fetch("/api/community/manage_members.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "block_member", community_id: communityId, user_id: memberId, reason: blockReason.trim() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Failed to block member");
+
+      toast({
+        title: "User Blocked",
+        description: `${memberName} has been blocked and removed from active membership.`,
+      });
+      await fetchBlockData();
+      setActiveTab("blocked");
+      // Reset form
+      setBlockReason("");
+      setSelectedDuration("30d");
+      setSelectedReasonPreset("");
+    } catch (err: any) {
+      toast({ title: "Could not block user", description: err.message || "Please try again.", variant: "destructive" });
+    } finally {
+      setBlockSubmitting(false);
+    }
   };
 
   // Handle blocking a non-member
@@ -212,12 +262,24 @@ export function BlockManagementDrawer({ open, onOpenChange }: BlockManagementDra
   };
 
   // Handle unblock confirmation
-  const handleUnblockConfirm = () => {
-    if (confirmUnblock) {
+  const handleUnblockConfirm = async () => {
+    if (!confirmUnblock) return;
+    if (!communityId) { toast({ title: "Community not found", variant: "destructive" }); return; }
+    try {
+      const res = await fetch("/api/community/manage_members.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "unblock_member", community_id: communityId, user_id: confirmUnblock.id }),
+      });
+      if (!res.ok) throw new Error("Failed to unblock");
       toast({
         title: "User Unblocked",
         description: `${confirmUnblock.name} has been unblocked and can now access the community`,
       });
+      await fetchBlockData();
+    } catch {
+      toast({ title: "Could not unblock user", description: "Please try again.", variant: "destructive" });
+    } finally {
       setConfirmUnblock(null);
     }
   };

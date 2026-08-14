@@ -6,9 +6,11 @@ import jsPDF from "jspdf";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { mockParentMerchants, ParentMerchant, MerchantStock, initialSubMerchantWalletBalance } from "@/data/subMerchantVoucherData";
 import { formatNum, generateBatchNumber } from "@/data/merchantVoucherData";
 import { MIN_DISCOUNT_ORDER_VALUE } from "@/data/platformSettingsData";
+
+interface ParentMerchant { id: string; name: string; city: string; state: string; discountRate: number; availableStock: MerchantStock[]; status: "active" | "inactive"; joinedDate: Date; }
+interface MerchantStock { denomination: number; availableBundles: number; pricePerBundle: number; }
 
 type Step = "select" | "merchant" | "summary" | "processing" | "success";
 
@@ -26,11 +28,38 @@ export default function SubMerchantBuyVouchers() {
   const [selections, setSelections] = useState<SelectedDenom[]>([]);
   const [selectedMerchant, setSelectedMerchant] = useState<ParentMerchant | null>(null);
   const [processingMsg, setProcessingMsg] = useState(0);
+  const [purchaseError, setPurchaseError] = useState("");
   const [receiptData] = useState(() => ({
     transactionRef: `TXN-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
     batchNumber: generateBatchNumber(new Date(), "SM01"),
     dateTime: new Date(),
   }));
+
+  const [mockParentMerchants, setMockParentMerchants] = useState<ParentMerchant[]>([]);
+  const [walletBalance, setWalletBalance] = useState(0);
+
+  useEffect(() => {
+    fetch("/api/merchant/vouchers.php?action=parent_merchants_stock", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const mapped: ParentMerchant[] = (d.parentMerchants ?? []).map((p: any) => ({
+          id: p.id, name: p.display_name, city: p.city || "", state: p.state || "",
+          discountRate: 0, status: "active" as const, joinedDate: new Date(p.created_at),
+          availableStock: (p.availableStock ?? []).map((s: any) => ({
+            denomination: parseFloat(s.denomination), availableBundles: Math.floor((parseInt(s.available, 10) || 0) / 100),
+            pricePerBundle: parseFloat(s.denomination) * 100,
+          })),
+        }));
+        setMockParentMerchants(mapped);
+      })
+      .catch(() => setMockParentMerchants([]));
+
+    fetch("/api/merchant/vouchers.php?action=sub_wallet", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => setWalletBalance(parseFloat(d.balance) || 0))
+      .catch(() => setWalletBalance(0));
+  }, []);
+  const initialSubMerchantWalletBalance = walletBalance;
 
   const availableDenoms = useMemo(() => {
     const denoms = new Set<number>();
@@ -104,18 +133,44 @@ export default function SubMerchantBuyVouchers() {
       navigate("/merchant-wallet-fund?returnTo=/sub-merchant-buy-vouchers");
       return;
     }
+    setPurchaseError("");
     setStep("processing");
     setProcessingMsg(0);
     window.scrollTo(0, 0);
   };
 
   useEffect(() => {
-    if (step !== "processing") return;
+    if (step !== "processing" || !selectedMerchant) return;
     const timers: ReturnType<typeof setTimeout>[] = [];
     PROCESSING_MESSAGES.forEach((_, i) => {
       if (i > 0) timers.push(setTimeout(() => setProcessingMsg(i), i * 800));
     });
-    timers.push(setTimeout(() => { setStep("success"); window.scrollTo(0, 0); }, 3200));
+    timers.push(setTimeout(async () => {
+      try {
+        for (const sel of selections) {
+          const stock = selectedMerchant.availableStock.find(s => s.denomination === sel.denomination);
+          const unitPrice = stock ? stock.pricePerBundle / 100 : sel.denomination;
+          const res = await fetch("/api/merchant/vouchers.php", {
+            method: "POST", credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "buy_vouchers",
+              parent_merchant_id: selectedMerchant.id,
+              denomination: sel.denomination,
+              card_count: sel.bundleCount * 100,
+              unit_price: unitPrice,
+            }),
+          });
+          const d = await res.json().catch(() => null);
+          if (!res.ok || !d?.success) throw new Error(d?.error || "Failed to complete purchase");
+        }
+        setStep("success");
+      } catch (e: any) {
+        setPurchaseError(e.message);
+        setStep("summary");
+      }
+      window.scrollTo(0, 0);
+    }, 3200));
     return () => timers.forEach(clearTimeout);
   }, [step]);
 
@@ -422,6 +477,11 @@ export default function SubMerchantBuyVouchers() {
           </div>
         </div>
         <div className="px-4 pt-4 space-y-4">
+          {purchaseError && (
+            <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+              {purchaseError}
+            </div>
+          )}
           {/* Merchant info */}
           <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 flex items-center gap-3">
             <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">

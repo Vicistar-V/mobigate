@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Wallet, TrendingUp, TrendingDown, Clock, FileText, Users, AlertTriangle, ChevronRight, Settings, Receipt, BarChart3, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -154,6 +154,7 @@ const StatCard = ({ label, value, icon: Icon, trend }: StatCardProps) => (
 type FinanceActionType = "transfer" | "withdrawal" | "disbursement" | "budget_approval" | "income" | "expense";
 
 interface AdminFinanceSectionProps {
+  communityId?: string;
   stats: AdminStats;
   recentTransactions: RecentTransaction[];
   defaultingMembers: DefaultingMember[];
@@ -163,6 +164,7 @@ interface AdminFinanceSectionProps {
 }
 
 export function AdminFinanceSection({
+  communityId,
   stats,
   recentTransactions,
   defaultingMembers,
@@ -176,6 +178,34 @@ export function AdminFinanceSection({
   const [showMemberReports, setShowMemberReports] = useState(false);
   const [showAudit, setShowAudit] = useState(false);
 
+  // Real balance and transactions from API
+  const [realBalance,   setRealBalance]   = useState<number | null>(null);
+  const [realIncome,    setRealIncome]    = useState<number | null>(null);
+  const [realExpenses,  setRealExpenses]  = useState<number | null>(null);
+  const [realTxns,      setRealTxns]      = useState<any[]>([]);
+  const [loadingFinance,setLoadingFinance]= useState(false);
+
+  useEffect(() => {
+    if (!communityId) return;
+    setLoadingFinance(true);
+    fetch(`/api/community/finance.php?community_id=${communityId}`, { credentials: "include" })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d) return;
+        setRealBalance(parseFloat(d.account?.balance ?? 0));
+        setRealIncome(parseFloat(d.account?.total_income ?? 0));
+        setRealExpenses(parseFloat(d.account?.total_expenses ?? 0));
+        setRealTxns(d.transactions ?? []);
+      })
+      .catch(() => {})
+      .finally(() => setLoadingFinance(false));
+  }, [communityId]);
+
+  // Use real values if available, fallback to stats
+  const displayBalance  = realBalance  ?? stats.walletBalance;
+  const displayIncome   = realIncome   ?? stats.monthlyIncome;
+  const displayExpenses = realExpenses ?? stats.monthlyExpenses;
+
   // Authorization state
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
   const [authTransaction, setAuthTransaction] = useState<{
@@ -184,14 +214,20 @@ export function AdminFinanceSection({
     amount: number;
   } | null>(null);
 
-  const handleAuthorizeTransaction = (transaction: RecentTransaction) => {
-    // Map transaction type to action config key
+  const handleAuthorizeTransaction = async (transaction: RecentTransaction) => {
+    // Call real API to approve pending transaction
+    if (communityId && transaction.status === 'pending') {
+      try {
+        await fetch("/api/community/finance.php", {
+          method: "POST", credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "approve_transaction", community_id: communityId, transaction_id: transaction.id }),
+        });
+      } catch {}
+    }
+    // Also open the auth drawer for the multi-sig flow
     const actionType: FinanceActionType = transaction.type as FinanceActionType;
-    setAuthTransaction({
-      type: actionType,
-      description: transaction.description,
-      amount: transaction.amount,
-    });
+    setAuthTransaction({ type: actionType, description: transaction.description, amount: transaction.amount });
     setAuthDrawerOpen(true);
   };
 
@@ -228,7 +264,7 @@ export function AdminFinanceSection({
     <>
       {/* Dialogs */}
       <ManageDuesLeviesDialog open={showDuesLevies} onOpenChange={setShowDuesLevies} />
-      <AccountStatementsDialog open={showStatements} onOpenChange={setShowStatements} />
+      <AccountStatementsDialog open={showStatements} onOpenChange={setShowStatements} communityId={communityId} />
       <MembersFinancialReportsDialog open={showMemberReports} onOpenChange={setShowMemberReports} />
       <AdminFinancialAuditDialog open={showAudit} onOpenChange={setShowAudit} />
 
@@ -254,7 +290,7 @@ export function AdminFinanceSection({
               <div className="text-left min-w-0 flex-1">
                 <h3 className="font-semibold text-sm">Finance</h3>
                 <p className="text-xs text-muted-foreground">
-                  {formatDualCurrency(stats.walletBalance)}
+                  {formatDualCurrency(displayBalance)}
                   {stats.pendingPayments > 0 && ` • ${stats.pendingPayments} Pending`}
                 </p>
               </div>
@@ -264,9 +300,9 @@ export function AdminFinanceSection({
             <div className="space-y-3">
               {/* Stats - inline row */}
               <div className="flex items-center justify-start gap-6 py-1">
-                <StatCard label="Balance" value={`₦${(stats.walletBalance / 1000).toFixed(0)}k`} icon={Wallet} />
-                <StatCard label="Income" value={`₦${(stats.monthlyIncome / 1000).toFixed(0)}k`} icon={TrendingUp} trend="up" />
-                <StatCard label="Expense" value={`₦${(stats.monthlyExpenses / 1000).toFixed(0)}k`} icon={TrendingDown} trend="down" />
+                <StatCard label="Balance" value={loadingFinance ? '…' : `₦${(displayBalance / 1000).toFixed(0)}k`} icon={Wallet} />
+                <StatCard label="Income" value={loadingFinance ? '…' : `₦${(displayIncome / 1000).toFixed(0)}k`} icon={TrendingUp} trend="up" />
+                <StatCard label="Expense" value={loadingFinance ? '…' : `₦${(displayExpenses / 1000).toFixed(0)}k`} icon={TrendingDown} trend="down" />
               </div>
 
               {/* Action Buttons - list style with dividers */}
@@ -313,7 +349,7 @@ export function AdminFinanceSection({
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-2">Recent Transactions</p>
                   <div className="divide-y divide-border/50">
-                    {recentTransactions.slice(0, 3).map((transaction) => (
+                    {(realTxns.length > 0 ? realTxns.slice(0, 3).map(t => ({ ...t, date: new Date(t.created_at), memberName: t.member_name })) : recentTransactions).slice(0, 3).map((transaction) => (
                       <TransactionItem 
                         key={transaction.id} 
                         transaction={transaction}

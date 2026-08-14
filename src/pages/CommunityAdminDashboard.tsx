@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useAdminDashboard } from "@/hooks/useAdminDashboard";
+import { useCommunityProfile } from "@/hooks/useCommunity";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, RefreshCw } from "lucide-react";
+import { ArrowLeft, RefreshCw, ShieldAlert } from "lucide-react";
 import { MemberPrivacyVotingSheet } from "@/components/community/settings/MemberPrivacyVotingSheet";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -14,6 +16,7 @@ import { AdminActivityLog } from "@/components/admin/AdminActivityLog";
 import { AdminMembershipSection } from "@/components/admin/AdminMembershipSection";
 import { AdminContentSection } from "@/components/admin/AdminContentSection";
 import { AdminFinanceSection } from "@/components/admin/AdminFinanceSection";
+import { CommunityFinanceManager } from "@/components/community/CommunityFinanceManager";
 import { AdminElectionSection } from "@/components/admin/AdminElectionSection";
 import { AdminMeetingSection } from "@/components/admin/AdminMeetingSection";
 import { AdminLeadershipSection } from "@/components/admin/AdminLeadershipSection";
@@ -56,41 +59,40 @@ import { EditCommunityProfileDialog } from "@/components/community/EditCommunity
 import { EditCommunityPhotoDialog } from "@/components/community/EditCommunityPhotoDialog";
 
 // Mock Data
-import {
-  mockAdminStats,
-  mockPendingActions,
-  mockAdminActivities,
-  mockRecentMemberRequests,
-  mockRecentContent,
-  mockRecentTransactions,
-  mockDefaultingMembers,
-  mockElectionActivities,
-  mockUpcomingMeetings,
-  PendingAction,
-} from "@/data/adminDashboardData";
+import { PendingAction } from "@/data/adminDashboardData";
 
-import communityPerson1 from "@/assets/community-person-1.jpg";
-import communityPerson2 from "@/assets/community-person-2.jpg";
-import communityPerson3 from "@/assets/community-person-3.jpg";
-import communityPerson4 from "@/assets/community-person-4.jpg";
-import communityPerson5 from "@/assets/community-person-5.jpg";
-import communityPerson6 from "@/assets/community-person-6.jpg";
+import communityPerson1 from "@/assets/community-person-1.jpg"; // logo fallback only
 
-// Mock executives for leadership section (extended with ExecutiveMember type properties)
-const mockExecutives: ExecutiveMember[] = [
-  { id: "exec-1", name: "Chief Emeka Obi", position: "President", imageUrl: communityPerson1, tenure: "2024-2028", level: "topmost", committee: "executive" },
-  { id: "exec-2", name: "Dr. Amaka Eze", position: "Vice President", imageUrl: communityPerson2, tenure: "2024-2028", level: "deputy", committee: "executive" },
-  { id: "exec-3", name: "Barr. Ngozi Okonkwo", position: "Secretary", imageUrl: communityPerson3, tenure: "2024-2028", level: "officer", committee: "executive" },
-  { id: "exec-4", name: "Mr. Chidi Okoro", position: "Treasurer", imageUrl: communityPerson4, tenure: "2024-2028", level: "officer", committee: "executive" },
-  { id: "exec-5", name: "Mrs. Ada Nwosu", position: "PRO", imageUrl: communityPerson5, tenure: "2024-2028", level: "officer", committee: "executive" },
-  { id: "exec-6", name: "Engr. Obinna Ibe", position: "Welfare", imageUrl: communityPerson6, tenure: "2024-2028", level: "officer", committee: "executive" },
-];
+// ─────────────────────────────────────────────────────────────────────────────
 
 const CommunityAdminDashboard = () => {
   const { communityId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // ── Real dashboard data via hook ──────────────────────────────────────────
+  const {
+    communityName, communityLogo,
+    stats: liveAdminStats,
+    pendingActions: livePendingActions,
+    activities: liveActivities,
+    recentMemberRequests: liveRecentMemberRequests,
+    recentContent: liveRecentContent,
+    recentTransactions: liveRecentTransactions,
+    defaultingMembers: liveDefaultingMembers,
+    electionActivities: liveElectionActivities,
+    upcomingMeetings: liveUpcomingMeetings,
+    loading: dashboardLoading,
+    refresh: refreshDashboard,
+    logAction,
+  } = useAdminDashboard(communityId);
+
+  // ── Real role check — any assigned admin (not just the owner) gets access
+  const { profile: roleProfile, loading: roleLoading } = useCommunityProfile(communityId);
+  const isRealOwner = !!roleProfile?.isOwner;
+  const isRealAdmin = isRealOwner || roleProfile?.role === "Admin" || roleProfile?.role === "admin";
+  const hasAdminAccess = isRealOwner || isRealAdmin;
 
   // Dialog States
   const [showMembershipRequests, setShowMembershipRequests] = useState(false);
@@ -100,6 +102,7 @@ const CommunityAdminDashboard = () => {
   const [showGalleryDialog, setShowGalleryDialog] = useState(false);
   const [showResourcesDialog, setShowResourcesDialog] = useState(false);
   const [showFinancialOverview, setShowFinancialOverview] = useState(false);
+  const [showFinanceManager,   setShowFinanceManager]   = useState(false);
   // showFinancialAudit removed - now handled by AdminFinanceSection's AdminFinancialAuditDialog
   const [showFinancialObligations, setShowFinancialObligations] = useState(false);
   const [showConstitution, setShowConstitution] = useState(false);
@@ -122,18 +125,38 @@ const CommunityAdminDashboard = () => {
   const [selectedExecutive, setSelectedExecutive] = useState<ExecutiveMember | null>(null);
   const [showExecutiveDetail, setShowExecutiveDetail] = useState(false);
 
+  // ── Real executives from leadership API ──────────────────────────────────
+  const [executives, setExecutives] = useState<ExecutiveMember[]>([]);
+
+  useEffect(() => {
+    if (!communityId) return;
+    fetch(`/api/community/leadership.php?community_id=${communityId}`, { credentials: "include" })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.executives?.length) {
+          setExecutives(data.executives.map((e: any): ExecutiveMember => ({
+            id:        e.user_id,
+            name:      e.name,
+            position:  e.position || "Member",
+            tenure:    e.joined_at ? new Date(e.joined_at).getFullYear().toString() : "—",
+            imageUrl:  e.profile_photo || "/placeholder.svg",
+            level:     (e.admin_rank <= 2 ? "president" : e.admin_rank <= 5 ? "officer" : "member") as any,
+            committee: "executive",
+          })));
+        }
+      })
+      .catch(() => {});
+  }, [communityId]);
+
   // Profile & Photo Edit States
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showEditPhoto, setShowEditPhoto] = useState(false);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await refreshDashboard();
     setIsRefreshing(false);
-    toast({
-      title: "Dashboard Refreshed",
-      description: "All data has been updated.",
-    });
+    toast({ title: "Dashboard Refreshed", description: "All data has been updated." });
   };
 
   const handlePendingActionClick = (action: PendingAction) => {
@@ -142,7 +165,7 @@ const CommunityAdminDashboard = () => {
         setShowMembershipRequests(true);
         break;
       case 'content':
-        navigate(`/community/${communityId}/admin/content`);
+        navigate(`/community/${communityId}/admin/content`); logAction('navigated to content moderation', 'Content', 'content');
         break;
       case 'clearance':
         navigate(`/community/${communityId}/admin/elections`);
@@ -159,6 +182,29 @@ const CommunityAdminDashboard = () => {
   const showToast = (title: string, description: string) => {
     toast({ title, description });
   };
+
+  // ── Real access control: only an assigned admin or the owner may view
+  // this dashboard — anyone else is blocked, regardless of how they got here.
+  if (!roleLoading && !hasAdminAccess) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 text-center">
+        <ShieldAlert className="h-12 w-12 text-destructive mb-4" />
+        <h1 className="text-lg font-bold mb-1">Admin Access Required</h1>
+        <p className="text-sm text-muted-foreground mb-6 max-w-xs">
+          You need to be an assigned admin or the owner of this community to view this dashboard.
+        </p>
+        <Button onClick={() => navigate(`/community/${communityId}`)}>Back to Community</Button>
+      </div>
+    );
+  }
+
+  if (roleLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background w-full overflow-x-hidden">
@@ -194,9 +240,9 @@ const CommunityAdminDashboard = () => {
         <div className="px-3 py-3 space-y-3 pb-24">
           {/* Dashboard Header with Stats */}
           <AdminDashboardHeader
-            communityName="Ndigbo Unity Association"
-            communityLogo={communityPerson1}
-            stats={mockAdminStats}
+            communityName={communityName}
+            communityLogo={communityLogo || communityPerson1}
+            stats={liveAdminStats}
             onMembersClick={() => setShowAllMembers(true)}
             onPendingClick={() => setShowMembershipRequests(true)}
             onElectionsClick={() => navigate(`/community/${communityId}/admin/elections`)}
@@ -211,13 +257,13 @@ const CommunityAdminDashboard = () => {
             onManageContent={() => navigate(`/community/${communityId}/admin/content`)}
             onManageLeadership={() => setShowLeadershipDialog(true)}
             onCommunitySettings={() => setShowSettingsTab(true)}
-            pendingMembers={mockAdminStats.pendingRequests}
-            pendingContent={mockAdminStats.pendingContent}
+            pendingMembers={liveAdminStats.pendingRequests}
+            pendingContent={liveAdminStats.pendingContent}
           />
 
           {/* Pending Actions Card */}
           <AdminPendingActionsCard
-            actions={mockPendingActions}
+            actions={livePendingActions}
             onActionClick={handlePendingActionClick}
           />
 
@@ -225,8 +271,9 @@ const CommunityAdminDashboard = () => {
           <div className="space-y-2">
             {/* Membership Management */}
             <AdminMembershipSection
-              stats={mockAdminStats}
-              recentRequests={mockRecentMemberRequests}
+              communityId={communityId}
+              stats={liveAdminStats}
+              recentRequests={liveRecentMemberRequests}
               onViewAllMembers={() => setShowAllMembers(true)}
               onManageRequests={() => setShowMembershipRequests(true)}
               onViewBlocked={() => setShowBlockManagement(true)}
@@ -234,8 +281,9 @@ const CommunityAdminDashboard = () => {
 
             {/* Content Management */}
             <AdminContentSection
-              stats={mockAdminStats}
-              recentContent={mockRecentContent}
+              communityId={communityId}
+              stats={liveAdminStats}
+              recentContent={liveRecentContent}
               onManageNews={() => navigate(`/community/${communityId}/admin/content`)}
               onManageEvents={() => navigate(`/community/${communityId}/admin/content`)}
               onManageGallery={() => setShowGalleryDialog(true)}
@@ -244,18 +292,20 @@ const CommunityAdminDashboard = () => {
 
             {/* Financial Management */}
             <AdminFinanceSection
-              stats={mockAdminStats}
-              recentTransactions={mockRecentTransactions}
-              defaultingMembers={mockDefaultingMembers}
-              onViewOverview={() => setShowFinancialOverview(true)}
+              communityId={communityId}
+              stats={liveAdminStats}
+              recentTransactions={liveRecentTransactions}
+              defaultingMembers={liveDefaultingMembers}
+              onViewOverview={() => setShowFinanceManager(true)}
               onViewAudit={() => {}}
               onViewObligations={() => setShowFinancialObligations(true)}
             />
 
             {/* Election Management */}
             <AdminElectionSection
-              stats={mockAdminStats}
-              electionActivities={mockElectionActivities}
+              communityId={communityId}
+              stats={liveAdminStats}
+              electionActivities={liveElectionActivities}
               onViewCampaigns={() => navigate(`/community/${communityId}/admin/elections`)}
               onViewResults={() => navigate(`/community/${communityId}/admin/elections`)}
               onManageAccreditation={() => navigate(`/community/${communityId}/admin/elections`)}
@@ -266,8 +316,9 @@ const CommunityAdminDashboard = () => {
 
             {/* Meeting Management */}
             <AdminMeetingSection
-              stats={mockAdminStats}
-              upcomingMeetings={mockUpcomingMeetings}
+              communityId={communityId}
+              stats={liveAdminStats}
+              upcomingMeetings={liveUpcomingMeetings}
               onViewUpcoming={() => setShowUpcomingMeetings(true)}
               onViewPast={() => setShowPastMeetings(true)}
               onViewAttendance={() => setShowAttendance(true)}
@@ -278,13 +329,14 @@ const CommunityAdminDashboard = () => {
 
             {/* Leadership Management */}
             <AdminLeadershipSection
-              executives={mockExecutives}
+              communityId={communityId}
+              executives={executives}
               onManageLeadership={() => setShowLeadershipDialog(true)}
-              onApplyElectionResults={() => setShowApplyResults(true)}
+              onApplyElectionResults={() => { setShowApplyResults(true); refreshDashboard(); }}
               onViewChangeHistory={() => setShowLeadershipHistory(true)}
               onManageAdhoc={() => setShowAdhocCommittees(true)}
               onViewExecutive={(id) => {
-                const exec = mockExecutives.find(e => e.id === id);
+                const exec = executives.find(e => e.id === id);
                 if (exec) {
                   setSelectedExecutive(exec);
                   setShowExecutiveDetail(true);
@@ -294,6 +346,7 @@ const CommunityAdminDashboard = () => {
 
             {/* Community Settings */}
             <AdminSettingsSection
+              communityId={communityId}
               onEditProfile={() => setShowEditProfile(true)}
               onEditPhotos={() => setShowEditPhoto(true)}
               onManageConstitution={() => setShowConstitution(true)}
@@ -307,53 +360,70 @@ const CommunityAdminDashboard = () => {
           </div>
 
           {/* Activity Log */}
-          <AdminActivityLog activities={mockAdminActivities} maxHeight="350px" />
+          <AdminActivityLog activities={liveActivities} maxHeight="350px" />
         </div>
       </ScrollArea>
 
       {/* Dialogs */}
       <ManageMembershipRequestsDialog
         open={showMembershipRequests}
-        onOpenChange={setShowMembershipRequests}
+        onOpenChange={async (v) => { setShowMembershipRequests(v); if (!v) { await logAction("reviewed membership requests", "Membership Applications", "membership"); refreshDashboard(); } }}
+        communityId={communityId}
       />
 
       <BlockManagementDrawer
         open={showBlockManagement}
-        onOpenChange={setShowBlockManagement}
+        onOpenChange={async (v) => { setShowBlockManagement(v); if (!v) { await logAction("managed blocked members", "Block Management", "membership"); refreshDashboard(); } }}
+        communityId={communityId}
       />
 
       <AllMembersDrawer
         open={showAllMembers}
-        onOpenChange={setShowAllMembers}
+        onOpenChange={(v) => { setShowAllMembers(v); if (!v) refreshDashboard(); }}
+        communityId={communityId}
       />
 
       <ManageLeadershipDialog
         open={showLeadershipDialog}
-        onOpenChange={setShowLeadershipDialog}
+        onOpenChange={async (v) => { setShowLeadershipDialog(v); if (!v) { await logAction("managed community leadership", "Leadership Management", "leadership"); refreshDashboard(); } }}
+        communityId={communityId}
+        onActivityLogged={async (action, target) => {
+          await logAction(action, target, "leadership");
+          refreshDashboard();
+        }}
       />
 
       <ManageCommunityGalleryDialog
         open={showGalleryDialog}
         onOpenChange={setShowGalleryDialog}
+        communityId={communityId}
       />
 
       <ManageCommunityResourcesDialog
         open={showResourcesDialog}
         onOpenChange={setShowResourcesDialog}
+        communityId={communityId}
       />
 
       <FinancialOverviewDialog
         open={showFinancialOverview}
-        onOpenChange={setShowFinancialOverview}
-        isAdmin={true}
-        isOwner={true}
+        onOpenChange={async (v) => { setShowFinancialOverview(v); if (!v) { await logAction("viewed financial overview", "Finance", "finance"); refreshDashboard(); } }}
+        communityId={communityId}
+        isAdmin={isRealAdmin}
+        isOwner={isRealOwner}
       />
 
       {/* FinancialAuditDialog removed - unified into AdminFinancialAuditDialog in AdminFinanceSection */}
+      <CommunityFinanceManager
+        open={showFinanceManager}
+        onOpenChange={async (v) => { setShowFinanceManager(v); if (!v) { await logAction("managed community finances", "Finance Manager", "finance"); refreshDashboard(); } }}
+        communityId={communityId}
+      />
 
       <FinancialObligationsDialog
         open={showFinancialObligations}
         onOpenChange={setShowFinancialObligations}
+        communityId={communityId}
       />
 
       <ConstitutionViewer
@@ -373,7 +443,8 @@ const CommunityAdminDashboard = () => {
 
       <AdminSettingsTab
         open={showSettingsTab}
-        onOpenChange={setShowSettingsTab}
+        onOpenChange={(v) => { setShowSettingsTab(v); if (!v) refreshDashboard(); }}
+        communityId={communityId}
       />
 
       {/* Meeting Management Drawers */}
@@ -423,27 +494,38 @@ const CommunityAdminDashboard = () => {
         onOpenChange={setShowExecutiveDetail}
       />
 
-      {/* Profile & Photo Edit Dialogs */}
+      {/* Executive Profile Edit (from LeadershipSection click) */}
       {selectedExecutive && (
-        <>
-          <EditCommunityProfileDialog
-            open={showEditProfile}
-            onOpenChange={setShowEditProfile}
-            member={selectedExecutive}
-            onSave={(profile, milestones) => {
-              console.log("Saved profile:", profile, milestones);
-            }}
-          />
-          <EditCommunityPhotoDialog
-            open={showEditPhoto}
-            onOpenChange={setShowEditPhoto}
-            currentImage={selectedExecutive.imageUrl}
-            onSave={(newImage) => {
-              console.log("Saved photo:", newImage);
-            }}
-          />
-        </>
+        <EditCommunityProfileDialog
+          open={showExecutiveDetail && showEditProfile}
+          onOpenChange={(v) => { if (!v) setShowEditProfile(false); }}
+          member={selectedExecutive}
+          onSave={(profile, milestones) => {
+            toast({ title: "Executive profile updated" });
+            setShowEditProfile(false);
+          }}
+        />
       )}
+
+      {/* Community Photo Edit (from Settings) */}
+      <EditCommunityPhotoDialog
+        open={showEditPhoto}
+        onOpenChange={setShowEditPhoto}
+        currentImage={communityLogo || communityPerson1}
+        onSave={async (newImage) => {
+          if (communityId) {
+            try {
+              await fetch("/api/community/leadership.php", {
+                method: "POST", credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "update_community_profile", community_id: communityId, logo: newImage }),
+              });
+              toast({ title: "Community photo updated" });
+            } catch {}
+          }
+          setShowEditPhoto(false);
+        }}
+      />
     </div>
   );
 };

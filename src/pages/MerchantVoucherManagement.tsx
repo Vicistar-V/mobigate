@@ -1,34 +1,32 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, Package, History, Wallet, ChevronRight, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  initialMockBatches,
-  initialMerchantWalletBalance,
-  getBatchStatusCounts,
-  formatNum,
-} from "@/data/merchantVoucherData";
+import { formatNum } from "@/data/merchantVoucherData";
 
 export default function MerchantVoucherManagement() {
   const navigate = useNavigate();
-  const [walletBalance] = useState(initialMerchantWalletBalance);
-  const batches = initialMockBatches;
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [stats, setStats] = useState({
+    totalBatches: 0, totalBundles: 0, totalCards: 0,
+    available: 0, soldUnused: 0, used: 0, invalidated: 0,
+  });
 
-  const stats = useMemo(() => {
-    let totalBatches = batches.length;
-    let totalBundles = batches.reduce((s, b) => s + b.bundleCount, 0);
-    let totalCards = batches.reduce((s, b) => s + b.totalCards, 0);
-    let available = 0, soldUnused = 0, used = 0, invalidated = 0;
-    batches.forEach(b => {
-      const c = getBatchStatusCounts(b);
-      available += c.available;
-      soldUnused += c.sold_unused;
-      used += c.used;
-      invalidated += c.invalidated;
-    });
-    return { totalBatches, totalBundles, totalCards, available, soldUnused, used, invalidated };
-  }, [batches]);
+  useEffect(() => {
+    fetch("/api/merchant/vouchers.php?action=wallet", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => setWalletBalance(parseFloat(d.balance) || 0))
+      .catch(() => setWalletBalance(0));
+
+    fetch("/api/merchant/vouchers.php?action=stats", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => setStats({
+        totalBatches: d.totalBatches || 0, totalBundles: d.totalBundles || 0, totalCards: d.totalCards || 0,
+        available: d.available || 0, soldUnused: 0, used: d.used || 0, invalidated: d.invalidated || 0,
+      }))
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="bg-background min-h-screen pb-8">

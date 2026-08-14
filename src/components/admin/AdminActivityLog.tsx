@@ -101,9 +101,17 @@ export function AdminActivityLog({ activities, maxHeight = "300px" }: AdminActiv
           style={{ maxHeight }}
         >
           <div className="divide-y divide-border">
-            {activities.map((activity) => (
-              <ActivityItem key={activity.id} activity={activity} />
-            ))}
+            {activities.length === 0 ? (
+              <div className="flex flex-col items-center gap-2 py-8 text-center text-muted-foreground">
+                <Clock className="h-8 w-8 opacity-30" />
+                <p className="text-sm font-medium">No admin activity yet</p>
+                <p className="text-xs">Actions performed by admins will appear here</p>
+              </div>
+            ) : (
+              activities.map((activity) => (
+                <ActivityItem key={activity.id} activity={activity} />
+              ))
+            )}
           </div>
         </div>
       </CardContent>

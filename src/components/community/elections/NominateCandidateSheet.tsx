@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 import {
   UserPlus,
@@ -104,27 +105,52 @@ const currentUser: Member = {
 interface NominateCandidateSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
   onNominationComplete?: (nomineeId: string, officeId: string, isSelfNomination: boolean) => void;
 }
 
 export function NominateCandidateSheet({
   open,
   onOpenChange,
+  communityId,
   onNominationComplete,
 }: NominateCandidateSheetProps) {
   const isMobile = useIsMobile();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const currentUser: Member = { id: user?.id || "", name: user?.name || "You", avatar: user?.avatar || "/placeholder.svg", title: "Member" };
   const [nominationType, setNominationType] = useState<"self" | "other">("self");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [selectedOffice, setSelectedOffice] = useState("");
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const openNominationPeriods = mockNominationPeriods.filter(
-    (p) => p.status === "open"
-  );
+  const [members, setMembers] = useState<Member[]>([]);
+  const [offices, setOffices] = useState<{ officeId: string; officeName: string }[]>([]);
+  const [electionId, setElectionId] = useState<string | null>(null);
 
-  const filteredMembers = mockMembers.filter((member) =>
+  useEffect(() => {
+    if (!open || !communityId) return;
+    fetch(`/api/community/manage_members.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => setMembers((d.members ?? []).map((m: any) => ({ id: m.user_id, name: m.name?.trim() || m.username, avatar: m.profile_photo }))))
+      .catch(() => setMembers([]));
+
+    fetch(`/api/community/elections.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const currentElection = (d.elections ?? []).find((e: any) => ['upcoming', 'eoi', 'nomination'].includes(e.status));
+        setElectionId(currentElection?.id ?? null);
+        const electionOffices = (d.offices ?? []).filter((o: any) => o.election_id === currentElection?.id);
+        setOffices(electionOffices.map((o: any) => ({ officeId: o.id, officeName: o.name })));
+      })
+      .catch(() => setOffices([]));
+  }, [open, communityId]);
+
+  const openNominationPeriods = offices;
+
+  const filteredMembers = members.filter((member) =>
     member.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -150,24 +176,54 @@ export function NominateCandidateSheet({
     setShowConfirmDialog(true);
   };
 
-  const confirmNomination = () => {
+  const confirmNomination = async () => {
     const nominee = nominationType === "self" ? currentUser : selectedMember;
     const office = openNominationPeriods.find((p) => p.officeId === selectedOffice);
+    if (!communityId || !electionId || !nominee?.id) {
+      toast({ title: "Couldn't Submit", description: "Missing community or election context", variant: "destructive" });
+      return;
+    }
 
-    toast({
-      title: "Nomination Submitted!",
-      description: `${nominee?.name} has been nominated for ${office?.officeName}`,
-    });
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/community/elections.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "nominate_candidate",
+          community_id: communityId,
+          election_id: electionId,
+          office_id: selectedOffice,
+          nominee_id: nominee.id,
+        }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to submit nomination");
 
-    onNominationComplete?.(
-      nominee?.id || "",
-      selectedOffice,
-      nominationType === "self"
-    );
+      // Self-nominations are automatically accepted — no separate approval needed
+      if (nominationType === "self") {
+        await fetch("/api/community/elections.php", {
+          method: "POST", credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "respond_nomination", community_id: communityId, candidate_id: d.id, accept: true }),
+        });
+      }
 
-    setShowConfirmDialog(false);
-    onOpenChange(false);
-    resetForm();
+      toast({
+        title: "Nomination Submitted!",
+        description: `${nominee?.name} has been nominated for ${office?.officeName}`,
+      });
+
+      onNominationComplete?.(nominee?.id || "", selectedOffice, nominationType === "self");
+
+      setShowConfirmDialog(false);
+      onOpenChange(false);
+      resetForm();
+    } catch (e: any) {
+      toast({ title: "Couldn't Submit Nomination", description: e.message, variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const resetForm = () => {
@@ -449,9 +505,10 @@ export function NominateCandidateSheet({
             <AlertDialogCancel className="mt-0">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmNomination}
+              disabled={submitting}
               className="bg-gradient-to-r from-primary to-primary/80"
             >
-              Confirm Nomination
+              {submitting ? "Submitting..." : "Confirm Nomination"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

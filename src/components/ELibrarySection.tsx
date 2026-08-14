@@ -16,22 +16,28 @@ interface ELibrarySectionProps {
   activeFilter: string;
   onFilterChange: (filter: string) => void;
   title?: string;
+  counts?: Record<string, number>;
 }
 
+const formatCount = (n: number): string => {
+  if (n >= 1000) return (n / 1000).toFixed(1) + "k";
+  return String(n);
+};
+
 const primaryFilters = [
-  { value: "all", label: "All", icon: null, count: "500.0k" },
-  { value: "video", label: "Videos", icon: Play, count: "200.0k" },
-  { value: "photo", label: "Photos", icon: Image, count: "100.0k" },
-  { value: "article", label: "Articles", icon: FileText, count: "100.0k" },
+  { value: "all", label: "All", icon: null },
+  { value: "video", label: "Videos", icon: Play },
+  { value: "photo", label: "Photos", icon: Image },
+  { value: "article", label: "Articles", icon: FileText },
 ];
 
 const moreFilters = [
-  { value: "audio", label: "Audio", icon: Headphones, count: "30.0k" },
-  { value: "pdf", label: "PDF Documents", icon: FileIcon, count: "50.0k" },
-  { value: "url", label: "URL Links", icon: Link, count: "20.0k" },
+  { value: "audio", label: "Audio", icon: Headphones },
+  { value: "pdf", label: "PDF Documents", icon: FileIcon },
+  { value: "url", label: "URL Links", icon: Link },
 ];
 
-export const ELibrarySection = ({ activeFilter, onFilterChange, title = "Recommended E-Library Contents" }: ELibrarySectionProps) => {
+export const ELibrarySection = ({ activeFilter, onFilterChange, title = "Recommended E-Library Contents", counts = {} }: ELibrarySectionProps) => {
   const isMoreActive = moreFilters.some(filter => filter.value === activeFilter);
   const [sortFilter, setSortFilter] = useState("all");
   const [isManageDialogOpen, setIsManageDialogOpen] = useState(false);
@@ -76,7 +82,7 @@ export const ELibrarySection = ({ activeFilter, onFilterChange, title = "Recomme
               className="text-sm md:text-base gap-1.5"
             >
               {Icon && <Icon className="w-3 h-3" />}
-              {option.label} ({option.count})
+              {option.label} ({formatCount(counts[option.value] ?? 0)})
             </Button>
           );
         })}
@@ -104,7 +110,7 @@ export const ELibrarySection = ({ activeFilter, onFilterChange, title = "Recomme
                   className={isActive ? "bg-primary text-primary-foreground" : ""}
                 >
                   <Icon className="w-4 h-4 mr-2" />
-                  {option.label} ({option.count})
+                  {option.label} ({formatCount(counts[option.value] ?? 0)})
                 </DropdownMenuItem>
               );
             })}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -36,7 +36,7 @@ import {
   AlertCircle,
   Info,
 } from "lucide-react";
-import { mockMeetings, mockMinutesSettings } from "@/data/meetingsData";
+// mockMeetings/mockMinutesSettings replaced with real API data above
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -45,26 +45,40 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 interface SecretaryUploadMinutesDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
+  onUploaded?: () => void;
 }
 
 export const SecretaryUploadMinutesDialog = ({
   open,
   onOpenChange,
+  communityId,
+  onUploaded,
 }: SecretaryUploadMinutesDialogProps) => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const [selectedMeeting, setSelectedMeeting] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
-  const [downloadFee, setDownloadFee] = useState(mockMinutesSettings.downloadFeeDefault.toString());
+  const [downloadFee, setDownloadFee] = useState("500");
   const [notes, setNotes] = useState("");
   const [sendNotification, setSendNotification] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
+  const [completedMeetings, setCompletedMeetings] = useState<any[]>([]);
 
-  // Get completed meetings that don't have minutes yet
-  const completedMeetings = mockMeetings.filter(
-    (m) => m.status === "completed"
-  );
+  useEffect(() => {
+    if (!open || !communityId) return;
+    fetch(`/api/community/meetings_admin.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        setCompletedMeetings((d.past ?? []).map((m: any) => ({ id: m.id, name: m.title, date: new Date(m.meeting_date), status: "completed" })));
+      })
+      .catch(() => setCompletedMeetings([]));
+    fetch(`/api/community/meetings_admin.php?action=minutes&community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => { if (d.settings) setDownloadFee(String(d.settings.download_fee_default ?? 500)); })
+      .catch(() => {});
+  }, [open, communityId]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -95,7 +109,7 @@ export const SecretaryUploadMinutesDialog = ({
   };
 
   const handleUpload = async () => {
-    if (!selectedMeeting || !file) {
+    if (!selectedMeeting || !file || !communityId) {
       toast({
         title: "Missing Information",
         description: "Please select a meeting and upload a file.",
@@ -106,35 +120,51 @@ export const SecretaryUploadMinutesDialog = ({
 
     setIsUploading(true);
 
-    // Simulate upload
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    setIsUploading(false);
-    setUploadComplete(true);
-
-    // Show upload success toast
-    toast({
-      title: "Minutes Uploaded Successfully",
-      description: "Meeting minutes have been uploaded and are pending adoption.",
-    });
-
-    // If notifications enabled, show notification sent toast
-    if (sendNotification) {
-      setTimeout(() => {
-        toast({
-          title: "Notifications Sent",
-          description: "All community members have been notified to adopt the minutes.",
-        });
-      }, 500);
-
-      // Simulate creating notification entries
-      // In a real app, this would add to the notifications data
-      console.log("[Minutes Upload] Creating notification entries for all members:", {
-        type: "minutes_adoption_required",
-        meetingId: selectedMeeting,
-        downloadFee: parseInt(downloadFee),
-        timestamp: new Date().toISOString(),
+    try {
+      // Note: there's no file-storage backend wired here yet, so the file's
+      // name/size/type are recorded for real, but the bytes themselves
+      // aren't persisted anywhere — file_url stays empty until a real
+      // upload/storage endpoint is added.
+      const fileType = file.type.includes("pdf") ? "PDF" : file.type.includes("wordprocessingml") ? "DOCX" : "DOC";
+      const res = await fetch("/api/community/meetings_admin.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "upload_minutes", community_id: communityId, meeting_id: selectedMeeting,
+          file_name: file.name, file_size: `${(file.size / 1024 / 1024).toFixed(2)} MB`, file_type: fileType,
+        }),
       });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to upload minutes");
+
+      await fetch("/api/community/meetings_admin.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "set_minutes_settings", community_id: communityId, download_fee_default: parseInt(downloadFee) || 500 }),
+      });
+
+      setIsUploading(false);
+      setUploadComplete(true);
+      onUploaded?.();
+
+      // Show upload success toast
+      toast({
+        title: "Minutes Uploaded Successfully",
+        description: "Meeting minutes have been uploaded and are pending adoption.",
+      });
+
+      if (sendNotification) {
+        setTimeout(() => {
+          toast({
+            title: "Notifications Sent",
+            description: "All community members have been notified to adopt the minutes.",
+          });
+        }, 500);
+      }
+    } catch (e: any) {
+      setIsUploading(false);
+      toast({ title: "Couldn't Upload Minutes", description: e.message, variant: "destructive" });
+      return;
     }
 
     // Show meeting lock notice

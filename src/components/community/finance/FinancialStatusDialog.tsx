@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, CheckCircle2, AlertTriangle, TrendingUp, Calendar, CreditCard, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
@@ -17,7 +17,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { mockFinancialStatus } from "@/data/financeData";
 import { useToast } from "@/hooks/use-toast";
 import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -25,6 +24,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface FinancialStatusDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
 }
 
 // Helper: Local Currency PRIMARY, Mobi SECONDARY
@@ -35,30 +35,64 @@ const formatLocalPrimary = (amount: number): { local: string; mobi: string } => 
   };
 };
 
-export function FinancialStatusDialog({ open, onOpenChange }: FinancialStatusDialogProps) {
+export function FinancialStatusDialog({ open, onOpenChange, communityId }: FinancialStatusDialogProps) {
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const [status] = useState(mockFinancialStatus);
+  const [status, setStatus] = useState({
+    standing: "good" as "good" | "defaulting" | "suspended",
+    outstandingBalance: 0, lastPaymentDate: new Date(), complianceRate: 100, totalPaid: 0, totalDue: 0,
+  });
+  const [loading, setLoading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
+  useEffect(() => {
+    if (!open || !communityId) return;
+    setLoading(true);
+    fetch(`/api/community/finance.php?action=my_status&community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.status) {
+          setStatus({
+            standing: d.status.standing, outstandingBalance: d.status.outstandingBalance,
+            lastPaymentDate: d.status.lastPaymentDate ? new Date(d.status.lastPaymentDate) : new Date(),
+            complianceRate: d.status.complianceRate, totalPaid: d.status.totalPaid, totalDue: d.status.totalDue,
+          });
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [open, communityId]);
 
   const handlePayNow = () => {
     setShowConfirmation(true);
   };
 
   const handleConfirmPayment = async () => {
+    if (!communityId) return;
     setIsProcessingPayment(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const formatted = formatLocalPrimary(status.outstandingBalance);
-    toast({
-      title: "Payment Successful!",
-      description: `Your payment of ${formatted.local} (${formatted.mobi}) has been debited on your Mobi Wallet.`,
-    });
-    
-    setIsProcessingPayment(false);
-    setShowConfirmation(false);
-    onOpenChange(false);
+    try {
+      const res = await fetch("/api/community/finance.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "pay_all_outstanding", community_id: communityId }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to process payment");
+
+      const formatted = formatLocalPrimary(status.outstandingBalance);
+      toast({
+        title: "Payment Successful!",
+        description: `Your payment of ${formatted.local} (${formatted.mobi}) has been debited on your Mobi Wallet.`,
+      });
+
+      setShowConfirmation(false);
+      onOpenChange(false);
+    } catch (e: any) {
+      toast({ title: "Couldn't Process Payment", description: e.message, variant: "destructive" });
+    } finally {
+      setIsProcessingPayment(false);
+    }
   };
 
   const getStandingColor = (standing: string) => {

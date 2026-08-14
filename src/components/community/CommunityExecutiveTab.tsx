@@ -1,79 +1,75 @@
+import { useState, useEffect, useCallback } from "react";
 import { Card } from "@/components/ui/card";
-import { Grid3x3 } from "lucide-react";
+import { Grid3x3, Loader2, Users } from "lucide-react";
 import { FeaturedLeaderCard } from "./FeaturedLeaderCard";
 import { ExecutiveMembersCarousel } from "./ExecutiveMembersCarousel";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
-import { PremiumAdCard } from "@/components/PremiumAdCard";
-import {
-  executiveMembers,
-  ExecutiveMember,
-} from "@/data/communityExecutivesData";
-import { useState } from "react";
+import { ExecutiveMember } from "@/data/communityExecutivesData";
 import { ExecutiveDetailSheet } from "./ExecutiveDetailSheet";
+import { mapApiExecutive, ApiExecutive } from "@/lib/leadershipMerge";
 
-export const CommunityExecutiveTab = () => {
+const API = "/api/community";
+
+interface CommunityExecutiveTabProps {
+  communityId?: string;
+}
+
+export const CommunityExecutiveTab = ({ communityId }: CommunityExecutiveTabProps) => {
   const [selectedMember, setSelectedMember] = useState<ExecutiveMember | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  
-  // Get the President-General (topmost level)
-  const presidentGeneral = executiveMembers.find((m) => m.level === "topmost");
-  
-  // Get other executive members (deputy and officers)
-  const otherExecutives = executiveMembers.filter((m) => m.level !== "topmost");
+  const [executives, setExecutives] = useState<ExecutiveMember[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const loadData = useCallback(() => {
+    if (!communityId) return;
+    setLoading(true);
+    fetch(`${API}/leadership.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d) => {
+        const execs: ApiExecutive[] = d.executives ?? [];
+        setExecutives(execs.map(mapApiExecutive));
+      })
+      .catch(() => setExecutives([]))
+      .finally(() => setLoading(false));
+  }, [communityId]);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const presidentGeneral = executives.find((m) => m.level === "topmost");
+  const otherExecutives = executives.filter((m) => m.level !== "topmost");
 
   const handleMemberClick = (member: ExecutiveMember) => {
     setSelectedMember(member);
     setIsDetailOpen(true);
   };
 
-  // Premium ad data
-  const premiumAd1 = {
-    id: "executive-premium-1",
-    advertiser: {
-      name: "Elite Business Solutions",
-      verified: true,
-    },
-    content: {
-      headline: "Transform Your Community Management",
-      description: "Professional tools for modern community leaders. Get 50% off your first year.",
-      ctaText: "Learn More",
-      ctaUrl: "https://example.com/elite",
-    },
-    media: {
-      type: "image" as const,
-      items: [
-        {
-          url: "https://images.unsplash.com/photo-1557426272-fc759fdf7a8d?w=1200&q=80",
-        },
-      ],
-    },
-    layout: "standard" as const,
-    duration: 15,
-  };
+  if (!communityId) {
+    return (
+      <Card className="p-8 text-center text-muted-foreground">
+        No community selected.
+      </Card>
+    );
+  }
 
-  const premiumAd2 = {
-    id: "executive-premium-2",
-    advertiser: {
-      name: "Community Pro Services",
-      verified: true,
-    },
-    content: {
-      headline: "Streamline Your Operations",
-      description: "End-to-end management solutions for growing communities. Free consultation available.",
-      ctaText: "Get Started",
-      ctaUrl: "https://example.com/communitypro",
-    },
-    media: {
-      type: "image" as const,
-      items: [
-        {
-          url: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=1200&q=80",
-        },
-      ],
-    },
-    layout: "standard" as const,
-    duration: 15,
-  };
+  if (loading && executives.length === 0) {
+    return (
+      <div className="flex justify-center py-16">
+        <Loader2 className="h-7 w-7 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (executives.length === 0) {
+    return (
+      <Card className="p-10 text-center">
+        <Users className="h-10 w-10 mx-auto mb-3 text-muted-foreground opacity-30" />
+        <p className="font-medium mb-1">No Executive Committee Yet</p>
+        <p className="text-sm text-muted-foreground">
+          Positions haven't been assigned for this community yet.
+        </p>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -86,32 +82,21 @@ export const CommunityExecutiveTab = () => {
               <Grid3x3 className="h-4 w-4" />
             </div>
           </Card>
-          <FeaturedLeaderCard 
+          <FeaturedLeaderCard
             leader={presidentGeneral}
             onClick={() => handleMemberClick(presidentGeneral)}
           />
         </div>
       )}
 
-      {/* Other Executive Members Carousel */}
-      <ExecutiveMembersCarousel
-        title="Executive Committee Members"
-        members={otherExecutives}
-        onMemberClick={handleMemberClick}
-      />
-
-      {/* Advertisement 1 */}
-      <PremiumAdCard {...premiumAd1} />
-
-      {/* Another Executive Section */}
-      <ExecutiveMembersCarousel
-        title="Executive Committee Members"
-        members={otherExecutives.slice(0, 6)}
-        onMemberClick={handleMemberClick}
-      />
-
-      {/* Advertisement 2 */}
-      <PremiumAdCard {...premiumAd2} />
+      {/* Other Executive Members */}
+      {otherExecutives.length > 0 && (
+        <ExecutiveMembersCarousel
+          title="Executive Committee Members"
+          members={otherExecutives}
+          onMemberClick={handleMemberClick}
+        />
+      )}
 
       {/* People You May Know */}
       <PeopleYouMayKnow />

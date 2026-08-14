@@ -2,21 +2,35 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Tag, ChevronDown, ChevronUp } from "lucide-react";
-import { mockMeetingHeadlines, mockMeetings } from "@/data/meetingsData";
 import { format } from "date-fns";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export const MeetingHeadlineThemeTab = () => {
+export const MeetingHeadlineThemeTab = ({ communityId }: { communityId?: string } = {}) => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // Combine headlines with meeting data
-  const headlinesWithMeetings = mockMeetingHeadlines.map((headline) => {
-    const meeting = mockMeetings.find((m) => m.id === headline.meetingId);
-    return { ...headline, meeting };
-  });
+  const [headlinesWithMeetings, setHeadlinesWithMeetings] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!communityId) return;
+    fetch(`/api/community/meetings_admin.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const allMeetings = [...(d.upcoming ?? []), ...(d.past ?? [])];
+        const mapped = allMeetings
+          .filter((m: any) => m.headline)
+          .map((m: any) => ({
+            id: m.id, meetingId: m.id, headline: m.headline, theme: m.theme || "",
+            description: m.headline_description || "",
+            agendaItems: m.agenda_items ? JSON.parse(m.agenda_items) : [],
+            meeting: { id: m.id, name: m.title, date: new Date(m.meeting_date) },
+          }));
+        setHeadlinesWithMeetings(mapped);
+      })
+      .catch(() => setHeadlinesWithMeetings([]));
+  }, [communityId]);
 
   const totalPages = Math.ceil(headlinesWithMeetings.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;

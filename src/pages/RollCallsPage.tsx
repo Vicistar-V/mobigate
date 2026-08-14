@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,22 +22,53 @@ import {
   TrendingUp,
   Calendar,
   Award,
+  Loader2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
-import { activeRollCall, rollCallHistory, type RollCall } from "@/data/rollCallsData";
+import { type RollCall } from "@/data/rollCallsData";
 
-export const RollCallsPage = () => {
+export const RollCallsPage = ({ communityId }: { communityId?: string } = {}) => {
   const [showMarkDialog, setShowMarkDialog] = useState(false);
   const [showAbsenceDialog, setShowAbsenceDialog] = useState(false);
   const [absenceReason, setAbsenceReason] = useState("");
   const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [marking, setMarking] = useState(false);
 
-  const currentRollCall = activeRollCall;
-  const pastRollCalls = rollCallHistory;
+  const [allRollCalls, setAllRollCalls] = useState<(RollCall & { hasAttended?: boolean })[]>([]);
 
-  // Mock user attendance data (in real app, would come from backend)
-  const userAttendedRollCallIds = ["rollcall-1", "rollcall-2", "rollcall-5"];
+  const loadRollCalls = useCallback(() => {
+    if (!communityId) return;
+    setLoading(true);
+    fetch(`/api/community/meetings_admin.php?action=rollcalls&community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const mapped = (d.rollcalls ?? []).map((rc: any) => {
+          const total = parseInt(rc.total_members, 10) || 0;
+          const attended = parseInt(rc.attended_members, 10) || 0;
+          return {
+            id: rc.id, title: rc.title, description: rc.description,
+            startTime: new Date(rc.start_time), endTime: new Date(rc.end_time),
+            status: rc.status, totalMembers: total, attendedMembers: attended,
+            absentMembers: Math.max(total - attended, 0),
+            attendancePercentage: total > 0 ? Math.round((attended / total) * 100) : 0,
+            category: rc.category, hasAttended: !!rc.has_attended,
+          };
+        });
+        setAllRollCalls(mapped);
+      })
+      .catch(() => setAllRollCalls([]))
+      .finally(() => setLoading(false));
+  }, [communityId]);
+
+  useEffect(() => { loadRollCalls(); }, [loadRollCalls]);
+
+  const currentRollCall = allRollCalls.find((rc) => rc.status === "active") || null;
+  const pastRollCalls = allRollCalls.filter((rc) => rc.status === "completed");
+
+  // Real attendance, from the roll-calls the user has actually marked
+  const userAttendedRollCallIds = allRollCalls.filter((rc) => rc.hasAttended).map((rc) => rc.id);
 
   // Calculate stats
   const totalAttended = pastRollCalls.filter((rc) =>
@@ -46,14 +77,29 @@ export const RollCallsPage = () => {
   const totalRollCalls = pastRollCalls.length;
   const attendanceRate = totalRollCalls > 0 ? (totalAttended / totalRollCalls) * 100 : 0;
 
-  const handleMarkAttendance = () => {
-    if (!currentRollCall) return;
+  const handleMarkAttendance = async () => {
+    if (!currentRollCall || !communityId) return;
+    setMarking(true);
+    try {
+      const res = await fetch("/api/community/meetings_admin.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "mark_rollcall", community_id: communityId, rollcall_id: currentRollCall.id }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to mark attendance");
 
-    toast({
-      title: "Attendance Marked",
-      description: `You've successfully marked your attendance for ${currentRollCall.title}`,
-    });
-    setShowMarkDialog(false);
+      toast({
+        title: "Attendance Marked",
+        description: `You've successfully marked your attendance for ${currentRollCall.title}`,
+      });
+      setShowMarkDialog(false);
+      loadRollCalls();
+    } catch (e: any) {
+      toast({ title: "Couldn't Mark Attendance", description: e.message, variant: "destructive" });
+    } finally {
+      setMarking(false);
+    }
   };
 
   const handleSubmitAbsence = () => {

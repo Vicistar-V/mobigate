@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, CreditCard, FileText, BookOpen, QrCode, Download, ExternalLink, Search, Shield, MoreHorizontal, Scale, HelpCircle, MessageCircle, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
@@ -8,8 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { mockIDCard, letterTemplates, mockLetterRequests, publications } from "@/data/resourcesData";
+import { letterTemplates } from "@/data/resourcesData";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DigitalIDCardDisplay, IDCardData } from "@/components/community/resources/DigitalIDCardDisplay";
@@ -23,11 +24,18 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface CommunityResourcesDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
 }
 
-export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResourcesDialogProps) {
+export function CommunityResourcesDialog({ open, onOpenChange, communityId }: CommunityResourcesDialogProps) {
   const isMobile = useIsMobile();
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (open) console.log("[CommunityResourcesDialog] opened with communityId:", communityId);
+  }, [open, communityId]);
+
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [letterPurpose, setLetterPurpose] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -38,21 +46,96 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
   const [selectedPubForDownload, setSelectedPubForDownload] = useState<{ title: string; fileSize: string } | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [showConstitutionViewer, setShowConstitutionViewer] = useState(false);
+  const [isSubmittingLetter, setIsSubmittingLetter] = useState(false);
+  const [isRequestingCard, setIsRequestingCard] = useState(false);
+
+  const [mockIDCard, setMockIDCard] = useState({
+    id: "", memberName: user?.name || "Member", memberId: (user?.id || "").slice(0, 8).toUpperCase(),
+    memberPhoto: user?.avatar || "/placeholder.svg", qrCode: "", issueDate: new Date(), expiryDate: new Date(),
+    status: "none" as "active" | "expired" | "suspended" | "none", cardNumber: "",
+  });
+  const [myCardRequests, setMyCardRequests] = useState<any[]>([]);
+  const [myLetterRequests, setMyLetterRequests] = useState<any[]>([]);
+  const [publications, setPublications] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!open || !communityId) return;
+    fetch(`/api/community/resources.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.myCard) {
+          setMockIDCard({
+            id: d.myCard.id, memberName: user?.name || "Member", memberId: (user?.id || "").slice(0, 8).toUpperCase(),
+            memberPhoto: user?.avatar || "/placeholder.svg", qrCode: d.myCard.qr_code,
+            issueDate: new Date(d.myCard.issue_date), expiryDate: new Date(d.myCard.expiry_date),
+            status: d.myCard.status, cardNumber: d.myCard.card_number,
+          });
+        }
+        setMyCardRequests(d.myCardRequests ?? []);
+        setMyLetterRequests((d.myLetterRequests ?? []).map((r: any) => ({
+          id: r.id, templateId: r.template_id, requestedBy: r.user_id, requestDate: new Date(r.created_at),
+          purpose: r.purpose, status: r.status, letterNumber: r.letter_number,
+        })));
+        setPublications((d.publications ?? []).map((p: any) => ({
+          id: p.id, title: p.title, description: p.description, type: p.type, coverImage: p.cover_image,
+          publishDate: new Date(p.publish_date), edition: p.edition, pages: p.pages, fileSize: p.file_size,
+          downloadUrl: p.download_url, featured: !!p.featured,
+        })));
+      })
+      .catch(() => {});
+  }, [open, communityId]);
 
   const constitutionArticles = constitutionSections.filter(s => s.type === "article");
 
-  const handleRequestCard = () => {
-    toast({
-      title: "ID Card Request Submitted",
-      description: "Your request will be processed within 5 business days",
-    });
+  const handleRequestCard = async () => {
+    if (!communityId) {
+      console.error("[CommunityResourcesDialog] communityId is missing:", { communityId, type: typeof communityId, open });
+      toast({ title: "Couldn't Submit Request", description: `No community selected (debug: communityId=${JSON.stringify(communityId)}) — please check the console and share this with support.`, variant: "destructive" });
+      return;
+    }
+    setIsRequestingCard(true);
+    try {
+      const res = await fetch("/api/community/resources.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "request_id_card", community_id: communityId, request_type: "new" }),
+      });
+      const d = await res.json().catch(() => null);
+      if (!res.ok || !d) throw new Error(d?.error || `Failed to submit request (HTTP ${res.status})`);
+      toast({
+        title: "ID Card Request Submitted",
+        description: "Your request will be processed within 5 business days",
+      });
+    } catch (e: any) {
+      toast({ title: "Couldn't Submit Request", description: e.message, variant: "destructive" });
+    } finally {
+      setIsRequestingCard(false);
+    }
   };
 
-  const handleRenewCard = () => {
-    toast({
-      title: "Renewal Request Submitted",
-      description: "Your ID card renewal will be processed within 5 business days",
-    });
+  const handleRenewCard = async () => {
+    if (!communityId) {
+      toast({ title: "Couldn't Submit Renewal", description: "No community selected — please reopen this from your community page.", variant: "destructive" });
+      return;
+    }
+    setIsRequestingCard(true);
+    try {
+      const res = await fetch("/api/community/resources.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "request_id_card", community_id: communityId, request_type: "renewal" }),
+      });
+      const d = await res.json().catch(() => null);
+      if (!res.ok || !d) throw new Error(d?.error || `Failed to submit renewal (HTTP ${res.status})`);
+      toast({
+        title: "Renewal Request Submitted",
+        description: "Your ID card renewal will be processed within 5 business days",
+      });
+    } catch (e: any) {
+      toast({ title: "Couldn't Submit Renewal", description: e.message, variant: "destructive" });
+    } finally {
+      setIsRequestingCard(false);
+    }
   };
 
   const handleOpenIDCardPreview = () => {
@@ -80,7 +163,7 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
     }
   };
 
-  const handleRequestLetter = () => {
+  const handleRequestLetter = async () => {
     if (!selectedTemplate || !letterPurpose.trim()) {
       toast({
         title: "Incomplete Request",
@@ -89,13 +172,29 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
       });
       return;
     }
+    if (!communityId) return;
 
-    toast({
-      title: "Letter Request Submitted",
-      description: "Your request will be reviewed by the appropriate authority",
-    });
-    setSelectedTemplate("");
-    setLetterPurpose("");
+    setIsSubmittingLetter(true);
+    try {
+      const res = await fetch("/api/community/resources.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "request_letter", community_id: communityId, template_id: selectedTemplate, purpose: letterPurpose.trim() }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to submit request");
+
+      toast({
+        title: "Letter Request Submitted",
+        description: "Your request will be reviewed by the appropriate authority",
+      });
+      setSelectedTemplate("");
+      setLetterPurpose("");
+    } catch (e: any) {
+      toast({ title: "Couldn't Submit Request", description: e.message, variant: "destructive" });
+    } finally {
+      setIsSubmittingLetter(false);
+    }
   };
 
   const handleDownloadPublication = (pub: { title: string; fileSize: string }) => {
@@ -269,9 +368,9 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                   {/* Action Buttons */}
                   <div className="space-y-2">
                     <div className="grid grid-cols-2 gap-2">
-                      <Button onClick={handleRequestCard} variant="outline" size="sm" className="text-sm touch-manipulation active:scale-[0.97]">
+                      <Button onClick={handleRequestCard} disabled={isRequestingCard} variant="outline" size="sm" className="text-sm touch-manipulation active:scale-[0.97]">
                         <CreditCard className="h-4 w-4 mr-1.5 shrink-0" />
-                        Request New
+                        {isRequestingCard ? "Submitting..." : "Request New"}
                       </Button>
                       <Button
                         variant="outline"
@@ -283,9 +382,9 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                         Download
                       </Button>
                     </div>
-                    <Button onClick={handleRenewCard} variant="default" className="w-full text-sm touch-manipulation active:scale-[0.97]" size="sm">
+                    <Button onClick={handleRenewCard} disabled={isRequestingCard} variant="default" className="w-full text-sm touch-manipulation active:scale-[0.97]" size="sm">
                       <CreditCard className="h-4 w-4 mr-1.5 shrink-0" />
-                      Renew ID Card
+                      {isRequestingCard ? "Submitting..." : "Renew ID Card"}
                     </Button>
                   </div>
 
@@ -365,7 +464,7 @@ export function CommunityResourcesDialog({ open, onOpenChange }: CommunityResour
                   <CardTitle className="text-base">Your Letter Requests</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 px-3 pb-3">
-                  {mockLetterRequests.map((request) => {
+                  {myLetterRequests.map((request) => {
                     const template = letterTemplates.find(t => t.id === request.templateId);
                     return (
                       <div key={request.id} className="p-3 border rounded-lg space-y-2 overflow-hidden">

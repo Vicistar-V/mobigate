@@ -14,8 +14,15 @@ import { PersonalBankDetails, CampaignMediaItem, urgencyLevels } from "@/data/fu
 import { useState, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 
-export const FundRaiserRaiseCampaignTab = () => {
+interface FundRaiserRaiseCampaignTabProps {
+  communityId?: string;
+  onCreated?: () => void;
+}
+
+export const FundRaiserRaiseCampaignTab = ({ communityId, onCreated }: FundRaiserRaiseCampaignTabProps) => {
   const { toast } = useToast();
+  const [isSavingBank, setIsSavingBank] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [personalDetails, setPersonalDetails] = useState<PersonalBankDetails>({
     name: "John Doe",
@@ -65,14 +72,40 @@ export const FundRaiserRaiseCampaignTab = () => {
     }
   };
 
-  const handleSavePersonalDetails = () => {
-    toast({
-      title: "Personal Details Saved",
-      description: "Your information has been saved successfully",
-    });
+  const handleSavePersonalDetails = async () => {
+    setIsSavingBank(true);
+    try {
+      const res = await fetch("/api/community/fundraiser.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "save_bank_details",
+          full_name: personalDetails.name,
+          address: personalDetails.address,
+          city: personalDetails.city,
+          state: personalDetails.state,
+          country: personalDetails.country,
+          telephone: personalDetails.telephone,
+          bank_name: personalDetails.bankName,
+          account_number: personalDetails.accountNumber,
+          account_name: personalDetails.accountName,
+          swift_code: personalDetails.swiftCode,
+        }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || `Failed to save (HTTP ${res.status})`);
+      toast({
+        title: "Personal Details Saved",
+        description: "Your information has been saved successfully",
+      });
+    } catch (e: any) {
+      toast({ title: "Couldn't Save Details", description: e.message, variant: "destructive" });
+    } finally {
+      setIsSavingBank(false);
+    }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!agreedToTerms) {
       toast({
         title: "Agreement Required",
@@ -91,10 +124,45 @@ export const FundRaiserRaiseCampaignTab = () => {
       return;
     }
 
-    toast({
-      title: "Campaign Submitted!",
-      description: "Your fundraiser campaign has been created successfully. You will receive your campaign ID via email.",
-    });
+    if (!communityId) {
+      toast({ title: "No community selected", variant: "destructive" });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const urgencyLevel = requestDetails.customUrgency || requestDetails.urgencyLevels.join(", ") || "Other";
+      const res = await fetch("/api/community/fundraiser.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "create_campaign",
+          community_id: communityId,
+          theme: requestDetails.theme,
+          description: requestDetails.moreDetails,
+          targetAmount: parseFloat(requestDetails.amount),
+          currency: requestDetails.currency,
+          urgencyLevel,
+          timeFrame: requestDetails.hasTimeFrame ? requestDetails.timeFrame : undefined,
+          audience,
+          mediaItems,
+          listingFee: totalCost,
+          bankDetails: personalDetails,
+        }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || `Failed to submit campaign (HTTP ${res.status})`);
+
+      toast({
+        title: "Campaign Submitted!",
+        description: `Your fundraiser campaign is live. Campaign ID: ${d.id_code || ""}`,
+      });
+      onCreated?.();
+    } catch (e: any) {
+      toast({ title: "Couldn't Submit Campaign", description: e.message, variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -244,8 +312,8 @@ export const FundRaiserRaiseCampaignTab = () => {
             />
           </div>
 
-          <Button onClick={handleSavePersonalDetails} className="w-full">
-            SAVE
+          <Button onClick={handleSavePersonalDetails} className="w-full" disabled={isSavingBank}>
+            {isSavingBank ? "Saving..." : "SAVE"}
           </Button>
         </div>
       </Card>
@@ -420,9 +488,10 @@ export const FundRaiserRaiseCampaignTab = () => {
           <Checkbox />
           <Button
             onClick={handleSubmit}
+            disabled={isSubmitting}
             className="bg-black text-white hover:bg-black/90 font-bold px-8"
           >
-            SUBMIT NOW
+            {isSubmitting ? "SUBMITTING..." : "SUBMIT NOW"}
           </Button>
         </div>
       </Card>

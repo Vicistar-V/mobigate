@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { format } from "date-fns";
 import {
   BookOpen, Plus, Search, Clock, Eye, Heart, MessageCircle,
@@ -17,6 +17,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useCommunityContent, ContentItem } from "@/hooks/useCommunityContent";
+import { useCommunityPostInteraction, type ApiComment } from "@/hooks/useCommunityPostInteraction";
+
+function commentTimeAgo(dateStr?: string): string {
+  if (!dateStr) return "";
+  try {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "Just now";
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    return `${days}d ago`;
+  } catch { return ""; }
+}
 
 interface Props {
   communityId?: string;
@@ -138,14 +153,22 @@ function CreateArticleDialog({ communityId, onCreated, open, onOpenChange }: {
 }
 
 /* ── Article Detail Dialog ──────────────────────────────────────────────── */
-function ArticleDetailDialog({ article, open, onOpenChange, onLike, isLiked, likeCount, onPrev, onNext, hasPrev, hasNext }: {
-  article: ContentItem | null; open: boolean; onOpenChange: (v: boolean) => void;
+function ArticleDetailDialog({ communityId, article, open, onOpenChange, onLike, isLiked, likeCount, onPrev, onNext, hasPrev, hasNext }: {
+  communityId?: string; article: ContentItem | null; open: boolean; onOpenChange: (v: boolean) => void;
   onLike?: (id: string) => void; isLiked?: boolean; likeCount?: number;
   onPrev?: () => void; onNext?: () => void; hasPrev?: boolean; hasNext?: boolean;
 }) {
   const [bookmarked,  setBookmarked]  = useState(false);
   const [commentText, setCommentText] = useState("");
-  const [comments,    setComments]    = useState<Array<{ id: string; author: string; text: string; time: string; replies?: any[] }>>([]);
+  const [comments,    setComments]    = useState<ApiComment[]>([]);
+  const [localLiked,  setLocalLiked]  = useState(isLiked ?? false);
+  const [localCount,  setLocalCount]  = useState(likeCount ?? 0);
+  const { fetchComments, toggleLike, submitComment, recordView } =
+    useCommunityPostInteraction(communityId);
+  useEffect(() => {
+    if (open && article?.id) { recordView(article.id); fetchComments(article.id).then(setComments); }
+  }, [open, article?.id]);
+  useEffect(() => { setLocalLiked(isLiked ?? false); setLocalCount(likeCount ?? 0); }, [isLiked, likeCount]);
 
   if (!article) return null;
 
@@ -154,9 +177,10 @@ function ArticleDetailDialog({ article, open, onOpenChange, onLike, isLiked, lik
 
   const catColor = CAT_COLOR[article.category ?? ""] ?? "bg-gray-100 text-gray-700";
 
-  const sendComment = () => {
-    if (!commentText.trim()) return;
-    setComments(prev => [...prev, { id: `c-${Date.now()}`, author: "You", text: commentText.trim(), time: "Just now", replies: [] }]);
+  const sendComment = async () => {
+    if (!commentText.trim() || !article?.id) return;
+    const r = await submitComment(article.id, commentText.trim());
+    setComments(prev => [...prev, r ?? { id:`tmp-${Date.now()}`, content:commentText.trim(), author_name:"You", profile_photo:null, created_at:new Date().toISOString(), replies:[] }]);
     setCommentText("");
   };
 
@@ -216,7 +240,7 @@ function ArticleDetailDialog({ article, open, onOpenChange, onLike, isLiked, lik
             )}
             <Separator />
             <div className="flex gap-6 text-sm">
-              {[{ label: "likes", v: likeCount ?? article.likes ?? 0 }, { label: "comments", v: comments.length + (article.comments || 0) }, { label: "views", v: article.views || 0 }].map(s => (
+              {[{ label: "likes", v: localCount }, { label: "comments", v: comments.length + (article.comments || 0) }, { label: "views", v: article.views || 0 }].map(s => (
                 <div key={s.label} className="text-center"><p className="font-semibold">{s.v.toLocaleString()}</p><p className="text-xs text-muted-foreground">{s.label}</p></div>
               ))}
             </div>
@@ -226,9 +250,17 @@ function ArticleDetailDialog({ article, open, onOpenChange, onLike, isLiked, lik
               <div className="space-y-4 pb-2">
                 {comments.map(c => (
                   <div key={c.id} className="flex gap-2">
-                    <Avatar className="h-7 w-7 shrink-0"><AvatarFallback className="text-xs">{c.author[0]}</AvatarFallback></Avatar>
-                    <div><div className="bg-muted/50 rounded-2xl px-3 py-2"><p className="text-xs font-semibold">{c.author}</p><p className="text-sm">{c.text}</p></div>
-                    <p className="text-[10px] text-muted-foreground mt-1 px-1">{c.time}</p></div>
+                    <Avatar className="h-7 w-7 shrink-0">
+                      <AvatarImage src={c.profile_photo || undefined} />
+                      <AvatarFallback className="text-xs">{(c.author_name || "U")[0]}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="bg-muted/50 rounded-2xl px-3 py-2">
+                        <p className="text-xs font-semibold">{c.author_name}</p>
+                        <p className="text-sm">{c.content}</p>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground mt-1 px-1">{commentTimeAgo(c.created_at)}</p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -287,13 +319,19 @@ export function CommunityArticlesSection({ communityId, isOwner, isMember = true
     return r;
   }, [items, search, category]);
 
-  const handleLike = useCallback((id: string) => {
+  const { toggleLike: apiToggleLike, submitComment: apiSubmitComment,
+          fetchComments: apiFetchComments, recordView: apiRecordView } =
+    useCommunityPostInteraction(communityId);
+
+  const handleLike = useCallback(async (id: string) => {
+    const wasLiked = likedIds.has(id);
     setLikedIds(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
     setLikeCounts(prev => {
       const base = items.find(i => i.id === id)?.likes ?? 0;
-      return { ...prev, [id]: likedIds.has(id) ? base : base + 1 };
+      return { ...prev, [id]: wasLiked ? Math.max(0, base - 1) : base + 1 };
     });
-  }, [items, likedIds]);
+    await apiToggleLike(id, wasLiked);
+  }, [items, likedIds, apiToggleLike]);
 
   const openDetail = (item: ContentItem) => { setSelected(item); setDetailOpen(true); };
 
@@ -387,6 +425,7 @@ export function CommunityArticlesSection({ communityId, isOwner, isMember = true
       <CreateArticleDialog communityId={communityId} onCreated={refresh} open={createOpen} onOpenChange={setCreateOpen} />
 
       <ArticleDetailDialog
+        communityId={communityId}
         article={selected} open={detailOpen} onOpenChange={setDetailOpen}
         onLike={handleLike}
         isLiked={selected ? likedIds.has(selected.id) : false}

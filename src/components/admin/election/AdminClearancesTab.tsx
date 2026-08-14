@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CheckCircle, XCircle, Clock, AlertCircle, Search, Eye } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -56,13 +56,52 @@ const StatCard = ({ value, label, icon: Icon, color }: StatCardProps) => (
   </div>
 );
 
-export function AdminClearancesTab() {
+export function AdminClearancesTab({ communityId }: { communityId?: string }) {
   const { toast } = useToast();
-  const [requests, setRequests] = useState<AdminClearanceRequest[]>(mockClearanceRequests);
+  const [requests, setRequests] = useState<AdminClearanceRequest[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedRequest, setSelectedRequest] = useState<AdminClearanceRequest | null>(null);
   const [showReviewSheet, setShowReviewSheet] = useState(false);
+
+  const loadData = () => {
+    if (!communityId) return;
+    fetch(`/api/community/elections.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const officesById: Record<string, string> = {};
+        (d.offices ?? []).forEach((o: any) => { officesById[o.id] = o.name; });
+        const mapped: AdminClearanceRequest[] = (d.candidates ?? []).map((c: any) => ({
+          id: c.id,
+          candidateId: c.id,
+          candidateName: c.name?.trim() || "Candidate",
+          candidateAvatar: c.profile_photo || "/placeholder.svg",
+          office: officesById[c.office_id] || c.position || "Office",
+          status: c.status === "cleared" ? "approved" : c.status === "pending" ? "pending" : "rejected",
+          documents: [],
+          submittedAt: new Date(c.registered_at),
+        }));
+        setRequests(mapped);
+      })
+      .catch(() => setRequests([]));
+  };
+
+  useEffect(() => { loadData(); }, [communityId]);
+
+  const updateStatus = async (candidateId: string, status: "cleared" | "disqualified") => {
+    if (!communityId) return;
+    try {
+      const res = await fetch("/api/community/elections.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "update_candidate_status", community_id: communityId, candidate_id: candidateId, status }),
+      });
+      if (!res.ok) throw new Error("Failed to update status");
+      loadData();
+    } catch (e: any) {
+      toast({ title: "Action Failed", description: e.message, variant: "destructive" });
+    }
+  };
 
   const filteredRequests = requests.filter(request => {
     const matchesSearch = request.candidateName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -84,9 +123,7 @@ export function AdminClearancesTab() {
   };
 
   const handleQuickApprove = (requestId: string) => {
-    setRequests(prev => prev.map(r => 
-      r.id === requestId ? { ...r, status: 'approved' as const, reviewedAt: new Date(), reviewedBy: 'Admin' } : r
-    ));
+    updateStatus(requestId, "cleared");
     toast({
       title: "Candidate Cleared",
       description: "The candidate has been approved for the election"
@@ -97,6 +134,7 @@ export function AdminClearancesTab() {
     setRequests(prev => prev.map(r => 
       r.id === requestId ? { ...r, status: 'rejected' as const, reviewedAt: new Date(), reviewedBy: 'Admin' } : r
     ));
+    updateStatus(requestId, "disqualified");
     toast({
       title: "Clearance Rejected",
       description: "The candidate's clearance has been rejected",
@@ -258,6 +296,7 @@ export function AdminClearancesTab() {
           setRequests(prev => prev.map(r => 
             r.id === id ? { ...r, status: 'rejected' as const, reviewedAt: new Date(), reviewedBy: 'Admin', rejectionReason: reason } : r
           ));
+          updateStatus(id, "disqualified");
           toast({
             title: "Clearance Rejected",
             description: "The candidate's clearance has been rejected",

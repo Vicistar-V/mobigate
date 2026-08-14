@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -6,26 +6,38 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
-import { mockMembersWithClearance } from "@/data/financialData";
 import { contentsAdSlots } from "@/data/profileAds";
 import { FinancialStatusDialog } from "./FinancialStatusDialog";
 import { CheckIndebtednessSheet } from "../elections/CheckIndebtednessSheet";
 
-export const FinancialAccreditationTab = () => {
+export const FinancialAccreditationTab = ({ communityId }: { communityId?: string } = {}) => {
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [showIndebtednessSheet, setShowIndebtednessSheet] = useState(false);
+  const [mockMembersWithClearance, setMockMembersWithClearance] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!communityId) return;
+    fetch(`/api/community/finance.php?action=clearance_matrix&community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        setMockMembersWithClearance((d.members ?? []).map((m: any) => ({
+          id: m.id, name: m.name, avatar: m.avatar, registration: m.registration, clearances: m.clearances,
+        })));
+      })
+      .catch(() => setMockMembersWithClearance([]));
+  }, [communityId]);
 
   const membersWithAccreditation = mockMembersWithClearance.map(member => {
     const clearedCount = member.clearances.filter(c => c.hasClearance).length;
     const totalCount = member.clearances.length;
-    const isAccredited = clearedCount === totalCount;
+    const isAccredited = totalCount > 0 && clearedCount === totalCount;
     
     return {
       ...member,
       isAccredited,
       clearedCount,
       totalCount,
-      accreditationDate: isAccredited ? 'Jan 15, 2025' : null
+      accreditationDate: isAccredited ? new Date().toLocaleDateString() : null
     };
   });
 
@@ -158,6 +170,7 @@ export const FinancialAccreditationTab = () => {
       <FinancialStatusDialog
         open={showStatusDialog}
         onOpenChange={setShowStatusDialog}
+        communityId={communityId}
       />
 
       <CheckIndebtednessSheet

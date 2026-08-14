@@ -1,11 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, Package, History, Wallet, ChevronRight, TrendingUp, Store, FileText, ShoppingBag, Eye, ArrowDownRight, Settings, Wifi, WifiOff, X, UserCheck, Bell, RotateCcw, CheckCircle2, Clock, XCircle, MapPin, CalendarDays, Receipt, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
-  initialSubMerchantBatches, initialSubMerchantWalletBalance,
   mockParentMerchants, mockMerchantApplications,
   initialOfflineWalletBalance, initialOfflineWalletTransactions,
   initialOfflineTotalCardsSold, initialOfflineTotalTransactions,
@@ -37,7 +36,7 @@ function getSoldBreakdown(batch: VoucherBatch) {
 
 export default function SubMerchantVoucherManagement() {
   const navigate = useNavigate();
-  const [walletBalance] = useState(initialSubMerchantWalletBalance);
+  const [walletBalance, setWalletBalance] = useState(0);
   const [offlineBalance] = useState(initialOfflineWalletBalance);
   const [offlineTransactions] = useState(initialOfflineWalletTransactions);
   const [showOfflineDrawer, setShowOfflineDrawer] = useState(false);
@@ -47,24 +46,40 @@ export default function SubMerchantVoucherManagement() {
   const [autoTagOffline, setAutoTagOffline] = useState(true);
   const [offlineNotifications, setOfflineNotifications] = useState(true);
   const [showOfflineInInventory, setShowOfflineInInventory] = useState(true);
-  const batches = initialSubMerchantBatches;
+  const [batches, setBatches] = useState<VoucherBatch[]>([]);
+  const [stats, setStats] = useState({
+    totalBatches: 0, totalBundles: 0, totalCards: 0,
+    available: 0, soldUnused: 0, used: 0, invalidated: 0, soldOffline: 0,
+  });
 
-  const stats = useMemo(() => {
-    let totalBatches = batches.length;
-    let totalBundles = batches.reduce((s, b) => s + b.bundleCount, 0);
-    let totalCards = batches.reduce((s, b) => s + b.totalCards, 0);
-    let available = 0, soldUnused = 0, used = 0, invalidated = 0;
-    let soldOffline = 0;
-    batches.forEach(b => {
-      const c = getBatchStatusCounts(b);
-      available += c.available;
-      soldUnused += c.sold_unused;
-      used += c.used;
-      invalidated += c.invalidated;
-    });
-    soldOffline = initialOfflineTotalCardsSold;
-    return { totalBatches, totalBundles, totalCards, available, soldUnused, used, invalidated, soldOffline };
-  }, [batches]);
+  useEffect(() => {
+    fetch("/api/merchant/vouchers.php?action=sub_wallet", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => setWalletBalance(parseFloat(d.balance) || 0))
+      .catch(() => setWalletBalance(0));
+
+    fetch("/api/merchant/vouchers.php?action=sub_stats", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => setStats({
+        totalBatches: d.totalBatches || 0, totalBundles: d.totalBundles || 0, totalCards: d.totalCards || 0,
+        available: d.available || 0, soldUnused: 0, used: d.used || 0, invalidated: d.invalidated || 0, soldOffline: 0,
+      }))
+      .catch(() => {});
+
+    fetch("/api/merchant/vouchers.php?action=sub_batches", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const mapped: VoucherBatch[] = (d.batches ?? []).map((b: any) => ({
+          id: b.id, batchNumber: `SM-${b.id.slice(0, 8).toUpperCase()}`, denomination: parseFloat(b.denomination),
+          bundleCount: Math.floor(b.card_count / 100), totalCards: b.card_count, status: "active" as const,
+          createdAt: new Date(b.created_at), totalCost: parseFloat(b.total_cost),
+          discountApplied: false, discountPercent: 0, generationType: "new" as const, replacedBatchId: null,
+          bundles: [],
+        }));
+        setBatches(mapped);
+      })
+      .catch(() => setBatches([]));
+  }, []);
 
   const pendingApps = mockMerchantApplications.filter(a => a.status === "pending");
 

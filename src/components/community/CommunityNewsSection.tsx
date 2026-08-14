@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/card";
 import { ChevronDown, Eye, MessageSquare, Share2, Video, Image as ImageIcon, FileText, TrendingUp, Heart, Play } from "lucide-react";
 import { NewsItem } from "@/data/newsData";
 import { useCommunityContent } from "@/hooks/useCommunityContent";
+import { useCommunityPostInteraction } from "@/hooks/useCommunityPostInteraction";
 import { formatDistanceToNow } from "date-fns";
 import { NewsDetailDialog } from "./NewsDetailDialog";
 import { CreateNewsForm } from "./CreateNewsForm";
@@ -117,7 +118,16 @@ export function CommunityNewsSection({
     featured:     n.featured || false,
     tags:         n.tags || [],
     isBreaking:   false,
+    isLiked:      n.isLiked || false,
   })), [apiNews]);
+
+  // Seed liked state from API on load — fixes likes resetting on page refresh
+  useEffect(() => {
+    const likedFromApi = apiMapped.filter(n => (n as any).isLiked).map(n => n.id);
+    if (likedFromApi.length > 0) {
+      setLikedNews(prev => new Set([...prev, ...likedFromApi]));
+    }
+  }, [apiMapped]);
 
   // Reset visible count when filters change
   useEffect(() => {
@@ -245,8 +255,11 @@ export function CommunityNewsSection({
   };
 
   // Handler for like toggle
+  const { toggleLike: apiToggleLike } = useCommunityPostInteraction(communityId);
+
   const handleLike = (newsId: string, e?: React.MouseEvent) => {
     e?.stopPropagation(); // Prevent card click
+    const wasLiked = likedNews.has(newsId);
     setLikedNews(prev => {
       const newSet = new Set(prev);
       if (newSet.has(newsId)) {
@@ -258,6 +271,7 @@ export function CommunityNewsSection({
       }
       return newSet;
     });
+    apiToggleLike(newsId, wasLiked);
   };
 
   // Handler for share
@@ -607,6 +621,7 @@ export function CommunityNewsSection({
       {/* News Detail Dialog */}
       {selectedNews && (
         <NewsDetailDialog
+          communityId={communityId}
           open={detailOpen}
           onOpenChange={setDetailOpen}
           news={selectedNews}

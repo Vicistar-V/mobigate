@@ -32,10 +32,12 @@ const activitiesData = {
 
 interface ElectionAccreditationTabProps {
   initialSubTab?: 'financial' | 'activities' | 'accredited';
+  communityId?: string;
 }
 
 export const ElectionAccreditationTab = ({ 
-  initialSubTab = 'financial' 
+  initialSubTab = 'financial',
+  communityId,
 }: ElectionAccreditationTabProps) => {
   const [activeSubTab, setActiveSubTab] = useState<'financial' | 'activities' | 'accredited'>(initialSubTab);
   const [showIndebtednessSheet, setShowIndebtednessSheet] = useState(false);
@@ -51,20 +53,31 @@ export const ElectionAccreditationTab = ({
   const [isActivityDebtClearing, setIsActivityDebtClearing] = useState(false);
 
   const handleGetAccreditation = async () => {
-    if (isAccredited) return;
-    
+    if (isAccredited || !communityId) return;
+
     setIsAccreditationLoading(true);
-    
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Generate mock accreditation number
-    const generatedNumber = `ACC-${Date.now().toString().slice(-6)}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-    setAccreditationNumber(generatedNumber);
-    setIsAccredited(true);
-    setIsAccreditationLoading(false);
-    
-    toast.success("Accreditation successful! Check your email for your accreditation number.");
+    try {
+      // Find the current election to accredit against
+      const overview = await fetch(`/api/community/elections.php?community_id=${communityId}`, { credentials: "include" }).then((r) => r.json());
+      const currentElection = (overview.elections ?? []).find((e: any) => e.status !== 'completed' && e.status !== 'cancelled');
+      if (!currentElection) throw new Error("No active election to get accredited for");
+
+      const res = await fetch("/api/community/elections.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "accredit_voter", community_id: communityId, election_id: currentElection.id }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to get accredited");
+
+      setAccreditationNumber(currentElection.id.slice(0, 8).toUpperCase());
+      setIsAccredited(true);
+      toast.success("Accreditation successful! You are now cleared to vote in this election.");
+    } catch (e: any) {
+      toast.error(e.message || "Couldn't complete accreditation");
+    } finally {
+      setIsAccreditationLoading(false);
+    }
   };
 
   const handleActivityDebtClearing = async () => {

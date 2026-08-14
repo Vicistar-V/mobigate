@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useCommunityPostInteraction, type ApiComment } from "@/hooks/useCommunityPostInteraction";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, isPast, isToday, isFuture } from "date-fns";
 import {
@@ -19,6 +20,7 @@ import { toast } from "sonner";
 import type { EventItem } from "@/data/eventsData";
 
 interface EventDetailDialogProps {
+  communityId?: string;
   open:          boolean;
   onOpenChange:  (v: boolean) => void;
   event:         EventItem | null;
@@ -40,7 +42,22 @@ const VENUE_BADGE: Record<string, string> = {
 
 interface Comment { id: string; author: string; avatar?: string; text: string; time: string; replies?: Comment[]; }
 
-function CommentRow({ comment, depth = 0, onReply }: { comment: Comment; depth?: number; onReply: (id: string, text: string) => void }) {
+
+function commentTimeAgo(dateStr?: string): string {
+  if (!dateStr) return "";
+  try {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "Just now";
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    return `${days}d ago`;
+  } catch { return ""; }
+}
+
+function CommentRow({ comment, depth = 0, onReply }: { comment: ApiComment; depth?: number; onReply: (id: string, text: string) => void }) {
   const [showReply, setShowReply] = useState(false);
   const [replyText, setReplyText]  = useState("");
   const [showReplies, setShowReplies] = useState(true);
@@ -51,16 +68,16 @@ function CommentRow({ comment, depth = 0, onReply }: { comment: Comment; depth?:
       <div className="flex-1 min-w-0">
         <div className="flex gap-2">
           <Avatar className="h-7 w-7 shrink-0 mt-0.5">
-            <AvatarImage src={comment.avatar} />
-            <AvatarFallback className="text-xs">{comment.author[0]}</AvatarFallback>
+            <AvatarImage src={comment.profile_photo} />
+            <AvatarFallback className="text-xs">{(comment.author_name || "U")[0]}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <div className="bg-muted/50 rounded-2xl px-3 py-2">
-              <p className="text-xs font-semibold leading-tight">{comment.author}</p>
-              <p className="text-sm mt-0.5 leading-snug whitespace-pre-wrap break-words">{comment.text}</p>
+              <p className="text-xs font-semibold leading-tight">{comment.author_name}</p>
+              <p className="text-sm mt-0.5 leading-snug whitespace-pre-wrap break-words">{comment.content}</p>
             </div>
             <div className="flex items-center gap-3 mt-1 px-1">
-              <span className="text-[10px] text-muted-foreground">{comment.time}</span>
+              <span className="text-[10px] text-muted-foreground">{commentTimeAgo(comment.created_at)}</span>
               {depth === 0 && (
                 <button className="text-[11px] font-semibold text-muted-foreground hover:text-primary"
                   onClick={() => setShowReply(r => !r)}>Reply</button>
@@ -75,7 +92,7 @@ function CommentRow({ comment, depth = 0, onReply }: { comment: Comment; depth?:
             </div>
             {showReply && (
               <div className="flex gap-2 items-center mt-2">
-                <Input placeholder={`Reply to ${comment.author}…`} value={replyText}
+                <Input placeholder={`Reply to ${comment.author_name}…`} value={replyText}
                   className="h-8 text-sm flex-1 rounded-full"
                   onChange={e => setReplyText(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter" && replyText.trim()) { onReply(comment.id, replyText.trim()); setReplyText(""); setShowReply(false); } }} />
@@ -96,7 +113,7 @@ function CommentRow({ comment, depth = 0, onReply }: { comment: Comment; depth?:
 }
 
 export function EventDetailDialog({
-  open, onOpenChange, event, communityId,
+  communityId, open, onOpenChange, event,
   onLike, isLiked, likeCount,
   onPrev, onNext, hasPrev, hasNext,
 }: EventDetailDialogProps) {
@@ -106,7 +123,12 @@ export function EventDetailDialog({
   const [rsvpCount,     setRsvpCount]     = useState(0);
   const [rsvpLoading,   setRsvpLoading]   = useState(false);
   const [commentText,   setCommentText]   = useState("");
-  const [comments,      setComments]      = useState<Comment[]>([]);
+  const [comments,      setComments]      = useState<ApiComment[]>([]);
+  const [localLiked,    setLocalLiked]    = useState(isLiked ?? false);
+  const [localLikeCount,setLocalLikeCount]= useState(likeCount ?? 0);
+  const { fetchComments, toggleLike, submitComment, recordView } = useCommunityPostInteraction(communityId);
+  useEffect(() => { if (open && event?.id) { recordView(event.id); fetchComments(event.id).then(setComments); } }, [open, event?.id]);
+  useEffect(() => { setLocalLiked(isLiked ?? false); setLocalLikeCount(likeCount ?? 0); }, [isLiked, likeCount]);
 
   if (!event) return null;
 
@@ -140,9 +162,10 @@ export function EventDetailDialog({
     finally { setRsvpLoading(false); }
   };
 
-  const handleSendComment = () => {
-    if (!commentText.trim()) return;
-    setComments(prev => [...prev, { id: `c-${Date.now()}`, author: "You", text: commentText.trim(), time: "Just now", replies: [] }]);
+  const handleSendComment = async () => {
+    if (!commentText.trim() || !event?.id) return;
+    const result = await submitComment(event.id, commentText.trim());
+    setComments(prev => [...prev, result ?? { id:`tmp-${Date.now()}`, content:commentText.trim(), author_name:"You", profile_photo:null, created_at:new Date().toISOString(), replies:[] }]);
     setCommentText("");
   };
 
@@ -352,7 +375,7 @@ export function EventDetailDialog({
               <Share2 className="h-5 w-5" />
             </button>
             <div className="flex-1" />
-            <span className="text-sm font-semibold">{(likeCount ?? event.likes ?? 0).toLocaleString()} likes</span>
+            <span className="text-sm font-semibold">{localLikeCount.toLocaleString()} likes</span>
           </div>
           <div className="flex items-center gap-2 px-4 pb-4">
             <Input

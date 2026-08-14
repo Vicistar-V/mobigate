@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Search, X, ChevronDown, ChevronUp, ShieldAlert, AlertTriangle, Package, Printer, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  initialMockBatches,
   VoucherBatch,
   type SoldVia,
   getBundleStatusCounts,
@@ -41,7 +40,45 @@ export default function MerchantVoucherBatchDetail() {
   const navigate = useNavigate();
   const { batchId } = useParams();
   const { toast } = useToast();
-  const [batches, setBatches] = useState(initialMockBatches);
+  const [batches, setBatches] = useState<VoucherBatch[]>([]);
+  useEffect(() => {
+    if (!batchId) return;
+    fetch(`/api/merchant/vouchers.php?action=batch_detail&id=${batchId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (!d.batch) return;
+        const b = d.batch;
+        const codes = d.codes ?? [];
+        const statusMap: Record<string, string> = { unused: "available", redeemed: "used", invalidated: "invalidated" };
+        const bundles = [];
+        for (let i = 0; i < codes.length; i += 100) {
+          const chunk = codes.slice(i, i + 100);
+          const bundleIndex = Math.floor(i / 100);
+          bundles.push({
+            id: `${b.id}-bundle-${bundleIndex}`,
+            serialPrefix: b.batch_number,
+            denomination: parseFloat(b.denomination),
+            batchId: b.id,
+            cardCount: chunk.length,
+            cards: chunk.map((c: any) => ({
+              id: c.id, serialNumber: c.code, pin: c.code.replace(/-/g, "").slice(-6),
+              denomination: parseFloat(b.denomination), status: statusMap[c.status] || "available",
+              batchId: b.id, bundleSerialPrefix: b.batch_number, soldVia: "direct",
+              createdAt: new Date(b.created_at), invalidatedAt: c.status === "invalidated" ? new Date(c.redeemed_at || b.created_at) : null,
+            })),
+          });
+        }
+        setBatches([{
+          id: b.id, batchNumber: b.batch_number, denomination: parseFloat(b.denomination),
+          bundleCount: b.bundle_count, totalCards: b.total_cards, status: b.status,
+          createdAt: new Date(b.created_at), totalCost: parseFloat(b.total_cost),
+          discountApplied: !!b.discount_applied, discountPercent: parseFloat(b.discount_percent),
+          generationType: b.generation_type, replacedBatchId: b.replaced_batch_id,
+          bundles,
+        }] as any);
+      })
+      .catch(() => setBatches([]));
+  }, [batchId]);
   const [expandedBundles, setExpandedBundles] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [invalidateTarget, setInvalidateTarget] = useState<InvalidateTarget | null>(null);

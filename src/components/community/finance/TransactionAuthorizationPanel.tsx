@@ -1,307 +1,337 @@
-import { useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
+// src/components/finance/TransactionAuthorizationPanel.tsx
+import { useState, useEffect, useCallback } from "react";
+import {
+  Shield, CheckCircle, Clock, XCircle, User, Crown,
+  Wallet, ChevronLeft, AlertTriangle, Loader2, RefreshCw, Check,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  Shield, 
-  CheckCircle2, 
-  AlertCircle, 
-  Send, 
-  Wallet,
-  ArrowLeft,
-  Info
-} from "lucide-react";
-import { OfficerAuthorizationCard } from "./OfficerAuthorizationCard";
-import { AuthorizationTimer } from "./AuthorizationTimer";
-import {
-  AuthorizationOfficer,
-  OfficerRole,
-  MOCK_OFFICER_PASSWORDS,
-  validateAuthorizationRequirements,
-} from "@/types/transactionAuthorization";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { formatMobiAmount, formatLocalAmount, formatLocalFirst } from "@/lib/mobiCurrencyTranslation";
+import { toast } from "sonner";
 
-// Mock officer data for authorization - Finance module uses 4 officers
-const AUTHORIZATION_OFFICERS: {
-  role: OfficerRole;
-  displayTitle: string;
-  name: string;
-  imageUrl?: string;
-  isRequired: boolean;
-}[] = [
-  {
-    role: "president",
-    displayTitle: "President/Chairman",
-    name: "Dr. Mark Anthony Onwudinjo",
-    imageUrl: "https://i.pravatar.cc/150?u=president",
-    isRequired: true, // MANDATORY for finance
-  },
-  {
-    role: "treasurer",
-    displayTitle: "Treasurer",
-    name: "Mr. Chidi Adebayo",
-    imageUrl: "https://i.pravatar.cc/150?u=treasurer",
-    isRequired: true, // MANDATORY for finance
-  },
-  {
-    role: "secretary",
-    displayTitle: "Secretary",
-    name: "Barr. Ngozi Okonkwo",
-    imageUrl: "https://i.pravatar.cc/150?u=secretary",
-    isRequired: false, // Alternative - pick one
-  },
-  {
-    role: "financial_secretary",
-    displayTitle: "Financial Secretary",
-    name: "Mrs. Amara Diallo",
-    imageUrl: "https://i.pravatar.cc/150?u=finsec",
-    isRequired: false, // Alternative - pick one
-  },
-];
+const API = "/api/community";
+
+interface Authorization { id: string; user_id: string; name: string; profile_photo?: string; position_title?: string; admin_rank: number; authorized_at: string; }
+
+interface PendingTxn {
+  id: string; type: string; amount: number; description: string;
+  status: string; current_sigs: number; required_sigs: number;
+  has_president: boolean; has_treasurer_or_fs: boolean;
+  authorizations: Authorization[];
+  expires_at: string; initiated_by: string;
+  metadata?: Record<string, any>;
+  initiator_name?: string; initiator_photo?: string;
+}
 
 interface TransactionAuthorizationPanelProps {
-  transactionType: "transfer" | "withdrawal" | "disbursement";
-  amount: number;
+  communityId?: string;
+  txnId?: string;                  // existing txn to authorize
+  // OR pass these to initiate a new one:
+  transactionType?: string;
+  amount?: number;
   recipient?: string;
   description?: string;
-  bankName?: string;
-  accountNumber?: string;
-  initiatorRole?: OfficerRole; // Track who initiated - affects signatory count
-  onConfirm: () => void;
-  onBack: () => void;
+  metadata?: Record<string, any>;
+  onConfirm?: () => void;
+  onBack?: () => void;
   onExpire?: () => void;
 }
 
+function fmt(n: number) { return "₦" + n.toLocaleString("en-NG", { minimumFractionDigits: 2 }); }
+function timeUntil(exp: string) {
+  const ms = new Date(exp).getTime() - Date.now();
+  if (ms <= 0) return "Expired";
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  return h > 0 ? `${h}h ${m}m left` : `${m}m left`;
+}
+
+// Determine badge for position
+function positionBadge(auth: Authorization) {
+  const t = (auth.position_title || "").toLowerCase();
+  if (auth.admin_rank === 1 || t.includes("president") || t.includes("founder"))
+    return { label: "President", color: "bg-purple-100 text-purple-700" };
+  if (t.includes("treasurer") || t.includes("financial secretary") || t.includes("fin sec"))
+    return { label: auth.position_title || "Treasurer", color: "bg-green-100 text-green-700" };
+  if (t.includes("vice president") || t.includes("vp"))
+    return { label: "VP", color: "bg-blue-100 text-blue-700" };
+  if (t.includes("secretary"))
+    return { label: "Secretary", color: "bg-amber-100 text-amber-700" };
+  return { label: auth.position_title || "Officer", color: "bg-gray-100 text-gray-600" };
+}
+
 export function TransactionAuthorizationPanel({
-  transactionType,
-  amount,
-  recipient,
-  description,
-  bankName,
-  accountNumber,
-  initiatorRole = "secretary", // Default to non-president initiator
-  onConfirm,
-  onBack,
-  onExpire,
+  communityId, txnId: existingTxnId,
+  transactionType, amount = 0, recipient, description = "", metadata,
+  onConfirm, onBack, onExpire,
 }: TransactionAuthorizationPanelProps) {
-  // Determine if president initiated (affects signatory count)
-  const isPresidentInitiator = initiatorRole === "president";
-  const requiredSignatories = isPresidentInitiator ? 3 : 4;
-  const [officers, setOfficers] = useState<AuthorizationOfficer[]>(
-    AUTHORIZATION_OFFICERS.map((o) => ({
-      role: o.role,
-      name: o.name,
-      imageUrl: o.imageUrl,
-      isRequired: o.isRequired,
-      status: "pending",
-    }))
+  const [txnId,       setTxnId]       = useState<string | null>(existingTxnId ?? null);
+  const [txn,         setTxn]         = useState<PendingTxn | null>(null);
+  const [loading,     setLoading]     = useState(false);
+  const [authorizing, setAuthorizing] = useState(false);
+  const [executing,   setExecuting]   = useState(false);
+  const [hasAuthorized, setHasAuthorized] = useState(false);
+
+  // Create or fetch the pending transaction
+  const initiateOrFetch = useCallback(async () => {
+    if (!communityId) return;
+    setLoading(true);
+    try {
+      if (!txnId) {
+        // Initiate a new pending transaction
+        const res = await fetch(`${API}/finance.php`, {
+          method: "POST", credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "initiate_transaction", community_id: communityId,
+            type: transactionType, amount, description,
+            metadata: { ...metadata, recipient_name: recipient },
+          }),
+        });
+        const d = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(d.error || "Failed to initiate");
+        setTxnId(d.txn_id);
+        toast.success("Transaction pending authorization");
+      }
+    } catch (e: any) { toast.error(e.message); }
+    finally { setLoading(false); }
+  }, [communityId, txnId, transactionType, amount, description, metadata, recipient]);
+
+  const fetchTxn = useCallback(async (id?: string) => {
+    const tid = id ?? txnId;
+    if (!tid || !communityId) return;
+    try {
+      const res = await fetch(`${API}/finance.php?community_id=${communityId}`, { credentials: "include" });
+      if (!res.ok) return;
+      const d = await res.json();
+      const found = (d.pendingTxns ?? []).find((t: any) => t.id === tid);
+      if (found) {
+        setTxn(found);
+        // Check if current user already signed
+        const me = await fetch("/api/community/session_helper.php", { credentials: "include" }).then(r => r.json()).catch(() => null);
+        if (me?.user_id && found.authorizations?.some((a: any) => a.user_id === me.user_id)) {
+          setHasAuthorized(true);
+        }
+      }
+    } catch {}
+  }, [communityId, txnId]);
+
+  useEffect(() => {
+    if (!txnId) { initiateOrFetch(); }
+    else { fetchTxn(txnId); }
+  }, [txnId]);
+
+  // Auto-refresh every 15 seconds while pending
+  useEffect(() => {
+    if (!txn || txn.status === "executed" || txn.status === "rejected" || txn.status === "expired") return;
+    const interval = setInterval(() => fetchTxn(), 15000);
+    return () => clearInterval(interval);
+  }, [txn, fetchTxn]);
+
+  // Check expiry
+  useEffect(() => {
+    if (txn?.expires_at && new Date(txn.expires_at).getTime() < Date.now()) {
+      onExpire?.();
+    }
+  }, [txn, onExpire]);
+
+  const handleAuthorize = async () => {
+    if (!txnId || !communityId) return;
+    setAuthorizing(true);
+    try {
+      const res = await fetch(`${API}/finance.php`, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "authorize_transaction", community_id: communityId, txn_id: txnId }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Authorization failed");
+      setHasAuthorized(true);
+      toast.success(d.message || "Authorization recorded");
+      fetchTxn();
+      if (d.fully_authorized) {
+        toast.success("All required signatures collected! Transaction can now be executed.");
+      }
+    } catch (e: any) { toast.error(e.message); }
+    finally { setAuthorizing(false); }
+  };
+
+  const handleExecute = async () => {
+    if (!txnId || !communityId) return;
+    setExecuting(true);
+    try {
+      const res = await fetch(`${API}/finance.php`, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "execute_transaction", community_id: communityId, txn_id: txnId }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Execution failed");
+      toast.success(d.message || "Transaction executed successfully!");
+      onConfirm?.();
+    } catch (e: any) { toast.error(e.message); }
+    finally { setExecuting(false); }
+  };
+
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center py-16 gap-3">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <p className="text-sm text-muted-foreground">Initiating transaction…</p>
+    </div>
   );
-  
-  const [expiresAt] = useState(() => {
-    const date = new Date();
-    date.setHours(date.getHours() + 24);
-    return date;
-  });
-  
-  const [isExpired, setIsExpired] = useState(false);
 
-  const handleAuthorize = (role: OfficerRole, password: string): boolean => {
-    const correctPassword = MOCK_OFFICER_PASSWORDS[role];
-    
-    if (password === correctPassword) {
-      setOfficers((prev) =>
-        prev.map((o) =>
-          o.role === role
-            ? { ...o, status: "authorized", authorizedAt: new Date() }
-            : o
-        )
-      );
-      return true;
-    }
-    return false;
-  };
-
-  const handleExpire = () => {
-    setIsExpired(true);
-    onExpire?.();
-  };
-
-  const validation = validateAuthorizationRequirements(officers);
-  const authorizedCount = validation.authorizedCount;
-
-  const getTransactionIcon = () => {
-    switch (transactionType) {
-      case "transfer":
-        return <Send className="h-6 w-6 text-primary" />;
-      case "withdrawal":
-        return <Wallet className="h-6 w-6 text-primary" />;
-      default:
-        return <Send className="h-6 w-6 text-primary" />;
-    }
-  };
-
-  const getTransactionTitle = () => {
-    switch (transactionType) {
-      case "transfer":
-        return "Transfer Authorization";
-      case "withdrawal":
-        return "Withdrawal Authorization";
-      case "disbursement":
-        return "Disbursement Authorization";
-    }
-  };
+  const sigCount   = txn?.current_sigs ?? 0;
+  const required   = txn?.required_sigs ?? 4;
+  const pctDone    = Math.min(100, (sigCount / required) * 100);
+  const hasPresident = txn?.has_president;
+  const hasTreasFS   = txn?.has_treasurer_or_fs;
+  const fullyAuth    = txn?.status === "authorized";
+  const executed     = txn?.status === "executed";
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <div className="flex justify-center">
-          <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <Shield className="h-8 w-8 text-primary" />
+    <div className="space-y-5">
+      {/* Title */}
+      <div className="flex items-center gap-2">
+        <div className="p-2 rounded-xl bg-primary/10"><Shield className="h-5 w-5 text-primary" /></div>
+        <div>
+          <h3 className="font-bold text-base">Multi-Signature Authorization</h3>
+          <p className="text-xs text-muted-foreground">4 officers required to authorize</p>
+        </div>
+        {txn && (
+          <Button variant="ghost" size="icon" className="ml-auto h-7 w-7" onClick={() => fetchTxn()}>
+            <RefreshCw className="h-3.5 w-3.5" />
+          </Button>
+        )}
+      </div>
+
+      {/* Transaction summary */}
+      {(txn || amount > 0) && (
+        <div className="p-3.5 rounded-xl bg-muted/40 border space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Transaction</span>
+            <span className="font-medium capitalize">{txn?.type ?? transactionType}</span>
           </div>
-        </div>
-        <h3 className="text-lg font-bold">{getTransactionTitle()}</h3>
-        <p className="text-xs text-muted-foreground">
-          Multi-signature authorization required
-        </p>
-      </div>
-
-      {/* Timer */}
-      <div className="flex justify-center">
-        <AuthorizationTimer expiresAt={expiresAt} onExpire={handleExpire} />
-      </div>
-
-      {/* Transaction Summary */}
-      <Card className="p-3 bg-muted/50">
-        <div className="flex items-center gap-3 mb-2">
-          {getTransactionIcon()}
-          <span className="text-sm font-medium">Transaction Details</span>
-        </div>
-        <div className="space-y-1.5 text-sm">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Amount</span>
+            <span className="font-bold text-primary">{fmt(txn?.amount ?? amount)}</span>
+          </div>
+          {(txn?.description || description) && (
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Purpose</span>
+              <span className="font-medium text-right max-w-[180px] line-clamp-2">{txn?.description ?? description}</span>
+            </div>
+          )}
           {recipient && (
-            <div className="flex justify-between">
+            <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Recipient</span>
               <span className="font-medium">{recipient}</span>
             </div>
           )}
-          {bankName && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Bank</span>
-              <span className="font-medium">{bankName}</span>
-            </div>
-          )}
-          {accountNumber && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Account</span>
-              <span className="font-medium">{accountNumber}</span>
-            </div>
-          )}
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Amount</span>
-            <div className="text-right">
-              <span className="font-bold text-base">{formatLocalAmount(amount, "NGN")}</span>
-              <p className="text-xs text-muted-foreground">
-                ({formatMobiAmount(amount)})
-              </p>
-            </div>
-          </div>
-          {description && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Description</span>
-              <span className="font-medium text-right max-w-[150px] line-clamp-1">
-                {description}
+          {txn?.expires_at && (
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Expires</span>
+              <span className={cn("font-medium text-xs", new Date(txn.expires_at).getTime() - Date.now() < 3600000 ? "text-red-500" : "text-muted-foreground")}>
+                <Clock className="h-3 w-3 inline mr-0.5" />{timeUntil(txn.expires_at)}
               </span>
             </div>
           )}
         </div>
-      </Card>
+      )}
 
-      {/* Authorization Requirements Info */}
-      <div className="p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg space-y-2">
-        <div className="flex items-start gap-2">
-          <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-          <div className="space-y-1">
-            <p className="text-xs text-blue-800 dark:text-blue-200">
-              <strong>Requires:</strong> {requiredSignatories} authorizations including President AND (Treasurer OR Financial Secretary)
-            </p>
-            {!isPresidentInitiator && (
-              <p className="text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-2 py-1 rounded">
-                ⚠️ President did not initiate - 4 signatories required
-              </p>
-            )}
+      {/* Progress */}
+      <div className="space-y-2">
+        <div className="flex justify-between text-sm font-medium">
+          <span>Signatures</span>
+          <span className={cn(sigCount >= required ? "text-green-600" : "text-primary")}>{sigCount}/{required}</span>
+        </div>
+        <Progress value={pctDone} className="h-2.5" />
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className={cn("flex items-center gap-1.5 p-2 rounded-lg", hasPresident ? "bg-green-50 text-green-700" : "bg-muted text-muted-foreground")}>
+            {hasPresident ? <CheckCircle className="h-3.5 w-3.5 shrink-0" /> : <Clock className="h-3.5 w-3.5 shrink-0" />}
+            <span className="font-medium">President</span>
+            {hasPresident ? <Badge className="ml-auto text-[9px] bg-green-100 text-green-700 px-1">✓</Badge> : <Badge variant="outline" className="ml-auto text-[9px] px-1">Required</Badge>}
+          </div>
+          <div className={cn("flex items-center gap-1.5 p-2 rounded-lg", hasTreasFS ? "bg-green-50 text-green-700" : "bg-muted text-muted-foreground")}>
+            {hasTreasFS ? <CheckCircle className="h-3.5 w-3.5 shrink-0" /> : <Clock className="h-3.5 w-3.5 shrink-0" />}
+            <span className="font-medium text-[10px]">Treasurer/FS</span>
+            {hasTreasFS ? <Badge className="ml-auto text-[9px] bg-green-100 text-green-700 px-1">✓</Badge> : <Badge variant="outline" className="ml-auto text-[9px] px-1">Required</Badge>}
           </div>
         </div>
       </div>
 
-      {/* Officer Authorization List - Single column for mobile optimization */}
-      <ScrollArea className="h-[340px] pr-1">
-        <div className="space-y-3">
-          {AUTHORIZATION_OFFICERS.map((officer) => {
-            const officerState = officers.find((o) => o.role === officer.role);
+      {/* Authorizations so far */}
+      {(txn?.authorizations?.length ?? 0) > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground">Officers who have authorized</p>
+          {txn!.authorizations.map(auth => {
+            const badge = positionBadge(auth);
             return (
-              <OfficerAuthorizationCard
-                key={officer.role}
-                role={officer.role}
-                name={officer.name}
-                imageUrl={officer.imageUrl}
-                displayTitle={officer.displayTitle}
-                isRequired={officer.isRequired}
-                status={officerState?.status || "pending"}
-                onAuthorize={handleAuthorize}
-                disabled={isExpired}
-              />
+              <div key={auth.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-green-50/50 border border-green-100">
+                <Avatar className="h-8 w-8 border-2 border-green-200">
+                  <AvatarImage src={auth.profile_photo} />
+                  <AvatarFallback className="text-xs">{(auth.name || "U")[0]}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold">{auth.name}</p>
+                  <Badge className={cn("text-[10px] px-1.5 mt-0.5", badge.color)}>{badge.label}</Badge>
+                </div>
+                <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
+              </div>
             );
           })}
         </div>
-      </ScrollArea>
+      )}
 
-      {/* Authorization Status */}
-      <div
-        className={cn(
-          "flex items-center gap-2 px-3 py-2 rounded-lg border",
-          validation.isValid
-            ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800"
-            : "bg-muted border-border"
-        )}
-      >
-        {validation.isValid ? (
-          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-        ) : (
-          <AlertCircle className="h-4 w-4 text-muted-foreground" />
-        )}
-        <span
-          className={cn(
-            "text-sm font-medium",
-            validation.isValid
-              ? "text-emerald-700 dark:text-emerald-400"
-              : "text-muted-foreground"
+      {/* Requirements info */}
+      <div className="p-3 rounded-xl border bg-amber-50/50 border-amber-200">
+        <p className="text-xs font-semibold text-amber-700 mb-1.5">Authorization Requirements</p>
+        <ul className="text-xs text-amber-600 space-y-1">
+          <li className="flex items-center gap-1.5"><Shield className="h-3 w-3" /> Minimum 4 officer signatures</li>
+          <li className="flex items-center gap-1.5"><Crown className="h-3 w-3" /> President must authorize</li>
+          <li className="flex items-center gap-1.5"><Wallet className="h-3 w-3" /> Treasurer or Financial Secretary must authorize</li>
+          <li className="flex items-center gap-1.5"><Clock className="h-3 w-3" /> Valid for 24 hours from initiation</li>
+        </ul>
+      </div>
+
+      {/* Status indicator */}
+      {executed && (
+        <div className="flex items-center gap-2 p-3 rounded-xl bg-green-50 border border-green-200 text-green-700">
+          <CheckCircle className="h-5 w-5 shrink-0" />
+          <p className="text-sm font-semibold">Transaction Executed Successfully</p>
+        </div>
+      )}
+
+      {/* Actions */}
+      {!executed && (
+        <div className="space-y-2">
+          {!hasAuthorized && !fullyAuth && (
+            <Button className="w-full gap-2" onClick={handleAuthorize} disabled={authorizing}>
+              {authorizing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Shield className="h-4 w-4" />}
+              {authorizing ? "Authorizing…" : "Authorize This Transaction"}
+            </Button>
           )}
-        >
-          {authorizedCount}/{requiredSignatories} Authorized • {validation.message}
-        </span>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="space-y-2 pt-2">
-        <Button
-          onClick={onConfirm}
-          disabled={!validation.isValid || isExpired}
-          className="w-full h-12"
-        >
-          <CheckCircle2 className="h-5 w-5 mr-2" />
-          Confirm {transactionType === "transfer" ? "Transfer" : "Withdrawal"}
-        </Button>
-        <Button
-          variant="outline"
-          onClick={onBack}
-          className="w-full h-11"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
-      </div>
+          {hasAuthorized && !fullyAuth && (
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-700">
+              <CheckCircle className="h-4 w-4 shrink-0" />
+              <p className="text-sm">Your authorization recorded. Waiting for {required - sigCount} more signature{required - sigCount !== 1 ? "s" : ""}.</p>
+            </div>
+          )}
+          {fullyAuth && (
+            <Button className="w-full gap-2 bg-green-600 hover:bg-green-700" onClick={handleExecute} disabled={executing}>
+              {executing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+              {executing ? "Executing…" : "Execute Transaction Now"}
+            </Button>
+          )}
+          {onBack && (
+            <Button variant="outline" className="w-full" onClick={onBack}>
+              <ChevronLeft className="h-4 w-4 mr-1" /> Back
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

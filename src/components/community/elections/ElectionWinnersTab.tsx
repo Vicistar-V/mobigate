@@ -1,9 +1,9 @@
-import { useState, useMemo } from "react";
-import { Menu, Calendar, Filter, X, ChevronDown, Trophy, ShieldCheck } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { Menu, Calendar, Filter, X, ChevronDown, Trophy, ShieldCheck, Loader2 } from "lucide-react";
 import { WinnersView } from "./WinnersView";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
-import { mockElectionWinners } from "@/data/electionData";
+import { ElectionWinner } from "@/data/electionData";
 import { getContentsAdsWithUserAdverts } from "@/data/profileAds";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +14,40 @@ import { format, isAfter, isBefore, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { VerifyCertificateDrawer } from "./VerifyCertificateDrawer";
 
-export const ElectionWinnersTab = () => {
+const API = "/api/community/elections.php";
+
+interface ElectionWinnersTabProps {
+  communityId?: string;
+}
+
+export const ElectionWinnersTab = ({ communityId }: ElectionWinnersTabProps) => {
+  const [mockElectionWinners, setMockElectionWinners] = useState<ElectionWinner[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!communityId) return;
+    setLoading(true);
+    fetch(`${API}?action=winners&community_id=${communityId}`, { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : { winners: [] }))
+      .then((d) => {
+        const mapped: ElectionWinner[] = (d.winners ?? []).map((w: any) => ({
+          id: w.id,
+          memberId: w.user_id,
+          candidateName: w.name?.trim() || "Candidate",
+          office: w.office_name,
+          votes: parseInt(w.votes, 10) || 0,
+          percentage: parseFloat(w.percentage) || 0,
+          image: w.profile_photo || "/placeholder.svg",
+          announcedAt: new Date(w.announced_at),
+          electionName: w.election_title,
+          electionType: w.election_type,
+        }));
+        setMockElectionWinners(mapped);
+      })
+      .catch(() => setMockElectionWinners([]))
+      .finally(() => setLoading(false));
+  }, [communityId]);
+
   // Filter states
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
@@ -280,7 +313,11 @@ export const ElectionWinnersTab = () => {
       </div>
 
       {/* Winners Content */}
-      <WinnersView winners={filteredWinners} />
+      {loading ? (
+        <div className="flex justify-center py-12"><Loader2 className="h-7 w-7 animate-spin text-primary" /></div>
+      ) : (
+        <WinnersView winners={filteredWinners} />
+      )}
 
       {/* Ads */}
       <PremiumAdRotation ads={getContentsAdsWithUserAdverts().flat()} slotId="election-winners" />

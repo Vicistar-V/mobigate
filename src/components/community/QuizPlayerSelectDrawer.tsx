@@ -11,7 +11,6 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
-import { quizPlayers, QuizPlayer } from "@/data/quizPlayersData";
 import { formatLocalAmount, formatMobiAmount } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -33,13 +32,27 @@ const sortLabels: Record<SortOption, string> = {
   highest_frequency: "Highest Frequency",
 };
 
+interface QuizPlayer {
+  id: string; name: string; avatar: string; registrationNumber: string;
+  totalGamesPlayed: number; totalStakePaid: number; totalAmountWon: number;
+  lastPlayedDate: Date; firstPlayedDate: Date; netPosition: number;
+}
+
+interface RawPlayer {
+  user_id: string; name: string; avatar?: string;
+  total_games_played: number; total_stake_paid: string; total_amount_won: string;
+  last_played_at: string; first_played_at: string;
+}
+
 interface QuizPlayerSelectDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   mode: ActionMode;
+  players: RawPlayer[];
+  onConfirm: (userId: string, amount: number, reason: string) => void;
 }
 
-export function QuizPlayerSelectDrawer({ open, onOpenChange, mode }: QuizPlayerSelectDrawerProps) {
+export function QuizPlayerSelectDrawer({ open, onOpenChange, mode, players, onConfirm }: QuizPlayerSelectDrawerProps) {
   const { toast } = useToast();
   const [sortBy, setSortBy] = useState<SortOption>("most_recent");
   const [showFilters, setShowFilters] = useState(false);
@@ -73,6 +86,23 @@ export function QuizPlayerSelectDrawer({ open, onOpenChange, mode }: QuizPlayerS
     setShowFilters(false);
     setShowSortMenu(false);
   };
+
+  const quizPlayers: QuizPlayer[] = useMemo(() => players.map((p) => {
+    const totalStakePaid = parseFloat(p.total_stake_paid) || 0;
+    const totalAmountWon = parseFloat(p.total_amount_won) || 0;
+    return {
+      id: p.user_id,
+      name: p.name || "Member",
+      avatar: p.avatar || "/placeholder.svg",
+      registrationNumber: p.user_id.slice(0, 8).toUpperCase(),
+      totalGamesPlayed: p.total_games_played,
+      totalStakePaid,
+      totalAmountWon,
+      lastPlayedDate: new Date(p.last_played_at),
+      firstPlayedDate: new Date(p.first_played_at),
+      netPosition: totalAmountWon - totalStakePaid,
+    };
+  }), [players]);
 
   const filteredPlayers = useMemo(() => {
     let result = [...quizPlayers];
@@ -126,7 +156,7 @@ export function QuizPlayerSelectDrawer({ open, onOpenChange, mode }: QuizPlayerS
     }
 
     return result;
-  }, [nameSearch, dateFrom, dateTo, stakeMin, stakeMax, sortBy]);
+  }, [quizPlayers, nameSearch, dateFrom, dateTo, stakeMin, stakeMax, sortBy]);
 
   const activeFilterCount = [nameSearch, dateFrom, dateTo, stakeMin, stakeMax].filter(Boolean).length;
 
@@ -136,12 +166,8 @@ export function QuizPlayerSelectDrawer({ open, onOpenChange, mode }: QuizPlayerS
       toast({ title: "Invalid", description: "Select a player and enter a valid amount.", variant: "destructive" });
       return;
     }
-    toast({
-      title: isBonus ? "Bonus Awarded" : "Refund Processed",
-      description: `${formatLocalAmount(amount, "NGN")} (${formatMobiAmount(amount)}) ${isBonus ? "awarded to" : "refunded to"} ${selectedPlayer.name}.`,
-    });
+    onConfirm(selectedPlayer.id, amount, actionReason);
     resetAll();
-    onOpenChange(false);
   };
 
   const handleClose = () => {

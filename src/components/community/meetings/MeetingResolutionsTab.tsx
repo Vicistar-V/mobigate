@@ -1,23 +1,42 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, CheckCircle2, XCircle, Clock, User } from "lucide-react";
-import { mockResolutions, mockMeetings } from "@/data/meetingsData";
+import { Calendar, CheckCircle2, XCircle, Clock, User, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { VoteBoxGroup } from "../shared/VoteBoxGroup";
 
-export const MeetingResolutionsTab = () => {
+export const MeetingResolutionsTab = ({ communityId }: { communityId?: string } = {}) => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const itemsPerPage = 5;
 
-  // Combine resolutions with meeting data
-  const resolutionsWithMeetings = mockResolutions.map((resolution) => {
-    const meeting = mockMeetings.find((m) => m.id === resolution.meetingId);
-    return { ...resolution, meeting };
-  });
+  const [mockResolutions, setMockResolutions] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!communityId) return;
+    setLoading(true);
+    fetch(`/api/community/meetings_admin.php?action=resolutions&community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const mapped = (d.resolutions ?? []).map((r: any) => ({
+          id: r.id, meetingId: r.meeting_id, title: r.title, description: r.description,
+          votesFor: parseInt(r.votes_for, 10) || 0, votesAgainst: parseInt(r.votes_against, 10) || 0,
+          abstentions: parseInt(r.abstentions, 10) || 0,
+          status: ['passed','rejected','tabled'].includes(r.status) ? r.status : (r.status === 'completed' ? 'passed' : 'tabled'),
+          proposedBy: r.proposed_by_name?.trim() || "Member",
+          meeting: { id: r.meeting_id, name: r.meeting_title, date: new Date(r.created_at) },
+        }));
+        setMockResolutions(mapped);
+      })
+      .catch(() => setMockResolutions([]))
+      .finally(() => setLoading(false));
+  }, [communityId]);
+
+  // Combine resolutions with meeting data (already joined server-side above)
+  const resolutionsWithMeetings = mockResolutions;
 
   // Filter by status
   const filteredResolutions =

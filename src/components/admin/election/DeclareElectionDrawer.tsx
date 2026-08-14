@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Vote,
   Calendar,
@@ -106,6 +106,7 @@ interface SelectedOfficeVacancy {
 interface DeclareElectionDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
 }
 
 type Step = "type" | "offices" | "details" | "confirm";
@@ -113,9 +114,28 @@ type Step = "type" | "offices" | "details" | "confirm";
 export function DeclareElectionDrawer({
   open,
   onOpenChange,
+  communityId,
 }: DeclareElectionDrawerProps) {
   const isMobile = useIsMobile();
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Multi-signature authorization only makes sense once a community actually
+  // has multiple real leaders — with a single admin (e.g. a brand-new
+  // community), require no separate authorization step at all.
+  const [hasMultipleAdmins, setHasMultipleAdmins] = useState(false);
+  useEffect(() => {
+    if (!open || !communityId) return;
+    fetch(`/api/community/manage_members.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const adminCount = (d.members ?? []).filter((m: any) =>
+          ['owner', 'admin', 'moderator'].includes(m.role)
+        ).length;
+        setHasMultipleAdmins(adminCount > 1);
+      })
+      .catch(() => setHasMultipleAdmins(false));
+  }, [open, communityId]);
   
   const [step, setStep] = useState<Step>("type");
   const [electionType, setElectionType] = useState<ElectionType>("general");
@@ -187,7 +207,13 @@ export function DeclareElectionDrawer({
     if (step === "type") setStep("offices");
     else if (step === "offices") setStep("details");
     else if (step === "details") setStep("confirm");
-    else if (step === "confirm") setShowAuthDrawer(true);
+    else if (step === "confirm") {
+      if (hasMultipleAdmins) {
+        setShowAuthDrawer(true);
+      } else {
+        handleAuthComplete();
+      }
+    }
   };
 
   const canProceed = () => {
@@ -207,12 +233,41 @@ export function DeclareElectionDrawer({
     return true;
   };
 
-  const handleAuthComplete = () => {
-    toast({
-      title: "Election Declared Successfully",
-      description: `${electionType === "general" ? "General" : "Supplementary"} Election for ${selectedOffices.length} office(s) has been declared.`,
-    });
-    handleClose();
+  const handleAuthComplete = async () => {
+    if (!communityId) {
+      toast({ title: "No community selected", variant: "destructive" });
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const officeNames = selectedOffices.map((id) => mockOffices.find((o) => o.id === id)?.name).filter(Boolean);
+      const res = await fetch("/api/community/elections.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "create_election",
+          community_id: communityId,
+          title: electionName || `${electionType === "general" ? "General" : "Supplementary"} Election`,
+          description: additionalNotes,
+          type: electionType === "general" ? "general" : "by-election",
+          offices: officeNames,
+          nomination_deadline: nominationStartDate || undefined,
+          voting_start: electionDate || undefined,
+        }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to declare election");
+
+      toast({
+        title: "Election Declared Successfully",
+        description: `${electionType === "general" ? "General" : "Supplementary"} Election for ${selectedOffices.length} office(s) has been declared.`,
+      });
+      handleClose();
+    } catch (e: any) {
+      toast({ title: "Couldn't Declare Election", description: e.message, variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleClose = () => {
@@ -639,12 +694,12 @@ export function DeclareElectionDrawer({
       <Button
         className="flex-1 bg-primary hover:bg-primary/90"
         onClick={handleNext}
-        disabled={!canProceed()}
+        disabled={!canProceed() || isSubmitting}
       >
         {step === "confirm" ? (
           <>
             <Vote className="h-4 w-4 mr-2" />
-            Proceed to Authorization
+            {hasMultipleAdmins ? "Proceed to Authorization" : (isSubmitting ? "Declaring..." : "Declare Election")}
           </>
         ) : (
           <>

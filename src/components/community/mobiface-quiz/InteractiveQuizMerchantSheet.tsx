@@ -1,30 +1,48 @@
-import { useState } from "react";
-import { ChevronRight, Star, Trophy, Users, Radio } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronRight, Star, Radio, Loader2 } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { mockMerchants, mockSeasons, mockSeasonWinners, QuizMerchant } from "@/data/mobifaceInteractiveQuizData";
-import { formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
+import { mockSeasonWinners } from "@/data/mobifaceInteractiveQuizData";
 import { InteractiveQuizSeasonSheet } from "./InteractiveQuizSeasonSheet";
 import { LiveScoreboardDrawer } from "./LiveScoreboardDrawer";
 import { HighlightedWinnersCarousel } from "./HighlightedWinnersCarousel";
 
+const API = "/api/quiz/interactive.php";
+
+interface Merchant {
+  id: string; name: string; category: string; is_verified: number; active_seasons: number;
+}
+
 interface InteractiveQuizMerchantSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialMerchantId?: string;
 }
 
-export function InteractiveQuizMerchantSheet({ open, onOpenChange }: InteractiveQuizMerchantSheetProps) {
-  const [selectedMerchant, setSelectedMerchant] = useState<QuizMerchant | null>(null);
+export function InteractiveQuizMerchantSheet({ open, onOpenChange, initialMerchantId }: InteractiveQuizMerchantSheetProps) {
+  const [selectedMerchant, setSelectedMerchant] = useState<Merchant | null>(null);
   const [showScoreboard, setShowScoreboard] = useState(false);
+  const [merchants, setMerchants] = useState<Merchant[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // Only show approved merchants with at least one active season
-  const visibleMerchants = mockMerchants.filter(m => {
-    if (m.applicationStatus !== "approved") return false;
-    const activeSeasons = mockSeasons.filter(s => s.merchantId === m.id && s.quizStatus === "active");
-    return activeSeasons.length > 0;
-  });
+  useEffect(() => {
+    if (!open) return;
+    setLoading(true);
+    fetch(`${API}?action=merchants`, { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d) => {
+        const list: Merchant[] = d.merchants ?? [];
+        setMerchants(list);
+        if (initialMerchantId) {
+          const found = list.find((m) => m.id === initialMerchantId);
+          if (found) setSelectedMerchant(found);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [open, initialMerchantId]);
 
   return (
     <>
@@ -60,76 +78,38 @@ export function InteractiveQuizMerchantSheet({ open, onOpenChange }: Interactive
 
           <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4 pb-4">
             <div className="space-y-3">
-              {visibleMerchants.map((merchant) => {
-                const activeSeasons = mockSeasons.filter(s => s.merchantId === merchant.id && s.quizStatus === "active");
-                // Get best season for prize display
-                const bestSeason = activeSeasons.sort((a, b) => b.totalWinningPrizes - a.totalWinningPrizes)[0];
-                const totalParticipants = activeSeasons.reduce((sum, s) => sum + s.totalParticipants, 0);
-
-                return (
-                  <Card
-                    key={merchant.id}
-                    className="cursor-pointer hover:border-blue-300 transition-all touch-manipulation"
-                    onClick={() => setSelectedMerchant(merchant)}
-                  >
-                    <CardContent className="p-4 space-y-3">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-14 w-14 rounded-lg">
-                          <AvatarFallback className="rounded-lg bg-blue-100 text-blue-700 text-sm font-bold">
-                            {merchant.name.substring(0, 2)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <h4 className="text-base font-bold break-words">{merchant.name}</h4>
-                            {merchant.isVerified && <span className="text-blue-500 text-sm">✓</span>}
-                          </div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <Badge variant="outline" className="text-xs">{merchant.category}</Badge>
-                            <span className="text-xs text-muted-foreground">{activeSeasons.length} season{activeSeasons.length !== 1 ? "s" : ""}</span>
-                            <span className="text-xs text-muted-foreground flex items-center gap-1">
-                              <Users className="h-3.5 w-3.5" />{totalParticipants.toLocaleString()}
-                            </span>
-                          </div>
+              {loading ? (
+                <div className="flex justify-center py-10"><Loader2 className="h-7 w-7 animate-spin text-blue-500" /></div>
+              ) : merchants.map((merchant) => (
+                <Card
+                  key={merchant.id}
+                  className="cursor-pointer hover:border-blue-300 transition-all touch-manipulation"
+                  onClick={() => setSelectedMerchant(merchant)}
+                >
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-14 w-14 rounded-lg">
+                        <AvatarFallback className="rounded-lg bg-blue-100 text-blue-700 text-sm font-bold">
+                          {merchant.name.substring(0, 2)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <h4 className="text-base font-bold break-words">{merchant.name}</h4>
+                          {!!merchant.is_verified && <span className="text-blue-500 text-sm">✓</span>}
                         </div>
-                        <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge variant="outline" className="text-xs">{merchant.category}</Badge>
+                          <span className="text-xs text-muted-foreground">{merchant.active_seasons} season{merchant.active_seasons !== 1 ? "s" : ""}</span>
+                        </div>
                       </div>
+                      <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
 
-                      {/* Winning Prizes Display */}
-                      {bestSeason && (
-                        <div className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 rounded-lg p-3 border border-amber-200/50 dark:border-amber-800/30">
-                          <div className="flex items-center gap-1.5 mb-2">
-                            <Trophy className="h-4 w-4 text-amber-500" />
-                            <span className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase">Winning Prizes</span>
-                          </div>
-                          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                            <span className="text-muted-foreground">🥇 1st Prize:</span>
-                            <span className="font-semibold">{formatLocalAmount(bestSeason.firstPrize, "NGN")}</span>
-                            <span className="text-muted-foreground">🥈 2nd Prize:</span>
-                            <span className="font-semibold">{formatLocalAmount(bestSeason.secondPrize, "NGN")}</span>
-                            <span className="text-muted-foreground">🥉 3rd Prize:</span>
-                            <span className="font-semibold">{formatLocalAmount(bestSeason.thirdPrize, "NGN")}</span>
-                            {bestSeason.consolationPrizesEnabled && (
-                              <>
-                                <span className="text-muted-foreground">🎁 Consolation:</span>
-                                <span className="font-semibold">{formatLocalAmount(bestSeason.consolationPrizePerPlayer, "NGN")} × {bestSeason.consolationPrizeCount}</span>
-                              </>
-                            )}
-                          </div>
-                          <div className="mt-2 pt-2 border-t border-amber-200/50 dark:border-amber-800/30">
-                            <div className="flex justify-between text-sm">
-                              <span className="font-bold text-amber-700 dark:text-amber-400">Total Prize Pool:</span>
-                              <span className="font-bold text-green-600">{formatLocalAmount(bestSeason.totalWinningPrizes, "NGN")}</span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                );
-              })}
-
-              {visibleMerchants.length === 0 && (
+              {!loading && merchants.length === 0 && (
                 <Card>
                   <CardContent className="p-6 text-center text-muted-foreground text-sm">
                     No active quiz merchants available right now.
@@ -145,8 +125,8 @@ export function InteractiveQuizMerchantSheet({ open, onOpenChange }: Interactive
         <InteractiveQuizSeasonSheet
           open={!!selectedMerchant}
           onOpenChange={(v) => { if (!v) { setSelectedMerchant(null); onOpenChange(false); } }}
-          merchant={selectedMerchant}
-          seasons={mockSeasons.filter(s => s.merchantId === selectedMerchant.id && s.quizStatus === "active")}
+          merchantId={selectedMerchant.id}
+          merchantName={selectedMerchant.name}
         />
       )}
       <LiveScoreboardDrawer open={showScoreboard} onOpenChange={setShowScoreboard} />

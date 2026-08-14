@@ -14,13 +14,15 @@ import { Badge } from "@/components/ui/badge";
 import { ModuleAuthorizationDrawer } from "./authorization/ModuleAuthorizationDrawer";
 import { getActionConfig, renderActionDetails } from "./authorization/authorizationActionConfigs";
 import { useToast } from "@/hooks/use-toast";
-import { mockAdminProposals, mockMemberRecommendations } from "@/data/communityDemocraticSettingsData";
 import { DEMOCRATIC_SETTINGS_CONFIG } from "@/types/communityDemocraticSettings";
+import { useCommunitySettings } from "@/hooks/useCommunity";
+import { buildAdminProposals, buildMemberRecommendations } from "@/lib/communitySettingsMerge";
 
 // Action types for settings module
 type SettingsActionType = "update_constitution" | "change_privacy" | "update_rules" | "enable_feature" | "disable_feature" | "upload_constitution" | "delete_constitution" | "deactivate_constitution";
 
 interface AdminSettingsSectionProps {
+  communityId?: string;
   onEditProfile: () => void;
   onEditPhotos: () => void;
   onManageConstitution: () => void;
@@ -33,6 +35,7 @@ interface AdminSettingsSectionProps {
 }
 
 export function AdminSettingsSection({
+  communityId,
   onEditProfile,
   onEditPhotos,
   onManageConstitution,
@@ -46,8 +49,9 @@ export function AdminSettingsSection({
   const { toast } = useToast();
 
   // Democratic governance stats
-  const pendingProposals = mockAdminProposals.filter((p) => p.status === "pending_approval");
-  const activeOverrides = mockMemberRecommendations.filter(
+  const { data: settingsData } = useCommunitySettings(communityId);
+  const pendingProposals = buildAdminProposals(settingsData).filter((p) => p.status === "pending_approval");
+  const activeOverrides = buildMemberRecommendations(settingsData).filter(
     (r) => r.supportPercentage >= DEMOCRATIC_SETTINGS_CONFIG.RECOMMENDATION_THRESHOLD
   );
 

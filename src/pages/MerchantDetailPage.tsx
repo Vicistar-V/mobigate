@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -55,7 +55,23 @@ export default function MerchantDetailPage() {
     settingsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const merchant = mockMerchants.find((m) => m.id === merchantId);
+  const [realMerchant, setRealMerchant] = useState<typeof mockMerchants[number] | null>(null);
+  useEffect(() => {
+    fetch(`/api/quiz/interactive.php?action=merchants`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const found = (d.merchants ?? []).find((m: any) => m.id === merchantId);
+        if (found) {
+          setRealMerchant({
+            id: found.id, name: found.name, category: found.category,
+            isVerified: !!found.is_verified, applicationStatus: "approved",
+          } as any);
+        }
+      })
+      .catch(() => {});
+  }, [merchantId]);
+
+  const merchant = realMerchant || mockMerchants.find((m) => m.id === merchantId);
   const seasons = mockSeasons.filter(
     (s) => s.merchantId === merchantId && s.quizStatus === "active"
   );

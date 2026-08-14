@@ -3,21 +3,33 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Calendar, Download, FileText, ThumbsUp, ThumbsDown, MinusCircle } from "lucide-react";
-import { mockVoteNotes, mockResolutions, mockMeetings } from "@/data/meetingsData";
 import { format } from "date-fns";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export const MeetingVoteNotesTab = () => {
+export const MeetingVoteNotesTab = ({ communityId }: { communityId?: string } = {}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Combine vote notes with resolution and meeting data
-  const votesWithDetails = mockVoteNotes.map((vote) => {
-    const resolution = mockResolutions.find((r) => r.id === vote.resolutionId);
-    const meeting = mockMeetings.find((m) => m.id === vote.meetingId);
-    return { ...vote, resolution, meeting };
-  });
+  const [votesWithDetails, setVotesWithDetails] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!communityId) return;
+    fetch(`/api/community/meetings_admin.php?action=all_vote_notes&community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const mapped = (d.voteNotes ?? []).map((v: any) => ({
+          id: v.id, resolutionId: v.resolution_id, meetingId: v.meeting_id,
+          voterId: v.voter_id, voterName: v.voter_name?.trim() || "Member", voterAvatar: v.voter_avatar || "/placeholder.svg",
+          vote: v.vote === 'for' ? 'for' : v.vote === 'against' ? 'against' : 'abstain',
+          note: v.note, timestamp: new Date(v.created_at),
+          resolution: { id: v.resolution_id, title: v.resolution_title },
+          meeting: { id: v.meeting_id, name: v.meeting_title, date: v.meeting_date ? new Date(v.meeting_date) : new Date() },
+        }));
+        setVotesWithDetails(mapped);
+      })
+      .catch(() => setVotesWithDetails([]));
+  }, [communityId]);
 
   const totalPages = Math.ceil(votesWithDetails.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;

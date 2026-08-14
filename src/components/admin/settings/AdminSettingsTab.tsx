@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
   Accordion,
@@ -40,19 +39,9 @@ import {
   SETTING_CATEGORY_LABELS,
   DEMOCRATIC_SETTINGS_CONFIG,
 } from "@/types/communityDemocraticSettings";
-import {
-  AdminSetting,
-  privacySettings,
-  generalSettings,
-  electionSettings,
-  financeSettings,
-  membershipSettings,
-  postingSettings,
-  meetingSettings,
-  promotionSettings,
-  getAllSettings,
-  getSettingsStats,
-} from "@/data/adminSettingsData";
+import { AdminSetting } from "@/data/adminSettingsData";
+import { useCommunitySettings } from "@/hooks/useCommunity";
+import { buildMergedAdminSettings, computeSettingsStats } from "@/lib/communitySettingsMerge";
 import { SettingsDetailSheet } from "./SettingsDetailSheet";
 import { CampaignGlobalSettingsDrawer } from "../election/CampaignGlobalSettingsDrawer";
 import { format } from "date-fns";
@@ -60,6 +49,7 @@ import { format } from "date-fns";
 interface AdminSettingsTabProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
 }
 
 interface CategoryConfig {
@@ -67,79 +57,35 @@ interface CategoryConfig {
   label: string;
   icon: React.ElementType;
   color: string;
-  settings: AdminSetting[];
 }
 
-const categories: CategoryConfig[] = [
-  { 
-    key: "privacy_settings", 
-    label: "Privacy Settings", 
-    icon: Shield, 
-    color: "text-violet-600 bg-violet-500/10",
-    settings: privacySettings
-  },
-  { 
-    key: "general_settings", 
-    label: "General Settings", 
-    icon: Settings, 
-    color: "text-gray-600 bg-gray-500/10",
-    settings: generalSettings
-  },
-  { 
-    key: "election_settings", 
-    label: "Election Settings", 
-    icon: Vote, 
-    color: "text-blue-600 bg-blue-500/10",
-    settings: electionSettings
-  },
-  { 
-    key: "finance_settings", 
-    label: "Finance Settings", 
-    icon: Wallet, 
-    color: "text-green-600 bg-green-500/10",
-    settings: financeSettings
-  },
-  { 
-    key: "membership_settings", 
-    label: "Membership Settings", 
-    icon: Users, 
-    color: "text-amber-600 bg-amber-500/10",
-    settings: membershipSettings
-  },
-  { 
-    key: "posting_settings", 
-    label: "Posting & Content", 
-    icon: FileText, 
-    color: "text-pink-600 bg-pink-500/10",
-    settings: postingSettings
-  },
-  { 
-    key: "meeting_settings", 
-    label: "Meeting Settings", 
-    icon: Calendar, 
-    color: "text-cyan-600 bg-cyan-500/10",
-    settings: meetingSettings
-  },
-  { 
-    key: "promotion_settings", 
-    label: "Promotion & Visibility", 
-    icon: Megaphone, 
-    color: "text-orange-600 bg-orange-500/10",
-    settings: promotionSettings
-  },
+const CATEGORY_CONFIG: CategoryConfig[] = [
+  { key: "privacy_settings", label: "Privacy Settings", icon: Shield, color: "text-violet-600 bg-violet-500/10" },
+  { key: "general_settings", label: "General Settings", icon: Settings, color: "text-gray-600 bg-gray-500/10" },
+  { key: "election_settings", label: "Election Settings", icon: Vote, color: "text-blue-600 bg-blue-500/10" },
+  { key: "finance_settings", label: "Finance Settings", icon: Wallet, color: "text-green-600 bg-green-500/10" },
+  { key: "membership_settings", label: "Membership Settings", icon: Users, color: "text-amber-600 bg-amber-500/10" },
+  { key: "posting_settings", label: "Posting & Content", icon: FileText, color: "text-pink-600 bg-pink-500/10" },
+  { key: "meeting_settings", label: "Meeting Settings", icon: Calendar, color: "text-cyan-600 bg-cyan-500/10" },
+  { key: "promotion_settings", label: "Promotion & Visibility", icon: Megaphone, color: "text-orange-600 bg-orange-500/10" },
 ];
 
-export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) {
+export function AdminSettingsTab({ open, onOpenChange, communityId }: AdminSettingsTabProps) {
   const isMobile = useIsMobile();
   const { toast } = useToast();
-  
+  const { data, propose, recommend } = useCommunitySettings(communityId);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSetting, setSelectedSetting] = useState<AdminSetting | null>(null);
   const [showSettingDetail, setShowSettingDetail] = useState(false);
   const [showCampaignSettings, setShowCampaignSettings] = useState(false);
-  
-  const stats = getSettingsStats();
-  const allSettings = getAllSettings();
+
+  const allSettings = buildMergedAdminSettings(data);
+  const stats = computeSettingsStats(data);
+  const categories = CATEGORY_CONFIG.map((c) => ({
+    ...c,
+    settings: allSettings.filter((s) => s.category === c.key),
+  }));
 
   // Filter settings based on search
   const filteredSettings = searchQuery.trim()
@@ -159,10 +105,56 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
     setShowSettingDetail(true);
   };
 
-  const handleProposalSubmit = (settingId: string, newValue: string, reason?: string) => {
+  const handleProposalSubmit = async (setting: AdminSetting, newValue: string, reason?: string) => {
+    if (!communityId) {
+      toast({ title: "No community selected", variant: "destructive" });
+      return;
+    }
+    const result = await propose({
+      settingKey: setting.key,
+      settingName: setting.name,
+      settingDescription: setting.description,
+      settingCategory: setting.category,
+      currentValue: setting.currentValue,
+      proposedValue: newValue,
+    });
+    if (!result.success) {
+      toast({
+        title: "Couldn't Submit Proposal",
+        description: result.error || "Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
     toast({
       title: "Change Proposed",
       description: "Your proposed setting change has been submitted for members' approval."
+    });
+  };
+
+  const handleRecommendSubmit = async (setting: AdminSetting, value: string, reason?: string) => {
+    if (!communityId) {
+      toast({ title: "No community selected", variant: "destructive" });
+      return;
+    }
+    const result = await recommend({
+      settingKey: setting.key,
+      settingName: setting.name,
+      currentValue: setting.currentValue,
+      recommendedValue: value,
+      reason,
+    });
+    if (!result.success) {
+      toast({
+        title: "Couldn't Submit Recommendation",
+        description: result.error || "Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+    toast({
+      title: "Recommendation Submitted",
+      description: "Your alternative setting recommendation has been submitted for member support."
     });
   };
 
@@ -298,7 +290,7 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
 
       {/* Categories Accordion */}
       {!filteredSettings && (
-        <Accordion type="multiple" defaultValue={["privacy_settings"]} className="space-y-2 w-full box-border">
+        <Accordion type="multiple" className="space-y-2 w-full box-border">
           {categories.map((category) => {
             const Icon = category.icon;
             const pendingCount = category.settings.filter(s => s.hasPendingChange).length;
@@ -381,14 +373,14 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
     return (
       <>
         <Drawer open={open} onOpenChange={onOpenChange}>
-          <DrawerContent className="max-h-[92vh] p-0">
-            <DrawerHeader className="border-b pb-3 shrink-0 px-4 pt-4">
+          <DrawerContent className="max-h-[92vh] flex flex-col overflow-hidden touch-auto">
+            <DrawerHeader className="border-b shrink-0 px-4 pt-4 pb-3">
               <DrawerTitle className="flex items-center gap-2">
                 <Settings className="h-5 w-5 text-primary shrink-0" />
                 Community Settings
               </DrawerTitle>
             </DrawerHeader>
-            <div className="flex-1 overflow-y-auto overflow-x-hidden touch-auto overscroll-contain px-4 py-4 pb-8">
+            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden touch-auto overscroll-contain px-4 py-4 pb-8">
               {content}
             </div>
           </DrawerContent>
@@ -399,6 +391,7 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
           onOpenChange={setShowSettingDetail}
           setting={selectedSetting}
           onProposalSubmit={handleProposalSubmit}
+          onRecommendSubmit={handleRecommendSubmit}
         />
 
         <CampaignGlobalSettingsDrawer
@@ -412,16 +405,16 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg max-h-[85vh] overflow-hidden flex flex-col">
-          <DialogHeader>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-hidden flex flex-col p-0 gap-0">
+          <DialogHeader className="px-4 pt-4 pb-3 border-b shrink-0">
             <DialogTitle className="flex items-center gap-2">
               <Settings className="h-5 w-5 text-primary" />
               Community Settings
             </DialogTitle>
           </DialogHeader>
-          <ScrollArea className="flex-1 pr-4">
+          <div className="flex-1 min-h-0 overflow-y-auto p-4">
             {content}
-          </ScrollArea>
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -430,6 +423,7 @@ export function AdminSettingsTab({ open, onOpenChange }: AdminSettingsTabProps) 
         onOpenChange={setShowSettingDetail}
         setting={selectedSetting}
         onProposalSubmit={handleProposalSubmit}
+        onRecommendSubmit={handleRecommendSubmit}
       />
 
       <CampaignGlobalSettingsDrawer

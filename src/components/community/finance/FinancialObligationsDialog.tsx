@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { X, Calendar, CreditCard, AlertCircle, CheckCircle2, Clock, Wallet, ChevronDown, ChevronUp } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, Calendar, CreditCard, AlertCircle, CheckCircle2, Clock, Wallet, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
@@ -7,21 +7,45 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { mockObligations } from "@/data/financeData";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/contexts/AuthContext";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 
 interface FinancialObligationsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
 }
 
-export function FinancialObligationsDialog({ open, onOpenChange }: FinancialObligationsDialogProps) {
+export function FinancialObligationsDialog({ open, onOpenChange, communityId }: FinancialObligationsDialogProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const isMobile = useIsMobile();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("pending");
+  const [loading, setLoading] = useState(false);
+  const [payingId, setPayingId] = useState<string | null>(null);
+
+  const [mockObligations, setMockObligations] = useState<any[]>([]);
+
+  const loadObligations = () => {
+    if (!communityId) return;
+    setLoading(true);
+    fetch(`/api/community/finance.php?action=my_obligations&community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        setMockObligations((d.obligations ?? []).map((o: any) => ({
+          id: o.id, title: o.title, description: o.description, amount: o.amount,
+          currency: "NGN", dueDate: o.dueDate ? new Date(o.dueDate) : new Date(),
+          status: o.status, category: o.category,
+        })));
+      })
+      .catch(() => setMockObligations([]))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { if (open) loadObligations(); }, [open, communityId]);
 
   const pendingObligations = mockObligations.filter(o => o.status === "pending");
   const paidObligations = mockObligations.filter(o => o.status === "paid");
@@ -31,11 +55,27 @@ export function FinancialObligationsDialog({ open, onOpenChange }: FinancialObli
   const totalPending = pendingObligations.reduce((sum, o) => sum + o.amount, 0);
   const totalOverdue = overdueObligations.reduce((sum, o) => sum + o.amount, 0);
 
-  const handlePayNow = (obligationId: string, title: string) => {
-    toast({
-      title: "Payment Initiated",
-      description: `Payment for ${title} will be processed`,
-    });
+  const handlePayNow = async (obligationId: string, title: string) => {
+    if (!communityId) return;
+    setPayingId(obligationId);
+    try {
+      const res = await fetch("/api/community/finance.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "record_payment", community_id: communityId, due_id: obligationId, member_id: user?.id, deduct_from_wallet: true }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to process payment");
+      toast({
+        title: "Payment Successful",
+        description: `Payment for ${title} has been recorded.`,
+      });
+      loadObligations();
+    } catch (e: any) {
+      toast({ title: "Couldn't Process Payment", description: e.message, variant: "destructive" });
+    } finally {
+      setPayingId(null);
+    }
   };
 
   const getStatusIcon = (status: string) => {
@@ -146,10 +186,11 @@ export function FinancialObligationsDialog({ open, onOpenChange }: FinancialObli
               {obligation.status !== "paid" && (
                 <Button
                   onClick={() => handlePayNow(obligation.id, obligation.title)}
+                  disabled={payingId === obligation.id}
                   className="w-full h-11 text-sm"
                 >
                   <CreditCard className="h-4 w-4 mr-2" />
-                  Pay Now
+                  {payingId === obligation.id ? "Processing..." : "Pay Now"}
                 </Button>
               )}
 

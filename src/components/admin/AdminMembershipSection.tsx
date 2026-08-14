@@ -80,6 +80,7 @@ const StatBadge = ({ value, label }: StatBadgeProps) => (
 type MemberActionType = "approve_member" | "reject_member" | "block_member" | "unblock_member" | "remove_member";
 
 interface AdminMembershipSectionProps {
+  communityId?: string;
   stats: AdminStats;
   recentRequests: RecentMemberRequest[];
   onViewAllMembers: () => void;
@@ -88,6 +89,7 @@ interface AdminMembershipSectionProps {
 }
 
 export function AdminMembershipSection({
+  communityId,
   stats,
   recentRequests,
   onViewAllMembers,

@@ -51,7 +51,7 @@ interface CampaignSettingsDialogProps {
   candidateName: string;
   office: string;
   walletBalance?: number;
-  onLaunchCampaign?: (data: CampaignFormData) => void;
+  onLaunchCampaign?: (data: CampaignFormData) => Promise<boolean>;
 }
 
 const audienceIcons: Record<CampaignAudience, React.ReactNode> = {
@@ -153,31 +153,24 @@ export function CampaignSettingsDialog({
 
   const handleLaunchCampaign = async () => {
     setIsProcessing(true);
-    
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const paymentResult = processCampaignPayment(walletBalance, feeCalculation.totalFee);
-    
-    if (paymentResult.success) {
-      toast({
-        title: "Campaign Launched Successfully! 🎉",
-        description: `${formatMobiAmount(feeCalculation.totalFee)} has been debited on your Mobi Wallet. Your campaign is now active!`,
-      });
-      
-      if (onLaunchCampaign) {
-        onLaunchCampaign({
-          candidateName,
-          office,
-          tagline,
-          manifesto,
-          priorities: priorities.filter(p => p.title.trim()),
-          audienceTargets: selectedAudiences,
-          durationDays: selectedDuration
-        });
-      }
-      
-      // Reset and close
+
+    if (!onLaunchCampaign) {
+      setIsProcessing(false);
+      return;
+    }
+
+    const succeeded = await onLaunchCampaign({
+      candidateName,
+      office,
+      tagline,
+      manifesto,
+      priorities: priorities.filter(p => p.title.trim()),
+      audienceTargets: selectedAudiences,
+      durationDays: selectedDuration
+    });
+
+    if (succeeded) {
+      // Reset and close — the success toast itself is shown by the real handler
       setStep(1);
       setTagline("");
       setSlogan("");
@@ -186,14 +179,8 @@ export function CampaignSettingsDialog({
       setSelectedAudiences(["community_interface"]);
       setSelectedDuration(7);
       onOpenChange(false);
-    } else {
-      toast({
-        title: "Payment Failed",
-        description: paymentResult.error,
-        variant: "destructive"
-      });
     }
-    
+
     setIsProcessing(false);
   };
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,65 +7,104 @@ import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   X, ChevronLeft, ChevronRight, Check, MapPin,
-  Users, UserCircle, Globe, UsersRound, Store, Wallet, CreditCard,
+  Users, Globe, UsersRound, Store, Wallet, CreditCard, Loader2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { campaignAudienceOptions, campaignDurationOptions } from "@/data/campaignSystemData";
-import { calculateCampaignFee, distributeCampaignFee, formatMobiAmount } from "@/lib/campaignFeeDistribution";
-import { getCategoryLabel } from "@/data/advertisementData";
+import { formatMobiAmount } from "@/lib/campaignFeeDistribution";
 import type { AdvertisementFormData } from "@/types/advertisementSystem";
-import type { CampaignAudience, CampaignDurationDays } from "@/types/campaignSystem";
+
+const API = "/api/community";
+
+interface AdRates {
+  duration_7: number; duration_14: number; duration_30: number;
+  duration_60: number; duration_90: number;
+  pct_members: number; pct_mobiface: number; pct_users: number; pct_store: number;
+  community_share_pct: number;
+}
+const DEFAULT_RATES: AdRates = { duration_7:500, duration_14:900, duration_30:1600, duration_60:2750, duration_90:3750, pct_members:1000, pct_mobiface:2500, pct_users:2000, pct_store:1500, community_share_pct:60 };
+
+const DURATIONS = [
+  { days: 7,  label: "7 Days"  },
+  { days: 14, label: "14 Days" },
+  { days: 30, label: "30 Days" },
+  { days: 60, label: "60 Days" },
+  { days: 90, label: "90 Days" },
+];
+
+
+
 
 interface AdvertisementSettingsSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
   formData: AdvertisementFormData;
   onFormDataChange: (data: AdvertisementFormData) => void;
+  onPublish?: (fees: { baseFee: number; audiencePremium: number; totalFee: number; communityShare: number; mobifaceShare: number }) => Promise<void>;
 }
 
-const audienceIcons: Record<string, React.ReactNode> = {
-  Users: <Users className="h-5 w-5" />,
-  UserCircle: <UserCircle className="h-5 w-5" />,
-  Globe: <Globe className="h-5 w-5" />,
-  UsersRound: <UsersRound className="h-5 w-5" />,
-  Store: <Store className="h-5 w-5" />,
-};
-
-export function AdvertisementSettingsSheet({
-  open,
-  onOpenChange,
-  formData,
-  onFormDataChange,
-}: AdvertisementSettingsSheetProps) {
+export function AdvertisementSettingsSheet({ open, onOpenChange, communityId, formData, onFormDataChange, onPublish }: AdvertisementSettingsSheetProps) {
   const { toast } = useToast();
-  const [step, setStep] = useState(1);
-  const mockWalletBalance = 150000;
+  const [step,         setStep]        = useState(1);
+  const [submitting,   setSubmitting]  = useState(false);
+  const [walletBalance,setWalletBalance] = useState<number | null>(null);
+  const [loadingWallet,setLoadingWallet] = useState(false);
+  const [rates,        setRates]       = useState<AdRates>(DEFAULT_RATES);
+  const [loadingRates, setLoadingRates]= useState(false);
 
-  const toggleAudience = (audience: CampaignAudience) => {
-    const current = formData.audienceTargets;
-    if (current.includes(audience)) {
-      if (current.length === 1) return; // Keep at least one
-      onFormDataChange({ ...formData, audienceTargets: current.filter((a) => a !== audience) });
-    } else {
-      onFormDataChange({ ...formData, audienceTargets: [...current, audience] });
+  // Icons inside component — no JSX at module level
+  const AUDIENCES = [
+    { id: "community_members",  label: "Community Members",      icon: <Users className="h-4 w-4" />,      key: "pct_members"  as const },
+    { id: "mobiface_interface", label: "Mobiface Interface",     icon: <Globe className="h-4 w-4" />,      key: "pct_mobiface" as const },
+    { id: "mobigate_users",     label: "All Mobigate Users",     icon: <UsersRound className="h-4 w-4" />, key: "pct_users"    as const },
+    { id: "mobi_store",         label: "Mobi-Store Marketplace", icon: <Store className="h-4 w-4" />,      key: "pct_store"    as const },
+  ];
+
+  useEffect(() => {
+    if (!open) return;
+    setLoadingWallet(true);
+    fetch(`${API}/advertisements.php?action=wallet_balance`, { credentials:"include" })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => setWalletBalance(d?.main_balance ?? 0))
+      .catch(() => setWalletBalance(0))
+      .finally(() => setLoadingWallet(false));
+    if (communityId) {
+      setLoadingRates(true);
+      fetch(`${API}/ad_rates.php?community_id=${communityId}`, { credentials:"include" })
+        .then(r => r.ok ? r.json() : null)
+        .then(d => { if (d?.rates) setRates(d.rates); })
+        .catch(() => {})
+        .finally(() => setLoadingRates(false));
     }
+  }, [open, communityId]);
+
+  // Compute fees from API rates
+  const durDays: number = (formData.durationDays as any) ?? 7;
+  const baseFee = (rates[`duration_${durDays}` as keyof AdRates] as number) ?? rates.duration_7;
+  const selectedAudiences: string[] = (formData.audienceTargets as any) ?? ["community_members"];
+  const audiencePremium = AUDIENCES.filter(a => selectedAudiences.includes(a.id)).reduce((s, a) => s + (rates[a.key] ?? 0), 0);
+  const totalFee = baseFee + audiencePremium;
+  const communityShareAmt = Math.round(totalFee * (rates.community_share_pct / 100));
+  const mobifaceShareAmt  = totalFee - communityShareAmt;
+  const canAfford = walletBalance !== null && walletBalance >= totalFee;
+
+  const toggleAudience = (id: string) => {
+    const cur = selectedAudiences;
+    const next = cur.includes(id) ? (cur.length > 1 ? cur.filter(a => a !== id) : cur) : [...cur, id];
+    onFormDataChange({ ...formData, audienceTargets: next as any });
   };
+  const setDuration = (days: number) => onFormDataChange({ ...formData, durationDays: days as any });
 
-  const setDuration = (days: CampaignDurationDays) => {
-    onFormDataChange({ ...formData, durationDays: days });
-  };
-
-  const feeCalc = calculateCampaignFee(formData.durationDays, formData.audienceTargets);
-  const feeDist = distributeCampaignFee(feeCalc.totalFee);
-  const canAfford = mockWalletBalance >= feeCalc.totalFee;
-
-  const handleSubmit = () => {
-    if (!canAfford) {
-      toast({ title: "Insufficient Balance", description: "Please top up your wallet", variant: "destructive" });
-      return;
-    }
-    toast({ title: "Advertisement Submitted!", description: `Your ad has been submitted. Fee: ${formatMobiAmount(feeCalc.totalFee)}` });
-    onOpenChange(false);
+  const handleSubmit = async () => {
+    if (walletBalance === null) { toast({ title:"Loading...", variant:"destructive" }); return; }
+    if (!canAfford) { toast({ title:"Insufficient Balance", description:`Need ${formatMobiAmount(totalFee)}`, variant:"destructive" }); return; }
+    setSubmitting(true);
+    try {
+      await onPublish?.({ baseFee, audiencePremium, totalFee, communityShare: communityShareAmt, mobifaceShare: mobifaceShareAmt });
+      toast({ title:"Ad Published!", description:`${formatMobiAmount(totalFee)} deducted` });
+      onOpenChange(false);
+    } catch (e: any) { toast({ title:"Failed", description: e.message, variant:"destructive" }); }
+    finally { setSubmitting(false); }
   };
 
   return (
@@ -119,7 +158,7 @@ export function AdvertisementSettingsSheet({
                         <Badge variant="secondary" className="text-xs font-medium max-w-full truncate">
                           {formData.category === "other" && formData.customCategory
                             ? formData.customCategory
-                            : getCategoryLabel(formData.category)}
+                            : (formData.category ?? 'general').replace(/_/g,' ')}
                         </Badge>
                       </div>
                     </div>
@@ -208,69 +247,50 @@ export function AdvertisementSettingsSheet({
             {step === 2 && (
               <>
                 <p className="text-sm text-muted-foreground">Choose ad duration:</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {campaignDurationOptions.map((option) => {
-                    const isSelected = formData.durationDays === option.days;
-                    return (
-                      <button
-                        key={option.days}
-                        onClick={() => setDuration(option.days)}
-                        className={`p-3 rounded-xl border-2 text-left transition-all touch-manipulation active:scale-[0.97] ${
-                          isSelected ? "border-amber-500 bg-amber-50 dark:bg-amber-950/30" : "border-border bg-card"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-sm">{option.label}</span>
-                          {option.popular && (
-                            <Badge className="text-xs px-1 bg-amber-500 text-white">Popular</Badge>
-                          )}
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-0.5">{option.description}</p>
-                        <p className="text-sm font-bold text-primary mt-1">{formatMobiAmount(option.feeInMobi)}</p>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Base Fee Preview */}
-                <Card className="p-3 space-y-2 bg-muted/30">
-                  <h4 className="font-semibold text-sm">Selected Duration</h4>
+                {loadingRates ? (
+                  <div className="flex justify-center py-4"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    {DURATIONS.map(opt => {
+                      const fee = (rates[`duration_${opt.days}` as keyof AdRates] as number) ?? 0;
+                      const isSelected = durDays === opt.days;
+                      return (
+                        <button key={opt.days} onClick={() => setDuration(opt.days)}
+                          className={`p-3 rounded-xl border-2 text-left transition-all ${isSelected ? "border-amber-500 bg-amber-50 dark:bg-amber-950/30" : "border-border bg-card"}`}>
+                          <span className="font-semibold text-sm">{opt.label}</span>
+                          <p className="text-xs text-muted-foreground mt-0.5">≈{Math.round(fee/opt.days)} Mobi/day</p>
+                          <p className="text-sm font-bold text-primary mt-1">{formatMobiAmount(fee)}</p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                <Card className="p-3 bg-muted/30">
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Base Fee ({formData.durationDays} days):</span>
-                    <span className="font-bold text-primary">{formatMobiAmount(feeCalc.baseFee)}</span>
+                    <span className="text-muted-foreground">Base Fee ({durDays} days):</span>
+                    <span className="font-bold text-primary">{formatMobiAmount(baseFee)}</span>
                   </div>
                 </Card>
               </>
             )}
 
-            {/* STEP 3: Target Audience (with live fee buildup) */}
+            {/* STEP 3: Target Audience */}
             {step === 3 && (
               <>
                 <p className="text-sm text-muted-foreground">Select where your ad should appear:</p>
                 <div className="space-y-2">
-                  {campaignAudienceOptions.map((option) => {
-                    const isSelected = formData.audienceTargets.includes(option.value);
+                  {AUDIENCES.map(opt => {
+                    const isSelected = selectedAudiences.includes(opt.id);
+                    const premium = rates[opt.key] ?? 0;
                     return (
-                      <button
-                        key={option.value}
-                        onClick={() => toggleAudience(option.value)}
-                        className={`w-full flex items-start gap-3 p-3 rounded-xl border-2 transition-all touch-manipulation active:scale-[0.98] ${
-                          isSelected ? "border-amber-500 bg-amber-50 dark:bg-amber-950/30" : "border-border bg-card"
-                        }`}
-                      >
-                        <div className={`p-2 rounded-lg shrink-0 ${isSelected ? "bg-amber-500 text-white" : "bg-muted text-muted-foreground"}`}>
-                          {audienceIcons[option.icon] || <Users className="h-5 w-5" />}
-                        </div>
+                      <button key={opt.id} onClick={() => toggleAudience(opt.id)}
+                        className={`w-full flex items-start gap-3 p-3 rounded-xl border-2 transition-all ${isSelected ? "border-amber-500 bg-amber-50 dark:bg-amber-950/30" : "border-border bg-card"}`}>
+                        <div className={`p-2 rounded-lg shrink-0 ${isSelected ? "bg-amber-500 text-white" : "bg-muted text-muted-foreground"}`}>{opt.icon}</div>
                         <div className="flex-1 min-w-0 text-left">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-medium text-sm">{option.label}</span>
-                            {option.premiumMultiplier > 1 && (
-                              <Badge variant="outline" className="text-xs px-1.5">
-                                +{Math.round((option.premiumMultiplier - 1) * 100)}%
-                              </Badge>
-                            )}
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-sm">{opt.label}</span>
+                            {premium > 0 && <Badge variant="outline" className="text-xs px-1.5">+{formatMobiAmount(premium)}</Badge>}
                           </div>
-                          <p className="text-xs text-muted-foreground mt-0.5">{option.description}</p>
                         </div>
                         <Checkbox checked={isSelected} className="mt-1 shrink-0" />
                       </button>
@@ -278,27 +298,22 @@ export function AdvertisementSettingsSheet({
                   })}
                 </div>
 
-                {/* Live Fee Breakdown — updates as audiences are toggled */}
-                <Card className="p-3 space-y-2 bg-muted/30">
+                {/* Fee Breakdown */}
+                <Card className="p-3 space-y-1.5 bg-muted/30">
                   <h4 className="font-semibold text-sm">Fee Breakdown</h4>
-                  <div className="space-y-1.5 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Base Fee ({formData.durationDays} days):</span>
-                      <span>{formatMobiAmount(feeCalc.baseFee)}</span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Base Fee ({durDays} days):</span>
+                    <span>{formatMobiAmount(baseFee)}</span>
+                  </div>
+                  {AUDIENCES.filter(a => selectedAudiences.includes(a.id) && rates[a.key]).map(a => (
+                    <div key={a.id} className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">{a.label} Premium:</span>
+                      <span>+{formatMobiAmount(rates[a.key])}</span>
                     </div>
-                    {feeCalc.breakdown.map((item) => {
-                      const audienceLabel = campaignAudienceOptions.find(a => a.value === item.audience)?.label || item.audience;
-                      return item.premium > 0 ? (
-                        <div key={item.audience} className="flex justify-between">
-                          <span className="text-muted-foreground">{audienceLabel} Premium:</span>
-                          <span>+{formatMobiAmount(item.premium)}</span>
-                        </div>
-                      ) : null;
-                    })}
-                    <div className="flex justify-between font-bold border-t pt-1.5">
-                      <span>Total Fee:</span>
-                      <span className="text-primary">{formatMobiAmount(feeCalc.totalFee)}</span>
-                    </div>
+                  ))}
+                  <div className="flex justify-between font-bold border-t pt-1.5 text-sm">
+                    <span>Total Fee:</span>
+                    <span className="text-primary">{formatMobiAmount(totalFee)}</span>
                   </div>
                 </Card>
 
@@ -306,12 +321,19 @@ export function AdvertisementSettingsSheet({
                 <Card className={`p-3 flex items-center justify-between ${canAfford ? "bg-emerald-50 dark:bg-emerald-950/20" : "bg-red-50 dark:bg-red-950/20"}`}>
                   <div className="flex items-center gap-2">
                     <Wallet className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Wallet Balance</span>
+                    <span className="text-sm font-medium">Your Wallet Balance</span>
                   </div>
-                  <span className={`font-bold text-sm ${canAfford ? "text-emerald-600" : "text-destructive"}`}>
-                    {formatMobiAmount(mockWalletBalance)}
-                  </span>
+                  {loadingWallet ? <Loader2 className="h-4 w-4 animate-spin" /> : (
+                    <span className={`font-bold text-sm ${canAfford ? "text-emerald-600" : "text-destructive"}`}>
+                      {walletBalance !== null ? formatMobiAmount(walletBalance) : "—"}
+                    </span>
+                  )}
                 </Card>
+                {!canAfford && walletBalance !== null && (
+                  <p className="text-xs text-destructive text-center">
+                    Need {formatMobiAmount(totalFee - walletBalance)} more to proceed.
+                  </p>
+                )}
               </>
             )}
           </div>
@@ -320,21 +342,15 @@ export function AdvertisementSettingsSheet({
         {/* Footer */}
         <div className="p-3 border-t bg-background flex-shrink-0">
           {step < 3 ? (
-            <Button
-              className="w-full h-11 text-sm font-medium touch-manipulation active:scale-[0.97] bg-amber-600 hover:bg-amber-700"
-              onClick={() => setStep(step + 1)}
-            >
-              Continue
-              <ChevronRight className="h-4 w-4 ml-1.5" />
+            <Button className="w-full h-11 bg-amber-600 hover:bg-amber-700" onClick={() => setStep(step + 1)}>
+              Continue <ChevronRight className="h-4 w-4 ml-1.5" />
             </Button>
           ) : (
-            <Button
-              className="w-full h-11 text-sm font-medium touch-manipulation active:scale-[0.97] bg-amber-600 hover:bg-amber-700"
-              onClick={handleSubmit}
-              disabled={!canAfford}
-            >
-              <CreditCard className="h-4 w-4 mr-1.5" />
-              Pay {formatMobiAmount(feeCalc.totalFee)} & Submit
+            <Button className="w-full h-11 bg-amber-600 hover:bg-amber-700"
+              onClick={handleSubmit} disabled={submitting || loadingWallet || !canAfford}>
+              {submitting ? <><Loader2 className="h-4 w-4 mr-1.5 animate-spin" />Publishing…</>
+               : loadingWallet ? <><Loader2 className="h-4 w-4 mr-1.5 animate-spin" />Loading…</>
+               : <><CreditCard className="h-4 w-4 mr-1.5" />Pay {formatMobiAmount(totalFee)} & Publish</>}
             </Button>
           )}
         </div>

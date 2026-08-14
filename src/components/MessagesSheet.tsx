@@ -82,7 +82,12 @@ export const MessagesSheet = () => {
           // No match — just open the sheet
         }
         setIsOpen(true);
+        return;
       }
+
+      // No specific target given at all — just open the sheet to show the
+      // conversations list (used by sidebar links like "View All Chats").
+      setIsOpen(true);
     };
 
     const handleCloseChat = () => setIsOpen(false);

@@ -1,437 +1,319 @@
-import { useState } from "react";
-import { Drawer, DrawerContent } from "@/components/ui/drawer";
+// src/components/community/advertisements/AdvertisementsListSheet.tsx
+import { useState, useEffect } from "react";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
-  X, MapPin, Eye, Calendar, Plus, Megaphone, Play, RefreshCw,
-  Edit2, Pause, Trash2, MoreVertical,
+  Megaphone, RefreshCw, X, Plus, Eye, Pause, Play,
+  Trash2, MapPin, Loader2, TrendingUp, XCircle, AlertCircle,
 } from "lucide-react";
-import {
-  getActiveAdvertisements,
-  getMyActiveAdvertisements,
-  getMyInactiveAdvertisements,
-  getCategoryLabel,
-  getAdvertisementStats,
-} from "@/data/advertisementData";
-import { calculateDaysRemaining, formatMobiAmount } from "@/lib/campaignFeeDistribution";
-import { AdvertisementFullViewSheet } from "./AdvertisementFullViewSheet";
 import { useToast } from "@/hooks/use-toast";
-import type { EnhancedAdvertisement } from "@/types/advertisementSystem";
+import { cn } from "@/lib/utils";
+import { AdvertisementFullViewSheet } from "./AdvertisementFullViewSheet";
 
 interface AdvertisementsListSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  initialTab?: "all_active" | "my_active" | "my_inactive";
+  communityId?: string;
+  initialTab?: string;
   onCreateNew?: () => void;
 }
 
-export function AdvertisementsListSheet({
-  open,
-  onOpenChange,
-  initialTab = "all_active",
-  onCreateNew,
-}: AdvertisementsListSheetProps) {
-  const { toast } = useToast();
-  const [selectedAd, setSelectedAd] = useState<EnhancedAdvertisement | null>(null);
-  const [showFullView, setShowFullView] = useState(false);
-  const [isViewingOwnAd, setIsViewingOwnAd] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<EnhancedAdvertisement | null>(null);
+const STATUS_STYLE: Record<string, string> = {
+  active:          "bg-green-100 text-green-700",
+  pending_payment: "bg-amber-100 text-amber-700",
+  paused:          "bg-blue-100 text-blue-700",
+  ended:           "bg-gray-100 text-gray-500",
+  cancelled:       "bg-red-100 text-red-600",
+  draft:           "bg-purple-100 text-purple-700",
+};
 
-  const allActiveAds = getActiveAdvertisements();
-  const myActiveAds = getMyActiveAdvertisements();
-  const myInactiveAds = getMyInactiveAdvertisements();
-  const stats = getAdvertisementStats();
+function timeAgo(d: string) {
+  const s = Math.floor((Date.now() - new Date(d).getTime()) / 1000);
+  if (s < 60) return "just now";
+  if (s < 3600) return `${Math.floor(s/60)}m ago`;
+  if (s < 86400) return `${Math.floor(s/3600)}h ago`;
+  return `${Math.floor(s/86400)}d ago`;
+}
 
-  const openAdvert = (ad: EnhancedAdvertisement, isOwn = false) => {
-    setSelectedAd(ad);
-    setIsViewingOwnAd(isOwn);
-    setShowFullView(true);
-  };
-
-  const handleReactivateAd = (ad: EnhancedAdvertisement, e: React.MouseEvent) => {
-    e.stopPropagation();
-    toast({
-      title: "Reactivate Advertisement",
-      description: `Redirecting to renew "${ad.businessName}" subscription...`,
-    });
-  };
-
-  const handleEditAd = (ad: EnhancedAdvertisement, e: React.MouseEvent) => {
-    e.stopPropagation();
-    toast({
-      title: "Edit Advertisement",
-      description: `Opening editor for "${ad.productTitle}"...`,
-    });
-  };
-
-  const handleTogglePause = (ad: EnhancedAdvertisement, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const isPaused = ad.status === "paused";
-    toast({
-      title: isPaused ? "Advertisement Resumed" : "Advertisement Paused",
-      description: isPaused
-        ? `"${ad.productTitle}" is now live again.`
-        : `"${ad.productTitle}" has been paused. You can resume it anytime.`,
-    });
-  };
-
-  const handleDeleteAd = (ad: EnhancedAdvertisement, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setDeleteTarget(ad);
-  };
-
-  const confirmDeleteAd = () => {
-    if (deleteTarget) {
-      toast({
-        title: "Advertisement Deleted",
-        description: `"${deleteTarget.productTitle}" has been permanently removed.`,
-        variant: "destructive",
-      });
-      setDeleteTarget(null);
-    }
-  };
-
-  // Public ad card (no management buttons)
-  const PublicAdCard = ({ ad }: { ad: EnhancedAdvertisement }) => {
-    const daysRemaining = calculateDaysRemaining(ad.endDate);
-    const firstMedia = ad.media[0];
-
-    return (
-      <Card
-        className="p-0 overflow-hidden touch-manipulation active:scale-[0.98] transition-transform"
-        onClick={() => openAdvert(ad)}
-      >
+function AdCard({ ad, canManage, onView, onPause, onResume, onStop, onDelete }: {
+  ad: any; canManage?: boolean;
+  onView(): void; onPause?(): void; onResume?(): void; onStop?(): void; onDelete?(): void;
+}) {
+  const [confirm, setConfirm] = useState<"stop"|"delete"|null>(null);
+  return (
+    <Card className="overflow-hidden border">
+      <CardContent className="p-0">
         <div className="flex gap-3 p-3">
-          <AdThumbnail firstMedia={firstMedia} businessName={ad.businessName} />
-          <div className="flex-1 min-w-0 space-y-1">
-            <h4 className="font-semibold text-sm leading-tight truncate">{ad.businessName}</h4>
-            <p className="text-xs text-primary font-medium truncate">{ad.productTitle}</p>
-            <div className="flex items-center gap-2 flex-wrap">
-              <Badge className="bg-amber-600 text-white text-xs px-1.5 py-0 border-0">
-                <Megaphone className="h-2.5 w-2.5 mr-0.5" />
-                Sponsored
-              </Badge>
-              <Badge variant="secondary" className="text-xs px-1.5 py-0">
-                {getCategoryLabel(ad.category)}
+          <div className="w-12 h-12 bg-amber-50 rounded-lg flex items-center justify-center shrink-0 border border-amber-100">
+            <Megaphone className="h-5 w-5 text-amber-500" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start gap-2">
+              <p className="font-semibold text-sm truncate flex-1">{ad.business_name}</p>
+              <Badge className={cn("text-[10px] px-1.5 shrink-0 capitalize", STATUS_STYLE[ad.status] ?? "bg-gray-100")}>
+                {ad.status?.replace(/_/g," ")}
               </Badge>
             </div>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <MapPin className="h-3 w-3 shrink-0" />
-              <span className="truncate">{ad.city}</span>
-            </div>
-            <div className="flex items-center gap-3 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Eye className="h-3 w-3" />{ad.views.toLocaleString()}
-              </span>
-              {daysRemaining > 0 && (
-                <span className="flex items-center gap-1 text-amber-600">
-                  <Calendar className="h-3 w-3" />{daysRemaining}d left
-                </span>
-              )}
+            <p className="text-xs text-primary font-medium mt-0.5 truncate">{ad.product_title}</p>
+            <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1"><MapPin className="h-3 w-3"/>{ad.city}</span>
+              <span className="flex items-center gap-1"><Eye className="h-3 w-3"/>{ad.views}</span>
+              <span className="flex items-center gap-1"><TrendingUp className="h-3 w-3"/>{ad.clicks}</span>
+              <span className="ml-auto">{timeAgo(ad.created_at)}</span>
             </div>
           </div>
         </div>
-      </Card>
-    );
+
+        {/* Confirm prompt */}
+        {confirm === "stop" && (
+          <div className="flex items-center gap-2 px-3 py-2 bg-red-50 border-t text-xs">
+            <AlertCircle className="h-4 w-4 text-red-500 shrink-0"/>
+            <span className="flex-1 text-red-700">Stop this advertisement?</span>
+            <button className="font-bold text-red-600 hover:text-red-800" onClick={() => { setConfirm(null); onStop?.(); }}>Yes</button>
+            <button className="text-muted-foreground ml-2" onClick={() => setConfirm(null)}>No</button>
+          </div>
+        )}
+        {confirm === "delete" && (
+          <div className="flex items-center gap-2 px-3 py-2 bg-red-50 border-t text-xs">
+            <AlertCircle className="h-4 w-4 text-red-500 shrink-0"/>
+            <span className="flex-1 text-red-700">Delete permanently?</span>
+            <button className="font-bold text-red-600 hover:text-red-800" onClick={() => { setConfirm(null); onDelete?.(); }}>Yes</button>
+            <button className="text-muted-foreground ml-2" onClick={() => setConfirm(null)}>No</button>
+          </div>
+        )}
+
+        {/* Action bar */}
+        {!confirm && (
+          <div className="flex border-t divide-x">
+            <button className="flex-1 flex items-center justify-center gap-1 py-2 text-xs text-primary hover:bg-primary/5 transition-colors" onClick={onView}>
+              <Eye className="h-3.5 w-3.5"/> View
+            </button>
+            {canManage && ad.status === "active" && (
+              <button className="flex-1 flex items-center justify-center gap-1 py-2 text-xs text-amber-600 hover:bg-amber-50 transition-colors" onClick={onPause}>
+                <Pause className="h-3.5 w-3.5"/> Pause
+              </button>
+            )}
+            {canManage && ad.status === "paused" && (
+              <button className="flex-1 flex items-center justify-center gap-1 py-2 text-xs text-green-600 hover:bg-green-50 transition-colors" onClick={onResume}>
+                <Play className="h-3.5 w-3.5"/> Resume
+              </button>
+            )}
+            {canManage && ad.status === "active" && (
+              <button className="flex-1 flex items-center justify-center gap-1 py-2 text-xs text-destructive hover:bg-red-50 transition-colors" onClick={() => setConfirm("stop")}>
+                <XCircle className="h-3.5 w-3.5"/> Stop
+              </button>
+            )}
+            {canManage && ["ended","cancelled"].includes(ad.status) && (
+              <button className="flex-1 flex items-center justify-center gap-1 py-2 text-xs text-destructive hover:bg-red-50 transition-colors" onClick={() => setConfirm("delete")}>
+                <Trash2 className="h-3.5 w-3.5"/> Delete
+              </button>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+export function AdvertisementsListSheet({ open, onOpenChange, communityId, initialTab = "all_active", onCreateNew }: AdvertisementsListSheetProps) {
+  const { toast } = useToast();
+  const [tab,         setTab]        = useState(initialTab);
+  const [allActive,   setAllActive]  = useState<any[]>([]);
+  const [myAds,       setMyAds]      = useState<any[]>([]);
+  const [stats,       setStats]      = useState({ totalAll:0, myActive:0, myTotal:0, totalFees:0 });
+  const [loading,     setLoading]    = useState(false);
+  const [viewAdId,    setViewAdId]   = useState<string|null>(null);
+  const [error,       setError]      = useState<string|null>(null);
+
+  const loadAds = () => {
+    if (!communityId) { setError("No community ID"); return; }
+    setLoading(true);
+    setError(null);
+    fetch(`/api/community/advertisements.php?community_id=${communityId}&limit=100`, { credentials:"include" })
+      .then(r => {
+        if (!r.ok) return r.text().then(t => { throw new Error(`HTTP ${r.status}: ${t.slice(0,100)}`); });
+        return r.text();
+      })
+      .then(text => {
+        let d: any;
+        try { d = JSON.parse(text); }
+        catch { throw new Error("Invalid JSON: " + text.slice(0,100)); }
+        setAllActive(d.all_active ?? []);
+        setMyAds(d.my_ads ?? []);
+        setStats({ totalAll: d.stats?.totalAll??0, myActive: d.stats?.myActive??0, myTotal: d.stats?.myTotal??0, totalFees: d.stats?.totalFees??0 });
+      })
+      .catch(e => { console.error("[Ads]", e); setError(e.message); })
+      .finally(() => setLoading(false));
   };
 
-  // My ad card (with management buttons)
-  const MyAdCard = ({ ad, showReactivate = false }: { ad: EnhancedAdvertisement; showReactivate?: boolean }) => {
-    const daysRemaining = calculateDaysRemaining(ad.endDate);
-    const isEnded = ad.status === "ended";
-    const isPaused = ad.status === "paused";
-    const firstMedia = ad.media[0];
+  useEffect(() => { if (open && communityId) loadAds(); }, [open, communityId]); // eslint-disable-line
 
-    return (
-      <Card className="p-0 overflow-hidden">
-        {/* Clickable card body */}
-        <div
-          className="flex gap-3 p-3 touch-manipulation active:bg-muted/30 transition-colors"
-          onClick={() => openAdvert(ad, true)}
-        >
-          <AdThumbnail firstMedia={firstMedia} businessName={ad.businessName} />
-          <div className="flex-1 min-w-0 space-y-1">
-            <h4 className="font-semibold text-sm leading-tight truncate">{ad.businessName}</h4>
-            <p className="text-xs text-primary font-medium truncate">{ad.productTitle}</p>
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <Badge className="bg-amber-600 text-white text-xs px-1.5 py-0 border-0">
-                <Megaphone className="h-2.5 w-2.5 mr-0.5" />
-                Sponsored
-              </Badge>
-              <Badge variant="secondary" className="text-xs px-1.5 py-0">
-                {getCategoryLabel(ad.category)}
-              </Badge>
-              {isPaused && (
-                <Badge variant="outline" className="text-xs px-1.5 py-0 text-amber-600 border-amber-300">
-                  <Pause className="h-2.5 w-2.5 mr-0.5" />
-                  Paused
-                </Badge>
-              )}
-            </div>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <MapPin className="h-3 w-3 shrink-0" />
-              <span className="truncate">{ad.city}</span>
-            </div>
-            <div className="flex items-center gap-3 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Eye className="h-3 w-3" />{ad.views.toLocaleString()}
-              </span>
-              {!isEnded && daysRemaining > 0 && (
-                <span className="flex items-center gap-1 text-amber-600">
-                  <Calendar className="h-3 w-3" />{daysRemaining}d left
-                </span>
-              )}
-              {isEnded && (
-                <Badge variant="outline" className="text-xs px-1.5 py-0 text-muted-foreground">
-                  Ended
-                </Badge>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Management Actions */}
-        <div className="border-t px-3 py-2 flex gap-2">
-          {showReactivate ? (
-            <>
-              <Button
-                size="sm"
-                className="flex-1 h-9 text-xs font-medium touch-manipulation active:scale-[0.97] bg-amber-600 hover:bg-amber-700"
-                onClick={(e) => handleReactivateAd(ad, e)}
-              >
-                <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
-                Reactivate
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-9 w-9 touch-manipulation active:scale-[0.97]"
-                onClick={(e) => handleDeleteAd(ad, e)}
-              >
-                <Trash2 className="h-3.5 w-3.5 text-destructive" />
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                size="sm"
-                variant="outline"
-                className="flex-1 h-9 text-xs font-medium touch-manipulation active:scale-[0.97]"
-                onClick={(e) => handleEditAd(ad, e)}
-              >
-                <Edit2 className="h-3.5 w-3.5 mr-1.5" />
-                Edit
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="flex-1 h-9 text-xs font-medium touch-manipulation active:scale-[0.97]"
-                onClick={(e) => handleTogglePause(ad, e)}
-              >
-                {isPaused ? (
-                  <>
-                    <Play className="h-3.5 w-3.5 mr-1.5" />
-                    Resume
-                  </>
-                ) : (
-                  <>
-                    <Pause className="h-3.5 w-3.5 mr-1.5" />
-                    Stop
-                  </>
-                )}
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-9 w-9 touch-manipulation active:scale-[0.97]"
-                onClick={(e) => handleDeleteAd(ad, e)}
-              >
-                <Trash2 className="h-3.5 w-3.5 text-destructive" />
-              </Button>
-            </>
-          )}
-        </div>
-      </Card>
-    );
+  const callStatus = (adId: string, status: string) => {
+    fetch("/api/community/advertisements.php", {
+      method:"POST", credentials:"include",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ action:"update_status", community_id:communityId, ad_id:adId, status }),
+    }).then(r => r.ok && (toast({ title:`Ad ${status}` }), loadAds()));
   };
 
-  // Shared thumbnail component
-  const AdThumbnail = ({ firstMedia, businessName }: { firstMedia?: EnhancedAdvertisement["media"][0]; businessName: string }) => (
-    <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted shrink-0 relative">
-      {firstMedia ? (
-        firstMedia.type === 'video' ? (
-          <div className="relative w-full h-full">
-            <video
-              src={firstMedia.url}
-              className="w-full h-full object-cover"
-              muted
-              playsInline
-              preload="metadata"
-            />
-            <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-              <div className="h-7 w-7 rounded-full bg-black/60 flex items-center justify-center">
-                <Play className="h-3.5 w-3.5 text-white ml-0.5" />
-              </div>
-            </div>
-          </div>
-        ) : (
-          <img src={firstMedia.url} alt={businessName} className="w-full h-full object-cover" />
-        )
-      ) : (
-        <div className="w-full h-full flex items-center justify-center">
-          <Megaphone className="h-6 w-6 text-muted-foreground" />
-        </div>
-      )}
+  const callDelete = (adId: string) => {
+    fetch("/api/community/advertisements.php", {
+      method:"POST", credentials:"include",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ action:"delete", community_id:communityId, ad_id:adId }),
+    }).then(r => r.ok && (toast({ title:"Ad deleted" }), loadAds()));
+  };
+
+  const myActive   = myAds.filter(a => a.status === "active");
+  const myInactive = myAds.filter(a => !["active","pending_payment"].includes(a.status));
+
+  const empty = (msg: string) => (
+    <div className="text-center py-12 text-muted-foreground">
+      <Megaphone className="h-10 w-10 mx-auto mb-2 opacity-30"/>
+      <p className="text-sm">{msg}</p>
+      {onCreateNew && <Button size="sm" className="mt-3 bg-amber-600 hover:bg-amber-700 text-white" onClick={onCreateNew}><Plus className="h-4 w-4 mr-1"/>Create Ad</Button>}
     </div>
   );
 
   return (
     <>
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[92vh] overflow-hidden p-0">
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent side="bottom" className="h-[92vh] rounded-t-2xl flex flex-col p-0 overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b flex-shrink-0">
+          <div className="flex items-center justify-between px-4 py-3 border-b shrink-0">
             <div className="flex items-center gap-2">
-              <Megaphone className="h-5 w-5 text-amber-600" />
-              <h2 className="font-semibold text-base">Advertisements</h2>
+              <Megaphone className="h-5 w-5 text-amber-600"/>
+              <span className="font-semibold text-base">Advertisements</span>
+              {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground"/>}
             </div>
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onOpenChange(false)}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Stats Bar */}
-          <div className="grid grid-cols-3 gap-1 px-4 py-2 border-b flex-shrink-0">
-            <div className="text-center p-1.5 bg-emerald-50 dark:bg-emerald-950/20 rounded">
-              <p className="text-sm font-bold text-emerald-600">{stats.active}</p>
-              <p className="text-xs text-muted-foreground">Active</p>
-            </div>
-            <div className="text-center p-1.5 bg-blue-50 dark:bg-blue-950/20 rounded">
-              <p className="text-sm font-bold text-blue-600">{stats.total}</p>
-              <p className="text-xs text-muted-foreground">Total</p>
-            </div>
-            <div className="text-center p-1.5 bg-amber-50 dark:bg-amber-950/20 rounded">
-              <p className="text-sm font-bold text-amber-600">{formatMobiAmount(stats.totalFees)}</p>
-              <p className="text-xs text-muted-foreground">Revenue</p>
+            <div className="flex gap-1">
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={loadAds} disabled={loading}>
+                <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")}/>
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onOpenChange(false)}>
+                <X className="h-4 w-4"/>
+              </Button>
             </div>
           </div>
 
-          <Tabs defaultValue={initialTab} className="flex-1 flex flex-col overflow-hidden">
-            <div className="px-4 pt-2 pb-1 flex-shrink-0">
-              <TabsList className="w-full grid grid-cols-3 h-10">
-                <TabsTrigger value="all_active" className="text-xs px-1 touch-manipulation">
-                  Active ({allActiveAds.length})
-                </TabsTrigger>
-                <TabsTrigger value="my_active" className="text-xs px-1 touch-manipulation">
-                  My Adverts ({myActiveAds.length})
-                </TabsTrigger>
-                <TabsTrigger value="my_inactive" className="text-xs px-1 touch-manipulation">
-                  Ended ({myInactiveAds.length})
-                </TabsTrigger>
-              </TabsList>
+          {/* Stats */}
+          <div className="grid grid-cols-3 divide-x border-b shrink-0">
+            <div className="py-2.5 text-center">
+              <p className="font-bold text-base text-green-600">{stats.totalAll}</p>
+              <p className="text-xs text-muted-foreground">All Active</p>
             </div>
+            <div className="py-2.5 text-center">
+              <p className="font-bold text-base text-blue-600">{stats.myTotal}</p>
+              <p className="text-xs text-muted-foreground">My Total</p>
+            </div>
+            <div className="py-2.5 text-center">
+              <p className="font-bold text-base text-amber-600">{stats.myActive}</p>
+              <p className="text-xs text-muted-foreground">My Active</p>
+            </div>
+          </div>
 
-            <ScrollArea className="flex-1 overflow-y-auto overflow-x-hidden touch-auto">
-              <TabsContent value="all_active" className="px-4 py-3 space-y-2 mt-0">
-                {allActiveAds.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">No active advertisements</p>
-                ) : (
-                  allActiveAds.map((ad) => <PublicAdCard key={ad.id} ad={ad} />)
-                )}
-              </TabsContent>
+          {/* Error */}
+          {error && (
+            <div className="flex items-center gap-2 mx-4 my-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-700">
+              <AlertCircle className="h-4 w-4 shrink-0"/>{error}
+              <Button size="sm" variant="ghost" className="h-6 ml-auto" onClick={loadAds}>Retry</Button>
+            </div>
+          )}
 
-              <TabsContent value="my_active" className="px-4 py-3 space-y-3 mt-0">
-                {myActiveAds.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Megaphone className="h-10 w-10 text-muted-foreground/30 mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">You have no active ads</p>
-                    <p className="text-xs text-muted-foreground mt-1">Create one to start promoting your business</p>
-                  </div>
-                ) : (
-                  myActiveAds.map((ad) => <MyAdCard key={ad.id} ad={ad} />)
-                )}
-              </TabsContent>
+          {/* Tabs */}
+          <Tabs value={tab} onValueChange={setTab} className="flex-1 flex flex-col min-h-0">
+            <TabsList className="rounded-none border-b h-10 bg-transparent p-0 shrink-0">
+              <TabsTrigger value="all_active" className="flex-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-primary text-xs font-medium">
+                All Active ({allActive.length})
+              </TabsTrigger>
+              <TabsTrigger value="my_active" className="flex-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-primary text-xs font-medium">
+                My Active ({myActive.length})
+              </TabsTrigger>
+              <TabsTrigger value="my_all" className="flex-1 h-full rounded-none border-b-2 border-transparent data-[state=active]:border-primary text-xs font-medium">
+                All Mine ({myAds.length})
+              </TabsTrigger>
+            </TabsList>
 
-              <TabsContent value="my_inactive" className="px-4 py-3 space-y-3 mt-0">
-                {myInactiveAds.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Megaphone className="h-10 w-10 text-muted-foreground/30 mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">You have no inactive ads</p>
-                  </div>
-                ) : (
-                  myInactiveAds.map((ad) => <MyAdCard key={ad.id} ad={ad} showReactivate />)
-                )}
-              </TabsContent>
-            </ScrollArea>
+            {loading ? (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto"/>
+                  <p className="text-sm text-muted-foreground mt-2">Loading advertisements…</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <TabsContent value="all_active" className="flex-1 min-h-0 m-0">
+                  <ScrollArea className="h-full">
+                    <div className="p-3 space-y-3 pb-20">
+                      {allActive.length === 0 ? empty("No active ads in this community") :
+                        allActive.map(ad => (
+                          <AdCard key={ad.id} ad={ad} canManage={false}
+                            onView={() => setViewAdId(ad.id)}
+                          />
+                        ))}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+
+                <TabsContent value="my_active" className="flex-1 min-h-0 m-0">
+                  <ScrollArea className="h-full">
+                    <div className="p-3 space-y-3 pb-20">
+                      {myActive.length === 0 ? empty("No active ads — create one!") :
+                        myActive.map(ad => (
+                          <AdCard key={ad.id} ad={ad} canManage
+                            onView={() => setViewAdId(ad.id)}
+                            onPause={() => callStatus(ad.id, "paused")}
+                            onResume={() => callStatus(ad.id, "active")}
+                            onStop={() => callStatus(ad.id, "cancelled")}
+                            onDelete={() => callDelete(ad.id)}
+                          />
+                        ))}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+
+                <TabsContent value="my_all" className="flex-1 min-h-0 m-0">
+                  <ScrollArea className="h-full">
+                    <div className="p-3 space-y-3 pb-20">
+                      {myAds.length === 0 ? empty("You have no advertisements yet") :
+                        myAds.map(ad => (
+                          <AdCard key={ad.id} ad={ad} canManage
+                            onView={() => setViewAdId(ad.id)}
+                            onPause={() => callStatus(ad.id, "paused")}
+                            onResume={() => callStatus(ad.id, "active")}
+                            onStop={() => callStatus(ad.id, "cancelled")}
+                            onDelete={() => callDelete(ad.id)}
+                          />
+                        ))}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+              </>
+            )}
           </Tabs>
 
           {/* FAB */}
           {onCreateNew && (
-            <div className="absolute bottom-4 right-4">
-              <Button
-                className="h-12 w-12 rounded-full shadow-lg bg-amber-600 hover:bg-amber-700 touch-manipulation active:scale-[0.95]"
-                onClick={() => {
-                  onOpenChange(false);
-                  onCreateNew();
-                }}
-              >
-                <Plus className="h-5 w-5" />
+            <div className="absolute bottom-6 right-4 z-50">
+              <Button size="icon" className="h-12 w-12 rounded-full shadow-lg bg-amber-600 hover:bg-amber-700" onClick={onCreateNew}>
+                <Plus className="h-5 w-5"/>
               </Button>
             </div>
           )}
-        </DrawerContent>
-      </Drawer>
+        </SheetContent>
+      </Sheet>
 
       <AdvertisementFullViewSheet
-        open={showFullView}
-        onOpenChange={setShowFullView}
-        advertisement={selectedAd}
-        isOwner={isViewingOwnAd}
+        open={!!viewAdId}
+        onOpenChange={v => { if (!v) setViewAdId(null); }}
+        adId={viewAdId ?? undefined}
+        communityId={communityId}
       />
-
-      {/* Delete Confirmation */}
-      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
-        <AlertDialogContent className="max-w-[90vw] sm:max-w-sm">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <Trash2 className="h-5 w-5 text-destructive" />
-              Delete Advertisement?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-2">
-              <p>
-                Are you sure you want to permanently delete{" "}
-                <strong>"{deleteTarget?.productTitle}"</strong>?
-              </p>
-              <p className="text-xs">
-                This action cannot be undone. All stats and data for this ad will be lost.
-              </p>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="touch-manipulation">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDeleteAd}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 touch-manipulation"
-            >
-              <Trash2 className="h-4 w-4 mr-1.5" />
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }

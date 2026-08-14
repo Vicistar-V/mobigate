@@ -1,8 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Filter, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { initialMockTransactions, formatNum } from "@/data/merchantVoucherData";
+import { formatNum } from "@/data/merchantVoucherData";
 
 type FilterType = "all" | "funding" | "voucher_generation";
 type SortOption = "newest" | "oldest" | "amount_high" | "amount_low";
@@ -12,6 +12,21 @@ export default function MerchantVoucherTransactions() {
   const [filterType, setFilterType] = useState<FilterType>("all");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [showFilters, setShowFilters] = useState(false);
+
+  const [initialMockTransactions, setTransactions] = useState<any[]>([]);
+  useEffect(() => {
+    fetch("/api/merchant/vouchers.php?action=transactions", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const mapped = (d.transactions ?? []).map((t: any) => ({
+          id: t.id, type: t.type, amount: parseFloat(t.amount), currency: "Mobi",
+          reference: t.reference, createdAt: new Date(t.created_at),
+          description: t.description, batchId: t.batch_id,
+        }));
+        setTransactions(mapped);
+      })
+      .catch(() => setTransactions([]));
+  }, []);
 
   const filtered = useMemo(() => {
     let result = [...initialMockTransactions];

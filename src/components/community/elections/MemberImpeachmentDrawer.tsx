@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Gavel,
   AlertTriangle,
@@ -101,6 +101,7 @@ interface MemberImpeachmentDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialView?: "list" | "start";
+  communityId?: string;
 }
 
 // Mock data
@@ -188,7 +189,7 @@ const getVoteStatusLabel = (vote: MemberVoteStatus) => {
   }
 };
 
-export function MemberImpeachmentDrawer({ open, onOpenChange, initialView = "list" }: MemberImpeachmentDrawerProps) {
+export function MemberImpeachmentDrawer({ open, onOpenChange, initialView = "list", communityId }: MemberImpeachmentDrawerProps) {
   const { toast } = useToast();
   
   const [view, setView] = useState<"list" | "start" | "details">(initialView);
@@ -202,6 +203,40 @@ export function MemberImpeachmentDrawer({ open, onOpenChange, initialView = "lis
   const [showVotersList, setShowVotersList] = useState(false);
   const [showPrivacySettings, setShowPrivacySettings] = useState(false);
   const [privacySettings] = useState<ImpeachmentPrivacySetting[]>(mockImpeachmentPrivacySettings);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Real data — shadows the mock catalogs above for the rest of this component
+  const [mockOfficers, setMockOfficers] = useState<Officer[]>([]);
+  const [mockActiveImpeachments, setMockActiveImpeachments] = useState<ImpeachmentProcess[]>([]);
+  const [eligibleVoters, setEligibleVoters] = useState(0);
+
+  const loadImpeachmentData = useCallback(() => {
+    if (!communityId) return;
+    fetch(`/api/community/impeachment.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        setEligibleVoters(d.eligibleVoters ?? 0);
+        setMockOfficers((d.officers ?? []).map((o: any) => ({
+          id: o.user_id, name: o.name?.trim() || "Officer", position: o.role || "Officer",
+          avatar: o.profile_photo || "/placeholder.svg", tenureStart: new Date(), isImpeachable: true,
+        })));
+        setMockActiveImpeachments((d.impeachments ?? []).map((i: any) => ({
+          id: i.id, officerId: i.target_user_id, officerName: i.target_name?.trim() || "Officer",
+          officerPosition: i.target_position, officerAvatar: i.target_avatar || "/placeholder.svg",
+          initiatedBy: i.initiator_name?.trim() || "Member", initiatorName: i.initiator_name?.trim() || "Member",
+          supportersCount: parseInt(i.signature_count, 10) || 0,
+          initiatedAt: new Date(i.created_at), reason: i.reason, status: i.status,
+          totalEligibleVoters: d.eligibleVoters ?? 0, votesFor: parseInt(i.votes_for, 10) || 0,
+          votesAgainst: parseInt(i.votes_against, 10) || 0, expiresAt: new Date(i.expires_at),
+          requiredThreshold: i.status === "petition" ? i.required_signature_pct : i.required_vote_pct,
+          isNotificationActive: i.status === "voting",
+          myVote: i.my_vote === "remove" ? "support" : i.my_vote === "retain" ? "reject" : (i.has_signed ? "support" : "neutral"),
+        })));
+      })
+      .catch(() => { setMockOfficers([]); setMockActiveImpeachments([]); });
+  }, [communityId]);
+
+  useEffect(() => { if (open) loadImpeachmentData(); }, [open, loadImpeachmentData]);
 
   // Get effective privacy values
   const getPrivacyValue = (key: string): 'visible' | 'hidden' => {
@@ -231,29 +266,92 @@ export function MemberImpeachmentDrawer({ open, onOpenChange, initialView = "lis
     setStep("reason");
   };
 
-  const handleInitiateImpeachment = () => {
-    if (!selectedOfficer || impeachmentReason.length < 50) return;
-    
-    toast({
-      title: "Impeachment Petition Submitted",
-      description: `Your petition against ${selectedOfficer.name} has been submitted. Valid for 30 days.`,
-    });
-    
-    resetState();
+  const handleInitiateImpeachment = async () => {
+    if (!selectedOfficer || impeachmentReason.length < 50 || !communityId) return;
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/community/impeachment.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "start_impeachment", community_id: communityId,
+          target_user_id: selectedOfficer.id, position: selectedOfficer.position, reason: impeachmentReason,
+        }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to start impeachment process");
+
+      toast({
+        title: "Impeachment Petition Submitted",
+        description: `Your petition against ${selectedOfficer.name} has been submitted. Valid for 30 days.`,
+      });
+
+      resetState();
+      loadImpeachmentData();
+    } catch (e: any) {
+      toast({ title: "Couldn't Start Impeachment", description: e.message, variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleVote = (vote: MemberVoteStatus) => {
-    if (!selectedImpeachment) return;
-    
-    toast({
-      title: vote === "support" ? "Vote Recorded: Support" : vote === "reject" ? "Vote Recorded: Reject" : "Vote Cleared",
-      description: `Your vote on the impeachment of ${selectedImpeachment.officerName} has been recorded.`,
-    });
-    
-    setShowConfirmDialog(false);
-    setPendingVote(null);
-    setSelectedImpeachment(null);
-    setView("list");
+  const handleSignPetition = async (impeachment: ImpeachmentProcess) => {
+    if (!communityId) return;
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/community/impeachment.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "sign_petition", community_id: communityId, impeachment_id: impeachment.id }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to sign petition");
+      toast({
+        title: "Petition Signed",
+        description: d.moved_to_voting
+          ? `Enough signatures were gathered — this process has moved to voting!`
+          : `You've added your signature. ${d.signature_count} member(s) have signed so far.`,
+      });
+      loadImpeachmentData();
+      setView("list");
+      setSelectedImpeachment(null);
+    } catch (e: any) {
+      toast({ title: "Couldn't Sign Petition", description: e.message, variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleVote = async (vote: MemberVoteStatus) => {
+    if (!selectedImpeachment || !communityId || vote === "neutral") return;
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/community/impeachment.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "cast_impeachment_vote", community_id: communityId,
+          impeachment_id: selectedImpeachment.id, vote: vote === "support" ? "remove" : "retain",
+        }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to record your vote");
+
+      toast({
+        title: vote === "support" ? "Vote Recorded: Support" : "Vote Recorded: Reject",
+        description: `Your vote on the impeachment of ${selectedImpeachment.officerName} has been recorded.`,
+      });
+
+      setShowConfirmDialog(false);
+      setPendingVote(null);
+      setSelectedImpeachment(null);
+      setView("list");
+      loadImpeachmentData();
+    } catch (e: any) {
+      toast({ title: "Couldn't Record Vote", description: e.message, variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const resetState = () => {
@@ -730,6 +828,18 @@ export function MemberImpeachmentDrawer({ open, onOpenChange, initialView = "lis
                     Protected by Privacy Settings
                   </span>
                 </div>
+              )}
+
+              {/* Sign Petition — only during the petition stage */}
+              {selectedImpeachment.status === "petition" && (
+                <Button
+                  className="w-full mt-2"
+                  variant={selectedImpeachment.myVote === "support" ? "outline" : "default"}
+                  disabled={submitting || selectedImpeachment.myVote === "support"}
+                  onClick={() => handleSignPetition(selectedImpeachment)}
+                >
+                  {selectedImpeachment.myVote === "support" ? "You've Signed This Petition" : submitting ? "Signing..." : "Sign This Petition"}
+                </Button>
               )}
 
               {/* Dates - respects privacy */}

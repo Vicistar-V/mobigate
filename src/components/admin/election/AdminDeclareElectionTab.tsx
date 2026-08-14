@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Vote, Clock, CheckCircle2, XCircle, Calendar, Users, Shield, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -80,10 +80,41 @@ const mockDeclaredElections: DeclaredElection[] = [
 
 interface AdminDeclareElectionTabProps {
   onDeclareElection: () => void;
+  communityId?: string;
 }
 
-export function AdminDeclareElectionTab({ onDeclareElection }: AdminDeclareElectionTabProps) {
-  const [elections] = useState<DeclaredElection[]>(mockDeclaredElections);
+export function AdminDeclareElectionTab({ onDeclareElection, communityId }: AdminDeclareElectionTabProps) {
+  const [elections, setElections] = useState<DeclaredElection[]>([]);
+
+  useEffect(() => {
+    if (!communityId) return;
+    fetch(`/api/community/elections.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const officesByElection: Record<string, string[]> = {};
+        (d.offices ?? []).forEach((o: any) => {
+          if (!officesByElection[o.election_id]) officesByElection[o.election_id] = [];
+          officesByElection[o.election_id].push(o.name);
+        });
+        const mapped: DeclaredElection[] = (d.elections ?? []).map((e: any) => ({
+          id: e.id,
+          name: e.title,
+          type: e.type === "general" ? "general" : "supplementary",
+          selectedOffices: officesByElection[e.id] ?? [],
+          nominationStartDate: new Date(e.nomination_deadline || e.created_at),
+          electionDate: new Date(e.voting_start || e.created_at),
+          status: e.status === "upcoming" ? "pending_authorization"
+            : ["eoi", "nomination", "clearance"].includes(e.status) ? "nominations_open"
+            : ["primary", "campaign", "active", "voting"].includes(e.status) ? "active"
+            : e.status === "completed" ? "completed" : "cancelled",
+          authorizationProgress: { required: 1, completed: 1, signatories: [] },
+          createdAt: new Date(e.created_at),
+          createdBy: "",
+        }));
+        setElections(mapped);
+      })
+      .catch(() => setElections([]));
+  }, [communityId]);
 
   const stats = {
     active: elections.filter(e => e.status === 'active' || e.status === 'nominations_open').length,

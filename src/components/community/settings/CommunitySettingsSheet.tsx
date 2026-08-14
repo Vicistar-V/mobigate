@@ -18,34 +18,46 @@ import { ActiveSettingsList } from "./ActiveSettingsList";
 import { MemberRecommendationsList } from "./MemberRecommendationsList";
 import { RecommendAlternativeDialog } from "./RecommendAlternativeDialog";
 import { RecommendNewSettingDialog } from "./RecommendNewSettingDialog";
+import { useCommunitySettings } from "@/hooks/useCommunity";
 import {
-  mockAdminProposals,
-  mockMemberRecommendations,
-  mockSettingsStats,
-  getSettingsByCategory,
-} from "@/data/communityDemocraticSettingsData";
-import { SETTING_CATEGORY_LABELS, DEMOCRATIC_SETTINGS_CONFIG, ActiveCommunitySetting } from "@/types/communityDemocraticSettings";
+  buildActiveCommunitySettings,
+  buildAdminProposals,
+  buildMemberRecommendations,
+  computeSettingsStats,
+  groupSettingsByCategory,
+} from "@/lib/communitySettingsMerge";
+import { SETTING_CATEGORY_LABELS, DEMOCRATIC_SETTINGS_CONFIG, ActiveCommunitySetting, AdminSettingProposal } from "@/types/communityDemocraticSettings";
+import { useToast } from "@/hooks/use-toast";
 
 interface CommunitySettingsSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
 }
 
-export function CommunitySettingsSheet({ open, onOpenChange }: CommunitySettingsSheetProps) {
+export function CommunitySettingsSheet({ open, onOpenChange, communityId }: CommunitySettingsSheetProps) {
   const isMobile = useIsMobile();
+  const { toast } = useToast();
+  const { data, vote, support, recommend } = useCommunitySettings(communityId);
+
   const [recommendDialogOpen, setRecommendDialogOpen] = useState(false);
-  const [selectedProposal, setSelectedProposal] = useState<string | null>(null);
+  const [selectedProposal, setSelectedProposal] = useState<AdminSettingProposal | null>(null);
   const [recommendNewDialogOpen, setRecommendNewDialogOpen] = useState(false);
   const [selectedSetting, setSelectedSetting] = useState<ActiveCommunitySetting | null>(null);
 
-  const pendingProposals = mockAdminProposals.filter(
+  const allProposals = buildAdminProposals(data);
+  const pendingProposals = allProposals.filter(
     (p) => p.status === "pending_approval" && p.memberVote === null
   );
-  const settingsByCategory = getSettingsByCategory();
-  const activeRecommendations = mockMemberRecommendations.filter((r) => r.isActive);
+  const activeSettings = buildActiveCommunitySettings(data);
+  const settingsByCategory = groupSettingsByCategory(activeSettings);
+  const allRecommendations = buildMemberRecommendations(data);
+  const activeRecommendations = allRecommendations.filter((r) => r.isActive);
+  const stats = computeSettingsStats(data);
 
   const handleRecommendAlternative = (proposalId: string) => {
-    setSelectedProposal(proposalId);
+    const proposal = allProposals.find((p) => p.proposalId === proposalId) || null;
+    setSelectedProposal(proposal);
     setRecommendDialogOpen(true);
   };
 
@@ -54,12 +66,53 @@ export function CommunitySettingsSheet({ open, onOpenChange }: CommunitySettings
     setRecommendNewDialogOpen(true);
   };
 
-  const handleVote = (proposalId: string, vote: "approve" | "disapprove") => {
-    console.log(`Voted ${vote} on proposal ${proposalId}`);
+  const handleVote = async (proposalId: string, voteValue: "approve" | "disapprove") => {
+    await vote(proposalId, voteValue);
   };
 
-  const handleSupportRecommendation = (recommendationId: string) => {
-    console.log(`Toggled support for recommendation ${recommendationId}`);
+  const handleSupportRecommendation = async (recommendationId: string) => {
+    await support(recommendationId);
+  };
+
+  const handleRecommendAlternativeSubmit = async (value: string, reason?: string) => {
+    if (!selectedProposal) return;
+    const result = await recommend({
+      settingKey: selectedProposal.settingKey,
+      settingName: selectedProposal.settingName,
+      currentValue: selectedProposal.currentValue,
+      recommendedValue: value,
+      reason,
+      proposalId: selectedProposal.proposalId,
+    });
+    if (!result.success) {
+      toast({ title: "Couldn't Submit Recommendation", description: result.error || "Please try again.", variant: "destructive" });
+      return;
+    }
+    toast({
+      title: "Recommendation Submitted",
+      description: `Your recommendation for "${selectedProposal.settingName}" has been submitted. Members can now support it.`,
+    });
+    setRecommendDialogOpen(false);
+  };
+
+  const handleRecommendNewSubmit = async (value: string, reason?: string) => {
+    if (!selectedSetting) return;
+    const result = await recommend({
+      settingKey: selectedSetting.settingKey,
+      settingName: selectedSetting.settingName,
+      currentValue: selectedSetting.currentValue,
+      recommendedValue: value,
+      reason,
+    });
+    if (!result.success) {
+      toast({ title: "Couldn't Submit Recommendation", description: result.error || "Please try again.", variant: "destructive" });
+      return;
+    }
+    toast({
+      title: "Recommendation Submitted",
+      description: `Your recommendation for "${selectedSetting.settingName}" has been submitted. Members can now support it.`,
+    });
+    setRecommendNewDialogOpen(false);
   };
 
   const SheetContentComponent = () => (
@@ -122,7 +175,7 @@ export function CommunitySettingsSheet({ open, onOpenChange }: CommunitySettings
                   <Settings className="h-4 w-4 shrink-0" />
                   <span>Active Settings</span>
                   <Badge variant="secondary" className="ml-auto mr-2 text-xs">
-                    {mockSettingsStats.totalSettings}
+                    {stats.totalSettings}
                   </Badge>
                 </div>
               </AccordionTrigger>
@@ -222,16 +275,16 @@ export function CommunitySettingsSheet({ open, onOpenChange }: CommunitySettings
           {/* Bottom Stats */}
           <div className="grid grid-cols-3 gap-1.5 sm:gap-2 pt-2">
             <div className="text-center p-2 sm:p-3 rounded-lg bg-muted/50">
-              <p className="text-lg sm:text-xl font-bold">{mockSettingsStats.totalSettings}</p>
+              <p className="text-lg sm:text-xl font-bold">{stats.totalSettings}</p>
               <p className="text-[10px] sm:text-xs text-muted-foreground">Total</p>
             </div>
             <div className="text-center p-2 sm:p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30">
-              <p className="text-lg sm:text-xl font-bold text-amber-600">{mockSettingsStats.pendingApprovals}</p>
+              <p className="text-lg sm:text-xl font-bold text-amber-600">{stats.pendingApprovals}</p>
               <p className="text-[10px] sm:text-xs text-muted-foreground">Pending</p>
             </div>
             <div className="text-center p-2 sm:p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30">
               <p className="text-lg sm:text-xl font-bold text-blue-600">
-                {mockSettingsStats.memberRecommendations}
+                {stats.memberRecommendations}
               </p>
               <p className="text-[10px] sm:text-xs text-muted-foreground">Recommends</p>
             </div>
@@ -243,7 +296,8 @@ export function CommunitySettingsSheet({ open, onOpenChange }: CommunitySettings
       <RecommendAlternativeDialog
         open={recommendDialogOpen}
         onOpenChange={setRecommendDialogOpen}
-        proposalId={selectedProposal}
+        proposal={selectedProposal}
+        onSubmit={handleRecommendAlternativeSubmit}
       />
 
       {/* Recommend New Setting Dialog (for active settings) */}
@@ -251,6 +305,7 @@ export function CommunitySettingsSheet({ open, onOpenChange }: CommunitySettings
         open={recommendNewDialogOpen}
         onOpenChange={setRecommendNewDialogOpen}
         setting={selectedSetting}
+        onSubmit={handleRecommendNewSubmit}
       />
     </div>
   );

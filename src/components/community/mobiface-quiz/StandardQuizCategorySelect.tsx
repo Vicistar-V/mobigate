@@ -13,9 +13,10 @@ import { StandardQuizContinueSheet } from "./StandardQuizContinueSheet";
 interface StandardQuizCategorySelectProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
 }
 
-export function StandardQuizCategorySelect({ open, onOpenChange }: StandardQuizCategorySelectProps) {
+export function StandardQuizCategorySelect({ open, onOpenChange, communityId }: StandardQuizCategorySelectProps) {
   const { toast } = useToast();
   const [step, setStep] = useState<"category" | "level">("category");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -137,6 +138,7 @@ export function StandardQuizCategorySelect({ open, onOpenChange }: StandardQuizC
           levelName={selectedLevel.name}
           stake={selectedLevel.defaultStake}
           baseWinning={selectedLevel.defaultWinning}
+          communityId={communityId}
         />
       )}
     </>

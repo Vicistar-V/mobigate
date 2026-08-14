@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useCommunityPostInteraction, type ApiComment } from "@/hooks/useCommunityPostInteraction";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import {
@@ -18,6 +19,7 @@ import { toast } from "sonner";
 import type { NewsItem } from "@/data/newsData";
 
 interface NewsDetailDialogProps {
+  communityId?: string;
   open:          boolean;
   onOpenChange:  (v: boolean) => void;
   news:          NewsItem | null;
@@ -44,7 +46,22 @@ interface Comment {
   text: string; time: string; replies?: Comment[];
 }
 
-function CommentRow({ comment, depth = 0, onReply }: { comment: Comment; depth?: number; onReply: (id: string, text: string) => void }) {
+
+function commentTimeAgo(dateStr?: string): string {
+  if (!dateStr) return "";
+  try {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "Just now";
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    return `${days}d ago`;
+  } catch { return ""; }
+}
+
+function CommentRow({ comment, depth = 0, onReply }: { comment: ApiComment; depth?: number; onReply: (id: string, text: string) => void }) {
   const [showReply, setShowReply] = useState(false);
   const [replyText, setReplyText]  = useState("");
   const [showReplies, setShowReplies] = useState(true);
@@ -55,16 +72,16 @@ function CommentRow({ comment, depth = 0, onReply }: { comment: Comment; depth?:
       <div className="flex-1 min-w-0">
         <div className="flex gap-2">
           <Avatar className="h-7 w-7 shrink-0 mt-0.5">
-            <AvatarImage src={comment.avatar} />
-            <AvatarFallback className="text-xs">{comment.author[0]}</AvatarFallback>
+            <AvatarImage src={comment.profile_photo} />
+            <AvatarFallback className="text-xs">{(comment.author_name || "U")[0]}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <div className="bg-muted/50 rounded-2xl px-3 py-2">
-              <p className="text-xs font-semibold leading-tight">{comment.author}</p>
-              <p className="text-sm mt-0.5 leading-snug whitespace-pre-wrap break-words">{comment.text}</p>
+              <p className="text-xs font-semibold leading-tight">{comment.author_name}</p>
+              <p className="text-sm mt-0.5 leading-snug whitespace-pre-wrap break-words">{comment.content}</p>
             </div>
             <div className="flex items-center gap-3 mt-1 px-1">
-              <span className="text-[10px] text-muted-foreground">{comment.time}</span>
+              <span className="text-[10px] text-muted-foreground">{commentTimeAgo(comment.created_at)}</span>
               {depth === 0 && (
                 <button className="text-[11px] font-semibold text-muted-foreground hover:text-primary"
                   onClick={() => setShowReply(r => !r)}>Reply</button>
@@ -79,7 +96,7 @@ function CommentRow({ comment, depth = 0, onReply }: { comment: Comment; depth?:
             </div>
             {showReply && (
               <div className="flex gap-2 items-center mt-2">
-                <Input placeholder={`Reply to ${comment.author}…`} value={replyText} className="h-8 text-sm flex-1 rounded-full"
+                <Input placeholder={`Reply to ${comment.author_name}…`} value={replyText} className="h-8 text-sm flex-1 rounded-full"
                   onChange={e => setReplyText(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter" && replyText.trim()) { onReply(comment.id, replyText.trim()); setReplyText(""); setShowReply(false); } }} />
                 <Button size="icon" className="h-8 w-8 rounded-full shrink-0"
@@ -100,15 +117,19 @@ function CommentRow({ comment, depth = 0, onReply }: { comment: Comment; depth?:
 
 /* ── Main Dialog ─────────────────────────────────────────────────────────── */
 export function NewsDetailDialog({
-  open, onOpenChange, news,
+  communityId, open, onOpenChange, news,
   onLike, isLiked, likeCount,
   onPrev, onNext, hasPrev, hasNext,
 }: NewsDetailDialogProps) {
   const navigate = useNavigate();
-  const [bookmarked,   setBookmarked]   = useState(false);
-  const [commentText,  setCommentText]  = useState("");
-  const [comments,     setComments]     = useState<Comment[]>([]);
-  const [submitting,   setSubmitting]   = useState(false);
+  const [bookmarked,    setBookmarked]    = useState(false);
+  const [commentText,   setCommentText]   = useState("");
+  const [comments,      setComments]      = useState<ApiComment[]>([]);
+  const [localLiked,    setLocalLiked]    = useState(isLiked ?? false);
+  const [localLikeCount,setLocalLikeCount]= useState(likeCount ?? 0);
+  const { fetchComments, toggleLike, submitComment, recordView } = useCommunityPostInteraction(communityId);
+  useEffect(() => { if (open && news?.id) { recordView(news.id); fetchComments(news.id).then(setComments); } }, [open, news?.id]);
+  useEffect(() => { setLocalLiked(isLiked ?? false); setLocalLikeCount(likeCount ?? 0); }, [isLiked, likeCount]);
 
   if (!news) return null;
 
@@ -118,17 +139,11 @@ export function NewsDetailDialog({
 
   const catColor = CATEGORY_COLOR[news.category ?? "general"] ?? "bg-gray-100 text-gray-700";
 
-  const handleSendComment = () => {
-    if (!commentText.trim() || submitting) return;
-    setSubmitting(true);
-    const c: Comment = {
-      id: `c-${Date.now()}`, author: "You",
-      text: commentText.trim(),
-      time: "Just now", replies: [],
-    };
-    setComments(prev => [...prev, c]);
+  const handleSendComment = async () => {
+    if (!commentText.trim() || !news?.id) return;
+    const result = await submitComment(news.id, commentText.trim());
+    setComments(prev => [...prev, result ?? { id:`tmp-${Date.now()}`, content: commentText.trim(), author_name:"You", profile_photo:null, created_at:new Date().toISOString(), replies:[] }]);
     setCommentText("");
-    setSubmitting(false);
   };
 
   const handleReply = (parentId: string, text: string) => {
@@ -304,7 +319,13 @@ export function NewsDetailDialog({
           {/* Action bar */}
           <div className="flex items-center gap-1 px-4 py-2.5">
             <button
-              onClick={e => onLike?.(news.id, e)}
+              onClick={async (e) => {
+              const newVal = !localLiked;
+              setLocalLiked(newVal);
+              setLocalLikeCount(c => newVal ? c+1 : Math.max(0,c-1));
+              await toggleLike(news.id, !newVal);
+              onLike?.(news.id, e);
+            }}
               className={cn("p-2 rounded-full hover:bg-muted transition-colors", isLiked && "text-red-500")}
             >
               <Heart className={cn("h-5 w-5", isLiked && "fill-red-500")} />
@@ -340,7 +361,7 @@ export function NewsDetailDialog({
             <Button
               size="icon"
               className="h-10 w-10 rounded-full bg-primary shrink-0"
-              disabled={!commentText.trim() || submitting}
+              disabled={!commentText.trim()}
               onClick={handleSendComment}
             >
               <Send className="h-4 w-4 text-white" />

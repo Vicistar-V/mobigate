@@ -113,7 +113,56 @@ export function useCommunitySettings(communityId: string | undefined) {
     fetch_();
   };
 
-  return { data, loading, vote, support, refresh: fetch_ };
+  const propose = async (args: {
+    settingKey: string; settingName: string; settingDescription?: string;
+    settingCategory: string; currentValue: string; proposedValue: string;
+  }): Promise<{ success: boolean; proposal_id?: string; error?: string }> => {
+    try {
+      const res = await fetch(`${API}/community/settings.php`, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "propose", community_id: communityId,
+          setting_key: args.settingKey, setting_name: args.settingName,
+          setting_description: args.settingDescription ?? "",
+          setting_category: args.settingCategory,
+          current_value: args.currentValue, proposed_value: args.proposedValue,
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) return { success: false, error: json.error || "Failed to submit proposal" };
+      await fetch_();
+      return json;
+    } catch (e: any) {
+      return { success: false, error: e.message };
+    }
+  };
+
+  const recommend = async (args: {
+    settingKey: string; settingName: string; currentValue: string;
+    recommendedValue: string; reason?: string; proposalId?: string;
+  }): Promise<{ success: boolean; recommendation_id?: string; error?: string }> => {
+    try {
+      const res = await fetch(`${API}/community/settings.php`, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "recommend", community_id: communityId,
+          setting_key: args.settingKey, setting_name: args.settingName,
+          current_value: args.currentValue, recommended_value: args.recommendedValue,
+          reason: args.reason ?? "", proposal_id: args.proposalId,
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) return { success: false, error: json.error || "Failed to submit recommendation" };
+      await fetch_();
+      return json;
+    } catch (e: any) {
+      return { success: false, error: e.message };
+    }
+  };
+
+  return { data, loading, vote, support, propose, recommend, refresh: fetch_ };
 }
 
 export function useCommunityDiscover(search = "", excludeIds: string[] = []) {

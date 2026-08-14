@@ -23,7 +23,7 @@ import { PeopleYouMayKnow } from "./PeopleYouMayKnow";
 import { TopTrendingHeadlines } from "./TopTrendingHeadlines";
 import { HeadlinesYouDontWannaMiss } from "./HeadlinesYouDontWannaMiss";
 import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { ScrollableThumbStrip } from "@/components/feed/ScrollableThumbStrip";
 import { FeedShowcaseDialog } from "@/components/feed/FeedShowcaseDialog";
 import { UserTagBadges } from "./UserTagBadges";
@@ -35,6 +35,11 @@ import { WallBannerSlideshow } from "@/components/wall-banner/WallBannerSlidesho
 import { WallBannerManagerDialog } from "@/components/wall-banner/WallBannerManagerDialog";
 import { getActiveSlidesFor } from "@/lib/wallBannerStorage";
 import { PostDetailDialog } from "@/components/PostDetailDialog";
+
+// ── Breaking News wrapper — TopTrendingHeadlines handles its own sliding internally ──
+function BreakingNewsCarousel({ children }: { children: React.ReactNode }) {
+  return <div className="space-y-3">{children}</div>;
+}
 
 export const GreetingSection = ({
   profileUserId,
@@ -56,7 +61,37 @@ export const GreetingSection = ({
   // Editing is only allowed on your own page.
   const canEdit = editable ?? (ownerId === currentUserId);
   const phpFeedPosts = useFeedPosts();
-  const allPosts = phpFeedPosts || fallbackFeedPosts;
+  const [realFeedPosts, setRealFeedPosts] = useState<typeof fallbackFeedPosts | null>(null);
+
+  useEffect(() => {
+    fetch(`/api/posts/feed.php?limit=60`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((rows: any[]) => {
+        const typeMap: Record<string, any> = {
+          photo: "Photo", video: "Video", audio: "Audio", article: "Article",
+          blog: "Article", pdf: "PDF", url: "URL", status: "Article",
+        };
+        const mapped = rows.map((r) => {
+          const lastActiveMs = r.author_last_active ? new Date(r.author_last_active).getTime() : 0;
+          const isOnline = lastActiveMs > 0 && (Date.now() - lastActiveMs) < 5 * 60 * 1000;
+          return {
+            id: r.id, title: r.title || "", subtitle: r.subtitle || "", description: r.content || "",
+            author: r.author_name?.trim() || "Member", authorProfileImage: r.author_profile_photo || "/placeholder.svg",
+            userId: r.user_id, status: isOnline ? "Online" : "Offline",
+            views: String(r.view_count ?? 0), comments: String(r.comment_count ?? 0), likes: String(r.like_count ?? 0),
+            followers: String(r.author_follower_count ?? 0),
+            type: typeMap[r.post_type] || "Article",
+            imageUrl: r.thumbnail_url || r.media_url || undefined,
+            fee: r.access_fee > 0 ? String(r.access_fee) : undefined,
+            isOwner: !!r.is_owner,
+          };
+        });
+        setRealFeedPosts(mapped as any);
+      })
+      .catch(() => setRealFeedPosts(null));
+  }, []);
+
+  const allPosts = realFeedPosts || phpFeedPosts || fallbackFeedPosts;
 
   // Active posting-area tab — drives which slice of content is shown in place.
   const [activeFeedTab, setActiveFeedTab] = useState<"Stories" | "Vibes & Flexing" | "Breaking News">("Stories");
@@ -892,9 +927,9 @@ export const GreetingSection = ({
             {/* Featured post card — image left, [Post & Share button] + [storyline] stacked right.
                 Image X + Storyline 1 are READ-ONLY; tapping either opens an action sheet
                 with Edit Post / Create New Post. */}
-            {activeFeedTab !== "Vibes & Flexing" && featuredPost && (
+            {activeFeedTab === "Stories" && featuredPost && canEdit && (
               <div className="rounded-lg overflow-hidden">
-                <div className="grid grid-cols-[40%_1fr] gap-2 items-stretch">
+                <div className="grid grid-cols-[40%_1fr] gap-2 items-stretch max-h-[220px] sm:max-h-[240px]">
                   {/* Left: own image — opens Edit/Create on own page, viewer elsewhere */}
                   <div
                     role="button"
@@ -906,14 +941,14 @@ export const GreetingSection = ({
                         handleOwnPrimary();
                       }
                     }}
-                    className="relative bg-muted rounded-lg overflow-hidden border-[3px] border-green-500/80 shadow-sm cursor-pointer active:scale-[0.98] transition-transform touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+                    className="relative bg-muted rounded-lg overflow-hidden border-[3px] border-green-500/80 shadow-sm cursor-pointer active:scale-[0.98] transition-transform touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 min-w-0"
                     aria-label={canEdit ? "Open post options: Edit Post or Create New Post" : "View posts"}
                   >
                     <img
                       key={featuredPost.id || safeFeaturedIdx}
                       src={featuredPost.imageUrl}
                       alt={featuredPost.title}
-                      className="w-full h-full object-cover aspect-[4/5] transition-opacity duration-300 pointer-events-none"
+                      className="w-full h-full object-cover transition-opacity duration-300 pointer-events-none"
                       loading="lazy"
                     />
                     <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded-md bg-black/55 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm pointer-events-none">
@@ -945,13 +980,13 @@ export const GreetingSection = ({
                   </div>
 
                   {/* Right column: stacked button + storyline (storyline is read-only opener) */}
-                  <div className="flex flex-col gap-2 min-w-0">
+                  <div className="flex flex-col gap-2 min-w-0 overflow-hidden">
                     {/* Post & Share button — quick shortcut to blank composer (owner only) */}
                     {canEdit && (
                       <button
                         type="button"
                         onClick={openComposerBlank}
-                        className="bg-primary text-primary-foreground rounded-md px-2.5 py-2.5 text-center text-[15px] font-bold leading-tight truncate active:opacity-90 touch-manipulation shadow-sm"
+                        className="bg-primary text-primary-foreground rounded-md px-2.5 py-2.5 text-center text-[15px] font-bold leading-tight truncate active:opacity-90 touch-manipulation shadow-sm shrink-0"
                       >
                         {tabMeta.composeCta}
                       </button>
@@ -967,13 +1002,13 @@ export const GreetingSection = ({
                           handleOwnPrimary();
                         }
                       }}
-                      className="flex-1 bg-lime-200/70 text-foreground p-2.5 text-left rounded-md active:opacity-90 touch-manipulation cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 select-none"
+                      className="flex-1 min-h-0 bg-lime-200/70 text-foreground p-2.5 text-left rounded-md active:opacity-90 touch-manipulation cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 select-none overflow-hidden"
                       aria-label={canEdit ? "Open post options: Edit Post or Create New Post" : "View posts"}
                     >
-                      <p className="text-[15px] font-bold leading-snug">
+                      <p className="text-[15px] font-bold leading-snug line-clamp-2">
                         {featuredPost.title || "Your Post or Content Description or Storyline here."}
                       </p>
-                      <p className="text-[14px] leading-snug mt-1">
+                      <p className="text-[14px] leading-snug mt-1 line-clamp-3">
                         {(featuredPost as any).description ||
                           "However, the storyline may not just exceed certain word-counts or be made to be unnecessary"}
                         <span className="font-extrabold italic">…More</span>
@@ -989,24 +1024,24 @@ export const GreetingSection = ({
                 Inside it: the IMAGE opens the media viewer (enlarge),
                 the STORYLINE text opens the full story details dialog.
                 The outer card itself is NOT clickable. */}
-            {activeFeedTab !== "Vibes & Flexing" && featuredPublicPost && (
+            {activeFeedTab === "Stories" && featuredPublicPost && (
               <div
                 className="mt-2 rounded-lg overflow-hidden bg-purple-200/60 p-1.5"
                 aria-label="Public post preview"
               >
-                <div className="grid grid-cols-[40%_1fr] gap-2 items-stretch">
+                <div className="grid grid-cols-[40%_1fr] gap-2 items-stretch max-h-[220px] sm:max-h-[240px]">
                   {/* IMAGE → opens MediaGalleryViewer */}
                   <button
                     type="button"
                     onClick={() => setViewerOpen(true)}
-                    className="relative bg-muted rounded-md overflow-hidden border-2 border-red-500 cursor-pointer active:opacity-95 active:scale-[0.997] transition-transform touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                    className="relative bg-muted rounded-md overflow-hidden border-2 border-red-500 cursor-pointer active:opacity-95 active:scale-[0.997] transition-transform touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 min-w-0"
                     aria-label="Enlarge this post's media"
                   >
                     <img
                       key={featuredPublicPost.id || `pub-${safeFeaturedIdx}`}
                       src={featuredPublicPost.imageUrl}
                       alt={featuredPublicPost.title}
-                      className="w-full h-full object-cover aspect-[4/5] transition-opacity duration-300 pointer-events-none"
+                      className="w-full h-full object-cover transition-opacity duration-300 pointer-events-none"
                       loading="lazy"
                     />
                     <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded-md bg-black/55 px-1.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm pointer-events-none">
@@ -1019,18 +1054,18 @@ export const GreetingSection = ({
                   <button
                     type="button"
                     onClick={() => setStoryDetailOpen(true)}
-                    className="text-foreground p-2.5 text-left select-none cursor-pointer rounded-md hover:bg-purple-300/40 active:bg-purple-300/60 active:scale-[0.997] transition-all touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                    className="text-foreground p-2.5 text-left select-none cursor-pointer rounded-md hover:bg-purple-300/40 active:bg-purple-300/60 active:scale-[0.997] transition-all touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 min-w-0 overflow-hidden"
                     aria-label="Read full story details"
                   >
-                    <p className="text-[15px] font-bold leading-snug">
+                    <p className="text-[15px] font-bold leading-snug line-clamp-2">
                       {featuredPublicPost.title || "Public Post or Content Description or Storyline here."}
                     </p>
-                    <p className="text-[14px] leading-snug mt-1">
+                    <p className="text-[14px] leading-snug mt-1 line-clamp-2">
                       {(featuredPublicPost as any).description ||
                         "However, the storyline may not just exceed certain word-counts or be made to be unnecessarily bulky or voluminous in any case, or"}
                       <span className="font-extrabold italic text-primary">…More</span>
                     </p>
-                    <p className="text-[11px] text-muted-foreground mt-1 italic">
+                    <p className="text-[11px] text-muted-foreground mt-1 italic truncate">
                       by {(featuredPublicPost as any).author || "Public User"} · {featuredPublicPost.userId === currentUserId ? "Your post" : "Public / Connection"}
                     </p>
                   </button>
@@ -1043,7 +1078,7 @@ export const GreetingSection = ({
             {/* Scrollable thumbnail strip with real Play-style scroll arrows.
                 Arrows scroll the media left/right and dim when nothing is left in
                 that direction; the center label opens the full media window. */}
-            {activeFeedTab !== "Vibes & Flexing" && myRecentPosts.length > 1 && (
+            {activeFeedTab === "Stories" && myRecentPosts.length > 1 && (
               <ScrollableThumbStrip
                 items={myRecentPosts.map((p, i) => ({
                   id: p.id || `thumb-${i}`,
@@ -1056,6 +1091,16 @@ export const GreetingSection = ({
                 onSeeAll={() => setShowcaseOpen(true)}
                 accent="0 84% 60%"
               />
+            )}
+
+            {/* ============ BREAKING NEWS — TopTrendingHeadlines slides, HeadlinesYouDontWannaMiss stays below ============ */}
+            {activeFeedTab === "Breaking News" && (
+              <>
+                <BreakingNewsCarousel>
+                  <TopTrendingHeadlines />
+                </BreakingNewsCarousel>
+                <HeadlinesYouDontWannaMiss />
+              </>
             )}
 
             {/* Hidden gallery input */}
@@ -1072,14 +1117,6 @@ export const GreetingSection = ({
 
       {/* People You May Know (hidden in embedded/profile mode — the profile renders its own) */}
       {!embed && <PeopleYouMayKnow />}
-
-      {/* Breaking News extras — Top Trending Headlines + Headlines you don't wanna miss */}
-      {activeFeedTab === "Breaking News" && (
-        <>
-          <TopTrendingHeadlines />
-          <HeadlinesYouDontWannaMiss />
-        </>
-      )}
 
       {/* Compose dialog */}
       <CreatePostDialog

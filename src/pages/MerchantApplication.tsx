@@ -164,7 +164,9 @@ export default function MerchantApplication() {
 
   const totalFee = waiverMode ? 100000 : 50000;
 
-  const handleSubmit = () => {
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
     if (!acceptedPolicies) {
       toast({ title: "Accept Terms", description: "You must agree to the terms before submitting.", variant: "destructive" });
       return;
@@ -182,14 +184,40 @@ export default function MerchantApplication() {
       toast({ title: "Password Error", description: "Passwords must match and be at least 4 characters.", variant: "destructive" });
       return;
     }
-    const ref = generateTransactionReference("MERCH-CORP");
-    setRefNumber(ref);
-    setSubmitted(true);
-    const feeDesc = waiverMode
-      ? `Application Fee: ${formatMobi(50000)} + Waiver Fee: ${formatMobi(50000)} = ${formatMobi(totalFee)}`
-      : `Fee: ${formatMobi(50000)}`;
-    toast({ title: waiverMode ? "Application + Waiver Submitted!" : "Application Submitted!", description: `${feeDesc}. Ref: ${ref}` });
-    localStorage.removeItem("mobigate-corp-merchant-draft");
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/merchant/application.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "submit_corporate",
+          store_name: storeName, account_email: accountEmail,
+          merchant_name: merchantName, business_profile: businessProfile, dba,
+          registered_office: registeredOffice, company_reg_number: companyRegNumber, reg_authority: regAuthority,
+          country_of_reg: countryOfReg, tin, business_category: businessCategory,
+          directors: directors.map(d => ({ name: d.name, address: d.address })),
+          addresses, affiliates,
+          corp_email: emailAddress, website, corp_phone1: phone1, corp_phone2: phone2,
+          bank_accounts: bankAccounts,
+          waiver_requested: waiverMode, waiver_context: waiverContext,
+        }),
+      });
+      const d = await res.json().catch(() => null);
+      if (!res.ok || !d?.success) throw new Error(d?.error || `Failed to submit application (HTTP ${res.status})`);
+
+      const ref = d.id.slice(0, 12).toUpperCase();
+      setRefNumber(ref);
+      setSubmitted(true);
+      const feeDesc = waiverMode
+        ? `Application Fee: ${formatMobi(50000)} + Waiver Fee: ${formatMobi(50000)} = ${formatMobi(d.total_fee)}`
+        : `Fee: ${formatMobi(d.total_fee)}`;
+      toast({ title: waiverMode ? "Application + Waiver Submitted!" : "Application Submitted!", description: `${feeDesc}. Ref: ${ref}` });
+      localStorage.removeItem("mobigate-corp-merchant-draft");
+    } catch (e: any) {
+      toast({ title: "Couldn't Submit Application", description: e.message, variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const STORAGE_KEY = "mobigate-corp-merchant-draft";
@@ -768,7 +796,7 @@ export default function MerchantApplication() {
               <Button variant="outline" onClick={saveDraft} className="gap-1.5" size="lg">
                 <Save className="h-4 w-4" />
               </Button>
-              <Button onClick={handleSubmit} className="flex-1 h-auto py-3 flex-col" size="lg" disabled={!acceptedPolicies}>
+              <Button onClick={handleSubmit} className="flex-1 h-auto py-3 flex-col" size="lg" disabled={!acceptedPolicies || submitting}>
                 <span className="flex items-center gap-2"><Store className="h-4 w-4" /> Submit Application</span>
                 <span className="text-[10px] opacity-80">{waiverMode ? formatMobi(totalFee) : formatMobi(50000)}</span>
               </Button>

@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Users, TrendingUp, ChevronRight, UserPlus } from "lucide-react";
+import { ArrowLeft, Users, TrendingUp, ChevronRight, UserPlus, Loader2 } from "lucide-react";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { getContentsAdsWithUserAdverts } from "@/data/profileAds";
@@ -97,9 +97,47 @@ const getCandidateColors = (index: number) => {
   return colors[index % colors.length];
 };
 
-export const ElectionPrimariesTab = () => {
+interface ElectionPrimariesTabProps {
+  communityId?: string;
+}
+
+export const ElectionPrimariesTab = ({ communityId }: ElectionPrimariesTabProps) => {
   const navigate = useNavigate();
   const [showNominateSheet, setShowNominateSheet] = useState(false);
+  const [mockPrimaries, setMockPrimaries] = useState<PrimaryResult[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!communityId) return;
+    setLoading(true);
+    fetch(`/api/community/elections.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const offices = d.offices ?? [];
+        const mapped: PrimaryResult[] = offices.map((o: any) => {
+          const candidates = (d.candidates ?? []).filter((c: any) => c.office_id === o.id && c.status !== 'disqualified');
+          const totalVotes = candidates.reduce((s: number, c: any) => s + (parseInt(c.primary_votes, 10) || 0), 0);
+          return {
+            id: o.id,
+            office: o.name,
+            nominees: candidates.map((c: any) => ({
+              id: c.id,
+              name: c.name?.trim() || "Candidate",
+              avatar: c.profile_photo || "/placeholder.svg",
+              votes: parseInt(c.primary_votes, 10) || 0,
+              percentage: totalVotes > 0 ? ((parseInt(c.primary_votes, 10) || 0) / totalVotes) * 100 : 0,
+              qualified: c.status === "cleared",
+            })),
+            totalVotes,
+            date: new Date(),
+            status: candidates.some((c: any) => c.status === "cleared") ? "completed" : "ongoing",
+          };
+        }).filter((p: PrimaryResult) => p.nominees.length > 0);
+        setMockPrimaries(mapped);
+      })
+      .catch(() => setMockPrimaries([]))
+      .finally(() => setLoading(false));
+  }, [communityId]);
 
   const handleBack = () => {
     navigate(-1);
@@ -139,6 +177,11 @@ export const ElectionPrimariesTab = () => {
       </Button>
 
       {/* Primaries Tables */}
+      {loading ? (
+        <div className="flex justify-center py-12"><Loader2 className="h-7 w-7 animate-spin text-primary" /></div>
+      ) : mockPrimaries.length === 0 ? (
+        <div className="text-center py-8 text-sm text-muted-foreground">No primary results to show yet.</div>
+      ) : (
       <div className="space-y-6">
         {mockPrimaries.map((primary) => (
           <Card key={primary.id} className="p-3">
@@ -229,6 +272,7 @@ export const ElectionPrimariesTab = () => {
           </Card>
         ))}
       </div>
+      )}
 
       {/* Ads */}
       <PremiumAdRotation ads={getContentsAdsWithUserAdverts().flat()} slotId="election-primaries" />
@@ -240,6 +284,7 @@ export const ElectionPrimariesTab = () => {
       <NominateCandidateSheet
         open={showNominateSheet}
         onOpenChange={setShowNominateSheet}
+        communityId={communityId}
         onNominationComplete={() => setShowNominateSheet(false)}
       />
     </div>

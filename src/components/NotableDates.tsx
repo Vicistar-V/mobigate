@@ -354,13 +354,31 @@ export const NotableDates = () => {
   }, []);
 
   // ── Data ────────────────────────────────────────────────────────────────
-  const birthdayPeople = useMemo<NotablePerson[]>(() => {
-    const fromWindow = (typeof window !== "undefined" && (window as any).__NOTABLE_DATES__) as NotablePerson[] | undefined;
-    if (fromWindow?.length) return fromWindow;
-    return buildPeople("birthday");
-  }, []);
+  const [birthdayPeople, setBirthdayPeople] = useState<NotablePerson[]>([]);
+  const [baseEvents, setBaseEvents] = useState<NotablePerson[]>([]);
+  const [loadingNotable, setLoadingNotable] = useState(true);
 
-  const baseEvents = useMemo<NotablePerson[]>(() => buildPeople("event"), []);
+  const loadNotableDates = () => {
+    setLoadingNotable(true);
+    fetch(`/api/profile/notable_dates.php?action=list`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        setBirthdayPeople((d.birthdays ?? []).map((b: any) => ({
+          id: b.id, name: b.name, photo: b.photo || photoFor(b.name),
+          dateLabel: b.dateLabel, isFriend: b.isFriend, _bucket: b._bucket,
+        })));
+        setBaseEvents((d.events ?? []).map((e: any) => ({
+          id: e.id, name: e.name, photo: e.photo || photoFor(e.name),
+          images: e.images?.length ? e.images : undefined,
+          dateLabel: e.dateLabel, isFriend: e.isFriend, _bucket: e._bucket,
+          eventType: e.eventType, eventLabel: e.eventLabel, notes: e.notes, _typeKey: e.eventType,
+        })));
+      })
+      .catch(() => { setBirthdayPeople([]); setBaseEvents([]); })
+      .finally(() => setLoadingNotable(false));
+  };
+
+  useEffect(() => { loadNotableDates(); }, []);
 
   const bucketOf = (iso: string): TimeRange => {
     if (!iso) return "others";
@@ -377,7 +395,8 @@ export const NotableDates = () => {
     return "others";
   };
 
-  // Merge user-created events into the event pool
+  // Merge user-created events (freshly created this session, for instant
+  // feedback) into the real fetched event pool
   const allEvents = useMemo<NotablePerson[]>(() => {
     const created: NotablePerson[] = userEvents.map(ev => ({
       id: ev.id,
@@ -392,7 +411,9 @@ export const NotableDates = () => {
       notes: ev.notes,
       _typeKey: ev.eventType,
     }));
-    return [...created, ...baseEvents];
+    // Avoid duplicating an event that's already come back from the real fetch
+    const createdIds = new Set(created.map(c => c.id));
+    return [...created, ...baseEvents.filter(e => !createdIds.has(e.id))];
   }, [userEvents, baseEvents]);
 
   // ── Counts (derived from real data so chips always match cards) ──────────

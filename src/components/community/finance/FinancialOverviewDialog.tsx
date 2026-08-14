@@ -1,492 +1,326 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Wallet, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight,
   RefreshCw, Shield, AlertTriangle, CheckCircle, ArrowDown, ArrowUp,
-  ArrowDownLeft, Settings, ChevronRight
+  ArrowDownLeft, ChevronRight, Loader2, Building2, Send, Download,
 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import {
-  Drawer, DrawerContent, DrawerHeader, DrawerTitle,
-} from "@/components/ui/drawer";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { mockWalletData, mockTransactions } from "@/data/financeData";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { WalletTopUpDialog } from "./WalletTopUpDialog";
 import { WalletTransferDialog } from "./WalletTransferDialog";
 import { WalletWithdrawDialog } from "./WalletWithdrawDialog";
-import { DualCurrencyDisplay } from "@/components/common/DualCurrencyDisplay";
-import { QuizWalletDrawer } from "@/components/community/QuizWalletDrawer";
-import {
-  communityQuizWalletData,
-  getQuizWalletAvailability,
-  QuizWalletTransaction,
-} from "@/data/communityQuizData";
-import { formatLocalAmount, formatLocalFirst } from "@/lib/mobiCurrencyTranslation";
+import { TransactionDetailDrawer, TransactionDetail } from "./TransactionDetailDrawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSwipeable } from "react-swipeable";
 import { cn } from "@/lib/utils";
-import { TransactionDetailDrawer, TransactionDetail } from "./TransactionDetailDrawer";
+import { formatDistanceToNow } from "date-fns";
+
+const API = "/api/community";
+
+function amtFmt(n: number) {
+  return "₦" + Number(n).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function timeAgo(d: string) {
+  try { return formatDistanceToNow(new Date(d), { addSuffix: true }); } catch { return ""; }
+}
+function txnColor(type: string) {
+  return ["income","topup"].includes(type) ? "text-green-600" : "text-red-600";
+}
+function txnBg(type: string) {
+  return ["income","topup"].includes(type) ? "bg-green-100" : "bg-red-100";
+}
+function txnIcon(type: string) {
+  return ["income","topup"].includes(type) ? ArrowDownRight : ArrowUpRight;
+}
+function txnSign(type: string) {
+  return ["income","topup"].includes(type) ? "+" : "-";
+}
 
 interface FinancialOverviewDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
   isAdmin?: boolean;
   isOwner?: boolean;
 }
 
-// --- Transaction type config for quiz wallet ---
-const txTypeConfig: Record<QuizWalletTransaction["type"], { icon: typeof ArrowDown; color: string; bg: string; label: string }> = {
-  stake_income:   { icon: ArrowDownLeft,  color: "text-green-600",  bg: "bg-green-100 dark:bg-green-900/40",  label: "Stake In" },
-  winning_payout: { icon: ArrowUpRight,   color: "text-red-600",    bg: "bg-red-100 dark:bg-red-900/40",      label: "Payout" },
-  transfer_in:    { icon: ArrowDown,      color: "text-blue-600",   bg: "bg-blue-100 dark:bg-blue-900/40",    label: "Transfer In" },
-  transfer_out:   { icon: ArrowUp,        color: "text-orange-600", bg: "bg-orange-100 dark:bg-orange-900/40", label: "Transfer Out" },
-};
-
 export function FinancialOverviewDialog({
-  open,
-  onOpenChange,
-  isAdmin = false,
-  isOwner = false,
+  open, onOpenChange, communityId, isAdmin = false, isOwner = false,
 }: FinancialOverviewDialogProps) {
   const isMobile = useIsMobile();
-  const [walletData] = useState(mockWalletData);
-  const [walletIndex, setWalletIndex] = useState(0);
-  const [showTopUpDialog, setShowTopUpDialog] = useState(false);
-  const [showTransferDialog, setShowTransferDialog] = useState(false);
-  const [showWithdrawDialog, setShowWithdrawDialog] = useState(false);
-  const [showQuizWalletDrawer, setShowQuizWalletDrawer] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<TransactionDetail | null>(null);
 
-  const quizWallet = communityQuizWalletData;
-  const quizAvailability = getQuizWalletAvailability();
+  // ── Real finance data ────────────────────────────────────────────────────
+  const [loading,       setLoading]       = useState(false);
+  const [balance,       setBalance]       = useState(0);
+  const [totalIncome,   setTotalIncome]   = useState(0);
+  const [totalExpenses, setTotalExpenses] = useState(0);
+  const [monthlyIncome, setMonthlyIncome] = useState(0);
+  const [monthlyExp,    setMonthlyExp]    = useState(0);
+  const [transactions,  setTransactions]  = useState<any[]>([]);
+  const [bankAccounts,  setBankAccounts]  = useState<any[]>([]);
+  const [members,       setMembers]       = useState<any[]>([]);
+  const [pendingTxns,   setPendingTxns]   = useState<any[]>([]);
+  const [dues,          setDues]          = useState<any[]>([]);
+
+  const fetchData = useCallback(async () => {
+    if (!communityId) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`${API}/finance.php?community_id=${communityId}`, { credentials: "include" });
+      if (!res.ok) return;
+      const d = await res.json();
+      setBalance(parseFloat(d.account?.balance ?? 0));
+      setTotalIncome(parseFloat(d.account?.total_income ?? 0));
+      setTotalExpenses(parseFloat(d.account?.total_expenses ?? 0));
+      setTransactions(d.transactions ?? []);
+      setBankAccounts(d.bankAccounts ?? []);
+      setMembers(d.members ?? []);
+      setPendingTxns(d.pendingTxns ?? []);
+      setDues(d.dues ?? []);
+
+      // Compute monthly income / expenses from transactions this month
+      const now = new Date();
+      const thisMo = (d.transactions ?? []).filter((t: any) => {
+        const td = new Date(t.created_at);
+        return td.getMonth() === now.getMonth() && td.getFullYear() === now.getFullYear();
+      });
+      setMonthlyIncome(thisMo.filter((t: any) => ["income","topup"].includes(t.type)).reduce((s: number, t: any) => s + parseFloat(t.amount), 0));
+      setMonthlyExp(thisMo.filter((t: any) => !["income","topup"].includes(t.type)).reduce((s: number, t: any) => s + parseFloat(t.amount), 0));
+    } catch {}
+    finally { setLoading(false); }
+  }, [communityId]);
+
+  useEffect(() => { if (open) fetchData(); }, [open, fetchData]);
+
+  // ── UI states ────────────────────────────────────────────────────────────
+  const [walletIndex,          setWalletIndex]          = useState(0);
+  const [showTopUpDialog,      setShowTopUpDialog]      = useState(false);
+  const [showTransferDialog,   setShowTransferDialog]   = useState(false);
+  const [showWithdrawDialog,   setShowWithdrawDialog]   = useState(false);
+  const [selectedTransaction,  setSelectedTransaction]  = useState<TransactionDetail | null>(null);
 
   const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => setWalletIndex(1),
+    onSwipedLeft:  () => setWalletIndex(1),
     onSwipedRight: () => setWalletIndex(0),
-    trackMouse: false,
-    preventScrollOnSwipe: true,
-    delta: 50,
+    trackMouse: false, preventScrollOnSwipe: true, delta: 50,
   });
 
-  const sortedQuizTxns = [...quizWallet.transactions]
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 5);
-
-  // ----- Wallet Carousel -----
+  // ── Wallet balance carousel ───────────────────────────────────────────────
   const WalletCarousel = () => (
     <div className="space-y-2">
-      {/* Carousel Container */}
-      <div
-        {...swipeHandlers}
-        className="overflow-hidden rounded-xl touch-pan-y"
-      >
-        <div
-          className="flex transition-transform duration-300 ease-out"
-          style={{ transform: `translateX(-${walletIndex * 100}%)` }}
-        >
-          {/* Slide 1: Community Main Wallet */}
+      <div {...swipeHandlers} className="overflow-hidden rounded-xl touch-pan-y">
+        <div className="flex transition-transform duration-300 ease-out" style={{ transform: `translateX(-${walletIndex * 100}%)` }}>
+          {/* Slide 1: Main wallet */}
           <div className="min-w-full px-1">
-            <Card className="bg-gradient-to-br from-red-500/15 via-red-400/8 to-background border-red-300/30 dark:border-red-700/30 shadow-md">
+            <Card className="bg-gradient-to-br from-primary/15 via-primary/8 to-background border-primary/20 shadow-md">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <Badge variant="outline" className="text-xs px-1.5 py-0 border-red-300 text-red-600 dark:text-red-400 font-semibold bg-red-50 dark:bg-red-950/40">
-                        Main Wallet
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground mb-1">Total Balance</p>
-                    <h2 className="text-2xl font-bold">
-                      ₦{walletData.balance.toLocaleString()}.00
-                    </h2>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      (M{walletData.balance.toLocaleString()})
-                    </p>
+                    <Badge variant="outline" className="text-xs px-1.5 py-0 mb-1 font-semibold">Main Wallet</Badge>
+                    <p className="text-xs text-muted-foreground">Total Balance</p>
+                    {loading ? (
+                      <div className="flex items-center gap-2 mt-1"><Loader2 className="h-4 w-4 animate-spin" /><span className="text-sm text-muted-foreground">Loading…</span></div>
+                    ) : (
+                      <>
+                        <h2 className="text-2xl font-bold">{amtFmt(balance)}</h2>
+                        <p className="text-xs text-muted-foreground mt-0.5">Total in: {amtFmt(totalIncome)} | Out: {amtFmt(totalExpenses)}</p>
+                      </>
+                    )}
                   </div>
-                  <div className="bg-red-500/15 p-2.5 rounded-full">
-                    <Wallet className="h-5 w-5 text-red-600 dark:text-red-400" />
-                  </div>
+                  <div className="bg-primary/15 p-2.5 rounded-full"><Wallet className="h-5 w-5 text-primary" /></div>
                 </div>
-                {/* Income / Expenses row */}
                 <div className="flex items-center gap-3 mt-2">
                   <div className="flex items-center gap-1">
-                    <div className="bg-green-500/10 p-1 rounded-full">
-                      <TrendingUp className="h-3 w-3 text-green-600" />
-                    </div>
-                    <span className="text-xs text-green-600 font-medium">
-                      +₦{walletData.monthlyIncome.toLocaleString()}
-                    </span>
+                    <TrendingUp className="h-3 w-3 text-green-600" />
+                    <span className="text-xs text-green-600 font-medium">+{amtFmt(monthlyIncome)}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className="bg-red-500/10 p-1 rounded-full">
-                      <TrendingDown className="h-3 w-3 text-red-600" />
-                    </div>
-                    <span className="text-xs text-red-600 font-medium">
-                      -₦{walletData.monthlyExpenditure.toLocaleString()}
-                    </span>
+                    <TrendingDown className="h-3 w-3 text-red-600" />
+                    <span className="text-xs text-red-600 font-medium">-{amtFmt(monthlyExp)}</span>
                   </div>
+                  {loading && <Loader2 className="h-3 w-3 animate-spin ml-auto text-muted-foreground" />}
+                  {!loading && (
+                    <Button variant="ghost" size="icon" className="h-6 w-6 ml-auto" onClick={fetchData}>
+                      <RefreshCw className="h-3 w-3" />
+                    </Button>
+                  )}
                 </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Last updated: {walletData.lastUpdated.toLocaleString()}
-                </p>
               </CardContent>
             </Card>
           </div>
 
-          {/* Slide 2: Quiz Wallet */}
+          {/* Slide 2: Bank accounts summary */}
           <div className="min-w-full px-1">
-            <Card className="bg-gradient-to-br from-blue-500/15 via-blue-400/8 to-background border-blue-300/30 dark:border-blue-700/30 shadow-md">
+            <Card className="bg-gradient-to-br from-blue-500/15 via-blue-400/8 to-background border-blue-300/30 shadow-md">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <Badge variant="outline" className="text-xs px-1.5 py-0 border-blue-300 text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-950/40">
-                        Quiz Wallet
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground mb-1">Total Balance</p>
-                    <h2 className="text-2xl font-bold">
-                      ₦{quizWallet.balance.toLocaleString()}.00
-                    </h2>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      (M{quizWallet.balance.toLocaleString()})
-                    </p>
+                    <Badge variant="outline" className="text-xs px-1.5 py-0 mb-1 border-blue-300 text-blue-600 font-semibold bg-blue-50">Bank Accounts</Badge>
+                    <p className="text-xs text-muted-foreground">{bankAccounts.length} registered account{bankAccounts.length !== 1 ? "s" : ""}</p>
                   </div>
-                  <div className="bg-blue-500/15 p-2.5 rounded-full">
-                    <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  </div>
+                  <div className="bg-blue-500/15 p-2.5 rounded-full"><Building2 className="h-5 w-5 text-blue-600" /></div>
                 </div>
-                {/* Available / Reserved row */}
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  <div className="bg-blue-50/60 dark:bg-blue-900/20 rounded-lg p-2">
-                    <p className="text-xs text-muted-foreground">Available</p>
-                    <p className="text-sm font-bold text-blue-700 dark:text-blue-300">
-                      ₦{quizWallet.availableBalance.toLocaleString()}
-                    </p>
+                {bankAccounts.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">No bank accounts added yet. Add one to enable withdrawals.</p>
+                ) : (
+                  <div className="space-y-1.5">
+                    {bankAccounts.slice(0, 3).map((acc: any) => (
+                      <div key={acc.id} className="flex items-center justify-between p-2 rounded-lg bg-blue-50/50">
+                        <div>
+                          <p className="text-xs font-semibold">{acc.bank_name}</p>
+                          <p className="text-xs text-muted-foreground">{acc.account_number} • {acc.account_name}</p>
+                        </div>
+                        {acc.is_primary && <Badge className="text-[10px] px-1.5 bg-primary/10 text-primary">Primary</Badge>}
+                      </div>
+                    ))}
                   </div>
-                  <div className="bg-amber-50/60 dark:bg-amber-900/20 rounded-lg p-2">
-                    <p className="text-xs text-muted-foreground">Reserved</p>
-                    <p className="text-sm font-bold text-amber-700 dark:text-amber-300">
-                      ₦{quizWallet.reservedForPayouts.toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Last updated: {quizWallet.lastUpdated.toLocaleString()}
-                </p>
+                )}
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
-
-      {/* Dot Indicators */}
+      {/* Dots */}
       <div className="flex justify-center gap-2">
-        {[0, 1].map((idx) => (
-          <button
-            key={idx}
-            onClick={() => setWalletIndex(idx)}
-            className={cn(
-              "rounded-full transition-all duration-300",
-              walletIndex === idx
-                ? cn(
-                    "h-2 w-7",
-                    idx === 0 ? "bg-red-500" : "bg-blue-500"
-                  )
-                : "h-2 w-2 bg-muted-foreground/30"
-            )}
-            aria-label={idx === 0 ? "Main Wallet" : "Quiz Wallet"}
-          />
+        {[0, 1].map(idx => (
+          <button key={idx} onClick={() => setWalletIndex(idx)}
+            className={cn("rounded-full transition-all duration-300", walletIndex === idx ? "h-2 w-7 bg-primary" : "h-2 w-2 bg-muted-foreground/30")} />
         ))}
       </div>
     </div>
   );
 
-  // ----- Main Wallet Content -----
+  // ── Main wallet tab ───────────────────────────────────────────────────────
   const MainWalletContent = () => (
     <div className="space-y-4">
-      {/* Quick Actions */}
-      <div className="grid grid-cols-3 gap-2">
-        <Button onClick={() => setShowTopUpDialog(true)} className="flex-col h-auto py-3 gap-1.5 touch-manipulation active:scale-[0.98]">
-          <ArrowDownRight className="h-4 w-4" />
-          <span className="text-xs">Top Up</span>
-        </Button>
-        <Button onClick={() => setShowTransferDialog(true)} variant="outline" className="flex-col h-auto py-3 gap-1.5 touch-manipulation active:scale-[0.98]">
-          <RefreshCw className="h-4 w-4" />
-          <span className="text-xs">Transfer</span>
-        </Button>
-        <Button onClick={() => setShowWithdrawDialog(true)} variant="outline" className="flex-col h-auto py-3 gap-1.5 touch-manipulation active:scale-[0.98]">
-          <ArrowUpRight className="h-4 w-4" />
-          <span className="text-xs">Withdraw</span>
-        </Button>
-      </div>
+      {/* Pending authorizations alert */}
+      {pendingTxns.length > 0 && (
+        <Card className="border-amber-300 bg-amber-50 dark:bg-amber-950/20">
+          <CardContent className="p-3 flex items-start gap-2">
+            <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs font-semibold text-amber-700">{pendingTxns.length} transaction{pendingTxns.length > 1 ? "s" : ""} pending authorization</p>
+              <p className="text-xs text-amber-600">Officers need to sign before they can execute.</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Monthly Summary */}
+      {/* Quick actions */}
+      {(isAdmin || isOwner) && (
+        <div className="grid grid-cols-3 gap-2">
+          <Button onClick={() => setShowTopUpDialog(true)} className="flex-col h-auto py-3 gap-1.5">
+            <ArrowDownRight className="h-4 w-4" /><span className="text-xs">Top Up</span>
+          </Button>
+          <Button onClick={() => setShowTransferDialog(true)} variant="outline" className="flex-col h-auto py-3 gap-1.5">
+            <Send className="h-4 w-4" /><span className="text-xs">Transfer</span>
+          </Button>
+          <Button onClick={() => setShowWithdrawDialog(true)} variant="outline" className="flex-col h-auto py-3 gap-1.5"
+            disabled={bankAccounts.length === 0}>
+            <Download className="h-4 w-4" /><span className="text-xs">Withdraw</span>
+          </Button>
+        </div>
+      )}
+
+      {/* Monthly summary */}
       <div className="grid grid-cols-2 gap-3">
         <Card>
           <CardContent className="p-3">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="bg-green-500/10 p-1.5 rounded-full">
-                <TrendingUp className="h-3.5 w-3.5 text-green-600" />
-              </div>
-              <p className="text-xs text-muted-foreground">Income</p>
+            <div className="flex items-center gap-2 mb-1">
+              <TrendingUp className="h-3.5 w-3.5 text-green-600" />
+              <p className="text-xs text-muted-foreground">Income this month</p>
             </div>
-            <p className="text-lg font-bold text-green-600">
-              +₦{walletData.monthlyIncome.toLocaleString()}
-            </p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              (M{walletData.monthlyIncome.toLocaleString()})
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">This month</p>
+            <p className="text-lg font-bold text-green-600">+{amtFmt(monthlyIncome)}</p>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="p-3">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="bg-red-500/10 p-1.5 rounded-full">
-                <TrendingDown className="h-3.5 w-3.5 text-red-600" />
-              </div>
-              <p className="text-xs text-muted-foreground">Expenses</p>
+            <div className="flex items-center gap-2 mb-1">
+              <TrendingDown className="h-3.5 w-3.5 text-red-600" />
+              <p className="text-xs text-muted-foreground">Expenses this month</p>
             </div>
-            <p className="text-lg font-bold text-red-600">
-              -₦{walletData.monthlyExpenditure.toLocaleString()}
-            </p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              (M{walletData.monthlyExpenditure.toLocaleString()})
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">This month</p>
+            <p className="text-lg font-bold text-red-600">-{amtFmt(monthlyExp)}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Recent Transactions */}
+      {/* Active dues / levies */}
+      {dues.filter((d: any) => d.is_active).length > 0 && (
+        <Card>
+          <CardHeader className="pb-2 pt-3 px-3">
+            <CardTitle className="text-sm">Active Dues & Levies</CardTitle>
+          </CardHeader>
+          <CardContent className="px-3 pb-3 space-y-2">
+            {dues.filter((d: any) => d.is_active).slice(0, 3).map((due: any) => {
+              const total = due.total_members > 0 ? due.total_members : 1;
+              const pct = Math.min(100, ((due.paid_count || 0) / total) * 100);
+              return (
+                <div key={due.id} className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="font-medium">{due.name}</span>
+                    <span className="text-muted-foreground">{due.paid_count}/{total} paid</span>
+                  </div>
+                  <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                    <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${pct}%` }} />
+                  </div>
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Target: {amtFmt(parseFloat(due.amount) * total)}</span>
+                    <span>Collected: {amtFmt(parseFloat(due.amount_collected || 0))}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Recent transactions */}
       <Card>
         <CardHeader className="pb-2 pt-3 px-3">
           <CardTitle className="text-sm">Recent Transactions</CardTitle>
         </CardHeader>
         <CardContent className="px-3 pb-3 space-y-2">
-          {mockTransactions.slice(0, 5).map((transaction) => (
-            <button
-              key={transaction.id}
-              className="p-2.5 rounded-lg border space-y-1.5 w-full text-left touch-manipulation active:bg-muted/60 active:scale-[0.98] transition-all"
-              onClick={() => setSelectedTransaction({
-                id: transaction.id,
-                description: transaction.description,
-                amount: transaction.amount,
-                date: transaction.date,
-                type: transaction.type,
-                status: transaction.status,
-                category: transaction.category,
-              })}
-            >
-              {/* Row 1: Icon + Description + Amount */}
-              <div className="flex items-start gap-2">
-                <div className={`p-1.5 rounded-full shrink-0 mt-0.5 ${
-                  transaction.type === "credit"
-                    ? "bg-green-500/10"
-                    : "bg-red-500/10"
-                }`}>
-                  {transaction.type === "credit" ? (
-                    <ArrowDownRight className="h-3.5 w-3.5 text-green-600" />
-                  ) : (
-                    <ArrowUpRight className="h-3.5 w-3.5 text-red-600" />
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium text-xs truncate">{transaction.description}</p>
-                </div>
-                <div className="text-right shrink-0 flex flex-col items-end">
-                  <DualCurrencyDisplay
-                    mobiAmount={transaction.amount}
-                    transactionType={transaction.type}
-                    showSign="auto"
-                    size="sm"
-                    showMobiInline={false}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    (M{Math.abs(transaction.amount).toLocaleString()})
-                  </p>
-                </div>
-              </div>
-              {/* Row 2: Date + Status + Chevron */}
-              <div className="flex items-center justify-between pl-9">
-                <p className="text-xs text-muted-foreground">
-                  {transaction.date.toLocaleDateString()}
-                </p>
-                <div className="flex items-center gap-1.5">
-                  <Badge variant={transaction.status === "completed" ? "default" : "secondary"} className="text-xs">
-                    {transaction.status}
-                  </Badge>
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />
-                </div>
-              </div>
-            </button>
-          ))}
-        </CardContent>
-      </Card>
-    </div>
-  );
-
-  // ----- Quiz Wallet Content -----
-  const QuizWalletContent = () => (
-    <div className="space-y-4">
-      {/* Availability Banner */}
-      {!quizAvailability.available ? (
-        <Card className="border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700">
-          <CardContent className="p-3 flex items-start gap-2.5">
-            <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
-                {quizAvailability.reason}
-              </p>
-              <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
-                Required reserve: ₦{quizAvailability.totalRequired.toLocaleString()} — Fund from Main Wallet to resume games.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card className="border-green-200 bg-green-50/50 dark:bg-green-950/20 dark:border-green-800">
-          <CardContent className="p-3 flex items-center gap-2.5">
-            <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
-            <p className="text-xs text-green-700 dark:text-green-400 font-medium">
-              Quiz Wallet has sufficient funds — All games active
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Quick Stats */}
-      <div className="grid grid-cols-3 gap-2">
-        <Card>
-          <CardContent className="p-2.5 text-center">
-            <p className="text-xs text-muted-foreground mb-0.5">Stakes In</p>
-            <p className="text-sm font-bold text-green-600">
-              ₦{quizWallet.totalStakeIncome.toLocaleString()}
-            </p>
-            <p className="text-xs text-muted-foreground">(M{quizWallet.totalStakeIncome.toLocaleString()})</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-2.5 text-center">
-            <p className="text-xs text-muted-foreground mb-0.5">Payouts</p>
-            <p className="text-sm font-bold text-red-600">
-              ₦{quizWallet.totalWinningPayouts.toLocaleString()}
-            </p>
-            <p className="text-xs text-muted-foreground">(M{quizWallet.totalWinningPayouts.toLocaleString()})</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-2.5 text-center">
-            <p className="text-xs text-muted-foreground mb-0.5">Net</p>
-            <p className={cn(
-              "text-sm font-bold",
-              (quizWallet.totalStakeIncome - quizWallet.totalWinningPayouts) >= 0
-                ? "text-green-600"
-                : "text-red-600"
-            )}>
-              ₦{Math.abs(quizWallet.totalStakeIncome - quizWallet.totalWinningPayouts).toLocaleString()}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              (M{Math.abs(quizWallet.totalStakeIncome - quizWallet.totalWinningPayouts).toLocaleString()})
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Transfer Actions */}
-      <div className="grid grid-cols-2 gap-3">
-        <Button
-          variant="outline"
-          className="flex-col h-auto py-3 gap-1.5 border-blue-200 hover:bg-blue-50 dark:border-blue-800 dark:hover:bg-blue-950/40"
-          onClick={() => setShowQuizWalletDrawer(true)}
-        >
-          <ArrowDown className="h-4 w-4 text-blue-600" />
-          <span className="text-xs text-blue-700 dark:text-blue-400">Fund from Main</span>
-        </Button>
-        <Button
-          variant="outline"
-          className="flex-col h-auto py-3 gap-1.5 border-orange-200 hover:bg-orange-50 dark:border-orange-800 dark:hover:bg-orange-950/40"
-          onClick={() => setShowQuizWalletDrawer(true)}
-        >
-          <ArrowUp className="h-4 w-4 text-orange-600" />
-          <span className="text-xs text-orange-700 dark:text-orange-400">Transfer to Main</span>
-        </Button>
-      </div>
-
-      {/* Manage Quiz Wallet (Admin) */}
-      {(isAdmin || isOwner) && (
-        <Button
-          variant="outline"
-          className="w-full h-10 text-primary border-primary/20 hover:bg-primary/5"
-          onClick={() => setShowQuizWalletDrawer(true)}
-        >
-          <Settings className="h-4 w-4 mr-2" />
-          <span className="text-sm font-medium">Manage Quiz Wallet</span>
-        </Button>
-      )}
-
-      {/* Quiz Wallet Transactions */}
-      <Card>
-        <CardHeader className="pb-2 pt-3 px-3">
-          <CardTitle className="text-sm">Quiz Wallet Transactions</CardTitle>
-        </CardHeader>
-        <CardContent className="px-3 pb-3 space-y-2">
-          {sortedQuizTxns.map((tx) => {
-            const config = txTypeConfig[tx.type];
-            const Icon = config.icon;
-            const isPositive = tx.type === "stake_income" || tx.type === "transfer_in";
+          {loading && transactions.length === 0 ? (
+            <div className="flex justify-center py-6"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+          ) : transactions.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">No transactions yet</p>
+          ) : transactions.slice(0, 8).map((txn: any) => {
+            const Icon = txnIcon(txn.type);
             return (
-              <button
-                key={tx.id}
-                className="p-2.5 rounded-lg border space-y-1.5 w-full text-left touch-manipulation active:bg-muted/60 active:scale-[0.98] transition-all"
+              <button key={txn.id}
+                className="p-2.5 rounded-lg border space-y-1.5 w-full text-left hover:bg-muted/40 active:bg-muted/60 transition-all"
                 onClick={() => setSelectedTransaction({
-                  id: tx.id,
-                  description: tx.description,
-                  amount: tx.amount,
-                  date: new Date(tx.date),
-                  quizType: tx.type,
-                  reference: tx.reference,
-                  playerName: tx.playerName,
-                  relatedQuizId: tx.relatedQuizId,
-                  status: "completed",
-                })}
-              >
-                {/* Row 1: Icon + Description + Amount */}
+                  id: txn.id,
+                  description: txn.description,
+                  amount: parseFloat(txn.amount),
+                  date: new Date(txn.created_at),
+                  type: ["income","topup"].includes(txn.type) ? "credit" : "debit",
+                  status: txn.status as any,
+                  category: txn.category || txn.type,
+                  reference: txn.reference_number,
+                })}>
                 <div className="flex items-start gap-2">
-                  <div className={cn("p-1.5 rounded-full shrink-0 mt-0.5", config.bg)}>
-                    <Icon className={cn("h-3.5 w-3.5", config.color)} />
+                  <div className={cn("p-1.5 rounded-full shrink-0 mt-0.5", txnBg(txn.type))}>
+                    <Icon className={cn("h-3.5 w-3.5", txnColor(txn.type))} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="font-medium text-xs truncate">{tx.description}</p>
+                    <p className="font-medium text-xs truncate">{txn.description}</p>
+                    {txn.member_name && <p className="text-xs text-muted-foreground truncate">{txn.member_name}</p>}
                   </div>
-                  <div className="text-right shrink-0 flex flex-col items-end">
-                    <p className={cn(
-                      "text-sm font-semibold",
-                      isPositive ? "text-green-600" : "text-red-600"
-                    )}>
-                      {isPositive ? "+" : "-"}₦{tx.amount.toLocaleString()}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      (M{tx.amount.toLocaleString()})
-                    </p>
+                  <div className="text-right shrink-0">
+                    <p className={cn("text-sm font-bold", txnColor(txn.type))}>{txnSign(txn.type)}{amtFmt(parseFloat(txn.amount))}</p>
                   </div>
                 </div>
-                {/* Row 2: Date + Player Badge + Chevron */}
                 <div className="flex items-center justify-between pl-9">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(tx.date).toLocaleDateString()}
-                    </p>
-                    {tx.playerName && (
-                      <Badge variant="secondary" className="text-xs px-1.5 py-0">
-                        {tx.playerName}
-                      </Badge>
-                    )}
+                  <p className="text-xs text-muted-foreground">{timeAgo(txn.created_at)}</p>
+                  <div className="flex items-center gap-1.5">
+                    <Badge variant={txn.status === "completed" ? "secondary" : "outline"} className="text-[10px] px-1">{txn.status}</Badge>
+                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />
                   </div>
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
                 </div>
               </button>
             );
@@ -496,64 +330,65 @@ export function FinancialOverviewDialog({
     </div>
   );
 
-  // Shared content component
+  // ── Shared content wrapper ────────────────────────────────────────────────
   const content = (
-    <div className="flex-1 min-h-0 overflow-y-auto touch-auto overscroll-contain">
-      <div className="px-2 pb-6 space-y-4">
-        {/* Swipeable Wallet Carousel */}
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* Balance carousel */}
+      <div className="shrink-0 px-4 pt-4 pb-2">
         <WalletCarousel />
-
-        {/* Dynamic Content Based on Active Wallet */}
-        {walletIndex === 0 ? <MainWalletContent /> : <QuizWalletContent />}
       </div>
+
+      {/* Scrollable body */}
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: "touch" }}>
+        <div className="px-4 pb-8">
+          <MainWalletContent />
+        </div>
+      </div>
+
+      {/* Dialogs */}
+      <WalletTopUpDialog
+        open={showTopUpDialog}
+        onOpenChange={setShowTopUpDialog}
+        communityId={communityId}
+      />
+      <WalletTransferDialog
+        open={showTransferDialog}
+        onOpenChange={(v) => { setShowTransferDialog(v); if (!v) fetchData(); }}
+        communityId={communityId}
+        walletBalance={balance}
+        communityMembers={members}
+      />
+      <WalletWithdrawDialog
+        open={showWithdrawDialog}
+        onOpenChange={(v) => { setShowWithdrawDialog(v); if (!v) fetchData(); }}
+        communityId={communityId}
+        walletBalance={balance}
+      />
+      <TransactionDetailDrawer
+        open={!!selectedTransaction}
+        onOpenChange={(v) => !v && setSelectedTransaction(null)}
+        transaction={selectedTransaction}
+      />
     </div>
   );
 
-  // Mobile: Bottom drawer pattern
   if (isMobile) {
     return (
-      <>
-        <Drawer open={open} onOpenChange={onOpenChange}>
-          <DrawerContent className="max-h-[92vh] flex flex-col overflow-hidden">
-            <DrawerHeader className="pb-2 border-b shrink-0">
-              <DrawerTitle className="flex items-center gap-2">
-                <Wallet className="h-5 w-5 text-primary" />
-                Financial Overview
-              </DrawerTitle>
-            </DrawerHeader>
-            {content}
-          </DrawerContent>
-        </Drawer>
-
-        <WalletTopUpDialog open={showTopUpDialog} onOpenChange={setShowTopUpDialog} />
-        <WalletTransferDialog open={showTransferDialog} onOpenChange={setShowTransferDialog} />
-        <WalletWithdrawDialog open={showWithdrawDialog} onOpenChange={setShowWithdrawDialog} />
-        <QuizWalletDrawer open={showQuizWalletDrawer} onOpenChange={setShowQuizWalletDrawer} />
-        <TransactionDetailDrawer open={!!selectedTransaction} onOpenChange={(open) => !open && setSelectedTransaction(null)} transaction={selectedTransaction} />
-      </>
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="max-h-[92vh] h-[92vh] flex flex-col overflow-hidden">
+          <DrawerTitle className="sr-only">Financial Overview</DrawerTitle>
+          {content}
+        </DrawerContent>
+      </Drawer>
     );
   }
 
-  // Desktop: Standard dialog
   return (
-    <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-lg max-h-[85vh] flex flex-col p-0 gap-0">
-          <DialogHeader className="px-4 pt-4 pb-2 shrink-0 border-b">
-            <DialogTitle className="flex items-center gap-2">
-              <Wallet className="h-5 w-5 text-primary" />
-              Financial Overview
-            </DialogTitle>
-          </DialogHeader>
-          {content}
-        </DialogContent>
-      </Dialog>
-
-      <WalletTopUpDialog open={showTopUpDialog} onOpenChange={setShowTopUpDialog} />
-      <WalletTransferDialog open={showTransferDialog} onOpenChange={setShowTransferDialog} />
-      <WalletWithdrawDialog open={showWithdrawDialog} onOpenChange={setShowWithdrawDialog} />
-      <QuizWalletDrawer open={showQuizWalletDrawer} onOpenChange={setShowQuizWalletDrawer} />
-      <TransactionDetailDrawer open={!!selectedTransaction} onOpenChange={(open) => !open && setSelectedTransaction(null)} transaction={selectedTransaction} />
-    </>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg w-full p-0 flex flex-col" style={{ height: "88vh", maxHeight: "88vh" }}>
+        <DialogTitle className="sr-only">Financial Overview</DialogTitle>
+        {content}
+      </DialogContent>
+    </Dialog>
   );
 }

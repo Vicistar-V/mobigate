@@ -1,8 +1,8 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { 
   X, CreditCard, FileText, BookOpen, Users, Search, Check, 
   XCircle, Send, Upload, Edit, Trash2, Star, StarOff, Eye,
-  Plus, UserMinus, IdCard, Settings
+  Plus, UserMinus, IdCard, Settings, RefreshCw
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -13,11 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
-  mockIDCardRequests, 
-  mockLetterRequests, 
-  publications, 
   letterTemplates,
-  mockResourceManagers 
 } from "@/data/resourcesData";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
@@ -44,12 +40,14 @@ interface ManageCommunityResourcesDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   isOwner?: boolean;
+  communityId?: string;
 }
 
 export function ManageCommunityResourcesDialog({ 
   open, 
   onOpenChange,
-  isOwner = false 
+  isOwner = false,
+  communityId,
 }: ManageCommunityResourcesDialogProps) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("id-cards");
@@ -57,6 +55,46 @@ export function ManageCommunityResourcesDialog({
   const [searchQuery, setSearchQuery] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+
+  const [mockIDCardRequests, setMockIDCardRequests] = useState<any[]>([]);
+  const [mockLetterRequests, setMockLetterRequests] = useState<any[]>([]);
+  const [publications, setPublications] = useState<any[]>([]);
+  const [mockResourceManagers, setMockResourceManagers] = useState<any[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const loadResources = useCallback(() => {
+    if (!communityId) return;
+    setIsRefreshing(true);
+    fetch(`/api/community/resources.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        setMockIDCardRequests((d.idCardRequests ?? []).map((r: any) => ({
+          id: r.id, memberId: r.user_id, memberName: r.member_name?.trim() || "Member",
+          memberPhoto: r.member_photo || "/placeholder.svg", requestType: r.request_type,
+          status: r.status, requestDate: new Date(r.created_at), notes: r.notes,
+        })));
+        setMockLetterRequests((d.letterRequests ?? []).map((r: any) => ({
+          id: r.id, memberId: r.user_id, memberName: r.requested_by_name?.trim() || "Member",
+          requestedBy: r.requested_by_name?.trim() || "Member",
+          memberPhoto: r.requested_by_photo || "/placeholder.svg", templateId: r.template_id,
+          purpose: r.purpose, status: r.status, requestDate: new Date(r.created_at),
+          approvalDate: r.approval_date ? new Date(r.approval_date) : undefined, letterNumber: r.letter_number,
+        })));
+        setPublications((d.publications ?? []).map((p: any) => ({
+          id: p.id, title: p.title, description: p.description, type: p.type, coverImage: p.cover_image,
+          publishDate: new Date(p.publish_date), edition: p.edition, pages: p.pages, fileSize: p.file_size,
+          downloadUrl: p.download_url, featured: !!p.featured,
+        })));
+        setMockResourceManagers((d.resourceManagers ?? []).map((m: any) => ({
+          id: m.id, userId: m.user_id, name: m.name?.trim() || "Member", avatar: m.photo || "/placeholder.svg",
+          role: m.role, assignedDate: new Date(m.assigned_date),
+        })));
+      })
+      .catch(() => {})
+      .finally(() => setIsRefreshing(false));
+  }, [communityId]);
+
+  useEffect(() => { if (open) loadResources(); }, [open, loadResources]);
   
   // Letter & ID Card preview state
   const [showLetterPreview, setShowLetterPreview] = useState(false);
@@ -88,6 +126,15 @@ export function ManageCommunityResourcesDialog({
   const [showAssignManager, setShowAssignManager] = useState(false);
   const [newManagerName, setNewManagerName] = useState("");
   const [newManagerRole, setNewManagerRole] = useState<string>("");
+  const [communityMembers, setCommunityMembers] = useState<{ user_id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    if (!open || !communityId) return;
+    fetch(`/api/community/manage_members.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => setCommunityMembers((d.members ?? []).map((m: any) => ({ user_id: m.user_id, name: m.name?.trim() || m.username }))))
+      .catch(() => setCommunityMembers([]));
+  }, [open, communityId]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -104,38 +151,76 @@ export function ManageCommunityResourcesDialog({
     }
   };
 
-  const handleApproveIDCard = (requestId: string) => {
-    toast({
-      title: "ID Card Request Approved",
-      description: "The member will be notified and can proceed with card issuance",
-    });
+  const handleApproveIDCard = async (requestId: string) => {
+    if (!communityId) return;
+    try {
+      const res = await fetch("/api/community/resources.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "approve_id_card", community_id: communityId, request_id: requestId }),
+      });
+      if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || "Failed to approve"); }
+      toast({
+        title: "ID Card Request Approved",
+        description: "The member will be notified and can proceed with card issuance",
+      });
+      loadResources();
+    } catch (e: any) {
+      toast({ title: "Couldn't Approve", description: e.message, variant: "destructive" });
+    }
   };
 
-  const handleRejectIDCard = (requestId: string) => {
-    toast({
-      title: "ID Card Request Rejected",
-      description: "The member will be notified of the rejection",
-      variant: "destructive"
-    });
+  const handleRejectIDCard = async (requestId: string) => {
+    if (!communityId) return;
+    try {
+      const res = await fetch("/api/community/resources.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "reject_id_card", community_id: communityId, request_id: requestId }),
+      });
+      if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || "Failed to reject"); }
+      toast({
+        title: "ID Card Request Rejected",
+        description: "The member will be notified of the rejection",
+        variant: "destructive"
+      });
+      loadResources();
+    } catch (e: any) {
+      toast({ title: "Couldn't Reject", description: e.message, variant: "destructive" });
+    }
   };
 
-  const handleIssueIDCard = (request: typeof mockIDCardRequests[0]) => {
-    const cardData: IDCardData = {
-      memberName: request.memberName,
-      memberId: request.memberId,
-      memberPhoto: request.memberPhoto,
-      cardNumber: `CMT-001-${request.memberId.split('-').pop()}`,
-      issueDate: new Date(),
-      expiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 2)),
-      communityName: "Ndigbo Progressive Union",
-      verificationCode: `VRF-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-    };
-    setSelectedIDCardData(cardData);
-    setShowIDCardPreview(true);
-    toast({
-      title: "ID Card Generated",
-      description: "The digital ID card has been generated and is ready for download",
-    });
+  const handleIssueIDCard = async (request: typeof mockIDCardRequests[0]) => {
+    if (!communityId) return;
+    try {
+      const res = await fetch("/api/community/resources.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "issue_id_card", community_id: communityId, request_id: request.id }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to issue card");
+
+      const cardData: IDCardData = {
+        memberName: request.memberName,
+        memberId: request.memberId,
+        memberPhoto: request.memberPhoto,
+        cardNumber: d.card_number,
+        issueDate: new Date(),
+        expiryDate: new Date(d.expiry_date),
+        communityName: "Ndigbo Progressive Union",
+        verificationCode: d.verification_code,
+      };
+      setSelectedIDCardData(cardData);
+      setShowIDCardPreview(true);
+      toast({
+        title: "ID Card Generated",
+        description: "The digital ID card has been generated and is ready for download",
+      });
+      loadResources();
+    } catch (e: any) {
+      toast({ title: "Couldn't Issue Card", description: e.message, variant: "destructive" });
+    }
   };
 
   const handleViewIDCard = (request: typeof mockIDCardRequests[0]) => {
@@ -153,39 +238,77 @@ export function ManageCommunityResourcesDialog({
     setShowIDCardPreview(true);
   };
 
-  const handleApproveLetter = (requestId: string) => {
-    toast({
-      title: "Letter Request Approved",
-      description: "The letter can now be issued to the member",
-    });
+  const handleApproveLetter = async (requestId: string) => {
+    if (!communityId) return;
+    try {
+      const res = await fetch("/api/community/resources.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "approve_letter", community_id: communityId, request_id: requestId }),
+      });
+      if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || "Failed to approve"); }
+      toast({
+        title: "Letter Request Approved",
+        description: "The letter can now be issued to the member",
+      });
+      loadResources();
+    } catch (e: any) {
+      toast({ title: "Couldn't Approve", description: e.message, variant: "destructive" });
+    }
   };
 
-  const handleRejectLetter = (requestId: string) => {
-    toast({
-      title: "Letter Request Rejected",
-      description: "The member will be notified",
-      variant: "destructive"
-    });
+  const handleRejectLetter = async (requestId: string) => {
+    if (!communityId) return;
+    try {
+      const res = await fetch("/api/community/resources.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "reject_letter", community_id: communityId, request_id: requestId }),
+      });
+      if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || "Failed to reject"); }
+      toast({
+        title: "Letter Request Rejected",
+        description: "The member will be notified",
+        variant: "destructive"
+      });
+      loadResources();
+    } catch (e: any) {
+      toast({ title: "Couldn't Reject", description: e.message, variant: "destructive" });
+    }
   };
 
-  const handleIssueLetter = (request: typeof mockLetterRequests[0]) => {
-    const template = letterTemplates.find(t => t.id === request.templateId);
-    const letterData: LetterData = {
-      templateTitle: template?.title || "Official Letter",
-      letterNumber: request.letterNumber || `CMT/LTR/${new Date().getFullYear()}/${String(Math.floor(Math.random() * 999)).padStart(3, '0')}`,
-      requestedBy: request.requestedBy,
-      purpose: request.purpose,
-      issuedDate: new Date(),
-      communityName: "Ndigbo Progressive Union",
-      signedBy: "Community Secretary",
-      verificationCode: `LTR-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-    };
-    setSelectedLetterData(letterData);
-    setShowLetterPreview(true);
-    toast({
-      title: "Letter Generated",
-      description: "The official letter has been generated and is ready for download",
-    });
+  const handleIssueLetter = async (request: typeof mockLetterRequests[0]) => {
+    if (!communityId) return;
+    try {
+      const res = await fetch("/api/community/resources.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "issue_letter", community_id: communityId, request_id: request.id }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to issue letter");
+
+      const template = letterTemplates.find(t => t.id === request.templateId);
+      const letterData: LetterData = {
+        templateTitle: template?.title || "Official Letter",
+        letterNumber: d.letter_number,
+        requestedBy: request.requestedBy,
+        purpose: request.purpose,
+        issuedDate: new Date(),
+        communityName: "Ndigbo Progressive Union",
+        signedBy: "Community Secretary",
+        verificationCode: `LTR-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+      };
+      setSelectedLetterData(letterData);
+      setShowLetterPreview(true);
+      toast({
+        title: "Letter Generated",
+        description: "The official letter has been generated and is ready for download",
+      });
+      loadResources();
+    } catch (e: any) {
+      toast({ title: "Couldn't Issue Letter", description: e.message, variant: "destructive" });
+    }
   };
 
   const handleViewLetter = (request: typeof mockLetterRequests[0]) => {
@@ -204,8 +327,8 @@ export function ManageCommunityResourcesDialog({
     setShowLetterPreview(true);
   };
 
-  const handleUploadPublication = () => {
-    if (!pubTitle || !pubType) {
+  const handleUploadPublication = async () => {
+    if (!pubTitle || !pubType || !communityId) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields",
@@ -214,24 +337,46 @@ export function ManageCommunityResourcesDialog({
       return;
     }
 
-    toast({
-      title: editingPubId ? "Publication Updated" : "Publication Uploaded",
-      description: editingPubId 
-        ? `"${pubTitle}" has been updated successfully`
-        : `"${pubTitle}" has been added to community publications`,
-    });
-    
-    // Reset form
-    setPubTitle("");
-    setPubDescription("");
-    setPubType("");
-    setPubEdition("");
-    setPubPages("");
-    setPubFeatured(false);
-    setCoverImageFile(null);
-    setPdfFile(null);
-    setEditingPubId(null);
-    setShowUploadForm(false);
+    try {
+      const body: any = {
+        action: editingPubId ? "update_publication" : "add_publication",
+        community_id: communityId,
+        title: pubTitle, description: pubDescription, type: pubType, edition: pubEdition,
+        pages: parseInt(pubPages) || 0, featured: pubFeatured,
+        cover_image: coverImageFile?.preview || "", download_url: "", file_size: "",
+      };
+      if (editingPubId) body.id = editingPubId;
+
+      const res = await fetch("/api/community/resources.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to save publication");
+
+      toast({
+        title: editingPubId ? "Publication Updated" : "Publication Uploaded",
+        description: editingPubId 
+          ? `"${pubTitle}" has been updated successfully`
+          : `"${pubTitle}" has been added to community publications`,
+      });
+
+      loadResources();
+      // Reset form
+      setPubTitle("");
+      setPubDescription("");
+      setPubType("");
+      setPubEdition("");
+      setPubPages("");
+      setPubFeatured(false);
+      setCoverImageFile(null);
+      setPdfFile(null);
+      setEditingPubId(null);
+      setShowUploadForm(false);
+    } catch (e: any) {
+      toast({ title: "Couldn't Save Publication", description: e.message, variant: "destructive" });
+    }
   };
 
   const handleCoverImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -257,21 +402,44 @@ export function ManageCommunityResourcesDialog({
     toast({ title: "PDF File Selected", description: file.name });
   };
 
-  const handleToggleFeatured = (pubId: string, currentFeatured: boolean) => {
-    toast({
-      title: currentFeatured ? "Removed from Featured" : "Added to Featured",
-      description: currentFeatured 
-        ? "Publication removed from featured list" 
-        : "Publication is now featured",
-    });
+  const handleToggleFeatured = async (pubId: string, currentFeatured: boolean) => {
+    if (!communityId) return;
+    try {
+      const res = await fetch("/api/community/resources.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "update_publication", community_id: communityId, id: pubId, featured: !currentFeatured }),
+      });
+      if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || "Failed to update"); }
+      toast({
+        title: currentFeatured ? "Removed from Featured" : "Added to Featured",
+        description: currentFeatured 
+          ? "Publication removed from featured list" 
+          : "Publication is now featured",
+      });
+      loadResources();
+    } catch (e: any) {
+      toast({ title: "Couldn't Update", description: e.message, variant: "destructive" });
+    }
   };
 
-  const handleDeletePublication = () => {
-    if (itemToDelete) {
-      toast({
-        title: "Publication Deleted",
-        description: "The publication has been removed",
-      });
+  const handleDeletePublication = async () => {
+    if (itemToDelete && communityId) {
+      try {
+        const res = await fetch("/api/community/resources.php", {
+          method: "POST", credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "delete_publication", community_id: communityId, id: itemToDelete }),
+        });
+        if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || "Failed to delete"); }
+        toast({
+          title: "Publication Deleted",
+          description: "The publication has been removed",
+        });
+        loadResources();
+      } catch (e: any) {
+        toast({ title: "Couldn't Delete", description: e.message, variant: "destructive" });
+      }
       setShowDeleteConfirm(false);
       setItemToDelete(null);
     }
@@ -290,8 +458,8 @@ export function ManageCommunityResourcesDialog({
     setShowUploadForm(true);
   };
 
-  const handleAssignManager = () => {
-    if (!newManagerName || !newManagerRole) {
+  const handleAssignManager = async () => {
+    if (!newManagerName || !newManagerRole || !communityId) {
       toast({
         title: "Missing Information",
         description: "Please select a member and assign a role",
@@ -300,20 +468,46 @@ export function ManageCommunityResourcesDialog({
       return;
     }
 
-    toast({
-      title: "Manager Assigned",
-      description: `${newManagerName} has been assigned as Resource Manager`,
-    });
-    setNewManagerName("");
-    setNewManagerRole("");
-    setShowAssignManager(false);
+    try {
+      const res = await fetch("/api/community/resources.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "assign_manager", community_id: communityId, user_id: newManagerName, role: newManagerRole }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to assign manager");
+
+      const memberName = communityMembers.find((m) => m.user_id === newManagerName)?.name || "Member";
+      toast({
+        title: "Manager Assigned",
+        description: `${memberName} has been assigned as Resource Manager`,
+      });
+      setNewManagerName("");
+      setNewManagerRole("");
+      setShowAssignManager(false);
+      loadResources();
+    } catch (e: any) {
+      toast({ title: "Couldn't Assign Manager", description: e.message, variant: "destructive" });
+    }
   };
 
-  const handleRemoveManager = (managerId: string, managerName: string) => {
-    toast({
-      title: "Manager Removed",
-      description: `${managerName} has been removed from Resource Management`,
-    });
+  const handleRemoveManager = async (managerId: string, managerName: string) => {
+    if (!communityId) return;
+    try {
+      const res = await fetch("/api/community/resources.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "remove_manager", community_id: communityId, id: managerId }),
+      });
+      if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || "Failed to remove"); }
+      toast({
+        title: "Manager Removed",
+        description: `${managerName} has been removed from Resource Management`,
+      });
+      loadResources();
+    } catch (e: any) {
+      toast({ title: "Couldn't Remove Manager", description: e.message, variant: "destructive" });
+    }
   };
 
   const handleManagerClick = (manager: typeof mockResourceManagers[0]) => {
@@ -361,14 +555,26 @@ export function ManageCommunityResourcesDialog({
                 <Settings className="h-5 w-5 text-primary" />
                 <SheetTitle className="text-lg font-bold">Manage Resources</SheetTitle>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onOpenChange(false)}
-                className="h-8 w-8"
-              >
-                <X className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={loadResources}
+                  disabled={isRefreshing}
+                  className="h-8 w-8"
+                  title="Refresh"
+                >
+                  <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onOpenChange(false)}
+                  className="h-8 w-8"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
             
             <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-2">
@@ -951,10 +1157,9 @@ export function ManageCommunityResourcesDialog({
                               <SelectValue placeholder="Choose a member..." />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="John Smith">John Smith</SelectItem>
-                              <SelectItem value="Jane Doe">Jane Doe</SelectItem>
-                              <SelectItem value="Michael Johnson">Michael Johnson</SelectItem>
-                              <SelectItem value="Sarah Williams">Sarah Williams</SelectItem>
+                              {communityMembers.map((m) => (
+                                <SelectItem key={m.user_id} value={m.user_id}>{m.name}</SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>

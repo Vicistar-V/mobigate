@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { rechargeVouchers, RechargeVoucher } from "@/data/rechargeVouchersData";
 import {
   calculateBulkDiscount,
-  initialMerchantWalletBalance,
   formatNum,
   generateBatchNumber,
 } from "@/data/merchantVoucherData";
@@ -47,7 +46,13 @@ export default function MerchantVoucherGenerate() {
   const [step, setStep] = useState<Step>("select");
   const [selections, setSelections] = useState<VoucherSelection[]>([]);
   const [processingMsg, setProcessingMsg] = useState(0);
-  const [walletBalance] = useState(initialMerchantWalletBalance);
+  const [walletBalance, setWalletBalance] = useState(0);
+  useEffect(() => {
+    fetch("/api/merchant/vouchers.php?action=wallet", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => setWalletBalance(parseFloat(d.balance) || 0))
+      .catch(() => setWalletBalance(0));
+  }, []);
   const [receiptData] = useState(() => ({
     transactionRef: `TXN-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
     batchNumber: generateBatchNumber(new Date()),
@@ -120,7 +125,10 @@ export default function MerchantVoucherGenerate() {
     window.scrollTo(0, 0);
   };
 
+  const [generateError, setGenerateError] = useState("");
+
   const handleGenerate = () => {
+    setGenerateError("");
     setStep("processing");
     setProcessingMsg(0);
     window.scrollTo(0, 0);
@@ -132,12 +140,35 @@ export default function MerchantVoucherGenerate() {
     PROCESSING_MESSAGES.forEach((_, i) => {
       if (i > 0) timers.push(setTimeout(() => setProcessingMsg(i), i * 700));
     });
-    timers.push(setTimeout(() => {
-      setStep("complete");
+    timers.push(setTimeout(async () => {
+      try {
+        const res = await fetch("/api/merchant/vouchers.php", {
+          method: "POST", credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "generate_batch",
+            line_items: lineItems.map((li) => ({
+              denomination: li.denomination.mobiValue,
+              bundleCount: li.bundleCount,
+              totalCards: li.totalCards,
+              subtotal: li.subtotal,
+              discountPercent: li.discountPercent,
+              discountAmount: li.discountAmount,
+              total: li.total,
+            })),
+          }),
+        });
+        const d = await res.json().catch(() => null);
+        if (!res.ok || !d?.success) throw new Error(d?.error || "Failed to generate voucher batch");
+        setStep("complete");
+      } catch (e: any) {
+        setGenerateError(e.message);
+        setStep("summary");
+      }
       window.scrollTo(0, 0);
     }, 3500));
     return () => timers.forEach(clearTimeout);
-  }, [step]);
+  }, [step, lineItems]);
 
   const [isPrintingReceipt, setIsPrintingReceipt] = useState(false);
 
@@ -374,6 +405,11 @@ export default function MerchantVoucherGenerate() {
           </div>
         </div>
         <div className="px-4 pt-4 space-y-4">
+          {generateError && (
+            <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+              {generateError}
+            </div>
+          )}
           {/* Per-denomination line items */}
           <div className="space-y-2.5">
             {lineItems.map(li => (

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   X, 
   Search, 
@@ -15,7 +15,9 @@ import {
   Briefcase,
   FileText,
   Users,
-  Settings
+  Settings,
+  Loader2,
+  RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,9 +47,6 @@ import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { 
-  mockMembershipApplications, 
-  mockMembershipManagers,
-  mockOnlineMembers,
   MembershipApplication,
   MembershipManager 
 } from "@/data/membershipData";
@@ -56,19 +55,98 @@ interface ManageMembershipRequestsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   isOwner?: boolean;
+  communityId?: string;
 }
 
 export function ManageMembershipRequestsDialog({ 
   open, 
   onOpenChange,
-  isOwner = false
+  isOwner = false,
+  communityId,
 }: ManageMembershipRequestsDialogProps) {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState("pending");
   const [searchQuery, setSearchQuery] = useState("");
-  const [applications, setApplications] = useState<MembershipApplication[]>(mockMembershipApplications);
-  const [managers, setManagers] = useState<MembershipManager[]>(mockMembershipManagers);
+  const [applications, setApplications] = useState<MembershipApplication[]>([]);
+  const [loadingApplications, setLoadingApplications] = useState(false);
+  const [managers,        setManagers]        = useState<MembershipManager[]>([]);
+  const [loadingManagers, setLoadingManagers] = useState(false);
+  // Real members for the assign dropdown (fetched from manage_members.php on dialog open)
+  const [allMembers,      setAllMembers]      = useState<{id:string;name:string;avatar:string}[]>([]);
+
+  // Fetch real managers (community members with admin_rank set)
+  const fetchManagers = async () => {
+    if (!communityId) return;
+    setLoadingManagers(true);
+    try {
+      const res = await fetch(`/api/community/manage_members.php?community_id=${communityId}`, { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        // Managers = members who have admin_rank (executive/leadership role)
+        const mgrs: MembershipManager[] = (data.members ?? [])
+          .filter((m: any) => m.admin_rank !== null && m.admin_rank !== undefined)
+          .map((m: any): MembershipManager => ({
+            id:          m.user_id,
+            name:        m.name || "Unknown",
+            photo:       m.profile_photo || "/placeholder.svg",
+            role:        m.role || "Admin",
+            assignedAt:  new Date(m.joined_at || Date.now()),
+            canApprove:  true,
+            canReject:   true,
+          }));
+        setManagers(mgrs);
+
+        // All members for assign dropdown
+        setAllMembers((data.members ?? []).map((m: any) => ({
+          id:     m.user_id,
+          name:   m.name || "Unknown",
+          avatar: m.profile_photo || "/placeholder.svg",
+        })));
+      }
+    } catch {}
+    finally { setLoadingManagers(false); }
+  };
+
+  const fetchApplications = async () => {
+    if (!communityId) return;
+    setLoadingApplications(true);
+    try {
+      const res = await fetch(`/api/community/manage_members.php?community_id=${communityId}`, { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        const mapped: MembershipApplication[] = (data.applications || []).map((a: any): MembershipApplication => ({
+          id: a.id,
+          referenceNumber: a.reference_number || a.id,
+          communityId: communityId,
+          fullName: a.full_name,
+          email: a.email,
+          phone: a.phone,
+          dateOfBirth: a.date_of_birth || undefined,
+          gender: a.gender || "",
+          photo: a.profile_photo || undefined,
+          stateOfOrigin: a.state_of_origin || undefined,
+          cityOfResidence: a.city_of_residence || undefined,
+          occupation: a.occupation || undefined,
+          howHeard: a.how_heard || "",
+          sponsorName: a.sponsor_name || undefined,
+          motivation: a.motivation || "",
+          status: (a.status || "pending") as MembershipApplication["status"],
+          submittedAt: a.applied_at ? new Date(a.applied_at) : new Date(),
+          invitationCode: a.invite_code || undefined,
+        }));
+        setApplications(mapped);
+      }
+    } catch { /* keep previous state on failure */ }
+    finally { setLoadingApplications(false); }
+  };
+
+  useEffect(() => {
+    if (open && communityId) {
+      fetchApplications();
+      fetchManagers();
+    }
+  }, [open, communityId]);
   const [selectedApplication, setSelectedApplication] = useState<MembershipApplication | null>(null);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
@@ -91,25 +169,32 @@ export function ManageMembershipRequestsDialog({
     );
   };
 
-  const handleApprove = (applicationId: string) => {
-    setApplications(prev => prev.map(app => 
-      app.id === applicationId 
-        ? { 
-            ...app, 
-            status: "approved" as const, 
-            reviewedAt: new Date(), 
-            reviewedBy: "Membership Manager" 
-          }
-        : app
-    ));
-    toast({
-      title: "Application Approved",
-      description: "The membership application has been approved successfully.",
-    });
-    setShowDetailDialog(false);
+  const handleApprove = async (applicationId: string) => {
+    if (!communityId) { toast({ title: "Community not found", variant: "destructive" }); return; }
+    try {
+      const res = await fetch("/api/community/manage_members.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "approve_application", community_id: communityId, application_id: applicationId }),
+      });
+      if (!res.ok) throw new Error("Failed to approve");
+
+      setApplications(prev => prev.map(app => 
+        app.id === applicationId 
+          ? { ...app, status: "approved" as const, reviewedAt: new Date(), reviewedBy: "Membership Manager" }
+          : app
+      ));
+      toast({
+        title: "Application Approved",
+        description: "The membership application has been approved successfully.",
+      });
+      setShowDetailDialog(false);
+    } catch {
+      toast({ title: "Could not approve", description: "Please try again.", variant: "destructive" });
+    }
   };
 
-  const handleReject = () => {
+  const handleReject = async () => {
     if (!selectedApplication || !rejectionReason.trim()) {
       toast({
         title: "Rejection Reason Required",
@@ -118,25 +203,31 @@ export function ManageMembershipRequestsDialog({
       });
       return;
     }
+    if (!communityId) { toast({ title: "Community not found", variant: "destructive" }); return; }
 
-    setApplications(prev => prev.map(app => 
-      app.id === selectedApplication.id 
-        ? { 
-            ...app, 
-            status: "rejected" as const, 
-            reviewedAt: new Date(), 
-            reviewedBy: "Membership Manager",
-            rejectionReason: rejectionReason
-          }
-        : app
-    ));
-    toast({
-      title: "Application Rejected",
-      description: "The membership application has been rejected.",
-    });
-    setShowRejectDialog(false);
-    setShowDetailDialog(false);
-    setRejectionReason("");
+    try {
+      const res = await fetch("/api/community/manage_members.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "reject_application", community_id: communityId, application_id: selectedApplication.id }),
+      });
+      if (!res.ok) throw new Error("Failed to reject");
+
+      setApplications(prev => prev.map(app => 
+        app.id === selectedApplication.id 
+          ? { ...app, status: "rejected" as const, reviewedAt: new Date(), reviewedBy: "Membership Manager", rejectionReason: rejectionReason }
+          : app
+      ));
+      toast({
+        title: "Application Rejected",
+        description: "The membership application has been rejected.",
+      });
+      setShowRejectDialog(false);
+      setShowDetailDialog(false);
+      setRejectionReason("");
+    } catch {
+      toast({ title: "Could not reject", description: "Please try again.", variant: "destructive" });
+    }
   };
 
   const handleMarkUnderReview = (applicationId: string) => {
@@ -161,12 +252,12 @@ export function ManageMembershipRequestsDialog({
       return;
     }
 
-    const member = mockOnlineMembers.find(m => m.id === selectedNewManager);
+    const member = allMembers.find(m => m.id === selectedNewManager);
     if (member) {
       const newManager: MembershipManager = {
         id: `mm-${Date.now()}`,
         name: member.name,
-        photo: member.avatar,
+        photo: member.avatar || '/placeholder.svg',
         assignedDate: new Date(),
         assignedBy: "Community Owner"
       };
@@ -610,14 +701,14 @@ export function ManageMembershipRequestsDialog({
                 <SelectValue placeholder="Choose a member" />
               </SelectTrigger>
               <SelectContent>
-                {mockOnlineMembers
-                  .filter(m => !managers.find(mgr => mgr.name === m.name))
+                {allMembers
+                  .filter(m => !managers.find(mgr => mgr.id === m.id))
                   .map(member => (
                     <SelectItem key={member.id} value={member.id}>
                       <div className="flex items-center gap-2">
                         <Avatar className="h-6 w-6">
                           <AvatarImage src={member.avatar} />
-                          <AvatarFallback>{member.name[0]}</AvatarFallback>
+                          <AvatarFallback>{(member.name || "U")[0]}</AvatarFallback>
                         </Avatar>
                         {member.name}
                       </div>
@@ -766,24 +857,35 @@ export function ManageMembershipRequestsDialog({
                     Users who can approve or reject applications
                   </p>
                 </div>
-                {isOwner && (
-                  <Button 
-                    size="sm" 
-                    className="h-9 shrink-0"
-                    onClick={() => setShowAssignManagerDialog(true)}
-                  >
-                    <UserPlus className="h-4 w-4 mr-1" />
-                    Assign
+                <div className="flex gap-2 shrink-0">
+                  <Button size="sm" variant="ghost" className="h-9 w-9 p-0" onClick={fetchManagers} disabled={loadingManagers}>
+                    <RefreshCw className={`h-4 w-4 ${loadingManagers ? "animate-spin" : ""}`} />
                   </Button>
-                )}
+                  {isOwner && (
+                    <Button 
+                      size="sm" 
+                      className="h-9"
+                      onClick={() => setShowAssignManagerDialog(true)}
+                    >
+                      <UserPlus className="h-4 w-4 mr-1" />
+                      Assign
+                    </Button>
+                  )}
+                </div>
               </div>
 
               <Separator />
 
-              {managers.length === 0 ? (
+              {loadingManagers ? (
+                <div className="flex flex-col items-center gap-3 py-10 text-muted-foreground">
+                  <Loader2 className="h-7 w-7 animate-spin text-primary" />
+                  <p className="text-sm">Loading admins…</p>
+                </div>
+              ) : managers.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <Settings className="h-16 w-16 mx-auto mb-4 opacity-30" />
-                  <p className="text-base font-medium">No managers assigned</p>
+                  <p className="text-base font-medium">No admins found</p>
+                  <p className="text-sm text-muted-foreground mt-1">Members with leadership positions appear here</p>
                   {isOwner && (
                     <Button 
                       variant="outline" 

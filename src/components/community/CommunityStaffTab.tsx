@@ -1,11 +1,9 @@
+import { useState, useEffect, useCallback } from "react";
+import { Card } from "@/components/ui/card";
+import { Loader2, Briefcase } from "lucide-react";
 import { ExecutiveMembersCarousel } from "./ExecutiveMembersCarousel";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
-import { PremiumAdCard } from "@/components/PremiumAdCard";
-import {
-  staffMembers,
-  ExecutiveMember,
-} from "@/data/communityExecutivesData";
-import { useState } from "react";
+import { ExecutiveMember } from "@/data/communityExecutivesData";
 import {
   Select,
   SelectContent,
@@ -14,74 +12,47 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ExecutiveDetailSheet } from "./ExecutiveDetailSheet";
+import { mapApiStaff, ApiStaff } from "@/lib/leadershipMerge";
 
-export const CommunityStaffTab = () => {
+const API = "/api/community";
+
+interface CommunityStaffTabProps {
+  communityId?: string;
+}
+
+export const CommunityStaffTab = ({ communityId }: CommunityStaffTabProps) => {
   const [staffFilter, setStaffFilter] = useState<string>("all");
   const [selectedMember, setSelectedMember] = useState<ExecutiveMember | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [staff, setStaff] = useState<ApiStaff[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const loadData = useCallback(() => {
+    if (!communityId) return;
+    setLoading(true);
+    fetch(`${API}/staff.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d) => {
+        const rows: ApiStaff[] = (d.staff ?? []).filter((s: ApiStaff) => s.status === "active");
+        setStaff(rows);
+      })
+      .catch(() => setStaff([]))
+      .finally(() => setLoading(false));
+  }, [communityId]);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const filteredStaff = staffFilter === "all" ? staff : staff.filter((s) => s.department === staffFilter);
+  const staffMembers = filteredStaff.map(mapApiStaff);
 
   const handleMemberClick = (member: ExecutiveMember) => {
     setSelectedMember(member);
     setIsDetailOpen(true);
   };
 
-  // Premium ad data
-  const premiumAd1 = {
-    id: "staff-premium-1",
-    advertiser: {
-      name: "Leadership Training Institute",
-      verified: true,
-    },
-    content: {
-      headline: "Empower Your Leadership Team",
-      description: "Professional development programs for community executives. Enroll now for Q1 2025.",
-      ctaText: "View Programs",
-      ctaUrl: "https://example.com/leadership",
-    },
-    media: {
-      type: "carousel" as const,
-      items: [
-        {
-          url: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&q=80",
-          caption: "Executive Leadership Training",
-        },
-        {
-          url: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80",
-          caption: "Team Building Workshops",
-        },
-      ],
-    },
-    layout: "standard" as const,
-    duration: 15,
-  };
-
-  const premiumAd2 = {
-    id: "staff-premium-2",
-    advertiser: {
-      name: "Elite Business Solutions",
-      verified: true,
-    },
-    content: {
-      headline: "Transform Your Community Management",
-      description: "Professional tools for modern community leaders. Get 50% off your first year.",
-      ctaText: "Learn More",
-      ctaUrl: "https://example.com/elite",
-    },
-    media: {
-      type: "image" as const,
-      items: [
-        {
-          url: "https://images.unsplash.com/photo-1557426272-fc759fdf7a8d?w=1200&q=80",
-        },
-      ],
-    },
-    layout: "standard" as const,
-    duration: 15,
-  };
-
   const filterDropdown = (
     <Select value={staffFilter} onValueChange={setStaffFilter}>
-      <SelectTrigger className="h-7 w-[120px] bg-primary-foreground text-primary text-xs">
+      <SelectTrigger className="h-7 w-[140px] bg-primary-foreground text-primary text-xs">
         <SelectValue placeholder="Filter" />
       </SelectTrigger>
       <SelectContent>
@@ -93,6 +64,34 @@ export const CommunityStaffTab = () => {
     </Select>
   );
 
+  if (!communityId) {
+    return (
+      <Card className="p-8 text-center text-muted-foreground">
+        No community selected.
+      </Card>
+    );
+  }
+
+  if (loading && staff.length === 0) {
+    return (
+      <div className="flex justify-center py-16">
+        <Loader2 className="h-7 w-7 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (staff.length === 0) {
+    return (
+      <Card className="p-10 text-center">
+        <Briefcase className="h-10 w-10 mx-auto mb-3 text-muted-foreground opacity-30" />
+        <p className="font-medium mb-1">No Staff Recorded Yet</p>
+        <p className="text-sm text-muted-foreground">
+          This community hasn't added any staff or employees yet.
+        </p>
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <ExecutiveMembersCarousel
@@ -103,19 +102,11 @@ export const CommunityStaffTab = () => {
         headerExtra={filterDropdown}
       />
 
-      {/* Advertisement */}
-      <PremiumAdCard {...premiumAd1} />
-
-      {/* Another Staff Section */}
-      <ExecutiveMembersCarousel
-        title="Staff & Employees"
-        members={staffMembers.slice(0, 4)}
-        showViewToggle={true}
-        onMemberClick={handleMemberClick}
-      />
-
-      {/* Advertisement */}
-      <PremiumAdCard {...premiumAd2} />
+      {staffMembers.length === 0 && (
+        <Card className="p-6 text-center text-sm text-muted-foreground">
+          No staff found in this department.
+        </Card>
+      )}
 
       {/* People You May Know */}
       <PeopleYouMayKnow />

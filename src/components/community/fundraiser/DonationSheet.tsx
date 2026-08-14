@@ -26,19 +26,22 @@ interface DonationSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   campaign: FundRaiserCampaign | null;
+  onDonated?: () => void;
 }
 
 interface DonationContentProps {
   campaign: FundRaiserCampaign;
   onOpenChange: (open: boolean) => void;
+  onDonated?: () => void;
 }
 
-const DonationContent = ({ campaign, onOpenChange }: DonationContentProps) => {
+const DonationContent = ({ campaign, onOpenChange, onDonated }: DonationContentProps) => {
   const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState<'USD' | 'MOBI'>('USD');
   const [message, setMessage] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   // US$1 = M500
@@ -76,20 +79,41 @@ const DonationContent = ({ campaign, onOpenChange }: DonationContentProps) => {
     setShowConfirmation(true);
   };
 
-  const handleConfirmDonate = () => {
+  const handleConfirmDonate = async () => {
     const amt = parseFloat(amount);
-    
-    toast({
-      title: "Donation Successful!",
-      description: `Thank you for donating ${currency === 'USD' ? '$' : 'M'}${amt.toLocaleString()} to ${campaign.theme}`,
-    });
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/community/fundraiser.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "donate",
+          campaign_id: campaign.id,
+          amount: amt,
+          currency,
+          message,
+          isAnonymous,
+        }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to process donation");
 
-    // Reset and close
-    setAmount("");
-    setMessage("");
-    setIsAnonymous(false);
-    setShowConfirmation(false);
-    onOpenChange(false);
+      toast({
+        title: "Donation Successful!",
+        description: `Thank you for donating ${currency === 'USD' ? '$' : 'M'}${amt.toLocaleString()} to ${campaign.theme}`,
+      });
+
+      setAmount("");
+      setMessage("");
+      setIsAnonymous(false);
+      setShowConfirmation(false);
+      onDonated?.();
+      onOpenChange(false);
+    } catch (e: any) {
+      toast({ title: "Couldn't Process Donation", description: e.message, variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -219,10 +243,11 @@ const DonationContent = ({ campaign, onOpenChange }: DonationContentProps) => {
             <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleConfirmDonate}
+              disabled={isSubmitting}
               className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
             >
               <Heart className="h-4 w-4 mr-2" />
-              Donate Now
+              {isSubmitting ? "Processing..." : "Donate Now"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -235,6 +260,7 @@ export const DonationSheet = ({
   open,
   onOpenChange,
   campaign,
+  onDonated,
 }: DonationSheetProps) => {
   const isMobile = useIsMobile();
 
@@ -244,7 +270,7 @@ export const DonationSheet = ({
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="h-[90vh] overflow-hidden touch-auto">
-          <DonationContent campaign={campaign} onOpenChange={onOpenChange} />
+          <DonationContent campaign={campaign} onOpenChange={onOpenChange} onDonated={onDonated} />
         </DrawerContent>
       </Drawer>
     );
@@ -253,7 +279,7 @@ export const DonationSheet = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[85vh] overflow-hidden p-0">
-        <DonationContent campaign={campaign} onOpenChange={onOpenChange} />
+        <DonationContent campaign={campaign} onOpenChange={onOpenChange} onDonated={onDonated} />
       </DialogContent>
     </Dialog>
   );

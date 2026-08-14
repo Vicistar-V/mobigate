@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -20,7 +20,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { Wallet, Building2, Plus, CheckCircle2, AlertCircle, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { TransactionAuthorizationPanel } from "./TransactionAuthorizationPanel";
+import { TransactionAuthorizationPanel } from "@/components/community/finance/TransactionAuthorizationPanel";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { getMinimumWithdrawal } from "@/data/platformSettingsData";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -28,35 +28,33 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface WalletWithdrawDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
+  walletBalance?: number;
 }
 
-// Mock bank accounts
-const mockBankAccounts = [
-  {
-    id: "1",
-    bankName: "First Bank of Nigeria",
-    accountNumber: "0123456789",
-    accountName: "John Doe",
-    isPrimary: true,
-  },
-  {
-    id: "2",
-    bankName: "GTBank",
-    accountNumber: "9876543210",
-    accountName: "John Doe",
-    isPrimary: false,
-  },
-];
 
-export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialogProps) {
+export function WalletWithdrawDialog({ open, onOpenChange, communityId, walletBalance = 0 }: WalletWithdrawDialogProps) {
   const isMobile = useIsMobile();
   const [amount, setAmount] = useState("");
-  const [selectedAccount, setSelectedAccount] = useState(mockBankAccounts[0].id);
+  const [bankAccounts, setBankAccounts] = useState<any[]>([]);
+  const [selectedAccount, setSelectedAccount] = useState("");
+
+  useEffect(() => {
+    if (!open || !communityId) return;
+    fetch(`/api/community/finance.php?community_id=${communityId}`, { credentials: "include" })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d?.bankAccounts?.length) {
+          setBankAccounts(d.bankAccounts);
+          const primary = d.bankAccounts.find((b: any) => b.is_primary) || d.bankAccounts[0];
+          if (primary) setSelectedAccount(primary.id);
+        }
+      }).catch(() => {});
+  }, [open, communityId]);
   const [step, setStep] = useState<"amount" | "account" | "confirm" | "authorize">("amount");
   const [showAddAccount, setShowAddAccount] = useState(false);
   const { toast } = useToast();
 
-  const walletBalance = 50000; // Mock balance
   const minWithdrawal = getMinimumWithdrawal(); // Dynamic minimum from platform settings (M10,000)
 
   const handleContinue = () => {
@@ -101,7 +99,7 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
   };
 
   const handleConfirmWithdrawal = () => {
-    const account = mockBankAccounts.find((acc) => acc.id === selectedAccount);
+    const account = bankAccounts.find((acc: any) => acc.id === selectedAccount);
     toast({
       title: "Withdrawal Successful!",
       description: `${formatMobiAmount(parseFloat(amount))} (≈ ${formatLocalAmount(parseFloat(amount), "NGN")}) has been sent to ${account?.bankName}`,
@@ -110,7 +108,7 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
     // Reset
     setTimeout(() => {
       setAmount("");
-      setSelectedAccount(mockBankAccounts[0].id);
+      if (bankAccounts[0]) setSelectedAccount(bankAccounts[0].id);
       setStep("amount");
       setShowAddAccount(false);
     }, 300);
@@ -129,7 +127,7 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
     onOpenChange(false);
     setTimeout(() => {
       setAmount("");
-      setSelectedAccount(mockBankAccounts[0].id);
+      if (bankAccounts[0]) setSelectedAccount(bankAccounts[0].id);
       setStep("amount");
       setShowAddAccount(false);
     }, 300);
@@ -143,7 +141,7 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
     setShowAddAccount(false);
   };
 
-  const selectedAccountDetails = mockBankAccounts.find((acc) => acc.id === selectedAccount);
+  const selectedAccountDetails = bankAccounts.find((acc: any) => acc.id === selectedAccount);
 
   // Shared content as JSX variable (NOT a component function) to prevent remounting on state changes
   const withdrawContent = (
@@ -217,7 +215,7 @@ export function WalletWithdrawDialog({ open, onOpenChange }: WalletWithdrawDialo
             <div className="space-y-2">
               <Label>Select Bank Account</Label>
               <RadioGroup value={selectedAccount} onValueChange={setSelectedAccount}>
-                {mockBankAccounts.map((account) => (
+                {bankAccounts.map((account: any) => (
                   <Card key={account.id} className="p-3 touch-manipulation">
                     <div className="flex items-start space-x-3">
                       <RadioGroupItem value={account.id} id={account.id} className="mt-1" />

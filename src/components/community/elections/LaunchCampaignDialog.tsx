@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerBody, DrawerFooter } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,7 @@ const colorOptions = [
 interface LaunchCampaignDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
 }
 
 const officeOptions = [
@@ -40,7 +41,7 @@ const officeOptions = [
   "Organizing Secretary",
 ];
 
-export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialogProps) => {
+export const LaunchCampaignDialog = ({ open, onOpenChange, communityId }: LaunchCampaignDialogProps) => {
   const [candidateName, setCandidateName] = useState("");
   const [office, setOffice] = useState("");
   const [description, setDescription] = useState("");
@@ -55,6 +56,15 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
   const [endDateOpen, setEndDateOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const today = startOfDay(new Date());
+
+  const [realWalletBalance, setRealWalletBalance] = useState(0);
+  useEffect(() => {
+    if (!open) return;
+    fetch(`/api/community/advertisements.php?action=wallet_balance`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => setRealWalletBalance(parseFloat(d.main_balance) || 0))
+      .catch(() => setRealWalletBalance(0));
+  }, [open]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -107,25 +117,85 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
     setTimeout(() => setShowCampaignSettings(true), 50);
   };
 
-  const handleCampaignLaunched = (data: CampaignFormData) => {
-    toast({
-      title: "Campaign Launched! 🎉",
-      description: `Your campaign for ${data.office} is now live!`,
-    });
-
-    // Reset form
-    setCandidateName("");
-    setOffice("");
-    setDescription("");
-    setManifesto("");
-    setStartDate(undefined);
-    setEndDate(undefined);
-    setCampaignImage(null);
-    setCampaignColor("green");
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+  const handleCampaignLaunched = async (data: CampaignFormData): Promise<boolean> => {
+    if (!communityId) {
+      toast({ title: "No community selected", variant: "destructive" });
+      return false;
     }
-    onOpenChange(false);
+    try {
+      // Find the current user's own candidate record for this office (a
+      // campaign can only be launched for a candidacy that actually exists)
+      const overviewRes = await fetch(`/api/community/elections.php?community_id=${communityId}`, { credentials: "include" });
+      const overview = await overviewRes.json().catch(() => null);
+      if (!overviewRes.ok || !overview) throw new Error(overview?.error || `Couldn't load your election data (HTTP ${overviewRes.status})`);
+      const officesById: Record<string, string> = {};
+      (overview.offices ?? []).forEach((o: any) => { officesById[o.id] = o.name; });
+      const myCandidate = (overview.candidates ?? []).find((c: any) =>
+        (officesById[c.office_id] || c.position) === data.office
+      );
+      if (!myCandidate) {
+        toast({
+          title: "Not Registered for This Office",
+          description: "You need to Declare Interest or be nominated for this office before launching a campaign.",
+          variant: "destructive",
+        });
+        return false;
+      }
+      const currentElection = (overview.elections ?? []).find((e: any) => e.id === myCandidate.election_id);
+
+      const manifestoRes = await fetch("/api/community/elections.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update_candidate_manifesto",
+          community_id: communityId,
+          candidate_id: myCandidate.id,
+          manifesto,
+          campaign_slogan: description,
+          campaign_image: campaignImage || "",
+        }),
+      });
+      const manifestoData = await manifestoRes.json().catch(() => ({}));
+      if (!manifestoRes.ok) throw new Error(manifestoData.error || "Failed to save your campaign profile");
+
+      const res = await fetch("/api/community/elections.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "post_campaign_update",
+          community_id: communityId,
+          election_id: currentElection?.id || myCandidate.election_id,
+          candidate_id: myCandidate.id,
+          content: description,
+          image: campaignImage || "",
+        }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to launch campaign");
+
+      toast({
+        title: "Campaign Launched! 🎉",
+        description: `Your campaign for ${data.office} is now live!`,
+      });
+
+      // Reset form
+      setCandidateName("");
+      setOffice("");
+      setDescription("");
+      setManifesto("");
+      setStartDate(undefined);
+      setEndDate(undefined);
+      setCampaignImage(null);
+      setCampaignColor("green");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      onOpenChange(false);
+      return true;
+    } catch (e: any) {
+      toast({ title: "Couldn't Launch Campaign", description: e.message, variant: "destructive" });
+      return false;
+    }
   };
 
   const handleSimpleLaunch = () => {
@@ -475,7 +545,7 @@ export const LaunchCampaignDialog = ({ open, onOpenChange }: LaunchCampaignDialo
         onOpenChange={setShowCampaignSettings}
         candidateName={candidateName}
         office={office}
-        walletBalance={15000}
+        walletBalance={realWalletBalance}
         onLaunchCampaign={handleCampaignLaunched}
       />
     </>

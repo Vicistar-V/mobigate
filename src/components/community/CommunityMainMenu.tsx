@@ -50,12 +50,14 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Vote, Settings2, Flag, Gavel, ShieldCheck } from "lucide-react";
-import { getPendingProposalsCount } from "@/data/communityDemocraticSettingsData";
+import { useCommunitySettings } from "@/hooks/useCommunity";
+import { buildAdminProposals } from "@/lib/communitySettingsMerge";
 
 interface CommunityMainMenuProps {
   isOwner?: boolean;
   isAdmin?: boolean;
   isMember?: boolean;
+  communityName?: string;
   onNavigate?: (section: string) => void;
 }
 
@@ -63,12 +65,14 @@ export function CommunityMainMenu({
   isOwner = false,
   isAdmin = false,
   isMember = false,
+  communityName,
   onNavigate,
 }: CommunityMainMenuProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { communityId } = useParams<{ communityId: string }>();
+  console.log("[CommunityMainMenu] communityId from useParams:", communityId, "at path:", window.location.pathname);
   const [open, setOpen] = useState(false);
   const [showGuestLogin, setShowGuestLogin] = useState(false);
   const [showMemberLogin, setShowMemberLogin] = useState(false);
@@ -107,7 +111,10 @@ export function CommunityMainMenu({
   const [showMyAdverts, setShowMyAdverts] = useState(false);
   const [showQuizWallet, setShowQuizWallet] = useState(false);
 
-  const pendingSettingsCount = getPendingProposalsCount();
+  const { data: settingsData } = useCommunitySettings(communityId);
+  const pendingSettingsCount = buildAdminProposals(settingsData).filter(
+    (p) => p.status === "pending_approval" && p.memberVote === null
+  ).length;
 
   const handleLoginSuccess = (role: "guest" | "member" | "admin") => {
     if (!onNavigate) return;
@@ -399,38 +406,9 @@ export function CommunityMainMenu({
                       >
                         Members
                       </Button>
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start pl-4 text-sm h-8"
-                        onClick={() => handleMenuClick("Chat Members")}
-                      >
-                        Chat Members
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start pl-4 text-sm h-8"
-                        onClick={() => handleMenuClick("Gift Members")}
-                      >
-                        Gift Members
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start pl-4 text-sm h-8"
-                        onClick={() => handleMenuClick("Block Members")}
-                      >
-                        Block Members
-                      </Button>
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
-                
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start pl-2 mt-1 h-9 transition-colors duration-200"
-                  onClick={() => handleMenuClick("Add Friends")}
-                >
-                  Add Friends
-                </Button>
                 
                 <Accordion type="single" collapsible className="pl-2 mt-1">
                   <AccordionItem value="invite-members" className="border-none">
@@ -499,20 +477,6 @@ export function CommunityMainMenu({
                     <LayoutDashboard className="h-4 w-4" />
                     Admin Dashboard
                     <Badge variant="secondary" className="ml-auto text-[10px] bg-white/20">5</Badge>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start pl-4 h-9 transition-colors duration-200"
-                    onClick={() => handleMenuClick("Admin Login")}
-                  >
-                    Login
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start pl-4 h-9 transition-colors duration-200"
-                    onClick={() => handleMenuClick("Admin Logout")}
-                  >
-                    Logout
                   </Button>
                 </AccordionContent>
               </AccordionItem>
@@ -1288,20 +1252,30 @@ export function CommunityMainMenu({
       <BlockManagementDrawer open={showBlockMembers} onOpenChange={setShowBlockMembers} />
       <AddFriendsDialog open={showAddFriends} onOpenChange={setShowAddFriends} />
       <InviteMembersDialog open={showInviteMembers} onOpenChange={setShowInviteMembers} />
-      <ExitCommunityDialog open={showExitCommunity} onOpenChange={setShowExitCommunity} />
+      <ExitCommunityDialog
+        open={showExitCommunity}
+        onOpenChange={setShowExitCommunity}
+        communityId={communityId}
+        communityName={communityName}
+        onLeft={() => {
+          // Member has left — refresh the community profile page so it
+          // re-renders in the non-member view (join button, public tabs, etc.)
+          window.location.reload();
+        }}
+      />
 
       {/* Finance Dialogs */}
-      <FinancialOverviewDialog open={showFinancialOverview} onOpenChange={setShowFinancialOverview} isAdmin={isAdmin} isOwner={isOwner} />
-      <FinancialObligationsDialog open={showFinancialObligations} onOpenChange={setShowFinancialObligations} />
-      <FinancialStatusDialog open={showFinancialStatus} onOpenChange={setShowFinancialStatus} />
-      <FinancialAuditDialog open={showFinancialAudit} onOpenChange={setShowFinancialAudit} />
+      <FinancialOverviewDialog open={showFinancialOverview} onOpenChange={setShowFinancialOverview} isAdmin={isAdmin} isOwner={isOwner} communityId={communityId} />
+      <FinancialObligationsDialog open={showFinancialObligations} onOpenChange={setShowFinancialObligations} communityId={communityId} />
+      <FinancialStatusDialog open={showFinancialStatus} onOpenChange={setShowFinancialStatus} communityId={communityId} />
+      <FinancialAuditDialog open={showFinancialAudit} onOpenChange={setShowFinancialAudit} communityId={communityId} />
 
       {/* Constitution & Resources Dialogs */}
       <ConstitutionViewer open={showConstitution} onOpenChange={setShowConstitution} />
-      <CommunityResourcesDialog open={showResources} onOpenChange={setShowResources} />
+      <CommunityResourcesDialog open={showResources} onOpenChange={setShowResources} communityId={communityId} />
 
       {/* Mobi-Merchant Dialogs */}
-      <QuizCreationDialog open={showQuizCreation} onOpenChange={setShowQuizCreation} />
+      <QuizCreationDialog open={showQuizCreation} onOpenChange={setShowQuizCreation} communityId={communityId} />
       
 
       {/* Membership Application Drawer */}
@@ -1314,6 +1288,7 @@ export function CommunityMainMenu({
       <ManageLeadershipDialog 
         open={showManageLeadership} 
         onOpenChange={setShowManageLeadership}
+        communityId={communityId}
       />
 
       {/* Resource Management Dialog (Admin Only) */}
@@ -1321,6 +1296,7 @@ export function CommunityMainMenu({
         open={showManageResources} 
         onOpenChange={setShowManageResources}
         isOwner={isOwner}
+        communityId={communityId}
       />
 
       {/* Membership Requests Management Dialog (Admin Only) */}
@@ -1341,6 +1317,7 @@ export function CommunityMainMenu({
       <CommunityQuizDialog 
         open={showCommunityQuiz} 
         onOpenChange={setShowCommunityQuiz}
+        communityId={communityId}
         isAdmin={isAdmin}
         isOwner={isOwner}
       />
@@ -1349,12 +1326,14 @@ export function CommunityMainMenu({
       <QuizWalletDrawer
         open={showQuizWallet}
         onOpenChange={setShowQuizWallet}
+        communityId={communityId}
       />
 
       {/* Mobiface Quiz Dialog */}
       <MobifaceQuizDialog 
         open={showMobifaceQuiz} 
         onOpenChange={setShowMobifaceQuiz}
+        communityId={communityId}
       />
 
       {/* Member Privacy Voting Sheet */}
@@ -1367,6 +1346,7 @@ export function CommunityMainMenu({
       <CommunitySettingsSheet
         open={showCommunitySettings}
         onOpenChange={setShowCommunitySettings}
+        communityId={communityId}
       />
 
       {/* Election Declaration of Interest Sheet */}
@@ -1375,6 +1355,7 @@ export function CommunityMainMenu({
         onOpenChange={setShowDeclarationOfInterest}
         memberName="John Doe"
         walletBalance={75000}
+        communityId={communityId}
         onDeclarationComplete={(officeId, ref) => {
           setShowDeclarationOfInterest(false);
           setShowCandidateDashboard(true);
@@ -1392,12 +1373,14 @@ export function CommunityMainMenu({
         open={showImpeachment}
         onOpenChange={setShowImpeachment}
         initialView={impeachmentMode === "start" ? "start" : "list"}
+        communityId={communityId}
       />
 
       {/* Nominate Candidate Sheet */}
       <NominateCandidateSheet
         open={showNominateCandidate}
         onOpenChange={setShowNominateCandidate}
+        communityId={communityId}
         onNominationComplete={() => setShowNominateCandidate(false)}
       />
 
@@ -1411,6 +1394,7 @@ export function CommunityMainMenu({
       <AdvertisementsListSheet
         open={showAdvertisements}
         onOpenChange={setShowAdvertisements}
+        communityId={communityId}
         initialTab="all_active"
         onCreateNew={() => {
           navigate(`/community/${communityId}/create-advert`);
@@ -1420,6 +1404,7 @@ export function CommunityMainMenu({
       <AdvertisementsListSheet
         open={showMyAdverts}
         onOpenChange={setShowMyAdverts}
+        communityId={communityId}
         initialTab="my_active"
         onCreateNew={() => {
           navigate(`/community/${communityId}/create-advert`);

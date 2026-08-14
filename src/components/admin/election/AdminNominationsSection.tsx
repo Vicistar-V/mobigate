@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { 
   Users, 
   CheckCircle2, 
@@ -38,8 +38,6 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { 
   mockNominationPeriods, 
-  mockNominations, 
-  getNominationStats 
 } from "@/data/electionProcessesData";
 import { Nomination, NominationPeriod } from "@/types/electionProcesses";
 import { cn } from "@/lib/utils";
@@ -92,7 +90,7 @@ const StatCard = ({ icon, value, label, color }: StatCardProps) => (
   </div>
 );
 
-export function AdminNominationsSection() {
+export function AdminNominationsSection({ communityId }: { communityId?: string } = {}) {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
@@ -101,8 +99,45 @@ export function AdminNominationsSection() {
   const [selectedNomination, setSelectedNomination] = useState<Nomination | null>(null);
   const [showNominationSheet, setShowNominationSheet] = useState(false);
   const [showNominateCandidateDrawer, setShowNominateCandidateDrawer] = useState(false);
+  const [mockNominations, setMockNominations] = useState<Nomination[]>([]);
 
-  const stats = getNominationStats();
+  const loadData = useCallback(() => {
+    if (!communityId) return;
+    fetch(`/api/community/elections.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const officesById: Record<string, string> = {};
+        (d.offices ?? []).forEach((o: any) => { officesById[o.id] = o.name; });
+        const mapped: Nomination[] = (d.candidates ?? []).map((c: any) => ({
+          id: c.id,
+          nomineeId: c.user_id,
+          nomineeName: c.name?.trim() || "Candidate",
+          nomineeAvatar: c.profile_photo || undefined,
+          officeId: c.office_id || "",
+          officeName: officesById[c.office_id] || c.position || "Office",
+          nominatedBy: c.nominated_by || c.user_id,
+          nominatedByName: c.is_self_nomination ? (c.name?.trim() || "Candidate") : (c.nominated_by_name?.trim() || "Member"),
+          nominatedAt: new Date(c.registered_at),
+          status: c.status === "cleared" ? "approved" : c.status === "disqualified" || c.status === "primary_eliminated" ? "rejected" : "pending",
+          acceptedByNominee: c.is_self_nomination ? true : !!c.nomination_accepted,
+          acceptedAt: c.nomination_accepted ? new Date(c.registered_at) : undefined,
+          endorsementsCount: 0,
+          qualificationStatus: c.status === "cleared" ? "qualified" : c.status === "disqualified" ? "disqualified" : "pending",
+          isSelfNomination: !!c.is_self_nomination,
+        }));
+        setMockNominations(mapped);
+      })
+      .catch(() => setMockNominations([]));
+  }, [communityId]);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const stats = {
+    total: mockNominations.length,
+    pending: mockNominations.filter((n) => n.status === "pending").length,
+    approved: mockNominations.filter((n) => n.status === "approved").length,
+    rejected: mockNominations.filter((n) => n.status === "rejected").length,
+  };
 
   const filteredNominations = mockNominations.filter((nomination) => {
     const matchesSearch = 
@@ -113,21 +148,45 @@ export function AdminNominationsSection() {
     return matchesSearch && matchesStatus && matchesOffice;
   });
 
-  const handleApprove = (nomination: Nomination) => {
-    toast({
-      title: "Nomination Approved",
-      description: `${nomination.nomineeName} has been approved for ${nomination.officeName}`,
-    });
-    setShowNominationSheet(false);
+  const handleApprove = async (nomination: Nomination) => {
+    if (!communityId) return;
+    try {
+      const res = await fetch("/api/community/elections.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "update_candidate_status", community_id: communityId, candidate_id: nomination.id, status: "cleared" }),
+      });
+      if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || "Failed to approve"); }
+      toast({
+        title: "Nomination Approved",
+        description: `${nomination.nomineeName} has been approved for ${nomination.officeName}`,
+      });
+      setShowNominationSheet(false);
+      loadData();
+    } catch (e: any) {
+      toast({ title: "Couldn't Approve", description: e.message, variant: "destructive" });
+    }
   };
 
-  const handleReject = (nomination: Nomination) => {
-    toast({
-      title: "Nomination Rejected",
-      description: `${nomination.nomineeName} has been rejected`,
-      variant: "destructive",
-    });
-    setShowNominationSheet(false);
+  const handleReject = async (nomination: Nomination) => {
+    if (!communityId) return;
+    try {
+      const res = await fetch("/api/community/elections.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "update_candidate_status", community_id: communityId, candidate_id: nomination.id, status: "disqualified" }),
+      });
+      if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || "Failed to reject"); }
+      toast({
+        title: "Nomination Rejected",
+        description: `${nomination.nomineeName} has been rejected`,
+        variant: "destructive",
+      });
+      setShowNominationSheet(false);
+      loadData();
+    } catch (e: any) {
+      toast({ title: "Couldn't Reject", description: e.message, variant: "destructive" });
+    }
   };
 
   const openNominationDetail = (nomination: Nomination) => {

@@ -586,10 +586,8 @@ const UserProfile = () => {
 
           {/* Status tab */}
           <TabsContent value="status" className="space-y-6">
-            {/* Stories / Vibes & Flexing / Breaking News — read-only on another user's page */}
+            {/* embed=true hides the greeting card, keeps PeopleYouMayKnow */}
             <GreetingSection embed profileUserId={userId} editable={false} />
-
-            <PeopleYouMayKnow />
 
             <WallStatusCarousel
               items={wallPosts as any}

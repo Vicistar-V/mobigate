@@ -18,6 +18,8 @@ import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcce
 interface QuizCreationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
+  onCreated?: () => void;
 }
 
 interface QuizQuestion {
@@ -45,7 +47,7 @@ const createEmptyQuestion = (index: number): QuizQuestion => ({
 // Initialize with exactly 10 questions
 const initialQuestions: QuizQuestion[] = Array.from({ length: 10 }, (_, i) => createEmptyQuestion(i + 1));
 
-export function QuizCreationDialog({ open, onOpenChange }: QuizCreationDialogProps) {
+export function QuizCreationDialog({ open, onOpenChange, communityId, onCreated }: QuizCreationDialogProps) {
   const { toast } = useToast();
   const [legalAccepted, setLegalAccepted] = useState(false);
   const [quizTitle, setQuizTitle] = useState("");
@@ -167,15 +169,57 @@ export function QuizCreationDialog({ open, onOpenChange }: QuizCreationDialogPro
     return true;
   };
 
-  const handlePublish = () => {
-    if (!validateQuiz()) return;
+  const [publishing, setPublishing] = useState(false);
 
-    toast({
-      title: "Quiz Published!",
-      description: `"${quizTitle}" is now live for ${privacySetting === "public" ? "everyone" : "members only"} to play`,
-    });
-    onOpenChange(false);
-    resetForm();
+  const handlePublish = async () => {
+    if (!validateQuiz()) return;
+    if (!communityId) {
+      toast({ title: "No community selected", variant: "destructive" });
+      return;
+    }
+
+    setPublishing(true);
+    try {
+      const res = await fetch("/api/community/quiz.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "create_quiz",
+          community_id: communityId,
+          title: quizTitle,
+          description: quizDescription,
+          category,
+          difficulty,
+          stakeAmount: parseFloat(stakeAmount),
+          winningAmount: parseFloat(winningAmount),
+          timeLimitPerQuestion: parseInt(timeLimitPerQuestion, 10),
+          privacySetting,
+          status: "active",
+          coverImage,
+          questions: questions.map((q) => ({
+            question: q.question,
+            options: q.options,
+            correctAnswer: q.correctAnswer,
+            timeLimit: q.timeLimit,
+            points: q.points,
+          })),
+        }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to publish quiz");
+
+      toast({
+        title: "Quiz Published!",
+        description: `"${quizTitle}" is now live for ${privacySetting === "public" ? "everyone" : "members only"} to play`,
+      });
+      onCreated?.();
+      onOpenChange(false);
+      resetForm();
+    } catch (e: any) {
+      toast({ title: "Couldn't Publish Quiz", description: e.message, variant: "destructive" });
+    } finally {
+      setPublishing(false);
+    }
   };
 
   const handleSaveDraft = () => {
@@ -552,9 +596,9 @@ export function QuizCreationDialog({ open, onOpenChange }: QuizCreationDialogPro
             <Button onClick={handleSaveDraft} variant="outline" className="flex-1">
               Save Draft
             </Button>
-            <Button onClick={handlePublish} disabled={!legalAccepted} className="flex-1">
+            <Button onClick={handlePublish} disabled={!legalAccepted || publishing} className="flex-1">
               <Award className="h-4 w-4 mr-2" />
-              Publish Quiz
+              {publishing ? "Publishing..." : "Publish Quiz"}
             </Button>
           </div>
         </div>

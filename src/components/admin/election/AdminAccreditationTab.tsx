@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Users, CheckCircle, XCircle, Clock, Search, Download, Settings, UserCheck, UserX, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -56,15 +56,55 @@ const StatCard = ({ value, label, icon: Icon, color }: StatCardProps) => (
   </div>
 );
 
-export function AdminAccreditationTab() {
+export function AdminAccreditationTab({ communityId }: { communityId?: string }) {
   const { toast } = useToast();
-  const [voters, setVoters] = useState<AdminAccreditationVoter[]>(mockAccreditationVoters);
+  const [voters, setVoters] = useState<AdminAccreditationVoter[]>([]);
+  const [electionId, setElectionId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState<AdminAccreditationSettings>(mockAccreditationSettings);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [financialFilter, setFinancialFilter] = useState<string>("all");
   const [selectedVoters, setSelectedVoters] = useState<string[]>([]);
   const [showSettings, setShowSettings] = useState(false);
+
+  const loadData = useCallback(() => {
+    if (!communityId) return;
+    setLoading(true);
+    fetch(`/api/community/elections.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const currentElection = (d.elections ?? []).find((e: any) => !['completed', 'cancelled'].includes(e.status));
+        setElectionId(currentElection?.id ?? null);
+
+        const accreditedUserIds = new Set((d.accreditedVoters ?? []).filter((a: any) => a.election_id === currentElection?.id).map((a: any) => a.user_id));
+        const accreditedById: Record<string, any> = {};
+        (d.accreditedVoters ?? []).forEach((a: any) => { accreditedById[a.user_id] = a; });
+
+        fetch(`/api/community/manage_members.php?community_id=${communityId}`, { credentials: "include" })
+          .then((r) => r.json())
+          .then((md) => {
+            const mapped: AdminAccreditationVoter[] = (md.members ?? []).map((m: any) => {
+              const accRow = accreditedById[m.user_id];
+              return {
+                id: m.user_id,
+                name: m.name?.trim() || m.username,
+                avatar: m.profile_photo || "/placeholder.svg",
+                membershipId: m.user_id.slice(0, 8).toUpperCase(),
+                email: m.email || "",
+                financialStatus: 'clear' as const,
+                accreditationStatus: accreditedUserIds.has(m.user_id) ? 'valid' as const : 'pending' as const,
+                dateAccredited: accRow ? new Date(accRow.accredited_at) : undefined,
+              };
+            });
+            setVoters(mapped);
+          });
+      })
+      .catch(() => setVoters([]))
+      .finally(() => setLoading(false));
+  }, [communityId]);
+
+  useEffect(() => { loadData(); }, [loadData]);
   
   // Multi-signature authorization state
   const [showAuthDrawer, setShowAuthDrawer] = useState(false);
@@ -154,32 +194,41 @@ export function AdminAccreditationTab() {
   };
 
   // Execute action after multi-signature authorization
-  const handleAuthorizationComplete = () => {
-    if (!pendingAction) return;
-    
-    if (pendingAction.type === "accredit") {
-      setVoters(prev => prev.map(v => 
-        pendingAction.voterIds.includes(v.id) 
-          ? { ...v, accreditationStatus: 'valid' as const, dateAccredited: new Date() } 
-          : v
-      ));
-      toast({
-        title: "Voters Accredited",
-        description: `${pendingAction.voterIds.length} voter(s) have been accredited with multi-signature authorization`
-      });
-    } else {
-      setVoters(prev => prev.map(v => 
-        pendingAction.voterIds.includes(v.id) 
-          ? { ...v, accreditationStatus: 'revoked' as const } 
-          : v
-      ));
-      toast({
-        title: "Accreditation Revoked",
-        description: `${pendingAction.voterIds.length} voter(s) have had their accreditation revoked`,
-        variant: "destructive"
-      });
+  const handleAuthorizationComplete = async () => {
+    if (!pendingAction || !communityId || !electionId) return;
+
+    try {
+      if (pendingAction.type === "accredit") {
+        await Promise.all(pendingAction.voterIds.map((userId) =>
+          fetch("/api/community/elections.php", {
+            method: "POST", credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "accredit_voter", community_id: communityId, election_id: electionId, user_id: userId }),
+          })
+        ));
+        toast({
+          title: "Voters Accredited",
+          description: `${pendingAction.voterIds.length} voter(s) have been accredited with multi-signature authorization`
+        });
+      } else {
+        await Promise.all(pendingAction.voterIds.map((userId) =>
+          fetch("/api/community/elections.php", {
+            method: "POST", credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "revoke_accreditation", community_id: communityId, election_id: electionId, user_id: userId }),
+          })
+        ));
+        toast({
+          title: "Accreditation Revoked",
+          description: `${pendingAction.voterIds.length} voter(s) have had their accreditation revoked`,
+          variant: "destructive"
+        });
+      }
+      loadData();
+    } catch (e: any) {
+      toast({ title: "Action Failed", description: e.message, variant: "destructive" });
     }
-    
+
     setSelectedVoters([]);
     setPendingAction(null);
   };

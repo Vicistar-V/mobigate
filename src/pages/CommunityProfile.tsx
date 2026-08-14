@@ -15,6 +15,7 @@ import {
   DollarSign,
   ArrowLeft,
   Bell,
+  Pencil,
 } from "lucide-react";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
@@ -32,7 +33,7 @@ import { useCommunityPosts, type CommunityPost } from "@/hooks/useCommunityPosts
 import { CommunityCreatePostDialog } from "@/components/community/CommunityCreatePostDialog";
 import { CommunityPostCard } from "@/components/community/CommunityPostCard";
 import { CommunityPostDetailSheet } from "@/components/community/CommunityPostDetailSheet";
-import { communityPeople } from "@/data/communityPeopleData";
+// communityPeople mock data removed — now fetched live via OurLeadershipSection
 import { CommunityAboutTab } from "@/components/community/CommunityAboutTab";
 import { CommunityMembershipTab } from "@/components/community/CommunityMembershipTab";
 import { CommunityNewsSection } from "@/components/community/CommunityNewsSection";
@@ -41,9 +42,12 @@ import { CommunityQuickLinks } from "@/components/community/CommunityQuickLinks"
 import { CommunityMainMenu } from "@/components/community/CommunityMainMenu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { CommunityStatusBanner } from "@/components/community/CommunityStatusBanner";
+import { EditCommunityDialog } from "@/components/community/EditCommunityDialog";
+import { PendingProfileChangeBanner } from "@/components/community/PendingProfileChangeBanner";
+import { OurLeadershipSection } from "@/components/community/OurLeadershipSection";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 
-import { OurPeopleCarousel } from "@/components/community/OurPeopleCarousel";
+// OurPeopleCarousel replaced by OurLeadershipSection (real leadership data)
 import { CommunityVibesSection } from "@/components/community/CommunityVibesSection";
 import { CommunityExecutiveTab } from "@/components/community/CommunityExecutiveTab";
 import { CommunityTenureTab } from "@/components/community/CommunityTenureTab";
@@ -122,7 +126,7 @@ const CommunityProfile = () => {
   const [isLiked,      setIsLiked]      = useState<boolean>(cachedInteract.isLiked      ?? false);
   const [isFollowing,  setIsFollowing]  = useState<boolean>(cachedInteract.isFollowing  ?? false);
   // Get community data — real API first, mock fallback
-  const { profile: apiProfile, loading: apiLoading, error: apiError } = useCommunityProfile(communityId);
+  const { profile: apiProfile, loading: apiLoading, error: apiError, refresh: refreshProfile } = useCommunityProfile(communityId);
   const { posts, loading: postsLoading, hasMore: postsHasMore, refresh: refreshPosts,
           loadMore: loadMorePosts, createPost, likePost, deletePost,
           commentOnPost, viewPost, uploadMedia } = useCommunityPosts(communityId);
@@ -164,6 +168,8 @@ const CommunityProfile = () => {
   const [showArticleEditorDialog, setShowArticleEditorDialog] = useState(false);
   const [showVibeDialog, setShowVibeDialog] = useState(false);
   const [showSpecialEventDialog, setShowSpecialEventDialog] = useState(false);
+  const [showEditCommunityDialog, setShowEditCommunityDialog] = useState(false);
+  const [pendingChangeRefreshKey, setPendingChangeRefreshKey] = useState(0);
   const [showMembershipApplication, setShowMembershipApplication] = useState(false);
   const [showExitCommunity, setShowExitCommunity] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -413,6 +419,15 @@ const CommunityProfile = () => {
       <Header />
 
       <main className="flex-1 container mx-auto px-2 sm:px-4 py-4 sm:py-6 max-w-5xl">
+        {(community.isOwner || community.role === "Admin") && (
+          <PendingProfileChangeBanner
+            key={pendingChangeRefreshKey}
+            communityId={communityId!}
+            isAdmin={community.isOwner || community.role === "Admin"}
+            onApplied={() => refreshProfile()}
+          />
+        )}
+
         {/* Banner and Logo Section */}
         <Card className="overflow-hidden mb-4">
           {/* Banner — multi-media carousel (photos + videos) */}
@@ -420,12 +435,14 @@ const CommunityProfile = () => {
 
           {/* Logo and Info */}
           <div className="px-4 sm:px-6 pb-4">
-            <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-12 sm:-mt-16">
-              {/* Logo — tap to open in full-screen viewer */}
+            <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+              {/* Logo — tap to open in full-screen viewer. Only the avatar
+                  overlaps the banner's bottom edge, so the name/edit button
+                  row below it is never covered by the banner. */}
               <button
                 type="button"
                 onClick={() => setShowLogoViewer(true)}
-                className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary touch-manipulation active:scale-95 transition-transform self-start"
+                className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary touch-manipulation active:scale-95 transition-transform self-start -mt-12 sm:-mt-16 relative z-10"
                 aria-label={`Open ${community.name} profile picture`}
               >
                 <Avatar className="h-24 w-24 sm:h-32 sm:w-32 border-4 border-background cursor-zoom-in shadow-lg">
@@ -439,9 +456,22 @@ const CommunityProfile = () => {
 
               {/* Name and Stats */}
               <div className="flex-1">
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2">
-                  {community.name}
-                </h1>
+                <div className="flex items-center gap-2 mb-2">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">
+                    {community.name}
+                  </h1>
+                  {(community.isOwner || community.role === "Admin") && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 px-2.5 gap-1.5 shrink-0"
+                      onClick={() => setShowEditCommunityDialog(true)}
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">Edit</span>
+                    </Button>
+                  )}
+                </div>
                 <p className="text-xs sm:text-sm md:text-base font-semibold text-muted-foreground mb-3 whitespace-nowrap">
                   {community.memberCount.toLocaleString()} Members | {(community.followers + (isFollowing && !apiProfile?.isFollowing ? 1 : 0)).toLocaleString()} Followers | {(community.likes + (isLiked && !apiProfile?.isLiked ? 1 : 0)).toLocaleString()} Likes
                 </p>
@@ -532,6 +562,7 @@ const CommunityProfile = () => {
                 isOwner={community.isOwner}
                 isAdmin={community.role === "Admin"}
                 isMember={community.isMember || isMember}
+                communityName={community.name}
                 onNavigate={(section) => handleTabChange(section)}
               />
             </div>
@@ -567,8 +598,8 @@ const CommunityProfile = () => {
                 maxBanners={3}
               />
               
-              {/* 1. Our People, Our Strength - Images only, no filters */}
-              <OurPeopleCarousel items={communityPeople} />
+              {/* 1. Our People, Our Strength — real current leadership (owner/admins) */}
+              <OurLeadershipSection communityId={communityId!} />
 
               {/* 2. Recommended Community Gallery - Filters without counts, with grid toggle */}
               <WallStatusCarousel
@@ -697,15 +728,15 @@ const CommunityProfile = () => {
                 </TabsList>
                 
                 <TabsContent value="summary">
-                  <FinancialSummaryTab onClose={() => handleTabChange("status")} />
+                  <FinancialSummaryTab onClose={() => handleTabChange("status")} communityId={communityId} />
                 </TabsContent>
                 
                 <TabsContent value="clearances">
-                  <FinancialClearancesTab />
+                  <FinancialClearancesTab communityId={communityId} />
                 </TabsContent>
                 
                 <TabsContent value="accreditation">
-                  <FinancialAccreditationTab />
+                  <FinancialAccreditationTab communityId={communityId} />
                 </TabsContent>
                 
                 <TabsContent value="accounts">
@@ -717,61 +748,61 @@ const CommunityProfile = () => {
 
           {activeTab === "meetings" && (
             <div className="mt-6">
-              <CommunityMeetingsTab />
+              <CommunityMeetingsTab communityId={communityId} />
             </div>
           )}
 
           {activeTab === "meeting-proceedings" && (
             <div className="mt-6">
-              <MeetingProceedingsTab />
+              <MeetingProceedingsTab communityId={communityId} />
             </div>
           )}
 
           {activeTab === "meeting-headline" && (
             <div className="mt-6">
-              <MeetingHeadlineThemeTab />
+              <MeetingHeadlineThemeTab communityId={communityId} />
             </div>
           )}
 
           {activeTab === "meeting-resolutions" && (
             <div className="mt-6">
-              <MeetingResolutionsTab />
+              <MeetingResolutionsTab communityId={communityId} />
             </div>
           )}
 
           {activeTab === "meeting-conflicts" && (
             <div className="mt-6">
-              <MeetingConflictsTab />
+              <MeetingConflictsTab communityId={communityId} />
             </div>
           )}
 
           {activeTab === "meeting-chats" && (
             <div className="mt-6">
-              <MeetingChatsTab />
+              <MeetingChatsTab communityId={communityId} />
             </div>
           )}
 
           {activeTab === "meeting-vote-notes" && (
             <div className="mt-6">
-              <MeetingVoteNotesTab />
+              <MeetingVoteNotesTab communityId={communityId} />
             </div>
           )}
 
           {activeTab === "meeting-lighter-moods" && (
             <div className="mt-6">
-              <MeetingLighterMoodsTab />
+              <MeetingLighterMoodsTab communityId={communityId} />
             </div>
           )}
 
           {activeTab === "meeting-attendance" && (
             <div className="mt-6">
-              <MeetingAttendanceTab />
+              <MeetingAttendanceTab communityId={communityId} />
             </div>
           )}
 
           {activeTab === "meeting-minutes" && (
             <div className="mt-6">
-              <MeetingMinutesTab />
+              <MeetingMinutesTab communityId={communityId} />
             </div>
           )}
 
@@ -786,26 +817,26 @@ const CommunityProfile = () => {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Status
               </Button>
-              <RollCallsPage />
+              <RollCallsPage communityId={communityId} />
             </div>
           )}
 
           {/* FundRaiser Tabs */}
           {activeTab === "fundraiser-raise" && (
             <div className="mt-6">
-              <FundRaiserRaiseCampaignTab />
+              <FundRaiserRaiseCampaignTab communityId={communityId} onCreated={() => handleTabChange("fundraiser-campaigns")} />
             </div>
           )}
 
           {activeTab === "fundraiser-campaigns" && (
             <div className="mt-6">
-              <FundRaiserViewCampaignsTab onRaiseCampaign={() => handleTabChange("fundraiser-raise")} />
+              <FundRaiserViewCampaignsTab communityId={communityId} onRaiseCampaign={() => handleTabChange("fundraiser-raise")} />
             </div>
           )}
 
           {activeTab === "fundraiser-donors" && (
             <div className="mt-6">
-              <FundRaiserViewDonorsTab />
+              <FundRaiserViewDonorsTab communityId={communityId} />
             </div>
           )}
 
@@ -818,71 +849,71 @@ const CommunityProfile = () => {
           {/* Elections & Voting Tabs - Separated */}
           {activeTab === "election-campaigns" && (
             <div className="mt-6">
-              <ElectionCampaignsTab />
+              <ElectionCampaignsTab communityId={communityId} />
             </div>
           )}
           {activeTab === "election-voting" && (
             <div className="mt-6">
-              <ElectionVotingTab />
+              <ElectionVotingTab communityId={communityId} />
             </div>
           )}
           {activeTab === "election-results" && (
             <div className="mt-6">
-              <ElectionResultsTab />
+              <ElectionResultsTab communityId={communityId} />
             </div>
           )}
           {activeTab === "election-winners" && (
             <div className="mt-6">
-              <ElectionWinnersTab />
+              <ElectionWinnersTab communityId={communityId} />
             </div>
           )}
           {activeTab === "election-opinions" && (
             <div className="mt-6">
-              <ElectionOpinionsTab />
+              <ElectionOpinionsTab communityId={communityId} />
             </div>
           )}
           {activeTab === "election-accreditation" && (
             <div className="mt-6">
-              <ElectionAccreditationTab />
+              <ElectionAccreditationTab communityId={communityId} />
             </div>
           )}
           {activeTab === "election-accredited-voters" && (
             <div className="mt-6">
-              <ElectionAccreditationTab initialSubTab="accredited" />
+              <ElectionAccreditationTab initialSubTab="accredited" communityId={communityId} />
             </div>
           )}
           {activeTab === "election-clearances" && (
             <div className="mt-6">
-              <ElectionClearancesTab />
+              <ElectionClearancesTab communityId={communityId} />
             </div>
           )}
           {activeTab === "election-primaries" && (
             <div className="mt-6">
-              <ElectionPrimariesTab />
+              <ElectionPrimariesTab communityId={communityId} />
             </div>
           )}
 
           {activeTab === "executive" && (
             <div className="mt-6">
-              <CommunityExecutiveTab />
+              <CommunityExecutiveTab communityId={communityId} />
             </div>
           )}
 
           {activeTab === "tenure" && (
             <div className="mt-6">
-              <CommunityTenureTab />
+              <CommunityTenureTab communityId={communityId} />
             </div>
           )}
 
           {activeTab === "adhoc" && (
             <div className="mt-6">
-              <CommunityAdhocTab />
+              <CommunityAdhocTab communityId={communityId} />
             </div>
           )}
 
           {activeTab === "staff" && (
             <div className="mt-6">
-              <CommunityStaffTab />
+              <CommunityStaffTab communityId={communityId} />
             </div>
           )}
 
@@ -1020,17 +1051,17 @@ const CommunityProfile = () => {
           {/* Financial Tabs */}
           {activeTab === "finance-summary" && (
             <div className="mt-6">
-              <FinancialSummaryTab onClose={() => handleTabChange("status")} />
+              <FinancialSummaryTab onClose={() => handleTabChange("status")} communityId={communityId} />
             </div>
           )}
           {activeTab === "finance-clearances" && (
             <div className="mt-6">
-              <FinancialClearancesTab />
+              <FinancialClearancesTab communityId={communityId} />
             </div>
           )}
           {activeTab === "finance-accreditation" && (
             <div className="mt-6">
-              <FinancialAccreditationTab />
+              <FinancialAccreditationTab communityId={communityId} />
             </div>
           )}
           {activeTab === "community-accounts" && (
@@ -1104,6 +1135,30 @@ const CommunityProfile = () => {
         communityId={communityId}
         onPost={createPost}
         uploadMedia={uploadMedia}
+      />
+
+      {/* Edit Community Profile Dialog (owner/admin only) */}
+      <EditCommunityDialog
+        open={showEditCommunityDialog}
+        onOpenChange={setShowEditCommunityDialog}
+        community={{
+          id: communityId!,
+          name: community.name,
+          description: community.description,
+          motto: community.motto,
+          category: community.category,
+          classification: community.classification,
+          location: community.location,
+          telephone: community.telephone,
+          telephone2: community.telephone2,
+          emailAddress: community.emailAddress,
+          visionStatement: community.visionStatement,
+          logoImage: community.logoImage,
+          bannerImage: community.bannerImage,
+          coverImage: community.coverImage,
+        }}
+        onSaved={() => refreshProfile()}
+        onPendingApproval={() => setPendingChangeRefreshKey((k) => k + 1)}
       />
 
       {/* Article Editor Dialog */}

@@ -8,13 +8,10 @@ import { AdCard } from "@/components/AdCard";
 import { EditPostDialog } from "@/components/EditPostDialog";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
-import { CreatePostDialog } from "@/components/CreatePostDialog";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PremiumAdCardProps } from "@/components/PremiumAdCard";
 import { ChatWithFriendsDialog } from "@/components/chat/ChatWithFriendsDialog";
 import { CampaignBannerRotation } from "@/components/community/elections/CampaignBannerRotation";
-import { UserStatusBanner } from "@/components/profile/UserStatusBanner";
-import { MetaTags } from "@/components/MetaTags";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MessageCircle } from "lucide-react";
@@ -151,7 +148,6 @@ const Index = () => {
   useEffect(() => {
     setVisiblePostCount(20);
   }, [contentFilter]);
-
 
   // Convert wall status posts to Post format for WallStatusCarousel
   const wallStatusPostsForCarousel = activeWallStatusPosts.map(post => ({
@@ -375,11 +371,9 @@ const Index = () => {
     },
   ];
 
-  const typeFilteredPosts = contentFilter === "all"
-    ? activeFeedPosts
+  const filteredPosts = contentFilter === "all"
+    ? activeFeedPosts 
     : activeFeedPosts.filter(post => post.type.toLowerCase() === contentFilter);
-
-  const filteredPosts = typeFilteredPosts;
   
   const displayedPosts = filteredPosts.slice(0, visiblePostCount);
   const hasMorePosts = visiblePostCount < filteredPosts.length;
@@ -387,7 +381,6 @@ const Index = () => {
 
   return (
     <div className="flex flex-col w-full min-h-screen bg-background">
-      <MetaTags />
       <Header />
       
       <main className="container max-w-7xl mx-auto px-4 py-6 flex-1">
@@ -414,18 +407,12 @@ const Index = () => {
 
           {/* Main Feed */}
           <div className="lg:col-span-2 space-y-6 min-w-0">
-            {/* User's Status Banner — same banner shown on their Profile, with their click action + auto-rotation */}
-            <UserStatusBanner />
-
-            {/* Campaign Banners for Mobiface Interface */}
+            {/* Campaign Banners for Mobigate Interface */}
             <CampaignBannerRotation 
               audienceType="mobigate_interface" 
               compact={false}
               maxBanners={3}
             />
-            
-            {/* Create Monetized Post - Directly above Wall Status */}
-            <CreatePostDialog />
             
             <WallStatusCarousel
               items={wallStatusPostsForCarousel}
@@ -452,22 +439,16 @@ const Index = () => {
             
             {/* Feed Posts with Filter */}
             <div className="space-y-0">
-              <div>
-                <ELibrarySection
-                  activeFilter={contentFilter}
-                  onFilterChange={setContentFilter}
-                />
-              </div>
+              <ELibrarySection activeFilter={contentFilter} onFilterChange={setContentFilter} />
               <div className="space-y-6 mt-6">
-                {displayedPosts.map((post, index) => {
-                  const isOwn = !!post.userId && post.userId === currentUserId;
-                  return (
+                {displayedPosts.map((post, index) => (
                 <div key={index}>
                   <FeedPost
-                    {...(post as any)}
-                    isOwner={isOwn || (post as any).isOwner}
-                    onEdit={isOwn ? () => handleEditPost(post as Post) : undefined}
-                    onDelete={isOwn ? () => (post as any).id && handleDeletePost((post as any).id) : undefined}
+                    {...post as any}
+                    isMonetized={(post as any).isMonetized || false}
+                    hasPaid={(post as any).hasPaid || false}
+                    onEdit={post.isOwner ? () => handleEditPost(post as Post) : undefined}
+                    onDelete={post.isOwner ? () => handleDeletePost(post.id ?? "") : undefined}
                   />
                   {/* Insert premium ad after every 4 posts */}
                   {(index + 1) % 4 === 0 && index < displayedPosts.length - 1 && (
@@ -486,8 +467,7 @@ const Index = () => {
                     </div>
                   )}
                 </div>
-                  );
-                })}
+                ))}
               </div>
 
               {/* Pagination Controls */}

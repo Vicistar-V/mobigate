@@ -1,23 +1,23 @@
-import { useState, useCallback } from "react";
+// src/pages/community/CommunityCreateAdvertisementPage.tsx
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Header } from "@/components/Header";
+import { ArrowLeft, Megaphone, Eye, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Megaphone, Eye, Settings2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { AdvertisementPhotoUploader } from "@/components/community/advertisements/AdvertisementPhotoUploader";
+import { Header } from "@/components/Header";
 import { AdvertisementPreviewSheet } from "@/components/community/advertisements/AdvertisementPreviewSheet";
 import { AdvertisementSettingsSheet } from "@/components/community/advertisements/AdvertisementSettingsSheet";
+import { AdvertisementPhotoUploader } from "@/components/community/advertisements/AdvertisementPhotoUploader";
 import { advertisementCategories } from "@/data/advertisementData";
-import type { AdvertisementFormData, AdvertisementCategory } from "@/types/advertisementSystem";
+import type { AdvertisementFormData } from "@/types/advertisementSystem";
+import { toast } from "sonner";
 
-const initialFormData: AdvertisementFormData = {
+const defaultFormData: AdvertisementFormData = {
   businessName: "",
-  category: "other",
-  customCategory: "",
+  category: "food_drink",
   productTitle: "",
   description: "",
   city: "",
@@ -26,26 +26,60 @@ const initialFormData: AdvertisementFormData = {
   email: "",
   website: "",
   media: [],
-  audienceTargets: ["community_interface"],
+  audienceTargets: ["community_members"],
   durationDays: 7,
 };
 
-export default function CreateAdvertisementPage() {
+export default function CommunityCreateAdvertisementPage() {
   const navigate = useNavigate();
-  const { communityId } = useParams();
-  const { toast } = useToast();
-  const [formData, setFormData] = useState<AdvertisementFormData>(initialFormData);
-  const [showPreview, setShowPreview] = useState(false);
+  const { communityId } = useParams<{ communityId: string }>();
+
+  const [formData, setFormData]   = useState<AdvertisementFormData>(defaultFormData);
+  const [showPreview, setShowPreview]   = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [featuredIndex, setFeaturedIndex] = useState(0);
 
-  const updateField = <K extends keyof AdvertisementFormData>(key: K, value: AdvertisementFormData[K]) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
-  };
+  const handleBack = () => navigate(`/community/${communityId}`);
 
-  const isFormValid = formData.businessName.trim() && formData.productTitle.trim() && formData.description.trim() && formData.city.trim() && formData.phone1.trim() && formData.media.length >= 1;
+  const isFormValid =
+    formData.businessName.trim() &&
+    formData.productTitle.trim() &&
+    formData.description.trim() &&
+    formData.city.trim() &&
+    formData.phone1.trim() &&
+    formData.media.length >= 1;
 
-  const handleBack = () => {
+  const handlePublish = async (fees: { baseFee: number; audiencePremium: number; totalFee: number; communityShare: number; mobifaceShare: number }) => {
+    if (!communityId) return;
+    const res = await fetch('/api/community/advertisements.php', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action:           'create',
+        community_id:     communityId,
+        business_name:    formData.businessName,
+        category:         formData.category,
+        product_title:    formData.productTitle,
+        description:      formData.description,
+        city:             formData.city,
+        phone1:           formData.phone1,
+        phone2:           formData.phone2 ?? '',
+        email:            formData.email ?? '',
+        website:          formData.website ?? '',
+        media:            formData.media,
+        audience_targets: formData.audienceTargets,
+        duration_days:    formData.durationDays,
+        base_fee:         fees.baseFee,
+        audience_premium: fees.audiencePremium,
+        total_fee_mobi:   fees.totalFee,
+        community_share:  fees.communityShare,
+        mobiface_share:   fees.mobifaceShare,
+        status:           'active',
+      }),
+    });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(d.error || 'Failed to create ad');
+    toast.success('Advertisement created and is now live!');
     navigate(`/community/${communityId}`);
   };
 
@@ -71,66 +105,51 @@ export default function CreateAdvertisementPage() {
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">Business / Product Name *</Label>
             <Input
+              placeholder="e.g. Mama's Kitchen, Tech Hub Solutions"
               value={formData.businessName}
-              onChange={(e) => updateField("businessName", e.target.value)}
-              placeholder="e.g. Amara's Kitchen"
-              className="h-12 text-base"
-              autoComplete="off"
+              onChange={(e) => setFormData(p => ({ ...p, businessName: e.target.value }))}
+              className="h-11"
             />
           </div>
 
           {/* Category */}
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">Category *</Label>
-            <Select value={formData.category} onValueChange={(v) => updateField("category", v as AdvertisementCategory)}>
-              <SelectTrigger className="h-12 text-base">
+            <Select
+              value={formData.category}
+              onValueChange={(v) => setFormData(p => ({ ...p, category: v as any }))}
+            >
+              <SelectTrigger className="h-11">
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
-                {advertisementCategories.map((cat) => (
-                  <SelectItem key={cat.value} value={cat.value} className="text-base py-3">
-                    {cat.label}
-                  </SelectItem>
+                {advertisementCategories.map(cat => (
+                  <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
-          {/* Custom Category */}
-          {formData.category === "other" && (
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium">Specify Category *</Label>
-              <Input
-                value={formData.customCategory || ""}
-                onChange={(e) => updateField("customCategory", e.target.value)}
-                placeholder="e.g. Pet Supplies, Sports Equipment..."
-                className="h-12 text-base"
-                autoComplete="off"
-              />
-            </div>
-          )}
-
-          {/* Product Title */}
+          {/* Product/Service Title */}
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">Product / Service Title *</Label>
             <Input
+              placeholder="e.g. Fresh Homemade Jollof Rice, Web Design Services"
               value={formData.productTitle}
-              onChange={(e) => updateField("productTitle", e.target.value)}
-              placeholder="e.g. Premium Catering Services"
-              className="h-12 text-base"
-              autoComplete="off"
+              onChange={(e) => setFormData(p => ({ ...p, productTitle: e.target.value }))}
+              className="h-11"
             />
           </div>
 
           {/* Description */}
           <div className="space-y-1.5">
-            <Label className="text-sm font-medium">Description * ({formData.description.length}/500)</Label>
+            <Label className="text-sm font-medium">Description *</Label>
             <Textarea
+              placeholder="Describe your product or service in detail..."
               value={formData.description}
-              onChange={(e) => updateField("description", e.target.value.slice(0, 500))}
-              placeholder="Describe your product or service..."
-              className="min-h-[120px] text-base resize-none"
-              autoComplete="off"
+              onChange={(e) => setFormData(p => ({ ...p, description: e.target.value }))}
+              rows={4}
+              className="resize-none"
             />
           </div>
 
@@ -138,83 +157,80 @@ export default function CreateAdvertisementPage() {
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">City / Location *</Label>
             <Input
+              placeholder="e.g. Lagos, Abuja, Port Harcourt"
               value={formData.city}
-              onChange={(e) => updateField("city", e.target.value)}
-              placeholder="e.g. Lagos, Nigeria"
-              className="h-12 text-base"
-              autoComplete="off"
+              onChange={(e) => setFormData(p => ({ ...p, city: e.target.value }))}
+              className="h-11"
             />
           </div>
 
-          {/* Phone 1 */}
+          {/* Phone */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">Phone 1 *</Label>
+              <Input
+                type="tel"
+                placeholder="08012345678"
+                value={formData.phone1}
+                onChange={(e) => setFormData(p => ({ ...p, phone1: e.target.value }))}
+                className="h-11"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">Phone 2</Label>
+              <Input
+                type="tel"
+                placeholder="Optional"
+                value={formData.phone2 ?? ""}
+                onChange={(e) => setFormData(p => ({ ...p, phone2: e.target.value }))}
+                className="h-11"
+              />
+            </div>
+          </div>
+
+          {/* Email & Website */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">Email</Label>
+              <Input
+                type="email"
+                placeholder="business@email.com"
+                value={formData.email ?? ""}
+                onChange={(e) => setFormData(p => ({ ...p, email: e.target.value }))}
+                className="h-11"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">Website</Label>
+              <Input
+                type="url"
+                placeholder="https://..."
+                value={formData.website ?? ""}
+                onChange={(e) => setFormData(p => ({ ...p, website: e.target.value }))}
+                className="h-11"
+              />
+            </div>
+          </div>
+
+          {/* Photos */}
           <div className="space-y-1.5">
-            <Label className="text-sm font-medium">Phone Number 1 *</Label>
-            <Input
-              value={formData.phone1}
-              onChange={(e) => updateField("phone1", e.target.value)}
-              placeholder="+234 801 234 5678"
-              type="tel"
-              className="h-12 text-base"
-              autoComplete="off"
+            <Label className="text-sm font-medium">Photos / Videos * <span className="text-muted-foreground">(up to 4)</span></Label>
+            <AdvertisementPhotoUploader
+              media={formData.media}
+              onMediaChange={(media) => setFormData(p => ({ ...p, media }))}
+              maxItems={4}
             />
           </div>
-
-          {/* Phone 2 */}
-          <div className="space-y-1.5">
-            <Label className="text-sm font-medium">Phone Number 2 (Optional)</Label>
-            <Input
-              value={formData.phone2 || ""}
-              onChange={(e) => updateField("phone2", e.target.value)}
-              placeholder="+234 909 876 5432"
-              type="tel"
-              className="h-12 text-base"
-              autoComplete="off"
-            />
-          </div>
-
-          {/* Email */}
-          <div className="space-y-1.5">
-            <Label className="text-sm font-medium">Email Address (Optional)</Label>
-            <Input
-              value={formData.email || ""}
-              onChange={(e) => updateField("email", e.target.value)}
-              placeholder="orders@business.ng"
-              type="email"
-              className="h-12 text-base"
-              autoComplete="off"
-            />
-          </div>
-
-          {/* Website */}
-          <div className="space-y-1.5">
-            <Label className="text-sm font-medium">Website URL (Optional)</Label>
-            <Input
-              value={formData.website || ""}
-              onChange={(e) => updateField("website", e.target.value)}
-              placeholder="https://yourbusiness.com"
-              type="url"
-              className="h-12 text-base"
-              autoComplete="off"
-            />
-          </div>
-
-          {/* Media Uploader */}
-          <AdvertisementPhotoUploader
-            media={formData.media}
-            onMediaChange={(media) => updateField("media", media)}
-            featuredIndex={featuredIndex}
-            onFeaturedChange={setFeaturedIndex}
-          />
         </div>
       </main>
 
-      {/* Fixed Bottom Action Bar */}
+      {/* Bottom Buttons */}
       <div className="fixed bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur-sm p-3 space-y-2 z-40">
         <div className="max-w-lg mx-auto">
           <div className="flex gap-2">
             <Button
               variant="outline"
-              className="flex-1 h-11 text-sm font-medium active:scale-[0.97]"
+              className="flex-1 h-11 text-sm font-medium"
               onClick={() => setShowPreview(true)}
               disabled={!isFormValid}
             >
@@ -222,7 +238,7 @@ export default function CreateAdvertisementPage() {
               Preview
             </Button>
             <Button
-              className="flex-1 h-11 text-sm font-medium active:scale-[0.97] bg-amber-600 hover:bg-amber-700 text-white"
+              className="flex-1 h-11 text-sm font-medium bg-amber-600 hover:bg-amber-700 text-white"
               onClick={() => setShowSettings(true)}
               disabled={!isFormValid}
             >
@@ -247,6 +263,7 @@ export default function CreateAdvertisementPage() {
         onOpenChange={setShowSettings}
         formData={formData}
         onFormDataChange={setFormData}
+        onPublish={handlePublish}
       />
     </div>
   );

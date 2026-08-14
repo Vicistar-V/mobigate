@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Search, X, ChevronDown, ChevronUp, ShieldAlert, AlertTriangle, Package, Printer, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,6 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { initialSubMerchantBatches } from "@/data/subMerchantVoucherData";
 import {
   VoucherBatch,
   getBundleStatusCounts, getInvalidatableCards, hashPin, formatNum,
@@ -27,7 +26,43 @@ export default function SubMerchantVoucherBatchDetail() {
   const navigate = useNavigate();
   const { batchId } = useParams();
   const { toast } = useToast();
-  const [batches, setBatches] = useState(initialSubMerchantBatches);
+  const [batches, setBatches] = useState<VoucherBatch[]>([]);
+
+  useEffect(() => {
+    if (!batchId) return;
+    fetch(`/api/merchant/vouchers.php?action=sub_batch_detail&id=${batchId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (!d.batch) return;
+        const b = d.batch;
+        const codes = d.codes ?? [];
+        const statusMap: Record<string, string> = { unused: "available", redeemed: "used", invalidated: "invalidated" };
+        const bundles = [];
+        for (let i = 0; i < codes.length; i += 100) {
+          const chunk = codes.slice(i, i + 100);
+          const bundleIndex = Math.floor(i / 100);
+          bundles.push({
+            id: `${b.id}-bundle-${bundleIndex}`, serialPrefix: `SM-${b.id.slice(0, 6)}`,
+            denomination: parseFloat(b.denomination), batchId: b.id, cardCount: chunk.length,
+            cards: chunk.map((c: any) => ({
+              id: c.id, serialNumber: c.code, pin: c.code.replace(/-/g, "").slice(-6),
+              denomination: parseFloat(b.denomination), status: statusMap[c.status] || "available",
+              batchId: b.id, bundleSerialPrefix: `SM-${b.id.slice(0, 6)}`, soldVia: "direct",
+              createdAt: new Date(b.created_at), invalidatedAt: c.status === "invalidated" ? new Date(c.redeemed_at || b.created_at) : null,
+            })),
+          });
+        }
+        setBatches([{
+          id: b.id, batchNumber: `SM-${b.id.slice(0, 8).toUpperCase()}`, denomination: parseFloat(b.denomination),
+          bundleCount: Math.floor(b.card_count / 100), totalCards: b.card_count, status: "active",
+          createdAt: new Date(b.created_at), totalCost: parseFloat(b.total_cost),
+          discountApplied: false, discountPercent: 0, generationType: "new", replacedBatchId: null,
+          bundles,
+        }] as any);
+      })
+      .catch(() => setBatches([]));
+  }, [batchId]);
+
   const [expandedBundles, setExpandedBundles] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [invalidateTarget, setInvalidateTarget] = useState<InvalidateTarget | null>(null);

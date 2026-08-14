@@ -1,36 +1,61 @@
+import { useState, useEffect, useCallback } from "react";
 import { Card } from "@/components/ui/card";
-import { PremiumAdCard } from "@/components/PremiumAdCard";
-import { officeTenures } from "@/data/communityExecutivesData";
+import { Loader2, CalendarClock } from "lucide-react";
+import { mapApiPositionToTenure, ApiPosition } from "@/lib/leadershipMerge";
+import { OfficeTenure } from "@/data/communityExecutivesData";
 
-export const CommunityTenureTab = () => {
-  const premiumAd = {
-    id: "tenure-premium-1",
-    advertiser: {
-      name: "Leadership Training Institute",
-      verified: true,
-    },
-    content: {
-      headline: "Empower Your Leadership Team",
-      description: "Professional development programs for community executives. Enroll now for Q1 2025.",
-      ctaText: "View Programs",
-      ctaUrl: "https://example.com/leadership",
-    },
-    media: {
-      type: "carousel" as const,
-      items: [
-        {
-          url: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&q=80",
-          caption: "Executive Leadership Training",
-        },
-        {
-          url: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80",
-          caption: "Team Building Workshops",
-        },
-      ],
-    },
-    layout: "standard" as const,
-    duration: 15,
-  };
+const API = "/api/community";
+
+interface CommunityTenureTabProps {
+  communityId?: string;
+}
+
+export const CommunityTenureTab = ({ communityId }: CommunityTenureTabProps) => {
+  const [tenures, setTenures] = useState<OfficeTenure[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const loadData = useCallback(() => {
+    if (!communityId) return;
+    setLoading(true);
+    fetch(`${API}/leadership.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d) => {
+        const positions: ApiPosition[] = d.positions ?? [];
+        setTenures(positions.map(mapApiPositionToTenure));
+      })
+      .catch(() => setTenures([]))
+      .finally(() => setLoading(false));
+  }, [communityId]);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  if (!communityId) {
+    return (
+      <Card className="p-8 text-center text-muted-foreground">
+        No community selected.
+      </Card>
+    );
+  }
+
+  if (loading && tenures.length === 0) {
+    return (
+      <div className="flex justify-center py-16">
+        <Loader2 className="h-7 w-7 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (tenures.length === 0) {
+    return (
+      <Card className="p-10 text-center">
+        <CalendarClock className="h-10 w-10 mx-auto mb-3 text-muted-foreground opacity-30" />
+        <p className="font-medium mb-1">No Positions Set Up Yet</p>
+        <p className="text-sm text-muted-foreground">
+          Office tenure information will appear once positions are created.
+        </p>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -39,7 +64,7 @@ export const CommunityTenureTab = () => {
           <h3 className="font-semibold text-sm">Office Tenure Information</h3>
         </div>
         <div className="divide-y">
-          {officeTenures.map((tenure) => (
+          {tenures.map((tenure) => (
             <div key={tenure.id} className="p-4 hover:bg-muted/50 transition-colors">
               <div className="flex justify-between items-start gap-4">
                 <div className="flex-1">
@@ -55,9 +80,6 @@ export const CommunityTenureTab = () => {
           ))}
         </div>
       </Card>
-
-      {/* Advertisement */}
-      <PremiumAdCard {...premiumAd} />
     </div>
   );
 };

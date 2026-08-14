@@ -3,22 +3,37 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Calendar, Heart, Smile, Quote, Camera, MessageSquare } from "lucide-react";
-import { mockLighterMoods, mockMeetings } from "@/data/meetingsData";
 import { format } from "date-fns";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export const MeetingLighterMoodsTab = () => {
+export const MeetingLighterMoodsTab = ({ communityId }: { communityId?: string } = {}) => {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
   const [likedMoods, setLikedMoods] = useState<Set<string>>(new Set());
 
-  // Combine lighter moods with meeting data
-  const moodsWithMeetings = mockLighterMoods.map((mood) => {
-    const meeting = mockMeetings.find((m) => m.id === mood.meetingId);
-    return { ...mood, meeting };
-  });
+  const [moodsWithMeetings, setMoodsWithMeetings] = useState<any[]>([]);
+
+  const loadMoods = () => {
+    if (!communityId) return;
+    fetch(`/api/community/meetings_admin.php?action=lighter_moods&community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const mapped = (d.moods ?? []).map((m: any) => ({
+          id: m.id, meetingId: m.meeting_id, memberId: m.member_id,
+          memberName: m.member_name?.trim() || "Member", memberAvatar: m.member_avatar || "/placeholder.svg",
+          content: m.content, type: m.type, mediaUrl: m.media_url, likes: parseInt(m.likes_count, 10) || 0,
+          createdAt: new Date(m.created_at),
+          meeting: { id: m.meeting_id, name: "", date: new Date(m.created_at) },
+        }));
+        setMoodsWithMeetings(mapped);
+        setLikedMoods(new Set((d.moods ?? []).filter((m: any) => m.has_liked).map((m: any) => m.id)));
+      })
+      .catch(() => setMoodsWithMeetings([]));
+  };
+
+  useEffect(() => { loadMoods(); }, [communityId]);
 
   // Filter by type
   const filteredMoods =
@@ -95,7 +110,7 @@ export const MeetingLighterMoodsTab = () => {
     );
   };
 
-  const handleLike = (moodId: string) => {
+  const handleLike = async (moodId: string) => {
     setLikedMoods((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(moodId)) {
@@ -105,6 +120,17 @@ export const MeetingLighterMoodsTab = () => {
       }
       return newSet;
     });
+    setMoodsWithMeetings((prev) => prev.map((m) =>
+      m.id === moodId ? { ...m, likes: likedMoods.has(moodId) ? m.likes - 1 : m.likes + 1 } : m
+    ));
+    if (!communityId) return;
+    try {
+      await fetch("/api/community/meetings_admin.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "like_lighter_mood", community_id: communityId, mood_id: moodId }),
+      });
+    } catch { /* optimistic update already applied; will resync on next load */ }
   };
 
   return (

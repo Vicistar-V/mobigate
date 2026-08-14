@@ -9,8 +9,10 @@ export interface ContentItem {
   title:           string;
   description?:    string;
   content?:        string;
-  thumbnail?:      string;
-  mediaUrl?:       string;
+  thumbnail?:      string;   // thumbnail_url from DB
+  imageUrl?:       string;   // alias for thumbnail
+  thumbnailUrl?:   string;   // alias for gallery cards
+  mediaUrl?:       string;   // media_url from DB
   mediaType?:      string;
   category?:       string;
   tags?:           string[];

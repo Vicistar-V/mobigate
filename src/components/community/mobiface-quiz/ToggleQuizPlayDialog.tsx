@@ -1,113 +1,144 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
-import { X, Repeat, Trophy, AlertTriangle, Star, Timer, ArrowRight, ChevronRight, Award, Zap, Shield, RotateCcw } from "lucide-react";
+import { X, Repeat, Trophy, AlertTriangle, Star, Timer, Award, Zap, Shield, RotateCcw, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
 import { NonObjectiveQuestionCard } from "./NonObjectiveQuestionCard";
-import {
-  TOGGLE_SESSIONS,
-  TOGGLE_ANSWER_LABELS,
-  pickToggleQuestions,
-  type ToggleObjectiveQuestion,
-  type ToggleNonObjectiveQuestion,
-} from "@/data/toggleQuizData";
+import { TOGGLE_SESSIONS, TOGGLE_ANSWER_LABELS } from "@/data/toggleQuizData";
+
+const API = "/api/quiz/toggle.php";
+const STAKE_AMOUNT = 500;
+
+interface ObjQ { id: string; question: string; options: string[]; correctAnswer: number }
+interface NonObjQ { id: string; question: string; acceptedAnswers: string[] }
 
 interface ToggleQuizPlayDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
 }
 
-type Phase = "setup" | "playing_obj" | "playing_nonobj" | "session_win" | "session_fail" | "celebrity";
+type Phase = "setup" | "loading" | "playing_obj" | "playing_nonobj" | "submitting" | "session_win" | "session_fail" | "celebrity";
 
-const STAKE_AMOUNT = 500;
-
-export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialogProps) {
+export function ToggleQuizPlayDialog({ open, onOpenChange, communityId }: ToggleQuizPlayDialogProps) {
   const { toast } = useToast();
 
-  // Session state
+  const [runId, setRunId] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [sessionIndex, setSessionIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>("setup");
   const [totalStakeCharged, setTotalStakeCharged] = useState(0);
+  const [currentPrize, setCurrentPrize] = useState(0);
 
-  // Question state
-  const [objectives, setObjectives] = useState<ToggleObjectiveQuestion[]>([]);
-  const [nonObjectives, setNonObjectives] = useState<ToggleNonObjectiveQuestion[]>([]);
+  const [objectives, setObjectives] = useState<ObjQ[]>([]);
+  const [nonObjectives, setNonObjectives] = useState<NonObjQ[]>([]);
   const [objIndex, setObjIndex] = useState(0);
   const [nonObjIndex, setNonObjIndex] = useState(0);
-  const [objCorrect, setObjCorrect] = useState(0);
-  const [nonObjCorrect, setNonObjCorrect] = useState(0);
+  const [objAnswers, setObjAnswers] = useState<{ question_id: string; selected_answer: number | null }[]>([]);
+  const [nonObjAnswers, setNonObjAnswersArr] = useState<{ question_id: string; text: string }[]>([]);
 
-  // Timer
   const [timeLeft, setTimeLeft] = useState(10);
-
-  // Answer state
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showObjResult, setShowObjResult] = useState(false);
   const [nonObjAnswer, setNonObjAnswer] = useState("");
   const [nonObjShowResult, setNonObjShowResult] = useState(false);
 
   const session = TOGGLE_SESSIONS[sessionIndex];
-  const currentPrize = STAKE_AMOUNT * session.multiplier;
 
-  // Reset on open
   useEffect(() => {
     if (open) {
       setSessionIndex(0);
       setPhase("setup");
       setTotalStakeCharged(0);
+      setRunId(null);
+      setCurrentPrize(0);
     }
   }, [open]);
 
-  // Timer for objective questions
   useEffect(() => {
     if (phase !== "playing_obj" || showObjResult) return;
-    if (timeLeft <= 0) {
-      handleObjTimeUp();
-      return;
-    }
+    if (timeLeft <= 0) { handleObjTimeUp(); return; }
     const t = setTimeout(() => setTimeLeft(p => p - 1), 1000);
     return () => clearTimeout(t);
   }, [phase, timeLeft, showObjResult]);
 
-  // Timer for non-objective questions
   useEffect(() => {
     if (phase !== "playing_nonobj" || nonObjShowResult) return;
-    if (timeLeft <= 0) {
-      lockNonObjAnswer("");
-      return;
-    }
+    if (timeLeft <= 0) { lockNonObjAnswer(""); return; }
     const t = setTimeout(() => setTimeLeft(p => p - 1), 1000);
     return () => clearTimeout(t);
   }, [phase, timeLeft, nonObjShowResult]);
 
-  const startSession = useCallback((idx: number) => {
-    const picked = pickToggleQuestions(idx);
-    setObjectives(picked.objectives);
-    setNonObjectives(picked.nonObjectives);
-    setObjIndex(0);
-    setNonObjIndex(0);
-    setObjCorrect(0);
-    setNonObjCorrect(0);
-    setSelectedAnswer(null);
-    setShowObjResult(false);
-    setNonObjAnswer("");
-    setNonObjShowResult(false);
-    setTimeLeft(10);
-    setTotalStakeCharged(prev => prev + STAKE_AMOUNT);
-    setPhase("playing_obj");
-    toast({ title: `🎯 Session ${idx + 1} Started!`, description: `${TOGGLE_SESSIONS[idx].label} multiplier — ${TOGGLE_SESSIONS[idx].total} questions` });
-  }, [toast]);
+  const startSession = async (idx: number) => {
+    setPhase("loading");
+    try {
+      const res = await fetch(API, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "start_session", run_id: runId, session_number: idx + 1, community_id: communityId }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Couldn't start session");
+
+      setRunId(d.run_id);
+      setSessionId(d.session_id);
+      setObjectives(d.objective ?? []);
+      setNonObjectives(d.nonObjective ?? []);
+      setObjIndex(0); setNonObjIndex(0);
+      setObjAnswers([]); setNonObjAnswersArr([]);
+      setSelectedAnswer(null); setShowObjResult(false);
+      setNonObjAnswer(""); setNonObjShowResult(false);
+      setTimeLeft(10);
+      setTotalStakeCharged(prev => prev + STAKE_AMOUNT);
+      setPhase("playing_obj");
+      toast({ title: `🎯 Session ${idx + 1} Started!`, description: `${TOGGLE_SESSIONS[idx].label} multiplier — ${TOGGLE_SESSIONS[idx].total} questions` });
+    } catch (e: any) {
+      toast({ title: "Couldn't Start Session", description: e.message, variant: "destructive" });
+      setPhase(idx === 0 ? "setup" : "session_win");
+    }
+  };
+
+  const submitSession = async (finalObjAnswers: typeof objAnswers, finalNonObjAnswers: typeof nonObjAnswers) => {
+    setPhase("submitting");
+    try {
+      const res = await fetch(API, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "submit_session", session_id: sessionId, objective_answers: finalObjAnswers, non_objective_answers: finalNonObjAnswers }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Couldn't submit session");
+
+      if (d.status === "won") {
+        setCurrentPrize(d.prize);
+        if (d.is_celebrity) {
+          setPhase("celebrity");
+          toast({ title: "🏆 MOBI CELEBRITY!", description: "You completed all 7 Toggle Sessions!" });
+        } else {
+          setPhase("session_win");
+        }
+      } else {
+        setCurrentPrize(0);
+        setPhase("session_fail");
+        toast({ title: "❌ Session Failed", description: "You lost everything. Better luck next time!", variant: "destructive" });
+      }
+    } catch (e: any) {
+      toast({ title: "Couldn't Submit", description: e.message, variant: "destructive" });
+      onOpenChange(false);
+    }
+  };
 
   const handleObjTimeUp = () => {
-    // Time expired = wrong answer
     setShowObjResult(true);
-    setTimeout(() => failSession(), 1500);
+    const answers = [...objAnswers, { question_id: objectives[objIndex]?.id, selected_answer: null }];
+    setObjAnswers(answers);
+    setTimeout(() => submitSession(answers, nonObjAnswers), 1500);
   };
 
   const handleObjSelect = (answerIdx: number) => {
@@ -120,45 +151,44 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
     const q = objectives[objIndex];
     const correct = selectedAnswer === q.correctAnswer;
     setShowObjResult(true);
+    const answers = [...objAnswers, { question_id: q.id, selected_answer: selectedAnswer }];
+    setObjAnswers(answers);
 
     if (!correct) {
-      setTimeout(() => failSession(), 1500);
+      setTimeout(() => submitSession(answers, nonObjAnswers), 1500);
       return;
     }
 
-    setObjCorrect(p => p + 1);
     setTimeout(() => {
       if (objIndex + 1 < objectives.length) {
         setObjIndex(p => p + 1);
         setSelectedAnswer(null);
         setShowObjResult(false);
         setTimeLeft(10);
+      } else if (nonObjectives.length > 0) {
+        setPhase("playing_nonobj");
+        setTimeLeft(15);
+        setNonObjAnswer("");
+        setNonObjShowResult(false);
       } else {
-        // Move to non-objective phase
-        if (nonObjectives.length > 0) {
-          setPhase("playing_nonobj");
-          setTimeLeft(15);
-          setNonObjAnswer("");
-          setNonObjShowResult(false);
-        } else {
-          sessionWon();
-        }
+        submitSession(answers, nonObjAnswers);
       }
     }, 1000);
   };
 
-  const lockNonObjAnswer = useCallback((answer: string) => {
+  const lockNonObjAnswer = (answer: string) => {
     if (nonObjShowResult) return;
     setNonObjShowResult(true);
     const q = nonObjectives[nonObjIndex];
     const isCorrect = q.acceptedAnswers.some(a => answer.toLowerCase().includes(a.toLowerCase())) && answer.trim().length > 0;
+    const answers = [...nonObjAnswers, { question_id: q.id, text: answer }];
+    setNonObjAnswersArr(answers);
 
     if (!isCorrect) {
-      setTimeout(() => failSession(), 1500);
+      setTimeout(() => submitSession(objAnswers, answers), 1500);
       return;
     }
 
-    setNonObjCorrect(p => p + 1);
     setTimeout(() => {
       if (nonObjIndex + 1 < nonObjectives.length) {
         setNonObjIndex(p => p + 1);
@@ -166,23 +196,9 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
         setNonObjShowResult(false);
         setTimeLeft(15);
       } else {
-        sessionWon();
+        submitSession(objAnswers, answers);
       }
     }, 1500);
-  }, [nonObjShowResult, nonObjectives, nonObjIndex]);
-
-  const sessionWon = () => {
-    if (sessionIndex === 6) {
-      setPhase("celebrity");
-      toast({ title: "🏆 MOBI CELEBRITY!", description: "You completed all 7 Toggle Sessions!" });
-    } else {
-      setPhase("session_win");
-    }
-  };
-
-  const failSession = () => {
-    setPhase("session_fail");
-    toast({ title: "❌ Session Failed", description: "You lost everything. Better luck next time!", variant: "destructive" });
   };
 
   const handleToggle = () => {
@@ -191,12 +207,27 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
     startSession(nextIdx);
   };
 
-  const handleTakePrize = () => {
-    toast({ title: "💰 Prize Claimed!", description: `You won ${formatMobiAmount(currentPrize)}!` });
-    onOpenChange(false);
+  const handleTakePrize = async () => {
+    if (!runId) { onOpenChange(false); return; }
+    setPhase("submitting");
+    try {
+      const res = await fetch(API, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "claim_prize", run_id: runId }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Couldn't claim prize");
+      toast({ title: "💰 Prize Claimed!", description: `You won ${formatMobiAmount(d.prize)}!` });
+      onOpenChange(false);
+    } catch (e: any) {
+      toast({ title: "Couldn't Claim Prize", description: e.message, variant: "destructive" });
+      setPhase(sessionIndex === 6 ? "celebrity" : "session_win");
+    }
   };
 
   const handleExit = () => {
+    if ((phase === "playing_obj" || phase === "playing_nonobj") && !confirm("Exit now? Your stake for this session will be forfeited and this run will end.")) return;
     onOpenChange(false);
   };
 
@@ -204,12 +235,11 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
   const currentNonObjQuestion = nonObjectives[nonObjIndex];
   const totalAnswered = phase === "playing_obj" ? objIndex : objectives.length + nonObjIndex;
   const totalQs = session.total;
-  const progress = (totalAnswered / totalQs) * 100;
+  const progress = totalQs > 0 ? (totalAnswered / totalQs) * 100 : 0;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleExit}>
       <DialogContent className="max-w-lg max-h-[92vh] p-0 gap-0 flex flex-col overflow-hidden rounded-none sm:rounded-lg">
-        {/* Header */}
         <div className="shrink-0 p-3 pb-2 bg-gradient-to-r from-teal-500 to-cyan-600 z-10 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -222,6 +252,7 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
                 </h2>
                 <p className="text-xs text-teal-100">
                   {phase === "setup" ? "High-Stakes Escalating Sessions" :
+                    phase === "loading" ? "Loading..." :
                     `Session ${sessionIndex + 1}/7 — ${session.label} Prize`}
                 </p>
               </div>
@@ -230,7 +261,7 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
               <X className="h-4 w-4" />
             </Button>
           </div>
-          {phase !== "setup" && phase !== "session_win" && phase !== "session_fail" && phase !== "celebrity" && (
+          {(phase === "playing_obj" || phase === "playing_nonobj") && (
             <div className="mt-2 space-y-1">
               <div className="flex items-center justify-between text-xs">
                 <span>Q{totalAnswered + 1} of {totalQs}</span>
@@ -243,7 +274,6 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
 
         <div className="flex-1 overflow-y-auto touch-auto overscroll-contain">
           <div className="p-4 space-y-4">
-            {/* SETUP PHASE */}
             {phase === "setup" && (
               <div className="space-y-4">
                 <Card className="border-teal-200 dark:border-teal-800 bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30">
@@ -253,30 +283,12 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
                       <h3 className="font-bold text-sm">How Toggle Quiz Works</h3>
                     </div>
                     <ol className="text-sm text-muted-foreground space-y-3 leading-relaxed">
-                      <li className="flex items-start gap-2.5">
-                        <span className="text-teal-500 font-bold shrink-0">1.</span>
-                        <span>Answer ALL questions correctly <strong>(100%)</strong> to win a session.</span>
-                      </li>
-                      <li className="flex items-start gap-2.5">
-                        <span className="text-teal-500 font-bold shrink-0">2.</span>
-                        <span>After winning, choose:<br /><strong>Take Prize</strong> — collect your winnings, or<br /><strong>Toggle</strong> — advance to the next session.</span>
-                      </li>
-                      <li className="flex items-start gap-2.5">
-                        <span className="text-teal-500 font-bold shrink-0">3.</span>
-                        <span>Toggling <strong>cancels previous winnings</strong>.<br />Only the new session's prize matters.</span>
-                      </li>
-                      <li className="flex items-start gap-2.5">
-                        <span className="text-teal-500 font-bold shrink-0">4.</span>
-                        <span>Stake of <strong>{formatMobiAmount(STAKE_AMOUNT)}</strong> is charged each session.</span>
-                      </li>
-                      <li className="flex items-start gap-2.5">
-                        <span className="text-teal-500 font-bold shrink-0">5.</span>
-                        <span>Fail any session = <strong>lose everything</strong>.</span>
-                      </li>
-                      <li className="flex items-start gap-2.5">
-                        <span className="text-amber-500 font-bold shrink-0">★</span>
-                        <span>Complete all 7 sessions = <strong>Mobi Celebrity Badge!</strong></span>
-                      </li>
+                      <li className="flex items-start gap-2.5"><span className="text-teal-500 font-bold shrink-0">1.</span><span>Answer ALL questions correctly <strong>(100%)</strong> to win a session.</span></li>
+                      <li className="flex items-start gap-2.5"><span className="text-teal-500 font-bold shrink-0">2.</span><span>After winning, choose:<br /><strong>Take Prize</strong> — collect your winnings, or<br /><strong>Toggle</strong> — advance to the next session.</span></li>
+                      <li className="flex items-start gap-2.5"><span className="text-teal-500 font-bold shrink-0">3.</span><span>Toggling <strong>cancels previous winnings</strong>.<br />Only the new session's prize matters.</span></li>
+                      <li className="flex items-start gap-2.5"><span className="text-teal-500 font-bold shrink-0">4.</span><span>Stake of <strong>{formatMobiAmount(STAKE_AMOUNT)}</strong> is charged each session.</span></li>
+                      <li className="flex items-start gap-2.5"><span className="text-teal-500 font-bold shrink-0">5.</span><span>Fail any session = <strong>lose everything</strong>.</span></li>
+                      <li className="flex items-start gap-2.5"><span className="text-amber-500 font-bold shrink-0">★</span><span>Complete all 7 sessions = <strong>Mobi Celebrity Badge!</strong></span></li>
                     </ol>
                   </CardContent>
                 </Card>
@@ -297,17 +309,20 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
                   ))}
                 </div>
 
-                <Button
-                  className="w-full h-12 bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-bold text-sm touch-manipulation"
-                  onClick={() => startSession(0)}
-                >
+                <Button className="w-full h-12 bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-bold text-sm touch-manipulation" onClick={() => startSession(0)}>
                   <Zap className="h-4 w-4 mr-2" />
                   Start Session 1 — Stake {formatMobiAmount(STAKE_AMOUNT)}
                 </Button>
               </div>
             )}
 
-            {/* OBJECTIVE PLAYING PHASE */}
+            {(phase === "loading" || phase === "submitting") && (
+              <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
+                <Loader2 className="h-8 w-8 animate-spin" />
+                <p className="text-sm">{phase === "loading" ? "Setting up your session..." : "Submitting..."}</p>
+              </div>
+            )}
+
             {phase === "playing_obj" && currentObjQuestion && (
               <div className="space-y-3">
                 <Card className="border-teal-200 dark:border-teal-800">
@@ -322,22 +337,14 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
                     const isSelected = selectedAnswer === idx;
                     const isCorrect = idx === currentObjQuestion.correctAnswer;
                     return (
-                      <button
-                        key={idx}
-                        onClick={() => handleObjSelect(idx)}
-                        disabled={showObjResult}
-                        className={cn(
-                          "flex items-center gap-2 p-3 rounded-lg border-2 text-left text-sm transition-all touch-manipulation",
+                      <button key={idx} onClick={() => handleObjSelect(idx)} disabled={showObjResult}
+                        className={cn("flex items-center gap-2 p-3 rounded-lg border-2 text-left text-sm transition-all touch-manipulation",
                           !showObjResult && isSelected && "border-teal-500 bg-teal-50 dark:bg-teal-950/30",
                           !showObjResult && !isSelected && "border-border hover:border-teal-300",
                           showObjResult && isCorrect && "border-green-500 bg-green-50 dark:bg-green-950/30",
                           showObjResult && isSelected && !isCorrect && "border-red-500 bg-red-50 dark:bg-red-950/30",
-                        )}
-                      >
-                        <span className={cn(
-                          "w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0",
-                          isSelected ? "bg-teal-500 text-white" : "bg-muted text-muted-foreground"
                         )}>
+                        <span className={cn("w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0", isSelected ? "bg-teal-500 text-white" : "bg-muted text-muted-foreground")}>
                           {TOGGLE_ANSWER_LABELS[idx]}
                         </span>
                         <span className="flex-1">{opt}</span>
@@ -346,17 +353,12 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
                   })}
                 </div>
 
-                <Button
-                  className="w-full h-11 bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-bold touch-manipulation"
-                  disabled={selectedAnswer === null || showObjResult}
-                  onClick={handleObjConfirm}
-                >
+                <Button className="w-full h-11 bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-bold touch-manipulation" disabled={selectedAnswer === null || showObjResult} onClick={handleObjConfirm}>
                   Confirm Answer
                 </Button>
               </div>
             )}
 
-            {/* NON-OBJECTIVE PLAYING PHASE */}
             {phase === "playing_nonobj" && currentNonObjQuestion && (
               <div className="space-y-3">
                 <Card className="border-teal-200 dark:border-teal-800">
@@ -378,17 +380,12 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
                   isCorrect={currentNonObjQuestion.acceptedAnswers.some(a => nonObjAnswer.toLowerCase().includes(a.toLowerCase()))}
                 />
 
-                <Button
-                  className="w-full h-11 bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-bold touch-manipulation"
-                  disabled={nonObjShowResult || nonObjAnswer.trim().length === 0}
-                  onClick={() => lockNonObjAnswer(nonObjAnswer)}
-                >
+                <Button className="w-full h-11 bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-bold touch-manipulation" disabled={nonObjShowResult || nonObjAnswer.trim().length === 0} onClick={() => lockNonObjAnswer(nonObjAnswer)}>
                   Submit Answer
                 </Button>
               </div>
             )}
 
-            {/* SESSION WIN PHASE */}
             {phase === "session_win" && (
               <div className="space-y-4">
                 <div className="text-center py-4">
@@ -408,10 +405,7 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
                   </CardContent>
                 </Card>
 
-                <Button
-                  className="w-full h-12 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold touch-manipulation"
-                  onClick={handleTakePrize}
-                >
+                <Button className="w-full h-12 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold touch-manipulation" onClick={handleTakePrize}>
                   <Trophy className="h-4 w-4 mr-2" /> Take Prize & Exit
                 </Button>
 
@@ -437,11 +431,7 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
                       </CardContent>
                     </Card>
 
-                    <Button
-                      variant="outline"
-                      className="w-full h-12 border-2 border-teal-500 text-teal-700 dark:text-teal-300 font-bold touch-manipulation hover:bg-teal-50 dark:hover:bg-teal-950/30"
-                      onClick={handleToggle}
-                    >
+                    <Button variant="outline" className="w-full h-12 border-2 border-teal-500 text-teal-700 dark:text-teal-300 font-bold touch-manipulation hover:bg-teal-50 dark:hover:bg-teal-950/30" onClick={handleToggle}>
                       <Repeat className="h-4 w-4 mr-2" /> Toggle to Session {sessionIndex + 2} — {TOGGLE_SESSIONS[sessionIndex + 1].label}
                     </Button>
                   </>
@@ -449,7 +439,6 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
               </div>
             )}
 
-            {/* SESSION FAIL PHASE */}
             {phase === "session_fail" && (
               <div className="space-y-4">
                 <div className="text-center py-6">
@@ -463,12 +452,8 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
                 <Card className="border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950/30">
                   <CardContent className="p-4 text-center space-y-2">
                     <p className="text-sm font-bold text-red-600">You Lost Everything</p>
-                    <p className="text-xs text-muted-foreground">
-                      Total stake charged: {formatMobiAmount(totalStakeCharged)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Session {sessionIndex + 1} of 7 — {session.label} was the target
-                    </p>
+                    <p className="text-xs text-muted-foreground">Total stake charged: {formatMobiAmount(totalStakeCharged)}</p>
+                    <p className="text-xs text-muted-foreground">Session {sessionIndex + 1} of 7 — {session.label} was the target</p>
                   </CardContent>
                 </Card>
 
@@ -478,34 +463,27 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
                     onClick={() => {
                       setSessionIndex(0);
                       setTotalStakeCharged(0);
+                      setRunId(null);
                       startSession(0);
-                      toast({ title: "🔥 Let's Go!", description: `Stake of ${formatMobiAmount(STAKE_AMOUNT)} charged. You got this!` });
                     }}
                   >
                     <RotateCcw className="h-4 w-4 mr-2" />
                     Play Again to Win — {formatMobiAmount(STAKE_AMOUNT)}
                   </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full h-12 border-red-300 text-red-600 font-bold touch-manipulation active:scale-[0.97]"
-                    onClick={handleExit}
-                  >
+                  <Button variant="outline" className="w-full h-12 border-red-300 text-red-600 font-bold touch-manipulation active:scale-[0.97]" onClick={handleExit}>
                     Exit Game
                   </Button>
                 </div>
               </div>
             )}
 
-            {/* CELEBRITY PHASE — All 7 completed */}
             {phase === "celebrity" && (
               <div className="space-y-4">
                 <div className="text-center py-6">
                   <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-amber-400 via-yellow-400 to-orange-500 flex items-center justify-center mb-3 animate-pulse shadow-lg shadow-amber-300/50">
                     <Award className="h-10 w-10 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-                    🌟 MOBI CELEBRITY 🌟
-                  </h3>
+                  <h3 className="text-xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">🌟 MOBI CELEBRITY 🌟</h3>
                   <p className="text-muted-foreground text-sm mt-1">You completed ALL 7 Toggle Sessions!</p>
                   <p className="text-xs text-muted-foreground mt-0.5">This is an extraordinary achievement.</p>
                 </div>
@@ -513,40 +491,31 @@ export function ToggleQuizPlayDialog({ open, onOpenChange }: ToggleQuizPlayDialo
                 <Card className="border-amber-300 dark:border-amber-700 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/30">
                   <CardContent className="p-4 text-center">
                     <p className="text-xs text-amber-600 font-medium mb-1">Final Prize — {TOGGLE_SESSIONS[6].label}</p>
-                    <p className="text-3xl font-bold text-amber-700 dark:text-amber-300">{formatLocalAmount(STAKE_AMOUNT * 15, "NGN")}</p>
-                    <p className="text-xs text-amber-500">({formatMobiAmount(STAKE_AMOUNT * 15)})</p>
+                    <p className="text-3xl font-bold text-amber-700 dark:text-amber-300">{formatLocalAmount(currentPrize, "NGN")}</p>
+                    <p className="text-xs text-amber-500">({formatMobiAmount(currentPrize)})</p>
                     <div className="flex items-center justify-center gap-2 mt-3">
                       <Badge className="bg-amber-500 text-white text-xs">🏆 Mobi Celebrity</Badge>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Button
-                  className="w-full h-12 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold touch-manipulation"
-                  onClick={handleTakePrize}
-                >
+                <Button className="w-full h-12 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold touch-manipulation" onClick={handleTakePrize}>
                   <Star className="h-4 w-4 mr-2" /> Claim Celebrity Prize & Badge
                 </Button>
               </div>
             )}
 
-            {/* Session Progress Bar (bottom) */}
-            {phase !== "setup" && (
+            {phase !== "setup" && phase !== "loading" && (
               <div className="pt-2 border-t">
                 <p className="text-xs text-muted-foreground mb-1.5">Session Progress</p>
                 <div className="flex gap-1">
                   {TOGGLE_SESSIONS.map((s, i) => (
-                    <div
-                      key={i}
-                      className={cn(
-                        "flex-1 h-2 rounded-full",
-                        i < sessionIndex ? "bg-green-500" :
-                        i === sessionIndex && (phase === "session_win" || phase === "celebrity") ? "bg-green-500" :
-                        i === sessionIndex && phase === "session_fail" ? "bg-red-500" :
-                        i === sessionIndex ? "bg-teal-500" :
-                        "bg-muted"
-                      )}
-                    />
+                    <div key={i} className={cn("flex-1 h-2 rounded-full",
+                      i < sessionIndex ? "bg-green-500" :
+                      i === sessionIndex && (phase === "session_win" || phase === "celebrity") ? "bg-green-500" :
+                      i === sessionIndex && phase === "session_fail" ? "bg-red-500" :
+                      i === sessionIndex ? "bg-teal-500" : "bg-muted"
+                    )} />
                   ))}
                 </div>
                 <div className="flex justify-between mt-1">

@@ -50,6 +50,7 @@ const StatBadge = ({ value, label, icon: Icon }: StatBadgeProps) => (
 );
 
 interface AdminMeetingSectionProps {
+  communityId?: string;
   stats: AdminStats;
   upcomingMeetings: UpcomingMeeting[];
   onViewUpcoming: () => void;
@@ -61,6 +62,7 @@ interface AdminMeetingSectionProps {
 }
 
 export function AdminMeetingSection({
+  communityId,
   stats,
   upcomingMeetings,
   onViewUpcoming,

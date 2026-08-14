@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,11 +16,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import {
-  mockMeetings,
-  mockUpcomingMeetings,
-  mockParticipants,
-  mockChatMessages,
-  mockMeetingMinutes,
   MeetingParticipant,
   MeetingChatMessage,
   Meeting,
@@ -31,7 +26,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 type MeetingView = "lobby" | "live" | "history";
 type MeetingType = "executive" | "general";
 
-export const CommunityMeetingsTab = () => {
+export const CommunityMeetingsTab = ({ communityId }: { communityId?: string } = {}) => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const [meetingView, setMeetingView] = useState<MeetingView>("lobby");
@@ -40,16 +35,54 @@ export const CommunityMeetingsTab = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [expandedParticipantId, setExpandedParticipantId] = useState<string | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [chatMessages, setChatMessages] = useState<MeetingChatMessage[]>(mockChatMessages);
-  const [participants] = useState<MeetingParticipant[]>(mockParticipants);
+  const [chatMessages, setChatMessages] = useState<MeetingChatMessage[]>([]);
+  const [participants] = useState<MeetingParticipant[]>([]);
 
-  // Check if previous meeting minutes are pending adoption
-  const pendingMinutes = mockMeetingMinutes.find(
-    (m) => m.status === "pending_adoption"
-  );
-  const canStartNewMeeting = !pendingMinutes;
+  const [mockMeetings, setMockMeetings] = useState<Meeting[]>([]);
+  const [mockUpcomingMeetings, setMockUpcomingMeetings] = useState<Meeting[]>([]);
+  const [canStartNewMeeting, setCanStartNewMeeting] = useState(true);
+  const [activeMeetingId, setActiveMeetingId] = useState<string | null>(null);
 
-  const handleJoinMeeting = () => {
+  const loadMeetings = useCallback(() => {
+    if (!communityId) return;
+    fetch(`/api/community/meetings_admin.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const mapMeeting = (m: any): Meeting => ({
+          id: m.id, type: m.type === "executive" ? "executive" : "general", name: m.title,
+          date: new Date(m.meeting_date), status: m.status === "in-progress" ? "live" : m.status === "completed" ? "completed" : "upcoming",
+          participants: [], chatMessages: [],
+        });
+        setMockUpcomingMeetings((d.upcoming ?? []).map(mapMeeting));
+        setMockMeetings((d.past ?? []).map(mapMeeting));
+      })
+      .catch(() => {});
+
+    fetch(`/api/community/meetings_admin.php?action=minutes&community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const pending = (d.minutes ?? []).find((m: any) => m.status === "pending_adoption");
+        setCanStartNewMeeting(!pending);
+      })
+      .catch(() => {});
+  }, [communityId]);
+
+  useEffect(() => { loadMeetings(); }, [loadMeetings]);
+
+  const loadChat = useCallback((meetingId: string) => {
+    if (!communityId) return;
+    fetch(`/api/community/meetings_admin.php?action=chats&meeting_id=${meetingId}&community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        setChatMessages((d.messages ?? []).map((m: any) => ({
+          id: m.id, senderId: m.sender_id, senderName: m.sender_name?.trim() || "Member",
+          senderAvatar: m.sender_avatar || "/placeholder.svg", content: m.content, timestamp: new Date(m.created_at),
+        })));
+      })
+      .catch(() => {});
+  }, [communityId]);
+
+  const handleJoinMeeting = async () => {
     if (!canStartNewMeeting) {
       toast({
         title: "Meeting Locked",
@@ -57,6 +90,18 @@ export const CommunityMeetingsTab = () => {
         variant: "destructive",
       });
       return;
+    }
+    const meetingId = mockUpcomingMeetings[0]?.id;
+    if (meetingId && communityId) {
+      try {
+        await fetch("/api/community/meetings_admin.php", {
+          method: "POST", credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "mark_attendance", community_id: communityId, meeting_id: meetingId, status: "present" }),
+        });
+        setActiveMeetingId(meetingId);
+        loadChat(meetingId);
+      } catch { /* attendance marking is best-effort */ }
     }
     setMeetingView("live");
     setIsMeetingActive(true);
@@ -101,16 +146,27 @@ export const CommunityMeetingsTab = () => {
     });
   };
 
-  const handleSendMessage = (message: string) => {
-    const newMessage: MeetingChatMessage = {
-      id: `m${chatMessages.length + 1}`,
+  const handleSendMessage = async (message: string) => {
+    const optimisticMessage: MeetingChatMessage = {
+      id: `temp-${Date.now()}`,
       senderId: "you",
       senderName: "You",
       senderAvatar: "/placeholder.svg",
       content: message,
       timestamp: new Date(),
     };
-    setChatMessages([...chatMessages, newMessage]);
+    setChatMessages((prev) => [...prev, optimisticMessage]);
+
+    if (activeMeetingId && communityId) {
+      try {
+        await fetch("/api/community/meetings_admin.php", {
+          method: "POST", credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "post_chat_message", community_id: communityId, meeting_id: activeMeetingId, content: message }),
+        });
+        loadChat(activeMeetingId);
+      } catch { /* the optimistic message still shows even if the sync fails */ }
+    }
   };
 
   const handleDownloadChat = () => {

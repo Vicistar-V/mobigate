@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { 
   Vote, 
   Users, 
@@ -31,8 +31,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { 
-  mockPrimaryElections, 
-  getPrimaryStats,
   mockElectionProcessSettings
 } from "@/data/electionProcessesData";
 import { PrimaryElection, PrimaryCandidate } from "@/types/electionProcesses";
@@ -80,11 +78,70 @@ const StatCard = ({ icon, value, label, color }: StatCardProps) => (
   </div>
 );
 
-export function AdminPrimaryElectionsSection() {
+export function AdminPrimaryElectionsSection({ communityId }: { communityId?: string } = {}) {
   const { toast } = useToast();
   const [selectedPrimary, setSelectedPrimary] = useState<PrimaryElection | null>(null);
   const [showDetailSheet, setShowDetailSheet] = useState(false);
   const [showScheduleDrawer, setShowScheduleDrawer] = useState(false);
+  const [mockPrimaryElections, setMockPrimaryElections] = useState<PrimaryElection[]>([]);
+  const [primaryElectionId, setPrimaryElectionId] = useState<string | null>(null);
+  const [concluding, setConcluding] = useState(false);
+
+  const loadData = useCallback(() => {
+    if (!communityId) return;
+    fetch(`/api/community/elections.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const currentElection = (d.elections ?? []).find((e: any) => e.status === "primary")
+          ?? (d.elections ?? []).find((e: any) => !['completed', 'cancelled'].includes(e.status));
+        setPrimaryElectionId(currentElection?.id ?? null);
+        if (!currentElection) { setMockPrimaryElections([]); return; }
+
+        const officesForElection = (d.offices ?? []).filter((o: any) => o.election_id === currentElection.id);
+        const mapped: PrimaryElection[] = officesForElection.map((o: any) => {
+          const candidates = (d.candidates ?? []).filter((c: any) => c.office_id === o.id && c.status !== 'disqualified');
+          const totalVotes = candidates.reduce((s: number, c: any) => s + (parseInt(c.primary_votes, 10) || 0), 0);
+          return {
+            id: o.id, officeId: o.id, officeName: o.name,
+            scheduledDate: new Date(currentElection.primary_date || currentElection.created_at),
+            startTime: "09:00", endTime: "18:00",
+            status: (currentElection.status === "primary" ? "ongoing" : "completed") as any,
+            candidates: candidates.map((c: any) => ({
+              id: c.id, name: c.name?.trim() || "Candidate", avatar: c.profile_photo || "/placeholder.svg",
+              votes: parseInt(c.primary_votes, 10) || 0,
+              percentage: totalVotes > 0 ? ((parseInt(c.primary_votes, 10) || 0) / totalVotes) * 100 : 0,
+              advancedToMain: c.status === "cleared", autoQualified: false,
+            })),
+            totalVotesCast: totalVotes, totalEligibleVoters: d.stats?.accredited ?? 0, winnerThreshold: 25,
+          };
+        }).filter((p: PrimaryElection) => p.candidates.length > 0);
+        setMockPrimaryElections(mapped);
+      })
+      .catch(() => setMockPrimaryElections([]));
+  }, [communityId]);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const handleConcludePrimary = async () => {
+    if (!communityId || !primaryElectionId) return;
+    setConcluding(true);
+    try {
+      const res = await fetch("/api/community/elections.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "conclude_primary", community_id: communityId, election_id: primaryElectionId, advance_count: 2 }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to conclude primary");
+      toast({ title: "Primary Round Concluded", description: "Top candidates per office have advanced to the campaign stage." });
+      setShowDetailSheet(false);
+      loadData();
+    } catch (e: any) {
+      toast({ title: "Couldn't Conclude Primary", description: e.message, variant: "destructive" });
+    } finally {
+      setConcluding(false);
+    }
+  };
   
   // Voters List Sheet state
   const [votersListOpen, setVotersListOpen] = useState(false);
@@ -121,7 +178,11 @@ export function AdminPrimaryElectionsSection() {
     setShowMemberPreview(true);
   };
 
-  const stats = getPrimaryStats();
+  const stats = {
+    total: mockPrimaryElections.length,
+    completed: mockPrimaryElections.filter((p) => p.status === "completed").length,
+    scheduled: mockPrimaryElections.filter((p) => p.status === "scheduled" || p.status === "ongoing").length,
+  };
 
   const handleStartPrimary = (primary: PrimaryElection) => {
     toast({
@@ -165,6 +226,12 @@ export function AdminPrimaryElectionsSection() {
           color="bg-amber-500/10" 
         />
       </div>
+
+      {primaryElectionId && mockPrimaryElections.length > 0 && (
+        <Button className="w-full" disabled={concluding} onClick={handleConcludePrimary}>
+          {concluding ? "Concluding..." : "Conclude Primary Round — Advance Top 2 Per Office"}
+        </Button>
+      )}
 
       {/* Action Button */}
       <Button 

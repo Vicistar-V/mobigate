@@ -8,11 +8,13 @@ interface AdvertPricingCardProps {
   pricing: AdvertPricing;
   walletBalance?: number;
   variant?: "card" | "inline";
+  onFundWallet?: () => void;
 }
 export const AdvertPricingCard = ({
   pricing,
   walletBalance = 500000,
-  variant = "card"
+  variant = "card",
+  onFundWallet,
 }: AdvertPricingCardProps) => {
   const finalAmount = pricing.finalAmountPayable ?? pricing.totalCost;
   const hasInsufficientFunds = walletBalance < finalAmount;
@@ -253,15 +255,16 @@ export const AdvertPricingCard = ({
         </div>
 
         {hasInsufficientFunds && (
-          <a 
-            href="/application/buy_coins.php" 
-            className="block p-3 rounded-lg bg-destructive/10 border border-destructive/20 hover:bg-destructive/20 transition-colors cursor-pointer"
+          <button
+            type="button"
+            onClick={onFundWallet}
+            className="block w-full text-left p-3 rounded-lg bg-destructive/10 border border-destructive/20 hover:bg-destructive/20 transition-colors cursor-pointer"
           >
             <p className="text-sm text-destructive font-medium">Insufficient funds on wallet</p>
             <p className="text-xs text-muted-foreground mt-1">
               <span className="underline hover:text-foreground transition-colors">Click here</span> to fund your wallet to continue
             </p>
-          </a>
+          </button>
         )}
       </div>
 

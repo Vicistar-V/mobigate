@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +34,8 @@ interface SettingsDetailSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   setting: AdminSetting | null;
-  onProposalSubmit?: (settingId: string, newValue: string, reason?: string) => void;
+  onProposalSubmit?: (setting: AdminSetting, newValue: string, reason?: string) => void | Promise<void>;
+  onRecommendSubmit?: (setting: AdminSetting, value: string, reason?: string) => void | Promise<void>;
 }
 
 export function SettingsDetailSheet({
@@ -42,6 +43,7 @@ export function SettingsDetailSheet({
   onOpenChange,
   setting,
   onProposalSubmit,
+  onRecommendSubmit,
 }: SettingsDetailSheetProps) {
   const isMobile = useIsMobile();
   const { toast } = useToast();
@@ -51,15 +53,20 @@ export function SettingsDetailSheet({
   const [reason, setReason] = useState("");
   const [showRecommendation, setShowRecommendation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [recommendValue, setRecommendValue] = useState("");
+  const [recommendReason, setRecommendReason] = useState("");
 
-  // Reset state when setting changes
-  useState(() => {
+  // Reset state whenever a different setting is opened
+  useEffect(() => {
     if (setting) {
       setSelectedValue(setting.currentValue);
+      setCustomValue("");
       setReason("");
       setShowRecommendation(false);
+      setRecommendValue("");
+      setRecommendReason("");
     }
-  });
+  }, [setting?.key]);
 
   if (!setting) return null;
 
@@ -71,31 +78,40 @@ export function SettingsDetailSheet({
 
   const handleSubmitProposal = async () => {
     if (!hasChanged) return;
-    
+
     setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    onProposalSubmit?.(setting.id, effectiveValue, reason);
-    
+    await onProposalSubmit?.(setting, effectiveValue, reason);
+
     toast({
       title: "Proposal Submitted",
       description: `Your proposed change to "${setting.name}" will be sent to members for approval.`
     });
-    
+
     setIsSubmitting(false);
     onOpenChange(false);
   };
 
   const handleRecommendSubmit = async () => {
+    if (!recommendValue.trim()) {
+      toast({
+        title: "Value Required",
+        description: "Please enter a recommended value.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    await onRecommendSubmit?.(setting, recommendValue.trim(), recommendReason || undefined);
+
     toast({
       title: "Recommendation Submitted",
       description: "Your alternative setting recommendation has been submitted for member support."
     });
-    
+
     setIsSubmitting(false);
+    setRecommendValue("");
+    setRecommendReason("");
     setShowRecommendation(false);
     onOpenChange(false);
   };
@@ -325,8 +341,19 @@ export function SettingsDetailSheet({
               Recommend an alternative value that other members can support. 
               If it reaches 60% support, it will override admin settings.
             </p>
+            <Input
+              value={recommendValue}
+              onChange={(e) => setRecommendValue(e.target.value)}
+              placeholder="Your recommended value..."
+              className="text-sm touch-manipulation"
+              autoComplete="off"
+              spellCheck={false}
+              onClick={(e) => e.stopPropagation()}
+            />
             <Textarea
-              placeholder="Describe your recommended value and why it's better..."
+              value={recommendReason}
+              onChange={(e) => setRecommendReason(e.target.value)}
+              placeholder="Describe why it's better (optional)..."
               rows={3}
               className="text-sm touch-manipulation"
               autoComplete="off"
@@ -338,7 +365,7 @@ export function SettingsDetailSheet({
                 size="sm"
                 className="w-full bg-blue-600 hover:bg-blue-700 touch-manipulation active:scale-[0.97]"
                 onClick={handleRecommendSubmit}
-                disabled={isSubmitting}
+                disabled={isSubmitting || !recommendValue.trim()}
               >
                 <Lightbulb className="h-3.5 w-3.5 mr-1.5 shrink-0" />
                 Submit Recommendation
@@ -347,7 +374,7 @@ export function SettingsDetailSheet({
                 variant="outline"
                 size="sm"
                 className="w-full touch-manipulation active:scale-[0.97]"
-                onClick={() => setShowRecommendation(false)}
+                onClick={() => { setShowRecommendation(false); setRecommendValue(""); setRecommendReason(""); }}
               >
                 Cancel
               </Button>

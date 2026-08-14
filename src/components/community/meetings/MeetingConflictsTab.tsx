@@ -3,21 +3,33 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Calendar, AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
-import { mockConflictsOfInterest, mockMeetings } from "@/data/meetingsData";
 import { format } from "date-fns";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export const MeetingConflictsTab = () => {
+export const MeetingConflictsTab = ({ communityId }: { communityId?: string } = {}) => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // Combine conflicts with meeting data
-  const conflictsWithMeetings = mockConflictsOfInterest.map((conflict) => {
-    const meeting = mockMeetings.find((m) => m.id === conflict.meetingId);
-    return { ...conflict, meeting };
-  });
+  const [conflictsWithMeetings, setConflictsWithMeetings] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!communityId) return;
+    fetch(`/api/community/meetings_admin.php?action=conflicts&community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const mapped = (d.conflicts ?? []).map((c: any) => ({
+          id: c.id, meetingId: c.meeting_id, memberId: c.member_id,
+          memberName: c.member_name?.trim() || "Member", memberAvatar: c.member_avatar || "/placeholder.svg",
+          description: c.description, resolution: c.resolution, status: c.status,
+          declaredAt: new Date(c.declared_at),
+          meeting: { id: c.meeting_id, name: c.meeting_title, date: new Date(c.declared_at) },
+        }));
+        setConflictsWithMeetings(mapped);
+      })
+      .catch(() => setConflictsWithMeetings([]));
+  }, [communityId]);
 
   // Filter by status
   const filteredConflicts =

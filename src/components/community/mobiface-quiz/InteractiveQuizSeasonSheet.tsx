@@ -1,39 +1,65 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { format } from "date-fns";
-import { Zap, Users, Trophy, Radio, Gift, ArrowRight, Handshake } from "lucide-react";
+import { Zap, Trophy, Radio, Gift, Loader2, Star } from "lucide-react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-import { QuizMerchant, QuizSeason, GAME_SHOW_ENTRY_POINTS } from "@/data/mobifaceInteractiveQuizData";
+import { Progress } from "@/components/ui/progress";
 import { formatMobiAmount, formatLocalAmount } from "@/lib/mobiCurrencyTranslation";
-import { useToast } from "@/hooks/use-toast";
 import { InteractiveQuizPlayDialog } from "./InteractiveQuizPlayDialog";
 import { LiveScoreboardDrawer } from "./LiveScoreboardDrawer";
-import { ViewSponsorsDrawer } from "./ViewSponsorsDrawer";
+
+const API = "/api/quiz/interactive.php";
+const CONTINUE_STAKE_PERCENT = 50;
+
+interface Season {
+  id: string; name: string; type: string; entry_fee: string;
+  first_prize: string; second_prize: string; third_prize: string;
+  consolation_prizes_enabled: number; consolation_prize_per_player: string; consolation_prize_count: number;
+  quiz_status: string; start_date: string; end_date: string;
+}
+interface Entry { total_points: number; total_winnings: string; total_plays: number; qualified: number; final_rank?: string; final_prize?: string }
 
 interface InteractiveQuizSeasonSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  merchant: QuizMerchant;
-  seasons: QuizSeason[];
+  merchantId: string;
+  merchantName: string;
 }
 
-export function InteractiveQuizSeasonSheet({ open, onOpenChange, merchant, seasons }: InteractiveQuizSeasonSheetProps) {
-  const { toast } = useToast();
-  const [selectedSeason, setSelectedSeason] = useState<QuizSeason | null>(null);
+export function InteractiveQuizSeasonSheet({ open, onOpenChange, merchantId, merchantName }: InteractiveQuizSeasonSheetProps) {
+  const [seasons, setSeasons] = useState<Season[]>([]);
+  const [selectedSeason, setSelectedSeason] = useState<Season | null>(null);
+  const [entry, setEntry] = useState<Entry | null>(null);
+  const [qualifyingPoints, setQualifyingPoints] = useState(300);
   const [showPlay, setShowPlay] = useState(false);
   const [showScoreboard, setShowScoreboard] = useState(false);
-  const [sponsorsSeason, setSponsorsSeason] = useState<QuizSeason | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [loadingEntry, setLoadingEntry] = useState(false);
 
-  const handleJoin = () => {
-    if (!selectedSeason) return;
-    toast({
-      title: "🎬 Joined Season!",
-      description: `You've joined "${selectedSeason.name}". ${formatMobiAmount(selectedSeason.entryFee)} deducted. Good luck!`,
-    });
-    setShowPlay(true);
+  useEffect(() => {
+    if (!open) return;
+    setLoading(true);
+    fetch(`${API}?action=seasons&merchant_id=${merchantId}`, { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d) => setSeasons(d.seasons ?? []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [open, merchantId]);
+
+  const loadEntry = useCallback((seasonId: string) => {
+    setLoadingEntry(true);
+    fetch(`${API}?action=my_entry&season_id=${seasonId}`, { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d) => { setEntry(d.entry); setQualifyingPoints(d.qualifying_points ?? 300); })
+      .catch(() => {})
+      .finally(() => setLoadingEntry(false));
+  }, []);
+
+  const handleSelectSeason = (season: Season) => {
+    setSelectedSeason(season);
+    loadEntry(season.id);
   };
 
   const getSeasonTypeColor = (type: string) => {
@@ -45,18 +71,25 @@ export function InteractiveQuizSeasonSheet({ open, onOpenChange, merchant, seaso
     }
   };
 
+  const entryFee = selectedSeason ? parseFloat(selectedSeason.entry_fee) : 0;
+  const nextFee = entry && entry.total_plays > 0 ? Math.round(entryFee * CONTINUE_STAKE_PERCENT / 100) : entryFee;
+  const totalPrizePool = selectedSeason
+    ? parseFloat(selectedSeason.first_prize) + parseFloat(selectedSeason.second_prize) + parseFloat(selectedSeason.third_prize) +
+      (selectedSeason.consolation_prizes_enabled ? parseFloat(selectedSeason.consolation_prize_per_player) * selectedSeason.consolation_prize_count : 0)
+    : 0;
+
   return (
     <>
       <Drawer open={open && !showPlay} onOpenChange={onOpenChange}>
         <DrawerContent className="max-h-[92vh]">
           <DrawerHeader className="text-left pb-2">
             <DrawerTitle className="flex items-center gap-2 text-base">
-              <Trophy className="h-5 w-5 text-blue-500" /> {merchant.name}
+              <Trophy className="h-5 w-5 text-blue-500" /> {merchantName}
             </DrawerTitle>
             <p className="text-sm text-muted-foreground">Select a season to compete in</p>
             <button
               onClick={() => setShowScoreboard(true)}
-              className="flex items-center gap-1.5 mt-1 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-200/30 active:scale-95 transition-all touch-manipulation"
+              className="flex items-center gap-1.5 mt-1 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-200/30 active:scale-95 transition-all touch-manipulation w-fit"
             >
               <span className="relative flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
@@ -69,146 +102,124 @@ export function InteractiveQuizSeasonSheet({ open, onOpenChange, merchant, seaso
 
           <div className="flex-1 overflow-y-auto touch-auto overscroll-contain px-4">
             <div className="space-y-3 pb-4">
-              {seasons.map((season) => (
-                <Card
-                  key={season.id}
-                  className={`cursor-pointer transition-all touch-manipulation ${
-                    selectedSeason?.id === season.id ? "border-2 border-blue-500 bg-blue-50 dark:bg-blue-950/30" : "hover:border-blue-300"
-                  }`}
-                  onClick={() => setSelectedSeason(season)}
-                >
-                  <CardContent className="p-4 space-y-3">
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-1">
-                        <h4 className="text-base font-bold break-words">{season.name}</h4>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Badge variant="outline" className={`text-xs ${getSeasonTypeColor(season.type)}`}>{season.type} Season</Badge>
-                          {season.isLive && (
-                            <Badge className="text-xs bg-red-500 text-white border-0 animate-pulse">
-                              <Radio className="h-3 w-3 mr-1" /> LIVE
-                            </Badge>
-                          )}
-                          {season.consolationPrizesEnabled && (
-                            <Badge variant="outline" className="text-xs bg-purple-50 text-purple-600 border-purple-200">
-                              <Gift className="h-3 w-3 mr-0.5" /> Consolation
-                            </Badge>
+              {loading ? (
+                <div className="flex justify-center py-10"><Loader2 className="h-7 w-7 animate-spin text-blue-500" /></div>
+              ) : seasons.map((season) => {
+                const seasonTotal = parseFloat(season.first_prize) + parseFloat(season.second_prize) + parseFloat(season.third_prize) +
+                  (season.consolation_prizes_enabled ? parseFloat(season.consolation_prize_per_player) * season.consolation_prize_count : 0);
+                return (
+                  <Card
+                    key={season.id}
+                    className={`cursor-pointer transition-all touch-manipulation ${
+                      selectedSeason?.id === season.id ? "border-2 border-blue-500 bg-blue-50 dark:bg-blue-950/30" : "hover:border-blue-300"
+                    }`}
+                    onClick={() => handleSelectSeason(season)}
+                  >
+                    <CardContent className="p-4 space-y-3">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1">
+                          <h4 className="text-base font-bold break-words">{season.name}</h4>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant="outline" className={`text-xs ${getSeasonTypeColor(season.type)}`}>{season.type} Season</Badge>
+                            {season.quiz_status === "active" && (
+                              <Badge className="text-xs bg-red-500 text-white border-0 animate-pulse">
+                                <Radio className="h-3 w-3 mr-1" /> LIVE
+                              </Badge>
+                            )}
+                            {!!season.consolation_prizes_enabled && (
+                              <Badge variant="outline" className="text-xs bg-purple-50 text-purple-600 border-purple-200">
+                                <Gift className="h-3 w-3 mr-0.5" /> Consolation
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {season.start_date && format(new Date(season.start_date), "MMM d, yyyy")} — {season.end_date && format(new Date(season.end_date), "MMM d, yyyy")}
+                          </p>
+                        </div>
+                        <Badge variant="outline" className="text-xs">{season.quiz_status}</Badge>
+                      </div>
+
+                      <div className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 rounded-lg p-3 border border-amber-200/50 dark:border-amber-800/30">
+                        <p className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase mb-1.5 flex items-center gap-1">
+                          <Trophy className="h-3.5 w-3.5" /> Game Show Prizes
+                        </p>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                          <span className="text-muted-foreground">🥇 1st:</span>
+                          <span className="font-semibold">{formatLocalAmount(parseFloat(season.first_prize), "NGN")}</span>
+                          <span className="text-muted-foreground">🥈 2nd:</span>
+                          <span className="font-semibold">{formatLocalAmount(parseFloat(season.second_prize), "NGN")}</span>
+                          <span className="text-muted-foreground">🥉 3rd:</span>
+                          <span className="font-semibold">{formatLocalAmount(parseFloat(season.third_prize), "NGN")}</span>
+                          {!!season.consolation_prizes_enabled && (
+                            <>
+                              <span className="text-muted-foreground">🎁 Consolation:</span>
+                              <span className="font-semibold">{formatLocalAmount(parseFloat(season.consolation_prize_per_player), "NGN")} × {season.consolation_prize_count}</span>
+                            </>
                           )}
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          {format(new Date(season.startDate), "MMM d, yyyy")} — {format(new Date(season.endDate), "MMM d, yyyy")}
+                        <p className="text-xs text-muted-foreground mt-1.5">
+                          Total: <span className="font-bold text-green-600">{formatLocalAmount(seasonTotal, "NGN")}</span>
                         </p>
                       </div>
-                      <Badge variant="outline" className="text-xs">{season.status}</Badge>
-                    </div>
 
-                    {/* Winning Prizes Breakdown */}
-                    <div className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 rounded-lg p-3 border border-amber-200/50 dark:border-amber-800/30">
-                      <p className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase mb-1.5 flex items-center gap-1">
-                        <Trophy className="h-3.5 w-3.5" /> Game Show Prizes
-                      </p>
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                        <span className="text-muted-foreground">🥇 1st:</span>
-                        <span className="font-semibold">{formatLocalAmount(season.firstPrize, "NGN")}</span>
-                        <span className="text-muted-foreground">🥈 2nd:</span>
-                        <span className="font-semibold">{formatLocalAmount(season.secondPrize, "NGN")}</span>
-                        <span className="text-muted-foreground">🥉 3rd:</span>
-                        <span className="font-semibold">{formatLocalAmount(season.thirdPrize, "NGN")}</span>
-                        {season.consolationPrizesEnabled && (
-                          <>
-                            <span className="text-muted-foreground">🎁 Consolation:</span>
-                            <span className="font-semibold">{formatLocalAmount(season.consolationPrizePerPlayer, "NGN")} × {season.consolationPrizeCount}</span>
-                          </>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1.5">
-                        {season.consolationPrizesEnabled && `Consolation for ${season.consolationPrizeCount} Semi-Final contestants • `}
-                        Total: <span className="font-bold text-green-600">{formatLocalAmount(season.totalWinningPrizes, "NGN")}</span>
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
                       <div className="p-2 bg-muted/50 rounded text-center">
-                        <p className="text-xs text-muted-foreground">Levels</p>
-                        <p className="font-bold text-sm">{season.selectionLevels}</p>
+                        <p className="text-xs text-muted-foreground">Entry Fee</p>
+                        <p className="font-bold text-sm text-red-600">{formatMobiAmount(parseFloat(season.entry_fee))}</p>
                       </div>
-                      <div className="p-2 bg-muted/50 rounded text-center">
-                        <p className="text-xs text-muted-foreground">Prize/Lvl</p>
-                        <p className="font-bold text-sm text-green-600">{formatMobiAmount(season.prizePerLevel)}</p>
-                        <p className="text-xs text-muted-foreground">{formatLocalAmount(season.prizePerLevel, "NGN")}</p>
-                      </div>
-                    </div>
 
-                    {/* Selection Rounds */}
-                    {season.selectionProcesses.length > 0 && (
-                      <div className="space-y-1.5">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase">Selection Rounds</p>
-                        <div className="flex gap-1.5 flex-wrap">
-                          {season.selectionProcesses.map((sp, idx) => (
-                            <Badge key={idx} variant="outline" className="text-xs py-0.5 px-2">
-                              R{sp.round}: {formatLocalAmount(sp.entryFee, "NGN")}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                      {/* My progress in this season */}
+                      {selectedSeason?.id === season.id && (
+                        loadingEntry ? (
+                          <div className="flex justify-center py-2"><Loader2 className="h-5 w-5 animate-spin text-blue-500" /></div>
+                        ) : entry && (
+                          <div className="p-3 rounded-lg border border-blue-200 bg-blue-50/50 dark:bg-blue-950/20 space-y-2">
+                            {entry.final_rank ? (
+                              <div className="text-center">
+                                <p className="text-sm font-bold text-amber-600">Season Complete — You placed {entry.final_rank}!</p>
+                                {parseFloat(entry.final_prize ?? "0") > 0 && (
+                                  <p className="text-xs text-green-600 font-medium">Won {formatLocalAmount(parseFloat(entry.final_prize ?? "0"), "NGN")}</p>
+                                )}
+                              </div>
+                            ) : (
+                              <>
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="text-muted-foreground flex items-center gap-1"><Star className="h-3 w-3" /> Qualifying Points</span>
+                                  <span className="font-semibold">{entry.total_points}/{qualifyingPoints}</span>
+                                </div>
+                                <Progress value={Math.min(100, (entry.total_points / qualifyingPoints) * 100)} className="h-1.5" />
+                                {!!entry.qualified && (
+                                  <Badge className="bg-green-500 text-white border-0 text-xs">✓ Qualified for Season Finals</Badge>
+                                )}
+                                <div className="flex justify-between text-xs text-muted-foreground">
+                                  <span>{entry.total_plays} plays</span>
+                                  <span>Won so far: {formatLocalAmount(parseFloat(entry.total_winnings), "NGN")}</span>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        )
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
 
-                    {/* TV Rounds summary */}
-                    {season.tvShowRounds.length > 0 && (
-                      <div className="space-y-1.5">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase">TV Show Rounds</p>
-                        <div className="flex gap-1.5 flex-wrap">
-                          {season.tvShowRounds.map((tv, idx) => (
-                            <Badge key={idx} variant="secondary" className="text-xs py-0.5 px-2">
-                              📺 {tv.label}: {tv.entriesSelected} {tv.entryFee > 0 ? `@ ${formatLocalAmount(tv.entryFee, "NGN")}` : "(FREE)"}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>{GAME_SHOW_ENTRY_POINTS} pts to enter show</span>
-                    </div>
-
-                    {/* Level progression */}
-                    <div className="flex gap-1">
-                      {Array.from({ length: season.selectionLevels }).map((_, i) => {
-                        const isLive = i >= season.selectionLevels - 3;
-                        const isPast = i < season.currentLevel;
-                        return (
-                          <div key={i} className={`h-2 flex-1 rounded-full ${
-                            isPast ? "bg-blue-500" : isLive ? "bg-red-300" : "bg-muted"
-                          }`} />
-                        );
-                      })}
-                    </div>
-                    <p className="text-xs text-muted-foreground text-center">Last 3 levels are Live Shows 📺</p>
-
-                    {/* View Official Sponsors */}
-                    {season.sponsors && season.sponsors.length > 0 && (
-                      <Button
-                        variant="outline"
-                        className="w-full h-9 text-xs font-semibold gap-2 touch-manipulation active:scale-[0.97]"
-                        onClick={(e) => { e.stopPropagation(); setSponsorsSeason(season); }}
-                      >
-                        <Handshake className="h-3.5 w-3.5 text-primary" />
-                        View Official Sponsors ({season.sponsors.length})
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
+              {!loading && seasons.length === 0 && (
+                <Card><CardContent className="p-6 text-center text-muted-foreground text-sm">No seasons available.</CardContent></Card>
+              )}
             </div>
           </div>
 
           <div className="px-4 pb-4 pt-2 border-t">
             <Button
               className="w-full h-12 bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
-              onClick={handleJoin}
-              disabled={!selectedSeason}
+              onClick={() => setShowPlay(true)}
+              disabled={!selectedSeason || selectedSeason.quiz_status !== "active" || !!entry?.final_rank}
             >
               <Zap className="h-4 w-4 mr-2" />
-              {selectedSeason ? `Join - Pay ${formatMobiAmount(selectedSeason.entryFee)} (${formatLocalAmount(selectedSeason.entryFee, "NGN")})` : "Select a Season"}
+              {!selectedSeason ? "Select a Season" :
+                entry?.final_rank ? "Season Completed" :
+                `${entry && entry.total_plays > 0 ? "Continue" : "Join"} - Pay ${formatMobiAmount(nextFee)} (${formatLocalAmount(nextFee, "NGN")})`}
             </Button>
           </div>
         </DrawerContent>
@@ -217,17 +228,12 @@ export function InteractiveQuizSeasonSheet({ open, onOpenChange, merchant, seaso
       {selectedSeason && (
         <InteractiveQuizPlayDialog
           open={showPlay}
-          onOpenChange={(v) => { if (!v) { setShowPlay(false); onOpenChange(false); } }}
-          season={selectedSeason}
+          onOpenChange={(v) => { if (!v) { setShowPlay(false); loadEntry(selectedSeason.id); } }}
+          seasonId={selectedSeason.id}
+          entryFee={entryFee}
         />
       )}
       <LiveScoreboardDrawer open={showScoreboard} onOpenChange={setShowScoreboard} />
-      <ViewSponsorsDrawer
-        open={!!sponsorsSeason}
-        onOpenChange={(v) => { if (!v) setSponsorsSeason(null); }}
-        sponsors={sponsorsSeason?.sponsors || []}
-        seasonName={sponsorsSeason?.name}
-      />
     </>
   );
 }

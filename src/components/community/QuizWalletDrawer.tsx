@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { 
-  Wallet, ArrowDownLeft, ArrowUpRight, ArrowDown, ArrowUp, 
+import { useState, useEffect, useCallback } from "react";
+import {
+  Wallet, ArrowDownLeft, ArrowUpRight, ArrowDown, ArrowUp,
   Shield, AlertTriangle, CheckCircle, Send, X, Info, ChevronRight,
-  Gift, RotateCcw
+  Gift, RotateCcw, Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,60 +10,132 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
-import { 
-  communityQuizWalletData, 
-  getQuizWalletAvailability,
-  QuizWalletTransaction 
-} from "@/data/communityQuizData";
 import { formatLocalAmount, formatMobiAmount, formatLocalFirst } from "@/lib/mobiCurrencyTranslation";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { TransactionDetailDrawer, TransactionDetail } from "@/components/community/finance/TransactionDetailDrawer";
 import { QuizPlayerSelectDrawer } from "@/components/community/QuizPlayerSelectDrawer";
 
+const API = "/api/community";
+
 interface QuizWalletDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
 }
 
 type TransferMode = null | "fund" | "withdraw";
 
-const txTypeConfig: Record<QuizWalletTransaction["type"], { icon: typeof ArrowDown; color: string; bg: string; label: string }> = {
+type TxnType = "stake_income" | "winning_payout" | "transfer_in" | "transfer_out" | "bonus" | "refund";
+
+interface WalletTxn {
+  id: string; type: TxnType; amount: string; description: string; reference: string;
+  related_quiz_id?: string | null; player_name?: string | null; created_at: string;
+}
+interface QuizWallet {
+  balance: string; total_stake_income: string; total_winning_payouts: string;
+  income_from_main_wallet: string; transfers_to_main_wallet: string; reserved_for_payouts: string;
+}
+
+const txTypeConfig: Record<TxnType, { icon: typeof ArrowDown; color: string; bg: string; label: string }> = {
   stake_income:   { icon: ArrowDownLeft,  color: "text-green-600",  bg: "bg-green-100 dark:bg-green-900/40",  label: "Stake In" },
   winning_payout: { icon: ArrowUpRight,   color: "text-red-600",    bg: "bg-red-100 dark:bg-red-900/40",      label: "Payout" },
   transfer_in:    { icon: ArrowDown,      color: "text-blue-600",   bg: "bg-blue-100 dark:bg-blue-900/40",    label: "Transfer In" },
   transfer_out:   { icon: ArrowUp,        color: "text-orange-600", bg: "bg-orange-100 dark:bg-orange-900/40", label: "Transfer Out" },
+  bonus:          { icon: Gift,           color: "text-emerald-600", bg: "bg-emerald-100 dark:bg-emerald-900/40", label: "Bonus" },
+  refund:         { icon: RotateCcw,      color: "text-violet-600", bg: "bg-violet-100 dark:bg-violet-900/40", label: "Refund" },
 };
 
-export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) {
+export function QuizWalletDrawer({ open, onOpenChange, communityId }: QuizWalletDrawerProps) {
   const { toast } = useToast();
   const [transferMode, setTransferMode] = useState<TransferMode>(null);
   const [transferAmount, setTransferAmount] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [selectedTx, setSelectedTx] = useState<TransactionDetail | null>(null);
   const [playerSelectMode, setPlayerSelectMode] = useState<"bonus" | "refund" | null>(null);
-  const wallet = communityQuizWalletData;
-  const availability = getQuizWalletAvailability();
 
-  const handleTransfer = () => {
+  const [wallet, setWallet] = useState<QuizWallet | null>(null);
+  const [txns, setTxns] = useState<WalletTxn[]>([]);
+  const [players, setPlayers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const loadData = useCallback(() => {
+    if (!communityId) return;
+    setLoading(true);
+    fetch(`${API}/quiz.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d) => {
+        setWallet(d.wallet ?? null);
+        setTxns(d.walletTxns ?? []);
+        setPlayers(d.players ?? []);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [communityId]);
+
+  useEffect(() => { if (open) loadData(); }, [open, loadData]);
+
+  const balance = wallet ? parseFloat(wallet.balance) : 0;
+  const reserved = wallet ? parseFloat(wallet.reserved_for_payouts) : 0;
+  const availableBalance = balance - reserved;
+  const totalStakeIncome = wallet ? parseFloat(wallet.total_stake_income) : 0;
+  const totalWinningPayouts = wallet ? parseFloat(wallet.total_winning_payouts) : 0;
+  const netPosition = totalStakeIncome - totalWinningPayouts;
+  const available = { available: availableBalance > 0, totalRequired: reserved };
+
+  const handleTransfer = async () => {
     const amount = parseFloat(transferAmount);
     if (!amount || amount <= 0) {
       toast({ title: "Invalid Amount", description: "Enter a valid amount.", variant: "destructive" });
       return;
     }
-    if (transferMode === "withdraw" && amount > wallet.availableBalance) {
+    if (transferMode === "withdraw" && amount > availableBalance) {
       toast({ title: "Insufficient Available Balance", description: "You can only transfer the available balance (excluding reserved funds).", variant: "destructive" });
       return;
     }
-    toast({
-      title: transferMode === "fund" ? "Funds Received" : "Transfer Sent",
-      description: `${formatLocalFirst(amount, "NGN")} ${transferMode === "fund" ? "funded from" : "transferred to"} Main Community Wallet.`,
-    });
-    setTransferMode(null);
-    setTransferAmount("");
+    setSubmitting(true);
+    try {
+      const res = await fetch(`${API}/quiz.php`, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: transferMode === "fund" ? "fund_wallet" : "withdraw_wallet", community_id: communityId, amount }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Transfer failed");
+      toast({
+        title: transferMode === "fund" ? "Funds Received" : "Transfer Sent",
+        description: `${formatLocalFirst(amount, "NGN")} ${transferMode === "fund" ? "funded from" : "transferred to"} Main Community Wallet.`,
+      });
+      setTransferMode(null);
+      setTransferAmount("");
+      loadData();
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const sortedTxns = [...wallet.transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  const netPosition = wallet.totalStakeIncome - wallet.totalWinningPayouts;
+  const handlePlayerAction = async (userId: string, amount: number, reason: string) => {
+    try {
+      const res = await fetch(`${API}/quiz.php`, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: playerSelectMode === "bonus" ? "bonus_player" : "refund_player", community_id: communityId, user_id: userId, amount, reason }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Action failed");
+      toast({ title: playerSelectMode === "bonus" ? "Bonus Awarded" : "Refund Sent", description: formatLocalFirst(amount, "NGN") });
+      setPlayerSelectMode(null);
+      loadData();
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    }
+  };
+
+  const sortedTxns = [...txns].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  if (!communityId) return null;
 
   return (
     <>
@@ -88,7 +160,9 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
             </div>
           </div>
 
-          {/* Scrollable Body */}
+          {loading && !wallet ? (
+            <div className="flex-1 flex items-center justify-center"><Loader2 className="h-7 w-7 animate-spin text-blue-600" /></div>
+          ) : (
           <ScrollArea className="flex-1 overflow-y-auto touch-auto">
             <div className="px-2 py-4 space-y-4 pb-8">
               {/* Balance Card */}
@@ -97,36 +171,33 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
                   <div className="text-center">
                     <p className="text-xs text-muted-foreground">Total Balance</p>
                     <p className="text-3xl font-bold text-blue-700 dark:text-blue-300">
-                      {formatLocalAmount(wallet.balance, "NGN")}
+                      {formatLocalAmount(balance, "NGN")}
                     </p>
-                    <p className="text-sm text-muted-foreground">({formatMobiAmount(wallet.balance)})</p>
+                    <p className="text-sm text-muted-foreground">({formatMobiAmount(balance)})</p>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="p-2.5 bg-green-50 dark:bg-green-950/30 rounded-lg text-center border border-green-200">
                       <p className="text-xs text-muted-foreground">Available</p>
-                      <p className="font-bold text-sm text-green-600">{formatLocalAmount(wallet.availableBalance, "NGN")}</p>
-                      <p className="text-xs text-muted-foreground">({formatMobiAmount(wallet.availableBalance)})</p>
+                      <p className="font-bold text-sm text-green-600">{formatLocalAmount(availableBalance, "NGN")}</p>
+                      <p className="text-xs text-muted-foreground">({formatMobiAmount(availableBalance)})</p>
                     </div>
                     <div className="p-2.5 bg-amber-50 dark:bg-amber-950/30 rounded-lg text-center border border-amber-200">
                       <p className="text-xs text-muted-foreground">Reserved for Payouts</p>
-                      <p className="font-bold text-sm text-amber-600">{formatLocalAmount(wallet.reservedForPayouts, "NGN")}</p>
-                      <p className="text-xs text-muted-foreground">({formatMobiAmount(wallet.reservedForPayouts)})</p>
+                      <p className="font-bold text-sm text-amber-600">{formatLocalAmount(reserved, "NGN")}</p>
+                      <p className="text-xs text-muted-foreground">({formatMobiAmount(reserved)})</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Availability Banner */}
-              {!availability.available ? (
+              {!available.available ? (
                 <div className="flex items-start gap-2.5 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-300 rounded-lg">
                   <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">Insufficient Funds</p>
                     <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5">
                       Quiz Game Unavailable Right Now! Please fund the Quiz Wallet from the Main Community Wallet.
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Required reserve: {formatLocalFirst(availability.totalRequired, "NGN")}
                     </p>
                   </div>
                 </div>
@@ -141,11 +212,11 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
               <div className="grid grid-cols-3 gap-2">
                 <div className="p-2.5 bg-blue-50 dark:bg-blue-950/30 rounded-lg text-center border border-blue-200">
                   <p className="text-xs text-muted-foreground">Stakes In</p>
-                  <p className="font-bold text-sm text-blue-600">{formatLocalAmount(wallet.totalStakeIncome, "NGN")}</p>
+                  <p className="font-bold text-sm text-blue-600">{formatLocalAmount(totalStakeIncome, "NGN")}</p>
                 </div>
                 <div className="p-2.5 bg-red-50 dark:bg-red-950/30 rounded-lg text-center border border-red-200">
                   <p className="text-xs text-muted-foreground">Payouts</p>
-                  <p className="font-bold text-sm text-red-600">{formatLocalAmount(wallet.totalWinningPayouts, "NGN")}</p>
+                  <p className="font-bold text-sm text-red-600">{formatLocalAmount(totalWinningPayouts, "NGN")}</p>
                 </div>
                 <div className={cn("p-2.5 rounded-lg text-center border", netPosition >= 0 ? "bg-green-50 dark:bg-green-950/30 border-green-200" : "bg-red-50 dark:bg-red-950/30 border-red-200")}>
                   <p className="text-xs text-muted-foreground">Net Position</p>
@@ -227,15 +298,15 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
                     {transferMode === "withdraw" && (
                       <div className="flex items-start gap-2 p-2 bg-amber-50 border border-amber-200 rounded-lg">
                         <Info className="h-3.5 w-3.5 text-amber-600 shrink-0 mt-0.5" />
-                        <p className="text-xs text-amber-700">Max transferable: {formatLocalFirst(wallet.availableBalance, "NGN")} (reserved funds excluded)</p>
+                        <p className="text-xs text-amber-700">Max transferable: {formatLocalFirst(availableBalance, "NGN")} (reserved funds excluded)</p>
                       </div>
                     )}
                     <Button
                       className={cn("w-full h-11 font-semibold", transferMode === "fund" ? "bg-blue-600 hover:bg-blue-700" : "bg-orange-600 hover:bg-orange-700")}
                       onClick={handleTransfer}
-                      disabled={!transferAmount || parseFloat(transferAmount) <= 0}
+                      disabled={!transferAmount || parseFloat(transferAmount) <= 0 || submitting}
                     >
-                      <Send className="h-4 w-4 mr-2" />
+                      {submitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
                       Confirm {transferMode === "fund" ? "Funding" : "Transfer"}
                     </Button>
                   </CardContent>
@@ -251,13 +322,13 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
                       <span className="text-muted-foreground flex items-center gap-1.5">
                         <ArrowDown className="h-3 w-3 text-blue-500" /> Income from Main Wallet
                       </span>
-                      <span className="font-medium text-blue-600">{formatLocalAmount(wallet.incomeFromMainWallet, "NGN")}</span>
+                      <span className="font-medium text-blue-600">{formatLocalAmount(wallet ? parseFloat(wallet.income_from_main_wallet) : 0, "NGN")}</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground flex items-center gap-1.5">
                         <ArrowUp className="h-3 w-3 text-orange-500" /> Transfers to Main Wallet
                       </span>
-                      <span className="font-medium text-orange-600">{formatLocalAmount(wallet.transfersToMainWallet, "NGN")}</span>
+                      <span className="font-medium text-orange-600">{formatLocalAmount(wallet ? parseFloat(wallet.transfers_to_main_wallet) : 0, "NGN")}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -266,10 +337,14 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
               {/* Transaction History */}
               <div className="space-y-2">
                 <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-1">Transaction History</h4>
+                {sortedTxns.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-6">No transactions yet.</p>
+                )}
                 {sortedTxns.map((tx) => {
                   const config = txTypeConfig[tx.type];
                   const Icon = config.icon;
-                  const isDebit = tx.type === "winning_payout" || tx.type === "transfer_out";
+                  const isDebit = tx.type === "winning_payout" || tx.type === "transfer_out" || tx.type === "bonus" || tx.type === "refund";
+                  const amount = parseFloat(tx.amount);
                   return (
                     <button
                       key={tx.id}
@@ -277,12 +352,12 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
                       onClick={() => setSelectedTx({
                         id: tx.id,
                         description: tx.description,
-                        amount: tx.amount,
-                        date: new Date(tx.date),
+                        amount,
+                        date: new Date(tx.created_at),
                         quizType: tx.type,
                         reference: tx.reference,
-                        playerName: tx.playerName,
-                        relatedQuizId: tx.relatedQuizId,
+                        playerName: tx.player_name ?? undefined,
+                        relatedQuizId: tx.related_quiz_id ?? undefined,
                         status: "completed",
                       })}
                     >
@@ -293,20 +368,20 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
                         <p className="text-sm font-medium line-clamp-1">{tx.description}</p>
                         <div className="flex items-center gap-2 flex-wrap mt-0.5">
                           <Badge variant="outline" className="text-xs px-1.5 py-0">{config.label}</Badge>
-                          {tx.playerName && (
-                            <span className="text-xs text-muted-foreground">{tx.playerName}</span>
+                          {tx.player_name && (
+                            <span className="text-xs text-muted-foreground">{tx.player_name}</span>
                           )}
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {new Date(tx.date).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })} • {tx.reference}
+                          {new Date(tx.created_at).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })} • {tx.reference}
                         </p>
                       </div>
                       <div className="text-right shrink-0 flex flex-col items-end gap-1">
                         <p className={cn("font-bold text-sm", isDebit ? "text-red-600" : "text-green-600")}>
-                          {isDebit ? "-" : "+"}{formatLocalAmount(tx.amount, "NGN")}
+                          {isDebit ? "-" : "+"}{formatLocalAmount(amount, "NGN")}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          ({isDebit ? "-" : "+"}{formatMobiAmount(tx.amount)})
+                          ({isDebit ? "-" : "+"}{formatMobiAmount(amount)})
                         </p>
                         <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />
                       </div>
@@ -316,6 +391,7 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
               </div>
             </div>
           </ScrollArea>
+          )}
         </div>
       </DrawerContent>
     </Drawer>
@@ -331,6 +407,8 @@ export function QuizWalletDrawer({ open, onOpenChange }: QuizWalletDrawerProps) 
         open={!!playerSelectMode}
         onOpenChange={(open) => !open && setPlayerSelectMode(null)}
         mode={playerSelectMode}
+        players={players}
+        onConfirm={handlePlayerAction}
       />
     )}
     </>

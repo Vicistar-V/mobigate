@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle2, Clock, XCircle, ArrowLeft, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,15 +39,45 @@ const MerchantApplicationStatus = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [status, setStatus] = useState<Status>("pending");
+  const [application, setApplication] = useState<{
+    merchant_type?: string; rejection_reason?: string; submitted_at?: string; reviewed_at?: string;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`/api/merchant/application.php?action=status`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.application) {
+          setApplication(d.application);
+          setStatus(d.application.status as Status);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   const config = statusConfig[status];
   const Icon = config.icon;
 
-  const cycleStatus = () => {
-    const order: Status[] = ["pending", "approved", "rejected"];
-    const next = order[(order.indexOf(status) + 1) % order.length];
-    setStatus(next);
-  };
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-background items-center justify-center">
+        <Clock className="h-8 w-8 text-muted-foreground animate-pulse" />
+      </div>
+    );
+  }
+
+  if (!application) {
+    return (
+      <div className="flex flex-col min-h-screen bg-background items-center justify-center px-4 text-center">
+        <Bell className="h-10 w-10 text-muted-foreground mb-3" />
+        <h2 className="text-lg font-bold mb-1">No Application Found</h2>
+        <p className="text-sm text-muted-foreground mb-5">You haven't submitted a merchant application yet.</p>
+        <Button onClick={() => navigate("/merchant-application/individual")}>Apply Now</Button>
+      </div>
+    );
+  }
 
   const handleReminder = () => {
     toast({
@@ -80,12 +110,10 @@ const MerchantApplicationStatus = () => {
           <h2 className="text-xl font-bold text-foreground mb-2">{config.heading}</h2>
           <Badge
             variant="outline"
-            className={`${config.badgeClass} cursor-pointer touch-manipulation`}
-            onClick={cycleStatus}
+            className={config.badgeClass}
           >
             {config.badgeLabel}
           </Badge>
-          <p className="text-[10px] text-muted-foreground/50 mt-1">(Tap badge to cycle demo status)</p>
         </div>
 
         {/* Details Card */}
@@ -93,15 +121,15 @@ const MerchantApplicationStatus = () => {
           <CardContent className="p-4 space-y-3">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Date Submitted</span>
-              <span className="font-medium text-foreground">15 Feb 2026</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Reference No.</span>
-              <span className="font-medium text-foreground font-mono">MG-MER-2026-0042</span>
+              <span className="font-medium text-foreground">
+                {application?.submitted_at ? new Date(application.submitted_at).toLocaleDateString() : "—"}
+              </span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Application Type</span>
-              <span className="font-medium text-foreground">Individual Merchant</span>
+              <span className="font-medium text-foreground">
+                {application?.merchant_type === "corporate" ? "Corporate Merchant" : "Individual Merchant"}
+              </span>
             </div>
             {status === "pending" && (
               <div className="flex justify-between text-sm">
@@ -109,11 +137,11 @@ const MerchantApplicationStatus = () => {
                 <span className="font-medium text-amber-600">14 business days</span>
               </div>
             )}
-            {status === "rejected" && (
+            {status === "rejected" && application?.rejection_reason && (
               <div className="pt-2 border-t border-border/50">
                 <p className="text-sm font-semibold text-red-600 mb-1">Reason for Decline</p>
                 <p className="text-sm text-foreground leading-relaxed">
-                  Incomplete business documentation. Please provide a valid business registration certificate and proof of address, then re-apply.
+                  {application.rejection_reason}
                 </p>
               </div>
             )}

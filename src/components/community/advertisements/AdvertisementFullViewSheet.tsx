@@ -1,161 +1,123 @@
-import { useState, useRef } from "react";
-import { Drawer, DrawerContent } from "@/components/ui/drawer";
+// src/components/community/advertisements/AdvertisementFullViewSheet.tsx
+import { useState, useEffect } from "react";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
-  X, MapPin, Phone, Mail, Globe, ChevronLeft, ChevronRight,
-  Flag, Eye, Calendar, ThumbsUp, MessageSquare, Share2, Megaphone, Play,
-  MoreVertical, Edit2, Pause, Trash2, PlayCircle,
+  X, ChevronLeft, ChevronRight, MapPin, Phone, Mail, Globe,
+  Megaphone, Eye, TrendingUp, Loader2, Play, Image,
 } from "lucide-react";
-import { getCategoryLabel } from "@/data/advertisementData";
-import { formatMobiAmount, calculateDaysRemaining } from "@/lib/campaignFeeDistribution";
-import { useToast } from "@/hooks/use-toast";
-import type { EnhancedAdvertisement } from "@/types/advertisementSystem";
+import { cn } from "@/lib/utils";
+
+const API = "/api/community";
+
+interface MediaItem { url: string; type: "image" | "video"; }
+interface FullAd {
+  id: string;
+  business_name: string;
+  product_title: string;
+  category: string;
+  description: string;
+  city: string;
+  phone1: string;
+  phone2?: string;
+  email?: string;
+  website?: string;
+  media: MediaItem[];
+  views: number;
+  clicks: number;
+  status: string;
+  created_at: string;
+  advertiser_name: string;
+  advertiser_photo?: string;
+}
 
 interface AdvertisementFullViewSheetProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
-  advertisement: EnhancedAdvertisement | null;
-  isOwner?: boolean;
+  onOpenChange: (v: boolean) => void;
+  adId?: string;
+  communityId?: string;
 }
 
-export function AdvertisementFullViewSheet({ open, onOpenChange, advertisement, isOwner = false }: AdvertisementFullViewSheetProps) {
-  const { toast } = useToast();
-  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showReportConfirm, setShowReportConfirm] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
-  const [showComments, setShowComments] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+export function AdvertisementFullViewSheet({
+  open, onOpenChange, adId, communityId,
+}: AdvertisementFullViewSheetProps) {
+  const [ad,          setAd]          = useState<FullAd | null>(null);
+  const [loading,     setLoading]     = useState(false);
+  const [error,       setError]       = useState<string | null>(null);
+  const [mediaIndex,  setMediaIndex]  = useState(0);
+  const [videoPlaying,setVideoPlaying]= useState(false);
 
-  if (!advertisement) return null;
+  useEffect(() => {
+    if (!open || !adId || !communityId) return;
+    setAd(null); setError(null); setMediaIndex(0); setVideoPlaying(false);
+    setLoading(true);
+    fetch(`${API}/advertisements.php?community_id=${communityId}&ad_id=${adId}`, { credentials: "include" })
+      .then(r => r.ok ? r.json() : r.json().then(d => { throw new Error(d.error || `HTTP ${r.status}`); }))
+      .then(d => { if (d.ad) setAd(d.ad); else setError("Ad not found"); })
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false));
+  }, [open, adId, communityId]);
 
-  const ad = advertisement;
-  const daysRemaining = calculateDaysRemaining(ad.endDate);
-  const mediaItems = ad.media;
-  const currentItem = mediaItems[currentMediaIndex];
-  const isPaused = ad.status === "paused";
-  const isActive = ad.status === "active";
+  const media    = ad?.media ?? [];
+  const hasMedia = media.length > 0;
+  const current  = media[mediaIndex];
 
-  const nextMedia = () => {
-    if (mediaItems.length > 0) {
-      setCurrentMediaIndex((prev) => (prev + 1) % mediaItems.length);
-      setIsVideoPlaying(false);
-    }
-  };
-  const prevMedia = () => {
-    if (mediaItems.length > 0) {
-      setCurrentMediaIndex((prev) => (prev - 1 + mediaItems.length) % mediaItems.length);
-      setIsVideoPlaying(false);
-    }
-  };
+  const prev = () => { setVideoPlaying(false); setMediaIndex(i => (i - 1 + media.length) % media.length); };
+  const next = () => { setVideoPlaying(false); setMediaIndex(i => (i + 1) % media.length); };
 
-  const handleCall = (phone: string) => {
-    window.location.href = `tel:${phone.replace(/\s+/g, "")}`;
-  };
-
-  const handleWhatsApp = (phone: string) => {
-    window.open(`https://wa.me/${phone.replace(/[\s+]/g, "")}`, "_blank");
-  };
-
-  const handleVideoTap = () => {
-    if (!videoRef.current) return;
-    if (videoRef.current.paused) {
-      videoRef.current.play();
-      setIsVideoPlaying(true);
-    } else {
-      videoRef.current.pause();
-      setIsVideoPlaying(false);
-    }
-  };
-
-  const handleEditAd = () => {
-    toast({
-      title: "Edit Advertisement",
-      description: `Opening editor for "${ad.productTitle}"...`,
-    });
-  };
-
-  const handleTogglePause = () => {
-    toast({
-      title: isPaused ? "Advertisement Resumed" : "Advertisement Paused",
-      description: isPaused
-        ? `"${ad.productTitle}" is now live again.`
-        : `"${ad.productTitle}" has been paused. You can resume it anytime.`,
-    });
-  };
-
-  const handleDeleteConfirm = () => {
-    toast({
-      title: "Advertisement Deleted",
-      description: `"${ad.productTitle}" has been permanently removed.`,
-      variant: "destructive",
-    });
-    setShowDeleteConfirm(false);
-    onOpenChange(false);
-  };
+  const openPhone = (phone: string) => { window.open(`tel:${phone}`); };
+  const openWA    = (phone: string) => { window.open(`https://wa.me/${phone.replace(/\D/g,"")}`, "_blank"); };
+  const openEmail = (email: string) => { window.open(`mailto:${email}`); };
+  const openWeb   = (url: string)   => { window.open(url.startsWith("http") ? url : `https://${url}`, "_blank"); };
 
   return (
-    <>
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[92vh] overflow-hidden p-0">
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b flex-shrink-0">
-            <div className="flex items-center gap-2 min-w-0">
-              {ad.advertiserPhoto && (
-                <img src={ad.advertiserPhoto} alt={ad.advertiserName} className="h-7 w-7 rounded-full object-cover shrink-0" />
-              )}
-              <div className="min-w-0">
-                <h2 className="font-semibold text-sm truncate">{ad.businessName}</h2>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Globe className="h-3 w-3 shrink-0" />
-                  <span>Sponsored</span>
-                </div>
-              </div>
-            </div>
-            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => onOpenChange(false)}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="bottom" className="h-[95vh] rounded-t-2xl flex flex-col p-0 overflow-hidden">
 
-          <ScrollArea className="flex-1 overflow-y-auto touch-auto">
-            <div className="pb-6">
-              {/* Media Carousel */}
-              {mediaItems.length > 0 && (
-                <div className="relative bg-muted aspect-[4/3] overflow-hidden">
-                  {currentItem?.type === 'video' ? (
-                    <div className="relative w-full h-full bg-black" onClick={handleVideoTap}>
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b shrink-0">
+          <div className="flex items-center gap-2">
+            <Megaphone className="h-4 w-4 text-amber-600" />
+            <span className="font-semibold text-sm truncate max-w-[200px]">{ad?.business_name ?? "Advertisement"}</span>
+          </div>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onOpenChange(false)}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Body */}
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : error ? (
+          <div className="flex-1 flex flex-col items-center justify-center gap-3 text-muted-foreground p-6">
+            <Megaphone className="h-12 w-12 opacity-30" />
+            <p className="text-sm">{error}</p>
+            <Button size="sm" variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
+          </div>
+        ) : ad && (
+          <ScrollArea className="flex-1 overflow-y-auto">
+            <div className="pb-8">
+
+              {/* ── Media carousel ─────────────────────────────────────── */}
+              {hasMedia ? (
+                <div className="relative bg-black aspect-[4/3] overflow-hidden">
+                  {current?.type === "video" ? (
+                    <div className="relative w-full h-full" onClick={() => setVideoPlaying(v => !v)}>
                       <video
-                        ref={videoRef}
-                        src={currentItem.url}
+                        key={current.url}
+                        src={current.url}
                         className="w-full h-full object-contain"
                         playsInline
-                        muted
-                        preload="metadata"
-                        controls={isVideoPlaying}
+                        controls={videoPlaying}
+                        muted={!videoPlaying}
+                        autoPlay={videoPlaying}
                       />
-                      {!isVideoPlaying && (
+                      {!videoPlaying && (
                         <div className="absolute inset-0 flex items-center justify-center">
                           <div className="h-14 w-14 rounded-full bg-black/50 flex items-center justify-center">
                             <Play className="h-7 w-7 text-white ml-1" />
@@ -165,417 +127,135 @@ export function AdvertisementFullViewSheet({ open, onOpenChange, advertisement, 
                     </div>
                   ) : (
                     <img
-                      src={currentItem?.url}
-                      alt={`Product ${currentMediaIndex + 1}`}
+                      key={current?.url}
+                      src={current?.url}
+                      alt={ad.product_title}
                       className="w-full h-full object-cover"
+                      onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
                     />
                   )}
-                  {mediaItems.length > 1 && (
+
+                  {/* Carousel nav */}
+                  {media.length > 1 && (
                     <>
-                      <Button variant="ghost" size="icon" className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/40 text-white hover:bg-black/60 z-10" onClick={(e) => { e.stopPropagation(); prevMedia(); }}>
-                        <ChevronLeft className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/40 text-white hover:bg-black/60 z-10" onClick={(e) => { e.stopPropagation(); nextMedia(); }}>
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
+                      <button
+                        className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/50 flex items-center justify-center z-10"
+                        onClick={prev}
+                      >
+                        <ChevronLeft className="h-5 w-5 text-white" />
+                      </button>
+                      <button
+                        className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/50 flex items-center justify-center z-10"
+                        onClick={next}
+                      >
+                        <ChevronRight className="h-5 w-5 text-white" />
+                      </button>
+                      {/* Dots */}
                       <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
-                        {mediaItems.map((_, i) => (
-                          <div key={i} className={`w-2 h-2 rounded-full ${i === currentMediaIndex ? "bg-white" : "bg-white/50"}`} />
+                        {media.map((_, i) => (
+                          <button
+                            key={i}
+                            onClick={() => { setMediaIndex(i); setVideoPlaying(false); }}
+                            className={cn("w-2 h-2 rounded-full transition-all", i === mediaIndex ? "bg-white scale-125" : "bg-white/50")}
+                          />
                         ))}
                       </div>
+                      <span className="absolute top-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full z-10">
+                        {mediaIndex + 1}/{media.length}
+                      </span>
                     </>
                   )}
-                  {/* Sponsored Badge */}
-                  <Badge className="absolute top-2 left-2 bg-amber-600 text-white text-[10px] border-0 shadow-md z-10">
-                    <Megaphone className="h-3 w-3 mr-1" />
-                    Sponsored Advert
+
+                  {/* Sponsored badge */}
+                  <Badge className="absolute top-2 left-2 bg-amber-600 text-white text-[10px] border-0 z-10">
+                    <Megaphone className="h-3 w-3 mr-1" />Sponsored
                   </Badge>
-                  {/* Stats Overlay */}
-                  <div className="absolute top-2 right-2 flex gap-1.5 z-10">
-                    <Badge className="bg-black/60 text-white text-[10px] border-0">
-                      <Eye className="h-3 w-3 mr-1" />{ad.views.toLocaleString()}
-                    </Badge>
-                    {isActive && daysRemaining > 0 && (
-                      <Badge className="bg-amber-600 text-white text-[10px] border-0">
-                        <Calendar className="h-3 w-3 mr-1" />{daysRemaining}d left
-                      </Badge>
-                    )}
-                  </div>
+                </div>
+              ) : (
+                /* No media placeholder */
+                <div className="aspect-[4/3] bg-muted flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                  <Image className="h-10 w-10 opacity-40" />
+                  <p className="text-sm">No photos</p>
                 </div>
               )}
 
-              {/* Content */}
-              <div className="p-4 space-y-3">
-                {/* Title & Category + Owner Menu */}
-                <div className="space-y-1">
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-bold text-lg leading-tight flex-1 min-w-0 break-words">{ad.businessName}</h3>
-                    {isOwner && (
-                      <DropdownMenu modal={true}>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-9 w-9 shrink-0 rounded-full touch-manipulation active:scale-[0.95]"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <MoreVertical className="h-5 w-5" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48 z-[100]">
-                          <DropdownMenuItem
-                            onClick={handleEditAd}
-                            className="py-2.5 text-sm touch-manipulation"
-                          >
-                            <Edit2 className="h-4 w-4 mr-2.5" />
-                            Edit Advertisement
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={handleTogglePause}
-                            className="py-2.5 text-sm touch-manipulation"
-                          >
-                            {isPaused ? (
-                              <>
-                                <PlayCircle className="h-4 w-4 mr-2.5" />
-                                Resume Advertisement
-                              </>
-                            ) : (
-                              <>
-                                <Pause className="h-4 w-4 mr-2.5" />
-                                Stop Advertisement
-                              </>
-                            )}
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => setShowDeleteConfirm(true)}
-                            className="py-2.5 text-sm text-destructive focus:text-destructive touch-manipulation"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2.5" />
-                            Delete Advertisement
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
+              {/* ── Ad details ─────────────────────────────────────────── */}
+              <div className="p-4 space-y-4">
+                {/* Title + Category */}
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Badge variant="outline" className="text-[10px] capitalize">{ad.category}</Badge>
+                    <span className="text-[10px] text-muted-foreground ml-auto flex items-center gap-1">
+                      <Eye className="h-3 w-3" />{ad.views} · <TrendingUp className="h-3 w-3" />{ad.clicks}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="secondary" className="text-xs px-2 py-0.5">
-                      {getCategoryLabel(ad.category)}
-                    </Badge>
-                    <span className="text-sm text-primary font-medium">{ad.productTitle}</span>
-                    {isPaused && (
-                      <Badge variant="outline" className="text-xs px-1.5 py-0 text-amber-600 border-amber-300">
-                        <Pause className="h-2.5 w-2.5 mr-0.5" />
-                        Paused
-                      </Badge>
-                    )}
+                  <h2 className="font-bold text-lg leading-tight">{ad.business_name}</h2>
+                  <p className="text-sm font-medium text-primary mt-0.5">{ad.product_title}</p>
+                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-1">
+                    <MapPin className="h-3.5 w-3.5 shrink-0" />
+                    <span>{ad.city}</span>
                   </div>
-                </div>
-
-                {/* City */}
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <MapPin className="h-3.5 w-3.5 shrink-0" />
-                  <span>{ad.city}</span>
                 </div>
 
                 {/* Description */}
-                <p className="text-sm leading-relaxed">{ad.description}</p>
+                <p className="text-sm leading-relaxed text-foreground whitespace-pre-line">{ad.description}</p>
 
-                {/* Contact Buttons - Row 1: Call + WhatsApp */}
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  <Button
-                    size="sm"
-                    className="h-10 text-sm font-medium touch-manipulation active:scale-[0.97] bg-emerald-600 hover:bg-emerald-700"
-                    onClick={() => handleCall(ad.phone1)}
-                  >
-                    <Phone className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                    Call
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="h-10 text-sm font-medium touch-manipulation active:scale-[0.97] bg-green-600 hover:bg-green-700"
-                    onClick={() => handleWhatsApp(ad.phone1)}
-                  >
-                    <span className="mr-1.5 shrink-0">💬</span>
-                    WhatsApp
-                  </Button>
-                </div>
-
-                {/* Contact Buttons - Row 2: Email + Website */}
-                {(ad.email || ad.website) && (
+                {/* Contact buttons */}
+                <div className="space-y-2">
                   <div className="grid grid-cols-2 gap-2">
-                    {ad.email && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-10 text-sm font-medium touch-manipulation active:scale-[0.97]"
-                        onClick={() => (window.location.href = `mailto:${ad.email}`)}
-                      >
-                        <Mail className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                        Email
+                    {ad.phone1 && (
+                      <Button className="h-11 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => openPhone(ad.phone1!)}>
+                        <Phone className="h-4 w-4 mr-2" /> Call
                       </Button>
                     )}
-                    {ad.website && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-10 text-sm font-medium touch-manipulation active:scale-[0.97]"
-                        onClick={() => window.open(ad.website, "_blank")}
-                      >
-                        <Globe className="h-3.5 w-3.5 mr-1.5 shrink-0" />
-                        Website
+                    {ad.phone1 && (
+                      <Button className="h-11 bg-green-600 hover:bg-green-700 text-white" onClick={() => openWA(ad.phone1!)}>
+                        💬 WhatsApp
                       </Button>
                     )}
                   </div>
-                )}
-
-                {/* Phone 2 */}
-                {ad.phone2 && (
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="flex-1 h-9 text-xs touch-manipulation"
-                      onClick={() => handleCall(ad.phone2!)}
-                    >
-                      <Phone className="h-3 w-3 mr-1" />
-                      Call Alt: {ad.phone2}
-                    </Button>
-                  </div>
-                )}
-
-                {/* Engagement Bar */}
-                <div className="flex items-center justify-between pt-3 border-t text-muted-foreground">
-                  <button
-                    className={`flex items-center gap-1.5 text-sm touch-manipulation active:scale-[0.95] transition-colors ${isLiked ? "text-primary font-medium" : ""}`}
-                    onClick={() => {
-                      setIsLiked(!isLiked);
-                      setLikeCount((c) => isLiked ? Math.max(0, c - 1) : c + 1);
-                      if (!isLiked) {
-                        toast({ title: "Liked!", description: `You liked "${ad.productTitle}"` });
-                      }
-                    }}
-                  >
-                    <ThumbsUp className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`} />
-                    <span>{isLiked ? likeCount : likeCount > 0 ? likeCount : "Like"}</span>
-                  </button>
-                  <button
-                    className="flex items-center gap-1.5 text-sm touch-manipulation active:scale-[0.95]"
-                    onClick={() => setShowComments(!showComments)}
-                  >
-                    <MessageSquare className={`h-4 w-4 ${showComments ? "fill-current text-primary" : ""}`} />
-                    <span>{ad.feedbackCount}</span>
-                  </button>
-                  <button
-                    className="flex items-center gap-1.5 text-sm touch-manipulation active:scale-[0.95]"
-                    onClick={async () => {
-                      const shareData = {
-                        title: ad.productTitle,
-                        text: `${ad.businessName} - ${ad.productTitle}: ${ad.description.slice(0, 100)}...`,
-                        url: window.location.href,
-                      };
-                      try {
-                        if (navigator.share) {
-                          await navigator.share(shareData);
-                        } else {
-                          await navigator.clipboard.writeText(`${ad.businessName} - ${ad.productTitle}\n${window.location.href}`);
-                          toast({ title: "Link Copied!", description: "Ad link copied to clipboard." });
-                        }
-                      } catch {
-                        // user cancelled share
-                      }
-                    }}
-                  >
-                    <Share2 className="h-4 w-4" />
-                    <span>Share</span>
-                  </button>
-                  <button
-                    className="flex items-center gap-1.5 text-sm text-destructive touch-manipulation active:scale-[0.95]"
-                    onClick={() => setShowReportConfirm(true)}
-                  >
-                    <Flag className="h-4 w-4" />
-                    <span>Report</span>
-                  </button>
+                  {ad.phone2 && (
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button variant="outline" className="h-11" onClick={() => openPhone(ad.phone2!)}>
+                        <Phone className="h-4 w-4 mr-2" /> Phone 2
+                      </Button>
+                      <Button variant="outline" className="h-11" onClick={() => openWA(ad.phone2!)}>
+                        💬 WA 2
+                      </Button>
+                    </div>
+                  )}
+                  {(ad.email || ad.website) && (
+                    <div className="grid grid-cols-2 gap-2">
+                      {ad.email && (
+                        <Button variant="outline" className="h-11" onClick={() => openEmail(ad.email!)}>
+                          <Mail className="h-4 w-4 mr-2" /> Email
+                        </Button>
+                      )}
+                      {ad.website && (
+                        <Button variant="outline" className="h-11" onClick={() => openWeb(ad.website!)}>
+                          <Globe className="h-4 w-4 mr-2" /> Website
+                        </Button>
+                      )}
+                    </div>
+                  )}
                 </div>
 
-                {/* Comments Section (expandable) */}
-                {showComments && (
-                  <AdCommentsSection
-                    feedbacks={ad.feedbacks}
-                    feedbackCount={ad.feedbackCount}
-                    productTitle={ad.productTitle}
-                  />
-                )}
-
-                {/* Advertiser Info */}
-                <Card className="p-3 mt-2 bg-muted/30">
-                  <div className="flex items-center gap-2">
-                    {ad.advertiserPhoto && (
-                      <img src={ad.advertiserPhoto} alt={ad.advertiserName} className="h-8 w-8 rounded-full object-cover" />
-                    )}
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium truncate">{ad.advertiserName}</p>
-                      <p className="text-xs text-muted-foreground">{ad.communityName}</p>
-                    </div>
+                {/* Advertiser */}
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={ad.advertiser_photo} />
+                    <AvatarFallback>{(ad.advertiser_name || "M")[0].toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-sm font-medium">{ad.advertiser_name}</p>
+                    <p className="text-xs text-muted-foreground">Community Member</p>
                   </div>
-                </Card>
+                </div>
               </div>
             </div>
           </ScrollArea>
-        </DrawerContent>
-      </Drawer>
-
-      {/* Delete Confirmation */}
-      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent className="max-w-[90vw] sm:max-w-sm">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <Trash2 className="h-5 w-5 text-destructive" />
-              Delete Advertisement?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-2">
-              <p>
-                Are you sure you want to permanently delete{" "}
-                <strong>"{ad.productTitle}"</strong>?
-              </p>
-              <p className="text-xs">
-                This action cannot be undone. All stats and data for this ad will be lost.
-              </p>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="touch-manipulation">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteConfirm}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 touch-manipulation"
-            >
-              <Trash2 className="h-4 w-4 mr-1.5" />
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Report Confirmation */}
-      <AlertDialog open={showReportConfirm} onOpenChange={setShowReportConfirm}>
-        <AlertDialogContent className="max-w-[90vw] sm:max-w-sm">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <Flag className="h-5 w-5 text-destructive" />
-              Report Advertisement?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-2">
-              <p>
-                Are you sure you want to report{" "}
-                <strong>"{ad.productTitle}"</strong> by {ad.businessName}?
-              </p>
-              <p className="text-xs">
-                This ad will be flagged for review by community moderators. False reports may result in action against your account.
-              </p>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="touch-manipulation">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                toast({
-                  title: "Advertisement Reported",
-                  description: "Thank you. This ad has been flagged for review by moderators.",
-                });
-                setShowReportConfirm(false);
-              }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 touch-manipulation"
-            >
-              <Flag className="h-4 w-4 mr-1.5" />
-              Report
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
-  );
-}
-
-/* ─── Inline Comments Section ─── */
-function AdCommentsSection({
-  feedbacks,
-  feedbackCount,
-  productTitle,
-}: {
-  feedbacks: EnhancedAdvertisement["feedbacks"];
-  feedbackCount: number;
-  productTitle: string;
-}) {
-  const { toast } = useToast();
-  const [newComment, setNewComment] = useState("");
-
-  const handleSubmit = () => {
-    if (!newComment.trim()) return;
-    toast({
-      title: "Comment Posted",
-      description: `Your feedback on "${productTitle}" has been submitted.`,
-    });
-    setNewComment("");
-  };
-
-  return (
-    <div className="space-y-3 pt-2">
-      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-        Comments ({feedbackCount})
-      </h4>
-
-      {/* Comment input */}
-      <div className="flex gap-2">
-        <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-          <MessageSquare className="h-3.5 w-3.5 text-primary" />
-        </div>
-        <div className="flex-1 space-y-2">
-          <textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Write a comment..."
-            className="w-full min-h-[60px] rounded-lg border bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-primary touch-manipulation"
-            autoComplete="off"
-            spellCheck={false}
-          />
-          <Button
-            size="sm"
-            className="h-8 text-xs touch-manipulation active:scale-[0.97]"
-            disabled={!newComment.trim()}
-            onClick={handleSubmit}
-          >
-            Post Comment
-          </Button>
-        </div>
-      </div>
-
-      {/* Existing feedbacks */}
-      {feedbacks.length > 0 ? (
-        <div className="space-y-2">
-          {feedbacks.map((fb) => (
-            <div key={fb.id} className="flex gap-2">
-              <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center shrink-0 mt-0.5">
-                <span className="text-[10px] font-medium text-muted-foreground">
-                  {fb.anonymousId.slice(0, 2).toUpperCase()}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium">Anonymous</span>
-                  <span className="text-[10px] text-muted-foreground">
-                    {new Date(fb.submittedAt).toLocaleDateString()}
-                  </span>
-                </div>
-                <p className="text-xs text-foreground/80 leading-relaxed mt-0.5">{fb.feedbackText}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-xs text-muted-foreground text-center py-3">
-          No comments yet. Be the first to share feedback!
-        </p>
-      )}
-    </div>
+        )}
+      </SheetContent>
+    </Sheet>
   );
 }

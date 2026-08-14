@@ -1,30 +1,44 @@
-import { useState } from "react";
-import { Menu, MessageSquare, Eye, Users } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Menu, MessageSquare, Eye, Users, Loader2 } from "lucide-react";
 import { CampaignsView } from "./CampaignsView";
 import { LaunchCampaignDialog } from "./LaunchCampaignDialog";
 import { CandidateFeedbackSheet } from "./CandidateFeedbackSheet";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { CampaignBannerRotation } from "./CampaignBannerRotation";
-import { mockEnhancedCampaigns } from "@/data/campaignSystemData";
 import { getContentsAdsWithUserAdverts } from "@/data/profileAds";
 import { EnhancedCampaign } from "@/types/campaignSystem";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatMobiAmount } from "@/lib/campaignFeeDistribution";
 
-export const ElectionCampaignsTab = () => {
+interface RealCampaignPost {
+  id: string;
+  content: string;
+  image?: string;
+  created_at: string;
+  candidate_name: string;
+}
+
+interface ElectionCampaignsTabProps {
+  communityId?: string;
+}
+
+export const ElectionCampaignsTab = ({ communityId }: ElectionCampaignsTabProps) => {
   const [showLaunchDialog, setShowLaunchDialog] = useState(false);
   const [selectedCampaignForFeedback, setSelectedCampaignForFeedback] = useState<EnhancedCampaign | null>(null);
   const [showFeedbackSheet, setShowFeedbackSheet] = useState(false);
+  const [myPosts, setMyPosts] = useState<RealCampaignPost[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // Get user's own campaigns (simulated - in real app would filter by user ID)
-  const myCampaigns = mockEnhancedCampaigns.filter(c => c.status === "active" || c.status === "ended");
-
-  const handleViewFeedback = (campaign: EnhancedCampaign) => {
-    setSelectedCampaignForFeedback(campaign);
-    setShowFeedbackSheet(true);
-  };
+  useEffect(() => {
+    if (!communityId) return;
+    setLoading(true);
+    fetch(`/api/community/elections.php?action=campaigns&community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => setMyPosts(d.posts ?? []))
+      .catch(() => setMyPosts([]))
+      .finally(() => setLoading(false));
+  }, [communityId]);
 
   return (
     <div className="space-y-6 pb-20">
@@ -43,44 +57,25 @@ export const ElectionCampaignsTab = () => {
         maxBanners={3}
       />
 
-      {/* My Campaigns Summary */}
-      {myCampaigns.length > 0 && (
+      {/* My Campaign Updates (real candidate posts) */}
+      {loading ? (
+        <div className="flex justify-center py-6"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+      ) : myPosts.length > 0 && (
         <Card className="bg-primary/5 border-primary/20">
           <CardContent className="p-4">
             <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
               <Users className="h-4 w-4" />
-              Your Active Campaigns
+              Campaign Updates
             </h3>
             <div className="space-y-2">
-              {myCampaigns.slice(0, 2).map((campaign) => (
+              {myPosts.slice(0, 5).map((post) => (
                 <div 
-                  key={campaign.id} 
-                  className="flex items-center justify-between bg-background rounded-lg p-3 border"
+                  key={post.id} 
+                  className="bg-background rounded-lg p-3 border"
                 >
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{campaign.office}</p>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
-                      <span className="flex items-center gap-1">
-                        <Eye className="h-3 w-3" />
-                        {campaign.views}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <MessageSquare className="h-3 w-3" />
-                        {campaign.feedbackCount}
-                      </span>
-                      <Badge variant="outline" className="text-[10px]">
-                        {formatMobiAmount(campaign.totalFeeInMobi)}
-                      </Badge>
-                    </div>
-                  </div>
-                  {campaign.feedbackCount > 0 && (
-                    <button
-                      onClick={() => handleViewFeedback(campaign)}
-                      className="text-xs text-primary hover:underline ml-2"
-                    >
-                      View Feedback
-                    </button>
-                  )}
+                  <p className="font-medium text-sm">{post.candidate_name}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{post.content}</p>
+                  <p className="text-xs text-muted-foreground mt-1.5">{new Date(post.created_at).toLocaleDateString()}</p>
                 </div>
               ))}
             </div>
@@ -91,12 +86,14 @@ export const ElectionCampaignsTab = () => {
       {/* Campaigns Content */}
       <CampaignsView 
         onLaunchCampaign={() => setShowLaunchDialog(true)} 
+        communityId={communityId}
       />
       
       {/* Launch Campaign Dialog */}
       <LaunchCampaignDialog 
         open={showLaunchDialog} 
-        onOpenChange={setShowLaunchDialog} 
+        onOpenChange={(v) => { setShowLaunchDialog(v); if (!v) { setLoading(true); fetch(`/api/community/elections.php?action=campaigns&community_id=${communityId}`, { credentials: "include" }).then((r) => r.json()).then((d) => setMyPosts(d.posts ?? [])).catch(() => {}).finally(() => setLoading(false)); } }} 
+        communityId={communityId}
       />
 
       {/* Candidate Feedback Sheet */}

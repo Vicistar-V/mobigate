@@ -1,10 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Search, X, ChevronRight, Filter, CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { initialSubMerchantBatches } from "@/data/subMerchantVoucherData";
-import { getBatchStatusCounts, formatNum } from "@/data/merchantVoucherData";
+import { getBatchStatusCounts, formatNum, type VoucherBatch } from "@/data/merchantVoucherData";
 
 type SortOption = "newest" | "oldest" | "denom_high" | "denom_low";
 
@@ -16,6 +15,23 @@ export default function SubMerchantVoucherBatches() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [showFilters, setShowFilters] = useState(false);
+
+  const [initialSubMerchantBatches, setBatches] = useState<VoucherBatch[]>([]);
+  useEffect(() => {
+    fetch("/api/merchant/vouchers.php?action=sub_batches", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const mapped: VoucherBatch[] = (d.batches ?? []).map((b: any) => ({
+          id: b.id, batchNumber: `SM-${b.id.slice(0, 8).toUpperCase()}`, denomination: parseFloat(b.denomination),
+          bundleCount: Math.floor(b.card_count / 100), totalCards: b.card_count, status: "active" as const,
+          createdAt: new Date(b.created_at), totalCost: parseFloat(b.total_cost),
+          discountApplied: false, discountPercent: 0, generationType: "new" as const, replacedBatchId: null,
+          bundles: [],
+        }));
+        setBatches(mapped);
+      })
+      .catch(() => setBatches([]));
+  }, []);
 
   // Date filters
   const [filterYear, setFilterYear] = useState<string>("all");

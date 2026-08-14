@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Wallet, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { initialMerchantWalletBalance, formatNum } from "@/data/merchantVoucherData";
+import { formatNum } from "@/data/merchantVoucherData";
 
 type Step = "amount" | "processing" | "success";
 
@@ -29,8 +29,19 @@ export default function MerchantWalletFund() {
     setAmount(parseInt(clean) || 0);
   };
 
+  const [fundError, setFundError] = useState("");
+  const [currentBalance, setCurrentBalance] = useState(0);
+
+  useEffect(() => {
+    fetch("/api/merchant/vouchers.php?action=wallet", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => setCurrentBalance(parseFloat(d.balance) || 0))
+      .catch(() => setCurrentBalance(0));
+  }, []);
+
   const handleFund = () => {
     if (amount <= 0) return;
+    setFundError("");
     setStep("processing");
     setProcessingStep(0);
     window.scrollTo(0, 0);
@@ -43,8 +54,20 @@ export default function MerchantWalletFund() {
     msgs.forEach((_, i) => {
       if (i > 0) timers.push(setTimeout(() => setProcessingStep(i), i * 1000));
     });
-    timers.push(setTimeout(() => {
-      setStep("success");
+    timers.push(setTimeout(async () => {
+      try {
+        const res = await fetch("/api/merchant/vouchers.php", {
+          method: "POST", credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "fund_wallet", amount }),
+        });
+        const d = await res.json().catch(() => null);
+        if (!res.ok || !d?.success) throw new Error(d?.error || "Failed to fund wallet");
+        setStep("success");
+      } catch (e: any) {
+        setFundError(e.message);
+        setStep("amount");
+      }
       window.scrollTo(0, 0);
     }, 3000));
     return () => timers.forEach(clearTimeout);
@@ -74,7 +97,7 @@ export default function MerchantWalletFund() {
   }
 
   if (step === "success") {
-    const newBalance = initialMerchantWalletBalance + amount;
+    const newBalance = currentBalance + amount;
     return (
       <div className="bg-background min-h-screen flex flex-col items-center justify-center px-6">
         <div className="relative w-28 h-28 mb-6">
@@ -122,6 +145,11 @@ export default function MerchantWalletFund() {
         </div>
       </div>
       <div className="px-4 pt-4 space-y-4">
+        {fundError && (
+          <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+            {fundError}
+          </div>
+        )}
         {/* Current Balance */}
         <div className="rounded-xl border border-border/50 bg-card p-4 flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -129,7 +157,7 @@ export default function MerchantWalletFund() {
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Current Balance</p>
-            <p className="text-lg font-bold text-foreground">₦{formatNum(initialMerchantWalletBalance)}</p>
+            <p className="text-lg font-bold text-foreground">₦{formatNum(currentBalance)}</p>
           </div>
         </div>
 

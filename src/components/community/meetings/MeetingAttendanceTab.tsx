@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,14 +16,13 @@ import {
   List,
   FileText,
 } from "lucide-react";
-import { mockAttendance, mockMeetings, mockMinutesDownloads, mockMeetingMinutes } from "@/data/meetingsData";
 import { format, differenceInDays } from "date-fns";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { VoteBoxGroup } from "../shared/VoteBoxGroup";
 import { MemberPreviewDialog } from "../MemberPreviewDialog";
 import { ExecutiveMember } from "@/data/communityExecutivesData";
 
-export const MeetingAttendanceTab = () => {
+export const MeetingAttendanceTab = ({ communityId }: { communityId?: string } = {}) => {
   const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -31,6 +30,40 @@ export const MeetingAttendanceTab = () => {
   const [showMemberPreview, setShowMemberPreview] = useState(false);
   const [selectedMember, setSelectedMember] = useState<ExecutiveMember | null>(null);
   const itemsPerPage = 5;
+
+  const [mockMeetings, setMockMeetings] = useState<any[]>([]);
+  const [mockAttendance, setMockAttendance] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!communityId) return;
+    fetch(`/api/community/meetings_admin.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const mapped = (d.past ?? []).map((m: any) => ({
+          id: m.id, name: m.title, date: new Date(m.meeting_date), status: "completed",
+          type: m.type, duration: undefined,
+        }));
+        setMockMeetings(mapped);
+      })
+      .catch(() => setMockMeetings([]));
+  }, [communityId]);
+
+  useEffect(() => {
+    if (!communityId || !selectedMeetingId) { setMockAttendance([]); return; }
+    fetch(`/api/community/meetings_admin.php?action=attendance&meeting_id=${selectedMeetingId}&community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        setMockAttendance((d.attendance ?? []).map((a: any) => ({
+          id: a.id, meetingId: selectedMeetingId, memberId: a.user_id,
+          memberName: a.member_name?.trim() || "Member", avatar: a.avatar || "/placeholder.svg",
+          position: a.position || "Member", status: a.status,
+          arrivalTime: a.arrival_time ? new Date(a.arrival_time) : undefined,
+          departureTime: a.departure_time ? new Date(a.departure_time) : undefined,
+          notes: a.notes,
+        })));
+      })
+      .catch(() => setMockAttendance([]));
+  }, [communityId, selectedMeetingId]);
 
   // Handle member click to show profile preview
   const handleMemberClick = (attendance: any) => {
@@ -166,16 +199,12 @@ export const MeetingAttendanceTab = () => {
     }
   };
 
-  // Calculate download-based attendance for a meeting
+  // Download-based attendance is now unified server-side — downloading
+  // adopted minutes within the grace period directly marks the member
+  // "present" in community_meeting_attendance, so it's already reflected
+  // in meetingAttendance above. This stays as a no-op to avoid double-counting.
   const getDownloadBasedAttendance = (meetingId: string) => {
-    // Find the minutes for this meeting
-    const meetingMinutes = mockMeetingMinutes.find(m => m.meetingId === meetingId);
-    if (!meetingMinutes || meetingMinutes.status !== "adopted") return [];
-    
-    // Get downloads that marked attendance (within 90 days)
-    return mockMinutesDownloads.filter(
-      d => d.minutesId === meetingMinutes.id && d.markedAttendance
-    );
+    return [] as any[];
   };
 
   const calculateStats = () => {
@@ -315,7 +344,7 @@ export const MeetingAttendanceTab = () => {
 
             {/* Minutes Download Info */}
             {selectedMeetingId && (() => {
-              const meetingMinutes = mockMeetingMinutes.find(m => m.meetingId === selectedMeetingId);
+              const meetingMinutes: any = null; // See Meeting Minutes tab for full adoption/download details
               if (!meetingMinutes) return null;
               
               const daysRemaining = meetingMinutes.attendanceDeadline 

@@ -14,6 +14,7 @@ import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PremiumAdCardProps } from "@/components/PremiumAdCard";
 import { VibeItem } from "@/data/communityVibesData";
 import { useCommunityContent } from "@/hooks/useCommunityContent";
+import { useCommunityPostInteraction } from "@/hooks/useCommunityPostInteraction";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ViewToggleButton, ViewMode } from "@/components/ui/ViewToggleButton";
@@ -101,6 +102,7 @@ export const CommunityVibesSection = ({
     authorProfileImage: v.authorAvatar,
     authorId:         v.authorId,
     duration:         undefined as any,
+    isLiked:          v.isLiked || false,
   })), [apiVibes]);
   const [vibes, setVibes] = useState<VibeItem[]>([]);
   const [mediaFilter, setMediaFilter] = useState<string>("all");
@@ -112,6 +114,17 @@ export const CommunityVibesSection = ({
   const [inviteViewMode, setInviteViewMode] = useState<ViewMode>("carousel");
   const [selectedMember, setSelectedMember] = useState<ExecutiveMember | null>(null);
   const [showMemberPreview, setShowMemberPreview] = useState(false);
+
+  // Seed liked state from API on load — fixes likes resetting on page refresh
+  useEffect(() => {
+    const likedFromApi: Record<string, boolean> = {};
+    apiMapped.forEach(v => { if ((v as any).isLiked) likedFromApi[v.id] = true; });
+    if (Object.keys(likedFromApi).length > 0) {
+      setLikedVibes(prev => ({ ...likedFromApi, ...prev }));
+    }
+  }, [apiMapped]);
+
+  const { toggleLike: apiToggleLike } = useCommunityPostInteraction(communityId);
 
   const convertToExecutiveMember = (member: CommunityMember): ExecutiveMember => ({
     id: member.id,
@@ -135,10 +148,12 @@ export const CommunityVibesSection = ({
   };
 
   const handleLike = (vibeId: string) => {
+    const wasLiked = !!likedVibes[vibeId];
     setLikedVibes(prev => ({
       ...prev,
       [vibeId]: !prev[vibeId]
     }));
+    apiToggleLike(vibeId, wasLiked);
   };
 
   const handleVibeClick = (vibe: VibeItem) => {
@@ -465,6 +480,7 @@ export const CommunityVibesSection = ({
       {/* Vibe Detail Dialog */}
       {selectedVibe && (
         <VibeDetailDialog
+          communityId={communityId}
           open={isVibeDialogOpen}
           onOpenChange={setIsVibeDialogOpen}
           vibe={selectedVibe}

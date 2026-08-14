@@ -1,10 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Search, X, ChevronRight, Filter, CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  initialMockBatches,
   VoucherBatch,
   getBatchStatusCounts,
   formatNum,
@@ -24,6 +23,24 @@ export default function MerchantVoucherBatches() {
   const [filterDenom, setFilterDenom] = useState<FilterDenom>("all");
   const [filterType, setFilterType] = useState<FilterType>("all");
   const [showFilters, setShowFilters] = useState(false);
+
+  const [initialMockBatches, setBatches] = useState<VoucherBatch[]>([]);
+  useEffect(() => {
+    fetch("/api/merchant/vouchers.php?action=batches", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const mapped: VoucherBatch[] = (d.batches ?? []).map((b: any) => ({
+          id: b.id, batchNumber: b.batch_number, denomination: parseFloat(b.denomination),
+          bundleCount: b.bundle_count, totalCards: b.total_cards, status: b.status,
+          createdAt: new Date(b.created_at), totalCost: parseFloat(b.total_cost),
+          discountApplied: !!b.discount_applied, discountPercent: parseFloat(b.discount_percent),
+          generationType: b.generation_type, replacedBatchId: b.replaced_batch_id,
+          bundles: [],
+        }));
+        setBatches(mapped);
+      })
+      .catch(() => setBatches([]));
+  }, []);
 
   // Date filters
   const [filterYear, setFilterYear] = useState<string>("all");

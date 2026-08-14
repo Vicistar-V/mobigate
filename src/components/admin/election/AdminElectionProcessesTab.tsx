@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   UserPlus, 
   Vote, 
@@ -11,11 +11,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AdminNominationsSection } from "./AdminNominationsSection";
 import { AdminPrimaryElectionsSection } from "./AdminPrimaryElectionsSection";
 import { AdminMainElectionSection } from "./AdminMainElectionSection";
-import { 
-  getNominationStats, 
-  getPrimaryStats, 
-  getMainElectionStats 
-} from "@/data/electionProcessesData";
 import { cn } from "@/lib/utils";
 
 interface ProcessCardProps {
@@ -66,12 +61,47 @@ const ProcessCard = ({ icon, title, subtitle, stats, isActive, onClick }: Proces
   </Card>
 );
 
-export function AdminElectionProcessesTab() {
+export function AdminElectionProcessesTab({ communityId }: { communityId?: string } = {}) {
   const [activeProcess, setActiveProcess] = useState<'overview' | 'nominations' | 'primary' | 'main'>('overview');
 
-  const nominationStats = getNominationStats();
-  const primaryStats = getPrimaryStats();
-  const mainStats = getMainElectionStats();
+  const [nominationStats, setNominationStats] = useState({ total: 0, approved: 0, pending: 0, rejected: 0 });
+  const [primaryStats, setPrimaryStats] = useState({ total: 0, completed: 0, scheduled: 0 });
+  const [mainStats, setMainStats] = useState({ totalOffices: 0, completedOffices: 0, turnout: 0 });
+
+  useEffect(() => {
+    if (!communityId) return;
+    fetch(`/api/community/elections.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const candidates = d.candidates ?? [];
+        setNominationStats({
+          total: candidates.length,
+          approved: candidates.filter((c: any) => c.status === "cleared").length,
+          pending: candidates.filter((c: any) => c.status === "pending").length,
+          rejected: candidates.filter((c: any) => c.status === "disqualified" || c.status === "primary_eliminated").length,
+        });
+
+        const offices = d.offices ?? [];
+        const officesWithPrimaryVotes = offices.filter((o: any) =>
+          candidates.some((c: any) => c.office_id === o.id && parseInt(c.primary_votes, 10) > 0)
+        );
+        setPrimaryStats({
+          total: officesWithPrimaryVotes.length,
+          completed: candidates.filter((c: any) => c.status === "primary_eliminated" || (c.status === "cleared" && parseInt(c.primary_votes, 10) > 0)).length > 0 ? officesWithPrimaryVotes.length : 0,
+          scheduled: offices.length - officesWithPrimaryVotes.length,
+        });
+
+        const clearedCandidates = candidates.filter((c: any) => c.status === "cleared");
+        const totalVoteCount = clearedCandidates.reduce((s: number, c: any) => s + (parseInt(c.vote_count, 10) || 0), 0);
+        const accredited = d.stats?.accredited ?? 0;
+        setMainStats({
+          totalOffices: offices.length,
+          completedOffices: (d.elections ?? []).filter((e: any) => e.status === "completed").length,
+          turnout: accredited > 0 ? Math.round((totalVoteCount / accredited) * 100) : 0,
+        });
+      })
+      .catch(() => {});
+  }, [communityId]);
 
   if (activeProcess === 'nominations') {
     return (
@@ -83,7 +113,7 @@ export function AdminElectionProcessesTab() {
           <ChevronRight className="h-4 w-4 rotate-180" />
           Back to Overview
         </button>
-        <AdminNominationsSection />
+        <AdminNominationsSection communityId={communityId} />
       </div>
     );
   }
@@ -98,7 +128,7 @@ export function AdminElectionProcessesTab() {
           <ChevronRight className="h-4 w-4 rotate-180" />
           Back to Overview
         </button>
-        <AdminPrimaryElectionsSection />
+        <AdminPrimaryElectionsSection communityId={communityId} />
       </div>
     );
   }
@@ -113,7 +143,7 @@ export function AdminElectionProcessesTab() {
           <ChevronRight className="h-4 w-4 rotate-180" />
           Back to Overview
         </button>
-        <AdminMainElectionSection />
+        <AdminMainElectionSection communityId={communityId} />
       </div>
     );
   }

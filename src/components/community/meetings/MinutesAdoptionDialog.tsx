@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -44,12 +44,16 @@ interface MinutesAdoptionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   minutes: MeetingMinutes;
+  communityId?: string;
+  onVoted?: () => void;
 }
 
 export const MinutesAdoptionDialog = ({
   open,
   onOpenChange,
   minutes,
+  communityId,
+  onVoted,
 }: MinutesAdoptionDialogProps) => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -58,30 +62,56 @@ export const MinutesAdoptionDialog = ({
   const [hasVoted, setHasVoted] = useState(false);
   const [userVote, setUserVote] = useState<"adopt" | "reject" | null>(null);
 
-  // Get adoptions for this minutes
-  const adoptions = mockMinutesAdoptions.filter(
-    (a) => a.minutesId === minutes.id
-  );
+  const [adoptVotes, setAdoptVotes] = useState<any[]>([]);
+  const [rejectVotes, setRejectVotes] = useState<any[]>([]);
 
-  const adoptVotes = adoptions.filter((a) => a.vote === "adopt");
-  const rejectVotes = adoptions.filter((a) => a.vote === "reject");
+  const loadAdoptions = () => {
+    if (!communityId) return;
+    fetch(`/api/community/meetings_admin.php?action=minutes_adoptions&minutes_id=${minutes.id}&community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const mapped = (d.adoptions ?? []).map((a: any) => ({
+          id: a.id, minutesId: a.minutes_id, memberId: a.member_id,
+          memberName: a.member_name?.trim() || "Member", memberAvatar: a.member_avatar || "/placeholder.svg",
+          vote: a.vote, comment: a.comment, votedAt: new Date(a.voted_at),
+        }));
+        setAdoptVotes(mapped.filter((a: any) => a.vote === "adopt"));
+        setRejectVotes(mapped.filter((a: any) => a.vote === "reject"));
+      })
+      .catch(() => {});
+  };
+
+  useEffect(() => { if (open) loadAdoptions(); }, [open, minutes.id, communityId]);
 
   const handleVote = async (vote: "adopt" | "reject") => {
+    if (!communityId) return;
     setIsSubmitting(true);
-    
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    setIsSubmitting(false);
-    setHasVoted(true);
-    setUserVote(vote);
-    
-    toast({
-      title: vote === "adopt" ? "Minutes Adopted" : "Minutes Rejected",
-      description: vote === "adopt"
-        ? "Thank you for adopting the minutes. Your vote has been recorded."
-        : "Your rejection has been recorded with your feedback.",
-    });
+
+    try {
+      const res = await fetch("/api/community/meetings_admin.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "vote_adopt_minutes", community_id: communityId, minutes_id: minutes.id, vote, comment }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to record your vote");
+
+      setHasVoted(true);
+      setUserVote(vote);
+
+      toast({
+        title: vote === "adopt" ? "Vote Recorded: Adopt" : "Vote Recorded: Reject",
+        description: vote === "adopt"
+          ? "Thank you for adopting the minutes. Your vote has been recorded."
+          : "Your rejection has been recorded with your feedback.",
+      });
+      onVoted?.();
+      loadAdoptions();
+    } catch (e: any) {
+      toast({ title: "Couldn't Record Vote", description: e.message, variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const content = (

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { X, Trophy, Clock, Users, Play, Book, Award, Inbox, Wallet, Lock, BarChart3, History, Star, Crown, Shield, AlertTriangle, Settings } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { X, Trophy, Clock, Users, Play, Book, Award, Inbox, Wallet, Lock, BarChart3, History, Star, Crown, Shield, AlertTriangle, Settings, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,16 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
-  activeCommunityQuizzes, 
-  communityQuizLeaderboard, 
-  communityQuizPlayerStats, 
-  communityQuizWalletData,
-  communityQuizRules,
-  isCommunityQuizAvailable,
-  getQuizWalletAvailability,
-  CommunityQuiz
-} from "@/data/communityQuizData";
+import { communityQuizRules, CommunityQuiz } from "@/data/communityQuizData";
 import { CommunityQuizPlayDialog } from "./CommunityQuizPlayDialog";
 import { QuizWalletDrawer } from "./QuizWalletDrawer";
 import { MemberPreviewDialog } from "@/components/community/MemberPreviewDialog";
@@ -25,14 +16,27 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { formatMobiAmount, formatLocalAmount, formatLocalFirst } from "@/lib/mobiCurrencyTranslation";
 
+const API = "/api/community";
+
 interface CommunityQuizDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
   isAdmin?: boolean;
   isOwner?: boolean;
 }
 
-export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwner = false }: CommunityQuizDialogProps) {
+interface LeaderboardEntry {
+  id: string; user_id: string; player_name: string; player_avatar?: string;
+  questions_correct: number; total_questions: number; amount_won: number; completion_time: string; played_at: string;
+}
+interface QuizStats {
+  games_played: number; games_won: number; partial_wins: number; games_lost: number;
+  total_stake_paid: number; total_amount_won: number; best_score: number; community_rank: number | null;
+}
+interface QuizWallet { balance: number; reserved_for_payouts: number; }
+
+export function CommunityQuizDialog({ open, onOpenChange, communityId, isAdmin = false, isOwner = false }: CommunityQuizDialogProps) {
   const [activeTab, setActiveTab] = useState("quizzes");
   const [selectedQuiz, setSelectedQuiz] = useState<CommunityQuiz | null>(null);
   const [showGamePlay, setShowGamePlay] = useState(false);
@@ -41,31 +45,55 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
   const [selectedMember, setSelectedMember] = useState<ExecutiveMember | null>(null);
   const { toast } = useToast();
 
-  const playerWalletBalance = 15000;
-  const quizWalletAvailability = getQuizWalletAvailability();
-  const quizWalletUnavailable = !quizWalletAvailability.available;
+  const [quizzes, setQuizzes] = useState<CommunityQuiz[]>([]);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [stats, setStats] = useState<QuizStats | null>(null);
+  const [wallet, setWallet] = useState<QuizWallet | null>(null);
+  const [playerWalletBalance, setPlayerWalletBalance] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  const loadData = useCallback(() => {
+    if (!communityId) return;
+    setLoading(true);
+    fetch(`${API}/quiz.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d) => {
+        const mappedQuizzes: CommunityQuiz[] = (d.quizzes ?? []).map((q: any) => ({
+          id: q.id, title: q.title, description: q.description, category: q.category,
+          difficulty: q.difficulty, stakeAmount: parseFloat(q.stake_amount), winningAmount: parseFloat(q.winning_amount),
+          currency: "NGN", totalQuestions: 10, timeLimitPerQuestion: q.time_limit_per_question,
+          participants: q.participants, gamesPlayed: q.games_played, status: q.status,
+          privacySetting: q.privacy_setting, startDate: q.start_date ? new Date(q.start_date) : undefined,
+          endDate: q.end_date ? new Date(q.end_date) : undefined, communityId, badge: q.badge || "🎯",
+        }));
+        setQuizzes(mappedQuizzes);
+        setLeaderboard(d.leaderboard ?? []);
+        setStats(d.stats ?? null);
+        setWallet(d.wallet ?? null);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+
+    fetch(`${API}/advertisements.php?action=wallet_balance`, { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d) => setPlayerWalletBalance(parseFloat(d.main_balance) || 0))
+      .catch(() => {});
+  }, [communityId]);
+
+  useEffect(() => { if (open) loadData(); }, [open, loadData]);
+
+  const availableBalance = wallet ? wallet.balance - wallet.reserved_for_payouts : 0;
+  const quizWalletUnavailable = !wallet || availableBalance <= 0;
 
   const handleStartQuiz = (quiz: CommunityQuiz) => {
-    const availability = isCommunityQuizAvailable(quiz);
-    
-    if (!availability.available) {
-      toast({
-        title: "Quiz Unavailable",
-        description: availability.reason,
-        variant: "destructive"
-      });
+    if (quizWalletUnavailable) {
+      toast({ title: "Quiz Unavailable", description: "The Quiz Wallet doesn't have enough available balance right now.", variant: "destructive" });
       return;
     }
-
     if (playerWalletBalance < quiz.stakeAmount) {
-      toast({
-        title: "Insufficient Balance",
-        description: `You need at least ${formatLocalFirst(quiz.stakeAmount, "NGN")} to play.`,
-        variant: "destructive"
-      });
+      toast({ title: "Insufficient Balance", description: `You need at least ${formatLocalFirst(quiz.stakeAmount, "NGN")} to play.`, variant: "destructive" });
       return;
     }
-
     setSelectedQuiz(quiz);
     setShowGamePlay(true);
   };
@@ -73,16 +101,17 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
   const handleGameComplete = (result: { questionsCorrect: number; winningPercentage: number; amountWon: number; stakePaid: number }) => {
     toast({
       title: result.amountWon > 0 ? "🎉 Congratulations!" : "Game Over",
-      description: result.amountWon > 0 
-        ? `You won ${formatLocalFirst(result.amountWon, "NGN")}! Paid from the Quiz Wallet.` 
+      description: result.amountWon > 0
+        ? `You won ${formatLocalFirst(result.amountWon, "NGN")}! Paid from the Quiz Wallet.`
         : "Better luck next time!",
     });
     setShowGamePlay(false);
     setSelectedQuiz(null);
+    loadData();
   };
 
-  const availableQuizzes = activeCommunityQuizzes.filter(q => q.status === "active");
-  const upcomingQuizzes = activeCommunityQuizzes.filter(q => q.status === "upcoming");
+  const availableQuizzes = quizzes.filter(q => q.status === "active");
+  const upcomingQuizzes = quizzes.filter(q => q.status === "upcoming");
 
   const handleOpenProfile = (name: string, avatar?: string) => {
     const member: ExecutiveMember = {
@@ -134,6 +163,10 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
               <div className="px-3 py-4">
                 {/* Quizzes Tab */}
                 <TabsContent value="quizzes" className="mt-0 space-y-4">
+                  {loading && quizzes.length === 0 ? (
+                    <div className="flex justify-center py-16"><Loader2 className="h-7 w-7 animate-spin text-blue-600" /></div>
+                  ) : (
+                  <>
                   {/* Unavailability Banner */}
                   {quizWalletUnavailable && (
                     <div className="flex items-start gap-2.5 p-3 bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-400 rounded-xl">
@@ -168,7 +201,7 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
                           <span className="text-xs text-blue-600 dark:text-blue-400">Community Rank</span>
                         </div>
                         <Badge variant="outline" className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 border-blue-300">
-                          #{communityQuizPlayerStats.communityRank}
+                          {stats?.community_rank ? `#${stats.community_rank}` : "Unranked"}
                         </Badge>
                       </div>
                     </CardContent>
@@ -200,14 +233,14 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
                         <div>
                           <p className="text-xs text-muted-foreground">Available Balance</p>
                           <p className={cn("font-bold text-sm", quizWalletUnavailable ? "text-amber-700" : "text-green-700")}>
-                            {formatLocalAmount(communityQuizWalletData.availableBalance, "NGN")}
+                            {formatLocalAmount(availableBalance, "NGN")}
                           </p>
-                          <p className="text-xs text-muted-foreground">({formatMobiAmount(communityQuizWalletData.availableBalance)})</p>
+                          <p className="text-xs text-muted-foreground">({formatMobiAmount(availableBalance)})</p>
                         </div>
                         <div className="text-right">
                           <p className="text-xs text-muted-foreground">Reserved</p>
-                          <p className="font-semibold text-sm text-amber-600">{formatLocalAmount(communityQuizWalletData.reservedForPayouts, "NGN")}</p>
-                          <p className="text-xs text-muted-foreground">({formatMobiAmount(communityQuizWalletData.reservedForPayouts)})</p>
+                          <p className="font-semibold text-sm text-amber-600">{formatLocalAmount(wallet?.reserved_for_payouts ?? 0, "NGN")}</p>
+                          <p className="text-xs text-muted-foreground">({formatMobiAmount(wallet?.reserved_for_payouts ?? 0)})</p>
                         </div>
                       </div>
                       {(isAdmin || isOwner) && (
@@ -238,10 +271,9 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
                   ) : (
                     <>
                       {availableQuizzes.map((quiz) => {
-                        const availability = isCommunityQuizAvailable(quiz);
                         const isDisabledByWallet = quizWalletUnavailable;
                         const isDisabledByBalance = playerWalletBalance < quiz.stakeAmount;
-                        const isDisabled = !availability.available || isDisabledByBalance || isDisabledByWallet;
+                        const isDisabled = isDisabledByBalance || isDisabledByWallet;
                         return (
                           <Card key={quiz.id} className={cn(
                             "overflow-hidden border-blue-200 dark:border-blue-800 transition-colors",
@@ -296,7 +328,7 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
                                 </span>
                               </div>
 
-                              <Button 
+                              <Button
                                 className={cn(
                                   "w-full",
                                   isDisabledByWallet ? "bg-amber-500 hover:bg-amber-600" : "bg-blue-600 hover:bg-blue-700"
@@ -353,6 +385,8 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
                       )}
                     </>
                   )}
+                  </>
+                  )}
                 </TabsContent>
 
                 {/* Leaderboard Tab */}
@@ -361,40 +395,44 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
                     <Crown className="h-5 w-5 text-blue-600" />
                     <h3 className="font-semibold text-blue-700 dark:text-blue-300">Community Champions</h3>
                   </div>
-                  {communityQuizLeaderboard.map((entry) => (
+                  {leaderboard.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-8">No games played yet. Be the first!</p>
+                  ) : leaderboard.map((entry, idx) => {
+                    const rank = idx + 1;
+                    return (
                     <div key={entry.id} className={cn(
                       "p-3 rounded-lg",
-                      entry.rank === 1 && "bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-950/30 dark:to-amber-950/30 border border-yellow-200",
-                      entry.rank === 2 && "bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-950/30 dark:to-slate-950/30 border border-gray-200",
-                      entry.rank === 3 && "bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border border-orange-200",
-                      entry.rank > 3 && "bg-blue-50/50 dark:bg-blue-950/20 border border-transparent"
+                      rank === 1 && "bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-950/30 dark:to-amber-950/30 border border-yellow-200",
+                      rank === 2 && "bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-950/30 dark:to-slate-950/30 border border-gray-200",
+                      rank === 3 && "bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border border-orange-200",
+                      rank > 3 && "bg-blue-50/50 dark:bg-blue-950/20 border border-transparent"
                     )}>
                       {/* Row 1: Rank + Avatar + Name */}
                       <div className="flex items-center gap-2.5">
                         <div className={cn(
                           "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0",
-                          entry.rank === 1 && "bg-yellow-500 text-yellow-950",
-                          entry.rank === 2 && "bg-gray-300 text-gray-700",
-                          entry.rank === 3 && "bg-amber-600 text-amber-950",
-                          entry.rank > 3 && "bg-blue-200 text-blue-700"
+                          rank === 1 && "bg-yellow-500 text-yellow-950",
+                          rank === 2 && "bg-gray-300 text-gray-700",
+                          rank === 3 && "bg-amber-600 text-amber-950",
+                          rank > 3 && "bg-blue-200 text-blue-700"
                         )}>
-                          {entry.rank}
+                          {rank}
                         </div>
                         <button
                           className="shrink-0 touch-manipulation active:scale-[0.95]"
-                          onClick={() => handleOpenProfile(entry.playerName, entry.playerAvatar)}
+                          onClick={() => handleOpenProfile(entry.player_name, entry.player_avatar)}
                         >
                           <Avatar className="h-10 w-10 border-2 border-blue-200">
-                            <AvatarImage src={entry.playerAvatar} />
-                            <AvatarFallback className="bg-blue-100 text-blue-700 text-xs">{entry.playerName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                            <AvatarImage src={entry.player_avatar} />
+                            <AvatarFallback className="bg-blue-100 text-blue-700 text-xs">{(entry.player_name || "U").split(' ').map(n => n[0]).join('')}</AvatarFallback>
                           </Avatar>
                         </button>
                         <div className="flex-1 min-w-0">
                           <button
                             className="font-semibold text-sm truncate block w-full text-left touch-manipulation active:text-primary transition-colors"
-                            onClick={() => handleOpenProfile(entry.playerName, entry.playerAvatar)}
+                            onClick={() => handleOpenProfile(entry.player_name, entry.player_avatar)}
                           >
-                            {entry.playerName}
+                            {entry.player_name}
                           </button>
                         </div>
                       </div>
@@ -402,18 +440,15 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
                       {/* Row 2: Metadata + Prize — restacked below */}
                       <div className="flex items-end justify-between mt-1.5 ml-[calc(1.75rem+0.625rem+2.5rem+0.625rem)]">
                         <div>
-                          <p className="text-sm text-muted-foreground">{entry.questionsCorrect}/10 • {entry.completionTime}</p>
-                          {entry.memberSince && (
-                            <p className="text-sm text-blue-600 font-medium">Member since {entry.memberSince}</p>
-                          )}
+                          <p className="text-sm text-muted-foreground">{entry.questions_correct}/{entry.total_questions} • {entry.completion_time}</p>
                         </div>
                         <div className="text-right shrink-0 ml-2">
-                          <p className="font-bold text-blue-600 text-base">{formatLocalAmount(entry.amountWon, "NGN")}</p>
-                          <p className="text-sm text-muted-foreground">({formatMobiAmount(entry.amountWon)})</p>
+                          <p className="font-bold text-blue-600 text-base">{formatLocalAmount(entry.amount_won, "NGN")}</p>
+                          <p className="text-sm text-muted-foreground">({formatMobiAmount(entry.amount_won)})</p>
                         </div>
                       </div>
                     </div>
-                  ))}
+                  );})}
                 </TabsContent>
 
                 {/* Statistics Tab */}
@@ -425,42 +460,47 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
                       </h3>
                       <div className="grid grid-cols-3 gap-2 text-center">
                         <div className="p-2.5 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200">
-                          <p className="font-bold text-xl text-blue-700">{communityQuizPlayerStats.gamesPlayed}</p>
+                          <p className="font-bold text-xl text-blue-700">{stats?.games_played ?? 0}</p>
                           <p className="text-xs font-medium text-muted-foreground mt-0.5">Played</p>
                         </div>
                         <div className="p-2.5 bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-200">
-                          <p className="font-bold text-xl text-green-600">{communityQuizPlayerStats.gamesWon}</p>
+                          <p className="font-bold text-xl text-green-600">{stats?.games_won ?? 0}</p>
                           <p className="text-xs font-medium text-muted-foreground mt-0.5">Won</p>
                         </div>
                         <div className="p-2.5 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200">
-                          <p className="font-bold text-xl text-amber-600">{communityQuizPlayerStats.partialWins}</p>
+                          <p className="font-bold text-xl text-amber-600">{stats?.partial_wins ?? 0}</p>
                           <p className="text-xs font-medium text-muted-foreground mt-0.5">Partial</p>
                         </div>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 gap-2">
                         <div className="p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200">
                           <div className="flex items-center gap-2 mb-1">
                             <Star className="h-4 w-4 text-blue-600" />
                             <span className="text-xs text-muted-foreground">Best Score</span>
                           </div>
-                          <p className="font-bold text-lg text-blue-700">{communityQuizPlayerStats.bestScore}/10</p>
+                          <p className="font-bold text-lg text-blue-700">{stats?.best_score ?? 0}/10</p>
                         </div>
                         <div className="p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200">
                           <div className="flex items-center gap-2 mb-1">
                             <Shield className="h-4 w-4 text-blue-600" />
                             <span className="text-xs text-muted-foreground">Community Rank</span>
                           </div>
-                          <p className="font-bold text-lg text-blue-700">#{communityQuizPlayerStats.communityRank}</p>
+                          <p className="font-bold text-lg text-blue-700">{stats?.community_rank ? `#${stats.community_rank}` : "—"}</p>
                         </div>
                       </div>
 
                       <div className="flex justify-between text-sm p-3 bg-gradient-to-r from-blue-100 to-blue-50 dark:from-blue-950/50 dark:to-blue-900/30 rounded-lg border border-blue-200">
                         <span className="text-blue-700">Net Profit</span>
-                        <span className={cn("font-bold", communityQuizPlayerStats.netProfit >= 0 ? "text-green-600" : "text-destructive")}>
-                          {communityQuizPlayerStats.netProfit >= 0 ? "+" : ""}{formatLocalAmount(communityQuizPlayerStats.netProfit, "NGN")}
-                          <span className="text-xs font-normal text-muted-foreground ml-1">({formatMobiAmount(communityQuizPlayerStats.netProfit)})</span>
-                        </span>
+                        {(() => {
+                          const netProfit = (stats?.total_amount_won ?? 0) - (stats?.total_stake_paid ?? 0);
+                          return (
+                            <span className={cn("font-bold", netProfit >= 0 ? "text-green-600" : "text-destructive")}>
+                              {netProfit >= 0 ? "+" : ""}{formatLocalAmount(netProfit, "NGN")}
+                              <span className="text-xs font-normal text-muted-foreground ml-1">({formatMobiAmount(netProfit)})</span>
+                            </span>
+                          );
+                        })()}
                       </div>
                     </CardContent>
                   </Card>
@@ -476,8 +516,8 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
                       </p>
                       <div className="p-3 bg-white dark:bg-background rounded-lg border border-blue-200">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm">Total Contributed</span>
-                          <span className="font-bold text-blue-600">{formatLocalFirst(communityQuizPlayerStats.totalStakePaid * 0.7, "NGN")}</span>
+                          <span className="text-sm">Total Staked</span>
+                          <span className="font-bold text-blue-600">{formatLocalFirst(stats?.total_stake_paid ?? 0, "NGN")}</span>
                         </div>
                       </div>
                     </CardContent>
@@ -515,6 +555,7 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
         open={showGamePlay}
         onOpenChange={setShowGamePlay}
         quiz={selectedQuiz}
+        communityId={communityId}
         playerWalletBalance={playerWalletBalance}
         onGameComplete={handleGameComplete}
       />
@@ -523,6 +564,7 @@ export function CommunityQuizDialog({ open, onOpenChange, isAdmin = false, isOwn
       <QuizWalletDrawer
         open={showQuizWallet}
         onOpenChange={setShowQuizWallet}
+        communityId={communityId}
       />
 
       {/* Member Profile Preview */}

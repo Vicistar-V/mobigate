@@ -17,12 +17,14 @@ interface RecommendNewSettingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   setting: ActiveCommunitySetting | null;
+  onSubmit?: (value: string, reason?: string) => void | Promise<void>;
 }
 
 export function RecommendNewSettingDialog({
   open,
   onOpenChange,
   setting,
+  onSubmit,
 }: RecommendNewSettingDialogProps) {
   const isMobile = useIsMobile();
   const { toast } = useToast();
@@ -41,19 +43,11 @@ export function RecommendNewSettingDialog({
     }
 
     setIsSubmitting(true);
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    toast({
-      title: "Recommendation Submitted",
-      description: `Your recommendation for "${setting?.settingName}" has been submitted. Members can now support it.`,
-    });
+    await onSubmit?.(recommendedValue.trim(), reason || undefined);
 
     setRecommendedValue("");
     setReason("");
     setIsSubmitting(false);
-    onOpenChange(false);
   };
 
   const handleClose = (openState: boolean) => {

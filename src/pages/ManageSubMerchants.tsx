@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Users, FileText, Settings, ChevronRight, Check, X, Clock, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,40 +11,88 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  mockSubMerchants, mockSubMerchantApplications, subMerchantSettings,
-  setApplicationFee, formatNum, SubMerchantApplication,
+  subMerchantSettings,
+  setApplicationFee, formatNum, SubMerchantApplication, SubMerchant,
 } from "@/data/subMerchantData";
 
 export default function ManageSubMerchants() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [applications, setApplications] = useState(mockSubMerchantApplications);
+  const [applications, setApplications] = useState<SubMerchantApplication[]>([]);
+  const [mockSubMerchants, setSubMerchants] = useState<SubMerchant[]>([]);
   const [appFee, setAppFee] = useState(subMerchantSettings.applicationFee);
   const [isSaving, setIsSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [confirmAction, setConfirmAction] = useState<{ app: SubMerchantApplication; action: "approve" | "decline" } | null>(null);
 
+  const loadData = () => {
+    Promise.all([
+      fetch("/api/merchant/application.php?action=my_sub_applications_queue&status=pending", { credentials: "include" }).then((r) => r.json()),
+      fetch("/api/merchant/application.php?action=my_sub_applications_queue&status=approved", { credentials: "include" }).then((r) => r.json()),
+      fetch("/api/merchant/application.php?action=my_sub_applications_queue&status=rejected", { credentials: "include" }).then((r) => r.json()),
+    ])
+      .then(([pendingD, approvedD, rejectedD]) => {
+        const mapApp = (a: any, status: "pending" | "approved" | "rejected"): SubMerchantApplication => ({
+          id: a.id, applicantName: a.business_name || a.username || "Applicant",
+          city: a.town_of_residence || "", state: a.state_of_residence || "",
+          dateSubmitted: new Date(a.submitted_at), status, feePaid: parseFloat(a.total_fee) || 0,
+        });
+        setApplications([
+          ...(pendingD.applications ?? []).map((a: any) => mapApp(a, "pending")),
+          ...(approvedD.applications ?? []).map((a: any) => mapApp(a, "approved")),
+          ...(rejectedD.applications ?? []).map((a: any) => mapApp(a, "rejected")),
+        ]);
+      })
+      .catch(() => setApplications([]));
+
+    fetch("/api/merchant/application.php?action=my_sub_merchants", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const merchants: SubMerchant[] = (d.subMerchants ?? []).map((m: any) => ({
+          id: m.id, name: m.display_name, city: m.city || "", state: m.state || "",
+          status: m.status === "active" ? "active" : "suspended",
+          joinDate: new Date(m.created_at),
+          totalPurchases: 0, totalBatches: 0, totalBundles: 0, totalCards: 0, totalSpend: 0, discountRate: 0,
+        }));
+        setSubMerchants(merchants);
+      })
+      .catch(() => setSubMerchants([]));
+  };
+
+  useEffect(() => { loadData(); }, []);
+
   const filteredMerchants = useMemo(() => {
     if (!searchQuery) return mockSubMerchants;
     const q = searchQuery.toLowerCase();
     return mockSubMerchants.filter(m => m.name.toLowerCase().includes(q) || m.city.toLowerCase().includes(q));
-  }, [searchQuery]);
+  }, [searchQuery, mockSubMerchants]);
 
   const pendingApps = applications.filter(a => a.status === "pending");
   const processedApps = applications.filter(a => a.status !== "pending");
 
-  const handleAppAction = () => {
+  const handleAppAction = async () => {
     if (!confirmAction) return;
-    setApplications(prev => prev.map(a =>
-      a.id === confirmAction.app.id
-        ? { ...a, status: confirmAction.action === "approve" ? "approved" as const : "rejected" as const }
-        : a
-    ));
-    toast({
-      title: confirmAction.action === "approve" ? "Application Approved" : "Application Declined",
-      description: `${confirmAction.app.applicantName}'s application has been ${confirmAction.action === "approve" ? "approved" : "declined"}.`,
-    });
-    setConfirmAction(null);
+    try {
+      const res = await fetch("/api/merchant/application.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "review", id: confirmAction.app.id,
+          decision: confirmAction.action === "approve" ? "approved" : "rejected",
+        }),
+      });
+      const d = await res.json().catch(() => null);
+      if (!res.ok || !d?.success) throw new Error(d?.error || "Failed to record decision");
+
+      toast({
+        title: confirmAction.action === "approve" ? "Application Approved" : "Application Declined",
+        description: `${confirmAction.app.applicantName}'s application has been ${confirmAction.action === "approve" ? "approved" : "declined"}.`,
+      });
+      setConfirmAction(null);
+      loadData();
+    } catch (e: any) {
+      toast({ title: "Couldn't Record Decision", description: e.message, variant: "destructive" });
+    }
   };
 
   const handleSaveFee = async () => {

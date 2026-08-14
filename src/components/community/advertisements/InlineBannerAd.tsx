@@ -5,12 +5,16 @@ import { getActiveAdvertisements } from "@/data/advertisementData";
 import { EnhancedAdvertisement } from "@/types/advertisementSystem";
 import { AdvertisementFullViewSheet } from "./AdvertisementFullViewSheet";
 
+import { useInlineAd } from "@/hooks/useAdvertisements";
+
 interface InlineBannerAdProps {
+  communityId?: string;
   className?: string;
   rotationInterval?: number;
 }
 
-export function InlineBannerAd({ className = "", rotationInterval = 30000 }: InlineBannerAdProps) {
+export function InlineBannerAd({
+  communityId, className = "", rotationInterval = 30000 }: InlineBannerAdProps) {
   const [currentAd, setCurrentAd] = useState<EnhancedAdvertisement | null>(null);
   const [showFullView, setShowFullView] = useState(false);
 

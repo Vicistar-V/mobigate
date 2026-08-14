@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Trophy, Crown, Megaphone, Calendar, Users, CheckCircle, Clock, FileText, Shield, Eye, EyeOff, Award, FileCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,9 +29,13 @@ const StatCard = ({ value, label, icon: Icon }: StatCardProps) => (
   </div>
 );
 
-export function AdminWinnersAnnouncementTab() {
+export function AdminWinnersAnnouncementTab({ communityId }: { communityId?: string }) {
   const { toast } = useToast();
-  const [results, setResults] = useState<ElectionWinnerResult[]>(mockWinnerResults);
+  const [results, setResults] = useState<ElectionWinnerResult[]>([]);
+  const [electionId, setElectionId] = useState<string | null>(null);
+  const [realElectionName, setRealElectionName] = useState("Election");
+  const [totalVotesCast, setTotalVotesCast] = useState(0);
+  const [totalAccredited, setTotalAccredited] = useState(0);
   const [selectedResult, setSelectedResult] = useState<ElectionWinnerResult | null>(null);
   const [showAnnouncementDialog, setShowAnnouncementDialog] = useState(false);
   const [showCertificateGenerator, setShowCertificateGenerator] = useState(false);
@@ -46,7 +50,51 @@ export function AdminWinnersAnnouncementTab() {
   const [voterTransparency, setVoterTransparency] = useState<'anonymous' | 'identified'>('anonymous');
   const [showAntiIntimidationNotice, setShowAntiIntimidationNotice] = useState(true);
 
-  const election = mockCurrentElection;
+  const loadData = () => {
+    if (!communityId) return;
+    fetch(`/api/community/elections.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then(async (d) => {
+        const currentElection = (d.elections ?? []).find((e: any) => !['upcoming'].includes(e.status)) ?? (d.elections ?? [])[0];
+        if (!currentElection) { setResults([]); return; }
+        setElectionId(currentElection.id);
+        setRealElectionName(currentElection.title);
+        setTotalAccredited(d.stats?.accredited ?? 0);
+
+        const [resultsRes, winnersRes] = await Promise.all([
+          fetch(`/api/community/elections.php?action=results&community_id=${communityId}&election_id=${currentElection.id}`, { credentials: "include" }).then((r) => r.json()),
+          fetch(`/api/community/elections.php?action=winners&community_id=${communityId}`, { credentials: "include" }).then((r) => r.json()),
+        ]);
+        const announcedOfficeIds = new Set((winnersRes.winners ?? []).filter((w: any) => w.election_id === currentElection.id).map((w: any) => w.office_id));
+        const winnerByOffice: Record<string, any> = {};
+        (winnersRes.winners ?? []).forEach((w: any) => { winnerByOffice[w.office_id] = w; });
+
+        let votesCast = 0;
+        const mapped: ElectionWinnerResult[] = (resultsRes.offices ?? []).map((o: any) => {
+          const totalOfficeVotes = o.candidates.reduce((s: number, c: any) => s + (parseInt(c.live_votes, 10) || 0), 0);
+          votesCast += totalOfficeVotes;
+          return {
+            id: o.id,
+            officeId: o.id,
+            officeName: o.name,
+            candidates: o.candidates.map((c: any) => ({
+              id: c.id, name: c.name?.trim() || "Candidate", avatar: c.profile_photo || "/placeholder.svg",
+              votes: parseInt(c.live_votes, 10) || 0,
+              percentage: totalOfficeVotes > 0 ? ((parseInt(c.live_votes, 10) || 0) / totalOfficeVotes) * 100 : 0,
+            })),
+            announced: announcedOfficeIds.has(o.id),
+            announcedAt: winnerByOffice[o.id] ? new Date(winnerByOffice[o.id].announced_at) : undefined,
+          };
+        });
+        setTotalVotesCast(votesCast);
+        setResults(mapped);
+      })
+      .catch(() => setResults([]));
+  };
+
+  useEffect(() => { loadData(); }, [communityId]);
+
+  const election = { name: realElectionName, date: new Date(), totalVotesCast, totalAccredited };
   const announcedCount = results.filter(r => r.announced).length;
   const pendingCount = results.filter(r => !r.announced).length;
   const communityName = "Ndigbo Progressive Union";
@@ -125,14 +173,23 @@ export function AdminWinnersAnnouncementTab() {
     setShowAnnouncementDialog(true);
   };
 
-  const handleConfirmAnnouncement = (resultId: string, options: { notify: boolean; updateLeadership: boolean; message: string }) => {
-    setResults(prev => prev.map(r => 
-      r.id === resultId ? { ...r, announced: true, announcedAt: new Date(), announcedBy: 'Admin' } : r
-    ));
-    toast({
-      title: "Winner Announced!",
-      description: `The winner for ${results.find(r => r.id === resultId)?.officeName} has been officially announced`
-    });
+  const handleConfirmAnnouncement = async (resultId: string, options: { notify: boolean; updateLeadership: boolean; message: string }) => {
+    if (!communityId || !electionId) return;
+    try {
+      const res = await fetch("/api/community/elections.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "declare_winners", community_id: communityId, election_id: electionId }),
+      });
+      if (!res.ok) throw new Error("Failed to declare winners");
+      toast({
+        title: "Winner Announced!",
+        description: `The winner for ${results.find(r => r.id === resultId)?.officeName} has been officially announced`
+      });
+      loadData();
+    } catch (e: any) {
+      toast({ title: "Couldn't Announce", description: e.message, variant: "destructive" });
+    }
     setShowAnnouncementDialog(false);
   };
 
@@ -147,12 +204,24 @@ export function AdminWinnersAnnouncementTab() {
     });
   };
 
-  const handleAnnounceAll = () => {
-    setResults(prev => prev.map(r => ({ ...r, announced: true, announcedAt: new Date(), announcedBy: 'Admin' })));
-    toast({
-      title: "All Winners Announced!",
-      description: "All election winners have been officially announced"
-    });
+  const handleAnnounceAll = async () => {
+    if (!communityId || !electionId) return;
+    try {
+      const res = await fetch("/api/community/elections.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "declare_winners", community_id: communityId, election_id: electionId }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to declare winners");
+      toast({
+        title: "All Winners Announced!",
+        description: "All election winners have been officially announced"
+      });
+      loadData();
+    } catch (e: any) {
+      toast({ title: "Couldn't Announce Winners", description: e.message, variant: "destructive" });
+    }
   };
 
   return (

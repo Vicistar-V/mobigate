@@ -41,12 +41,13 @@ import { saveAdvert, saveAdvertDraft, loadAdvertDraft, clearAdvertDraft, loadAdv
 import { AdvertPricingCard } from "@/components/advert/AdvertPricingCard";
 import { FilePreviewGrid } from "@/components/advert/FilePreviewGrid";
 import { AdvertPreviewDialog } from "@/components/advert/AdvertPreviewDialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { DisplayModeSelector } from "@/components/advert/DisplayModeSelector";
 import { MultipleCountCard } from "@/components/advert/MultipleCountCard";
 import { LegalCopyrightAcceptance } from "@/components/common/LegalCopyrightAcceptance";
 import { AccreditedAdvertiserBadge } from "@/components/advert/AccreditedAdvertiserBadge";
 import { getUserDiscountProfile } from "@/data/discountData";
-import { useCurrentUserId, useWalletBalance } from "@/hooks/useWindowData";
+import { useCurrentUserId } from "@/hooks/useWindowData";
 import { SlotPackSelector } from "@/components/advert/SlotPackSelector";
 import { SlotPackManager } from "@/components/advert/SlotPackManager";
 import { SlotPackSummary } from "@/components/advert/SlotPackSummary";
@@ -180,9 +181,21 @@ export default function SubmitAdvert() {
   // Get user discount profile (mock data for now)
   const userProfile = getUserDiscountProfile(currentUserId);
   
-  // Wallet balance from PHP or fallback to mock
-  const walletData = useWalletBalance();
-  const walletBalance = walletData.credit; // Adverts use Credit wallet
+  // Real wallet balances — user picks which one to pay the advert fee from
+  const [mobiBalance, setMobiBalance] = useState(0);
+  const [localBalance, setLocalBalance] = useState(0);
+  const [paymentWallet, setPaymentWallet] = useState<"mobi" | "local">("mobi");
+  const loadWalletBalance = () => {
+    fetch(`/api/profile/wallet.php?action=overview`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        setMobiBalance(parseFloat(d.main_balance) || 0);
+        setLocalBalance(parseFloat(d.local_balance) || 0);
+      })
+      .catch(() => { setMobiBalance(0); setLocalBalance(0); });
+  };
+  useEffect(() => { loadWalletBalance(); }, []);
+  const walletBalance = paymentWallet === "local" ? localBalance : mobiBalance;
   
   // Pack system state
   const [currentStep, setCurrentStep] = useState<"select-user-type" | "verify-accreditation" | "select-pack" | "fill-slot">("select-user-type");
@@ -701,6 +714,22 @@ export default function SubmitAdvert() {
     return true;
   };
 
+  // No file-storage backend exists in this environment, so images are
+  // converted to base64 data URIs and stored directly — this makes them
+  // genuinely persisted and displayable, rather than just a filename.
+  const filesToDataUrls = (files: File[]): Promise<string[]> =>
+    Promise.all(
+      files.map(
+        (file) =>
+          new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          })
+      )
+    );
+
   const handlePublish = async () => {
     if (!validateSlotForm()) return;
 
@@ -728,89 +757,53 @@ export default function SubmitAdvert() {
         return;
       }
 
-      if (editMode && editingAdvertId) {
-        // Update existing advert by updating media
-        // This resets status to pending and clears old approval/rejection data
-        const updatedAdvert = saveAdvert(
-          {
-            category: category as AdvertCategory,
-            displayMode: displayMode as DisplayMode,
-            multipleCount,
-            type: type as AdvertType,
-            size: size as AdvertSize,
-            dpdPackage: dpdPackage as DPDPackageId,
-            subscriptionMonths,
-            extendedExposure: extendedExposureTime,
-            recurrentAfter,
-            recurrentEvery,
-            catchmentMarket,
-            launchDate,
-            files: uploadedFiles,
-            agreed,
-            contactPhone: contactPhone || undefined,
-            contactMethod: contactPhone ? contactMethod : undefined,
-            contactEmail: contactEmail || undefined,
-            websiteUrl: websiteUrl || undefined,
-            catalogueUrl: catalogueUrl || undefined,
-            logoUrl: logoUrl || undefined,
-            advertiserName: advertiserName || undefined,
-            advertDescription: advertDescription || undefined,
-            advertHeadline: advertHeadline || undefined,
-            advertCTAText: advertCTAText || undefined
-          },
-          pricing,
-          currentUserId
-        );
-        
-        toast({
-          title: "Advert Updated!",
-          description: "Your advert has been resubmitted for review.",
-        });
-      } else {
-        // Create new advert
-        const advert = saveAdvert(
-          {
-            category: category as AdvertCategory,
-            displayMode: displayMode as DisplayMode,
-            multipleCount,
-            type: type as AdvertType,
-            size: size as AdvertSize,
-            dpdPackage: dpdPackage as DPDPackageId,
-            subscriptionMonths,
-            extendedExposure: extendedExposureTime,
-            recurrentAfter,
-            recurrentEvery,
-            catchmentMarket,
-            launchDate,
-            files: uploadedFiles,
-            agreed,
-            contactPhone: contactPhone || undefined,
-            contactMethod: contactPhone ? contactMethod : undefined,
-            contactEmail: contactEmail || undefined,
-            websiteUrl: websiteUrl || undefined,
-            catalogueUrl: catalogueUrl || undefined,
-            logoUrl: logoUrl || undefined,
-            advertiserName: advertiserName || undefined,
-            advertDescription: advertDescription || undefined,
-            advertHeadline: advertHeadline || undefined,
-            advertCTAText: advertCTAText || undefined
-          },
-          pricing,
-          currentUserId
-        );
+      const totalFee = pricing.discountedTotal ?? pricing.totalCostMobi ?? pricing.totalCost ?? 0;
+      const mediaDataUrls = await filesToDataUrls(uploadedFiles);
+      const payload = {
+        action: editMode && editingAdvertId ? "update" : "create",
+        ad_id: editMode ? editingAdvertId : undefined,
+        business_name: advertiserName || "Advertiser",
+        category,
+        product_title: advertHeadline || `${category} — ${type}`,
+        description: advertDescription || "",
+        phone1: contactPhone || "",
+        email: contactEmail || "",
+        website: websiteUrl || "",
+        media: mediaDataUrls,
+        audience_targets: [catchmentMarket].filter(Boolean),
+        duration_days: subscriptionMonths * 30,
+        base_fee: pricing.setupFee ?? 0,
+        audience_premium: pricing.extendedExposureCost ?? 0,
+        total_fee_mobi: totalFee,
+        payment_wallet: paymentWallet,
+        metadata: {
+          displayMode, multipleCount, type, size, dpdPackage, subscriptionMonths,
+          extendedExposure: extendedExposureTime, recurrentAfter, recurrentEvery,
+          catchmentMarket, launchDate, contactMethod, catalogueUrl, logoUrl, advertCTAText,
+        },
+      };
 
-        toast({
-          title: "Success!",
-          description: "Your advert has been submitted for review. You'll be notified once it's approved.",
-        });
-      }
+      const res = await fetch("/api/adverts/advertisements.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const d = await res.json().catch(() => null);
+      if (!res.ok || !d?.success) throw new Error(d?.error || `Failed to submit advert (HTTP ${res.status})`);
+
+      toast({
+        title: editMode ? "Advert Updated!" : "Success!",
+        description: editMode
+          ? "Your advert has been resubmitted for review."
+          : "Your advert has been submitted for review. You'll be notified once it's approved.",
+      });
 
       // Navigate to My Adverts page
       navigate("/my-adverts");
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to submit advert. Please try again.",
+        description: error?.message || "Failed to submit advert. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -914,17 +907,27 @@ export default function SubmitAdvert() {
   // Check if user has sufficient balance
   const checkSufficientBalance = (pricing: any): boolean => {
     const finalAmount = pricing.finalAmountPayable ?? pricing.totalCost;
-    
-    if (walletBalance < finalAmount) {
+    if (walletBalance >= finalAmount) return true;
+
+    const otherWallet = paymentWallet === "local" ? "mobi" : "local";
+    const otherBalance = paymentWallet === "local" ? mobiBalance : localBalance;
+
+    if (otherBalance >= finalAmount) {
       toast({
-        title: "Insufficient Credit Balance",
-        description: `You need ₦${finalAmount.toLocaleString()} but your credit wallet has ₦${walletBalance.toLocaleString()}. Please fund your wallet to continue.`,
+        title: "Insufficient Balance in Selected Wallet",
+        description: `Your ${paymentWallet === "local" ? "Local Currency" : "Mobi"} Wallet is short, but your ${otherWallet === "local" ? "Local Currency" : "Mobi"} Wallet has enough. Switch wallets above to continue.`,
         variant: "destructive",
       });
       return false;
     }
-    
-    return true;
+
+    toast({
+      title: "Insufficient Balance in Both Wallets",
+      description: "Neither your Mobi nor Local Currency Wallet has enough for this advert. Redirecting you to fund your wallet...",
+      variant: "destructive",
+    });
+    setTimeout(() => navigate("/wallet"), 1500);
+    return false;
   };
 
   const handleAddSlot = () => {
@@ -1131,22 +1134,55 @@ export default function SubmitAdvert() {
 
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      // Save all slots as individual adverts
-      packDraft.slots.forEach((slot, index) => {
-        saveAdvert(slot.formData, slot.pricing, currentUserId);
-      });
+    (async () => {
+      try {
+        for (const slot of packDraft.slots) {
+          const fd = slot.formData;
+          const totalFee = slot.pricing.discountedTotal ?? slot.pricing.totalCostMobi ?? slot.pricing.totalCost ?? 0;
+          const slotMediaDataUrls = await filesToDataUrls(fd.files ?? []);
+          const res = await fetch("/api/adverts/advertisements.php", {
+            method: "POST", credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "create",
+              business_name: fd.advertiserName || "Advertiser",
+              category: fd.category,
+              product_title: fd.advertHeadline || `${fd.category} — ${fd.type}`,
+              description: fd.advertDescription || "",
+              phone1: fd.contactPhone || "",
+              email: fd.contactEmail || "",
+              website: fd.websiteUrl || "",
+              media: slotMediaDataUrls,
+              audience_targets: [fd.catchmentMarket].filter(Boolean),
+              duration_days: fd.subscriptionMonths * 30,
+              base_fee: slot.pricing.setupFee ?? 0,
+              audience_premium: slot.pricing.extendedExposureCost ?? 0,
+              total_fee_mobi: totalFee,
+              payment_wallet: paymentWallet,
+              metadata: {
+                displayMode: fd.displayMode, multipleCount: fd.multipleCount, type: fd.type, size: fd.size,
+                dpdPackage: fd.dpdPackage, subscriptionMonths: fd.subscriptionMonths,
+                extendedExposure: fd.extendedExposure, recurrentAfter: fd.recurrentAfter, recurrentEvery: fd.recurrentEvery,
+                catchmentMarket: fd.catchmentMarket, launchDate: fd.launchDate,
+              },
+            }),
+          });
+          const d = await res.json().catch(() => null);
+          if (!res.ok || !d?.success) throw new Error(d?.error || `Failed to submit one of the pack's ads (HTTP ${res.status})`);
+        }
 
-      clearPackDraft();
-      setIsSubmitting(false);
-
-      toast({
-        title: "Pack published successfully!",
-        description: `Your ${packDraft.slots.length}-slot pack has been submitted for approval.`,
-      });
-
-      navigate("/my-adverts");
-    }, 1500);
+        clearPackDraft();
+        toast({
+          title: "Pack published successfully!",
+          description: `Your ${packDraft.slots.length}-slot pack has been submitted for approval.`,
+        });
+        navigate("/my-adverts");
+      } catch (error: any) {
+        toast({ title: "Couldn't Publish Pack", description: error?.message || "Please try again.", variant: "destructive" });
+      } finally {
+        setIsSubmitting(false);
+      }
+    })();
   };
 
   const handleBackToPacks = () => {
@@ -2165,7 +2201,33 @@ export default function SubmitAdvert() {
 
                 {/* Cost Breakdown */}
                 {pricing ? (
-                  <AdvertPricingCard pricing={pricing} walletBalance={walletBalance} variant="inline" />
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setPaymentWallet("mobi")}
+                        className={cn(
+                          "rounded-xl border-2 p-3 text-left transition-colors",
+                          paymentWallet === "mobi" ? "border-primary bg-primary/5" : "border-border"
+                        )}
+                      >
+                        <p className="text-xs text-muted-foreground">Mobi Wallet</p>
+                        <p className="font-semibold">M{mobiBalance.toLocaleString()}</p>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPaymentWallet("local")}
+                        className={cn(
+                          "rounded-xl border-2 p-3 text-left transition-colors",
+                          paymentWallet === "local" ? "border-primary bg-primary/5" : "border-border"
+                        )}
+                      >
+                        <p className="text-xs text-muted-foreground">Local Currency Wallet</p>
+                        <p className="font-semibold">₦{localBalance.toLocaleString()}</p>
+                      </button>
+                    </div>
+                    <AdvertPricingCard pricing={pricing} walletBalance={walletBalance} variant="inline" onFundWallet={() => navigate("/wallet")} />
+                  </div>
                 ) : (
                   <div className="space-y-2">
                     <h3 className="text-lg font-semibold">Cost Breakdown</h3>
@@ -2310,8 +2372,32 @@ export default function SubmitAdvert() {
                       <CardTitle>Your Advertisement</CardTitle>
                       <CardDescription>Individual advert pricing</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                      <AdvertPricingCard pricing={pricing} walletBalance={walletBalance} variant="card" />
+                    <CardContent className="space-y-3">
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setPaymentWallet("mobi")}
+                          className={cn(
+                            "rounded-xl border-2 p-3 text-left transition-colors",
+                            paymentWallet === "mobi" ? "border-primary bg-primary/5" : "border-border"
+                          )}
+                        >
+                          <p className="text-xs text-muted-foreground">Mobi Wallet</p>
+                          <p className="font-semibold">M{mobiBalance.toLocaleString()}</p>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPaymentWallet("local")}
+                          className={cn(
+                            "rounded-xl border-2 p-3 text-left transition-colors",
+                            paymentWallet === "local" ? "border-primary bg-primary/5" : "border-border"
+                          )}
+                        >
+                          <p className="text-xs text-muted-foreground">Local Currency Wallet</p>
+                          <p className="font-semibold">₦{localBalance.toLocaleString()}</p>
+                        </button>
+                      </div>
+                      <AdvertPricingCard pricing={pricing} walletBalance={walletBalance} variant="card" onFundWallet={() => navigate("/wallet")} />
                     </CardContent>
                   </Card>
                 )

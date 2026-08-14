@@ -1,15 +1,43 @@
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, ChevronRight, Phone, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { mockSubMerchants, mockSubMerchantPurchases, formatNum } from "@/data/subMerchantData";
+import { SubMerchant, formatNum } from "@/data/subMerchantData";
 
 export default function SubMerchantDetail() {
   const navigate = useNavigate();
   const { subMerchantId } = useParams();
 
-  const sm = mockSubMerchants.find(m => m.id === subMerchantId);
-  const purchases = mockSubMerchantPurchases.filter(p => p.subMerchantId === subMerchantId);
+  const [sm, setSm] = useState<SubMerchant | null | undefined>(undefined);
+  useEffect(() => {
+    if (!subMerchantId) return;
+    fetch(`/api/merchant/application.php?action=sub_merchant_detail&id=${subMerchantId}`, { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!d?.subMerchant) { setSm(null); return; }
+        const m = d.subMerchant;
+        setSm({
+          id: m.id, name: m.display_name, city: m.city || "", state: m.state || "",
+          status: m.status === "active" ? "active" : "suspended",
+          joinDate: new Date(m.created_at),
+          totalPurchases: 0, totalBatches: 0, totalBundles: 0, totalCards: 0, totalSpend: 0, discountRate: 0,
+        });
+      })
+      .catch(() => setSm(null));
+  }, [subMerchantId]);
+
+  // The voucher-purchase relationship between parent and sub-merchant isn't
+  // built yet, so this stays empty for now rather than showing fake data.
+  const purchases: any[] = [];
+
+  if (sm === undefined) {
+    return (
+      <div className="bg-background min-h-screen flex items-center justify-center px-6">
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      </div>
+    );
+  }
 
   if (!sm) {
     return (

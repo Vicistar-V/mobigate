@@ -35,9 +35,10 @@ interface Friend {
 interface ProfileFriendsTabProps {
   userName: string;
   userId?: string;
+  autoOpen?: "find" | "invite";
 }
 
-export const ProfileFriendsTab = ({ userName, userId }: ProfileFriendsTabProps) => {
+export const ProfileFriendsTab = ({ userName, userId, autoOpen }: ProfileFriendsTabProps) => {
   const { toast }    = useToast();
   const navigate     = useNavigate();
   const [friends,    setFriends]    = useState<Friend[]>([]);
@@ -48,6 +49,11 @@ export const ProfileFriendsTab = ({ userName, userId }: ProfileFriendsTabProps) 
   const [giftUser,   setGiftUser]   = useState<{ id: string; name: string } | null>(null);
   const [showAddFriends,    setShowAddFriends]    = useState(false);
   const [showInviteMembers, setShowInviteMembers] = useState(false);
+
+  useEffect(() => {
+    if (autoOpen === "find") setShowAddFriends(true);
+    if (autoOpen === "invite") setShowInviteMembers(true);
+  }, [autoOpen]);
 
   const fetchFriends = useCallback(async () => {
     setLoading(true);

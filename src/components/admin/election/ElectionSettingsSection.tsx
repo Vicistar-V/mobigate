@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -167,11 +167,26 @@ const electionSettingsData: ElectionSetting[] = [
   },
 ];
 
-export function ElectionSettingsSection() {
+export function ElectionSettingsSection({ communityId }: { communityId?: string } = {}) {
   const [settings, setSettings] = useState(electionSettingsData);
   const [pendingChanges, setPendingChanges] = useState<Record<string, string>>({});
   const [showAuthDrawer, setShowAuthDrawer] = useState(false);
   const [selectedSetting, setSelectedSetting] = useState<ElectionSetting | null>(null);
+
+  useEffect(() => {
+    if (!communityId) return;
+    fetch(`/api/community/elections.php?action=election_settings&community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const byKey: Record<string, { value: string; updated_at: string }> = {};
+        (d.settings ?? []).forEach((s: any) => { byKey[s.setting_key] = s; });
+        setSettings((prev) => prev.map((s) => {
+          const real = byKey[s.key];
+          return real ? { ...s, currentValue: real.value, lastUpdated: new Date(real.updated_at), hasPendingChange: false } : s;
+        }));
+      })
+      .catch(() => {});
+  }, [communityId]);
 
   const hasUnsavedChanges = Object.keys(pendingChanges).length > 0;
 
@@ -192,27 +207,43 @@ export function ElectionSettingsSection() {
     setShowAuthDrawer(true);
   };
 
-  const handleAuthComplete = () => {
-    if (!selectedSetting) return;
+  const handleAuthComplete = async () => {
+    if (!selectedSetting || !communityId) return;
     
     const newValue = pendingChanges[selectedSetting.id];
     if (!newValue) return;
 
-    setSettings(prev => prev.map(s => 
-      s.id === selectedSetting.id 
-        ? { ...s, currentValue: newValue, hasPendingChange: true, lastUpdated: new Date() }
-        : s
-    ));
+    try {
+      const res = await fetch("/api/community/elections.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "save_election_setting", community_id: communityId, key: selectedSetting.key, value: newValue }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to save setting");
 
-    setPendingChanges(prev => {
-      const { [selectedSetting.id]: _, ...rest } = prev;
-      return rest;
-    });
+      setSettings(prev => prev.map(s => 
+        s.id === selectedSetting.id 
+          ? { ...s, currentValue: newValue, hasPendingChange: true, lastUpdated: new Date() }
+          : s
+      ));
 
-    toast({
-      title: "Setting Updated",
-      description: `${selectedSetting.name} has been authorized and updated successfully.`,
-    });
+      setPendingChanges(prev => {
+        const { [selectedSetting.id]: _, ...rest } = prev;
+        return rest;
+      });
+
+      toast({
+        title: "Setting Updated",
+        description: `${selectedSetting.name} has been authorized and updated successfully.`,
+      });
+    } catch (e: any) {
+      toast({
+        title: "Couldn't Update Setting",
+        description: e.message,
+        variant: "destructive",
+      });
+    }
 
     setSelectedSetting(null);
   };

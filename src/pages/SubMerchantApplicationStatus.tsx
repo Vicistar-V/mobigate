@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle2, Clock, XCircle, ArrowLeft, Bell, Store, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,40 +19,6 @@ interface SubMerchantApp {
   rejectionReason?: string;
   estimatedReview: string;
 }
-
-const mockApplications: SubMerchantApp[] = [
-  {
-    id: "1",
-    merchantId: "techhub",
-    merchantName: "TechHub Solutions",
-    merchantCity: "Lagos, Nigeria",
-    refNo: "MG-SUB-2026-0118",
-    dateSubmitted: "20 Feb 2026",
-    status: "pending",
-    estimatedReview: "14 business days",
-  },
-  {
-    id: "2",
-    merchantId: "greenleaf",
-    merchantName: "GreenLeaf Stores",
-    merchantCity: "Abuja, Nigeria",
-    refNo: "MG-SUB-2026-0095",
-    dateSubmitted: "12 Feb 2026",
-    status: "approved",
-    estimatedReview: "",
-  },
-  {
-    id: "3",
-    merchantId: "quickmart",
-    merchantName: "QuickMart Ltd",
-    merchantCity: "Port Harcourt, Nigeria",
-    refNo: "MG-SUB-2026-0071",
-    dateSubmitted: "5 Feb 2026",
-    status: "rejected",
-    rejectionReason: "Your application was declined due to incomplete documentation. Please provide a valid business registration certificate and proof of address, then re-apply.",
-    estimatedReview: "",
-  },
-];
 
 const statusMeta = {
   approved: {
@@ -84,7 +50,25 @@ const statusMeta = {
 const SubMerchantApplicationStatus = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [expandedId, setExpandedId] = useState<string | null>(mockApplications[0]?.id ?? null);
+  const [mockApplications, setApplications] = useState<SubMerchantApp[]>([]);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/merchant/application.php?action=my_sub_applications", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const mapped: SubMerchantApp[] = (d.applications ?? []).map((a: any) => ({
+          id: a.id, merchantId: a.parent_merchant_id, merchantName: a.parent_name || "Merchant",
+          merchantCity: a.parent_city || "", refNo: a.id.slice(0, 12).toUpperCase(),
+          dateSubmitted: a.submitted_at ? new Date(a.submitted_at).toLocaleDateString() : "",
+          status: a.status, rejectionReason: a.rejection_reason || undefined,
+          estimatedReview: "14 business days",
+        }));
+        setApplications(mapped);
+        setExpandedId(mapped[0]?.id ?? null);
+      })
+      .catch(() => setApplications([]));
+  }, []);
 
   const handleReminder = (merchantName: string) => {
     toast({

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Gavel,
   AlertTriangle,
@@ -306,7 +306,7 @@ const NotificationIndicator = ({ isActive, percentage }: { isActive: boolean; pe
   );
 };
 
-export function AdminImpeachmentTab() {
+export function AdminImpeachmentTab({ communityId }: { communityId?: string } = {}) {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   
@@ -319,6 +319,36 @@ export function AdminImpeachmentTab() {
   const [showDetailsSheet, setShowDetailsSheet] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [step, setStep] = useState<"select" | "reason" | "confirm">("select");
+  const [submitting, setSubmitting] = useState(false);
+
+  const [mockOfficers, setMockOfficers] = useState<Officer[]>([]);
+  const [mockImpeachments, setMockImpeachments] = useState<ImpeachmentProcess[]>([]);
+
+  const loadData = useCallback(() => {
+    if (!communityId) return;
+    fetch(`/api/community/impeachment.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        setMockOfficers((d.officers ?? []).map((o: any) => ({
+          id: o.user_id, name: o.name?.trim() || "Officer", position: o.role || "Officer",
+          avatar: o.profile_photo || "/placeholder.svg", tenureStart: new Date(), isImpeachable: true,
+        })));
+        setMockImpeachments((d.impeachments ?? []).map((i: any) => ({
+          id: i.id, officerId: i.target_user_id, officerName: i.target_name?.trim() || "Officer",
+          officerPosition: i.target_position, officerAvatar: i.target_avatar || "/placeholder.svg",
+          initiatedBy: i.initiator_name?.trim() || "Member", initiatorName: i.initiator_name?.trim() || "Member",
+          supportersCount: parseInt(i.signature_count, 10) || 0,
+          initiatedAt: new Date(i.created_at), reason: i.reason, status: i.status,
+          totalEligibleVoters: d.eligibleVoters ?? 0, votesFor: parseInt(i.votes_for, 10) || 0,
+          votesAgainst: parseInt(i.votes_against, 10) || 0, expiresAt: new Date(i.expires_at),
+          requiredThreshold: i.status === "petition" ? i.required_signature_pct : i.required_vote_pct,
+          isNotificationActive: i.status === "voting", myVote: "neutral" as const,
+        })));
+      })
+      .catch(() => { setMockOfficers([]); setMockImpeachments([]); });
+  }, [communityId]);
+
+  useEffect(() => { loadData(); }, [loadData]);
 
   // Stats
   const stats = {
@@ -355,18 +385,36 @@ export function AdminImpeachmentTab() {
     setStep("reason");
   };
 
-  const handleInitiateImpeachment = () => {
-    if (!selectedOfficer || !impeachmentReason.trim()) return;
-    
-    toast({
-      title: "Impeachment Process Initiated",
-      description: `Impeachment petition against ${selectedOfficer.name} has been submitted. Valid for 30 days.`,
-    });
-    
-    setShowInitiateDrawer(false);
-    setSelectedOfficer(null);
-    setImpeachmentReason("");
-    setStep("select");
+  const handleInitiateImpeachment = async () => {
+    if (!selectedOfficer || !impeachmentReason.trim() || !communityId) return;
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/community/impeachment.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "start_impeachment", community_id: communityId,
+          target_user_id: selectedOfficer.id, position: selectedOfficer.position, reason: impeachmentReason,
+        }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to initiate impeachment");
+
+      toast({
+        title: "Impeachment Process Initiated",
+        description: `Impeachment petition against ${selectedOfficer.name} has been submitted. Valid for 30 days.`,
+      });
+
+      setShowInitiateDrawer(false);
+      setSelectedOfficer(null);
+      setImpeachmentReason("");
+      setStep("select");
+      loadData();
+    } catch (e: any) {
+      toast({ title: "Couldn't Initiate Impeachment", description: e.message, variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const calculateProgress = (imp: ImpeachmentProcess) => {

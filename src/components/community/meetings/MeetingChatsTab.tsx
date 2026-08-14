@@ -3,22 +3,37 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Calendar, Download, Search, MessageCircle } from "lucide-react";
-import { mockMeetings } from "@/data/meetingsData";
 import { format } from "date-fns";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-export const MeetingChatsTab = () => {
+export const MeetingChatsTab = ({ communityId }: { communityId?: string } = {}) => {
   const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  // Get completed meetings with chat messages
-  const meetingsWithChats = mockMeetings.filter(
-    (m) => m.status === "completed" && m.chatMessages.length > 0
-  );
+  const [mockMeetings, setMockMeetings] = useState<any[]>([]);
+  const [selectedMeetingMessages, setSelectedMeetingMessages] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!communityId) return;
+    fetch(`/api/community/meetings_admin.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const mapped = [...(d.past ?? []), ...(d.upcoming ?? [])].map((m: any) => ({
+          id: m.id, name: m.title, date: new Date(m.meeting_date),
+          status: m.status === "completed" ? "completed" : m.status === "in-progress" ? "live" : "upcoming",
+          chatMessages: [], // fetched on demand when selected
+        }));
+        setMockMeetings(mapped);
+      })
+      .catch(() => setMockMeetings([]));
+  }, [communityId]);
+
+  // Get meetings (any could have chat history)
+  const meetingsWithChats = mockMeetings.filter((m) => m.status === "completed" || m.status === "live");
 
   const totalPages = Math.ceil(meetingsWithChats.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -28,6 +43,19 @@ export const MeetingChatsTab = () => {
   );
 
   const selectedMeeting = mockMeetings.find((m) => m.id === selectedMeetingId);
+
+  useEffect(() => {
+    if (!communityId || !selectedMeetingId) { setSelectedMeetingMessages([]); return; }
+    fetch(`/api/community/meetings_admin.php?action=chats&meeting_id=${selectedMeetingId}&community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        setSelectedMeetingMessages((d.messages ?? []).map((m: any) => ({
+          id: m.id, senderId: m.sender_id, senderName: m.sender_name?.trim() || "Member",
+          senderAvatar: m.sender_avatar || "/placeholder.svg", content: m.content, timestamp: new Date(m.created_at),
+        })));
+      })
+      .catch(() => setSelectedMeetingMessages([]));
+  }, [communityId, selectedMeetingId]);
 
   const premiumAdSlots = [
     {
@@ -60,14 +88,20 @@ export const MeetingChatsTab = () => {
     },
   ];
 
-  const handleDownloadChat = (meetingId: string) => {
+  const handleDownloadChat = async (meetingId: string) => {
     const meeting = mockMeetings.find((m) => m.id === meetingId);
-    if (!meeting) return;
+    if (!meeting || !communityId) return;
+
+    const res = await fetch(`/api/community/meetings_admin.php?action=chats&meeting_id=${meetingId}&community_id=${communityId}`, { credentials: "include" });
+    const d = await res.json().catch(() => ({ messages: [] }));
+    const messages = (d.messages ?? []).map((m: any) => ({
+      senderName: m.sender_name?.trim() || "Member", content: m.content, timestamp: new Date(m.created_at),
+    }));
 
     // Create chat transcript
-    const transcript = meeting.chatMessages
+    const transcript = messages
       .map(
-        (msg) =>
+        (msg: any) =>
           `[${format(msg.timestamp, "HH:mm:ss")}] ${msg.senderName}: ${msg.content}`
       )
       .join("\n");
@@ -149,7 +183,7 @@ export const MeetingChatsTab = () => {
           <Card className="p-4">
             <ScrollArea className="h-[500px] pr-4">
               <div className="space-y-4">
-                {selectedMeeting.chatMessages
+                {selectedMeetingMessages
                   .filter((msg) =>
                     searchQuery
                       ? msg.content

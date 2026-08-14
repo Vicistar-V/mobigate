@@ -1,77 +1,66 @@
 import { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { executivePositions, adhocCommittees, memberLevels } from "@/data/leadershipChangeHistory";
-import { changeReasonLabels, ChangeReason } from "@/types/leadershipManagement";
-import { ExecutiveMember } from "@/data/communityExecutivesData";
-import { Pencil } from "lucide-react";
+import { Pencil, Loader2 } from "lucide-react";
+
+const API = "/api/community";
+interface Position { id: string; title: string; admin_number: number; holder_user_id?: string; holder_name?: string; }
+interface EditableMember { id: string; name: string; position: string; position_id?: string; imageUrl?: string; profile_photo?: string; }
 
 interface EditMemberDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  member: ExecutiveMember;
+  member: EditableMember;
+  communityId?: string;
+  positions?: Position[];
+  onSaved?: () => void;
 }
 
-export function EditMemberDialog({ open, onOpenChange, member }: EditMemberDialogProps) {
+export function EditMemberDialog({ open, onOpenChange, member, communityId, positions = [], onSaved }: EditMemberDialogProps) {
   const { toast } = useToast();
-  const [position, setPosition] = useState(member.position);
-  const [level, setLevel] = useState(member.level || "");
-  const [committee, setCommittee] = useState(member.committee || "");
-  const [reason, setReason] = useState<ChangeReason>("manual");
-  const [tenureStart, setTenureStart] = useState("");
-  const [tenureEnd, setTenureEnd] = useState("");
-  const [notes, setNotes] = useState("");
+  const [positionId,  setPositionId]  = useState(member.position_id ?? "");
+  const [notes,       setNotes]       = useState("");
+  const [submitting,  setSubmitting]  = useState(false);
 
-  useEffect(() => {
-    setPosition(member.position);
-    setLevel(member.level || "");
-    setCommittee(member.committee || "");
-  }, [member]);
+  useEffect(() => { setPositionId(member.position_id ?? ""); setNotes(""); }, [member, open]);
 
-  const isAdhoc = !!member.committee;
-
-  const handleSubmit = () => {
-    toast({
-      title: "Member Updated",
-      description: `${member.name}'s information has been updated`,
-    });
-    onOpenChange(false);
+  const handleSubmit = async () => {
+    if (!positionId) { toast({ title: "Select a position", variant: "destructive" }); return; }
+    if (!communityId) return;
+    const pos = positions.find(p => p.id === positionId);
+    setSubmitting(true);
+    try {
+      const res = await fetch(`${API}/leadership.php`, {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "assign_position", community_id: communityId, user_id: member.id, position_id: positionId, admin_rank: pos?.admin_number ?? 99, notes }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to update");
+      toast({ title: "Member Updated", description: `${member.name} assigned to ${pos?.title}` });
+      onSaved?.();
+      onOpenChange(false);
+    } catch (e: any) { toast({ title: "Error", description: e.message, variant: "destructive" }); }
+    finally { setSubmitting(false); }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Pencil className="h-5 w-5" />
-            Edit Member
-          </DialogTitle>
+          <DialogTitle className="flex items-center gap-2"><Pencil className="h-5 w-5" /> Edit Member</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {/* Member Info Display */}
           <div className="flex items-center gap-3 p-3 rounded-lg bg-muted">
             <Avatar className="h-12 w-12">
-              <AvatarImage src={member.imageUrl} alt={member.name} />
-              <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+              <AvatarImage src={member.imageUrl || member.profile_photo} alt={member.name} />
+              <AvatarFallback>{(member.name || "U")[0]}</AvatarFallback>
             </Avatar>
             <div>
               <h4 className="font-medium">{member.name}</h4>
@@ -79,108 +68,30 @@ export function EditMemberDialog({ open, onOpenChange, member }: EditMemberDialo
             </div>
           </div>
 
-          {/* Position */}
           <div className="space-y-2">
-            <Label>Position</Label>
-            <Select value={position} onValueChange={setPosition}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
+            <Label>New Position *</Label>
+            <Select value={positionId} onValueChange={setPositionId}>
+              <SelectTrigger><SelectValue placeholder="Select position…" /></SelectTrigger>
               <SelectContent>
-                {(isAdhoc ? ["Chair", "Vice Chair", "Secretary", "Member"] : executivePositions).map((pos) => (
-                  <SelectItem key={pos} value={pos}>{pos}</SelectItem>
+                {positions.map(p => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.title} {p.holder_name && p.holder_user_id !== member.id ? `(${p.holder_name})` : p.holder_user_id === member.id ? "(current)" : "(vacant)"}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
-          {/* Committee (for ad-hoc) */}
-          {isAdhoc && (
-            <div className="space-y-2">
-              <Label>Committee</Label>
-              <Select value={committee} onValueChange={setCommittee}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {adhocCommittees.map((comm) => (
-                    <SelectItem key={comm} value={comm}>{comm}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {/* Level (for executive) */}
-          {!isAdhoc && (
-            <div className="space-y-2">
-              <Label>Level</Label>
-              <Select value={level} onValueChange={setLevel}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {memberLevels.map((lvl) => (
-                    <SelectItem key={lvl.value} value={lvl.value}>{lvl.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {/* Tenure */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label>Tenure Start</Label>
-              <Input 
-                type="month" 
-                value={tenureStart}
-                onChange={(e) => setTenureStart(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Tenure End</Label>
-              <Input 
-                type="month"
-                value={tenureEnd}
-                onChange={(e) => setTenureEnd(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Reason */}
-          <div className="space-y-2">
-            <Label>Reason for Change</Label>
-            <Select value={reason} onValueChange={(v) => setReason(v as ChangeReason)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(changeReasonLabels).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>{label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Notes */}
           <div className="space-y-2">
             <Label>Notes (Optional)</Label>
-            <Textarea
-              placeholder="Reason for update..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={2}
-            />
+            <Textarea placeholder="Reason for change…" value={notes} onChange={e => setNotes(e.target.value)} rows={2} className="resize-none" />
           </div>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit}>
-            Save Changes
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>Cancel</Button>
+          <Button onClick={handleSubmit} disabled={submitting || !positionId}>
+            {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null} Save Changes
           </Button>
         </DialogFooter>
       </DialogContent>

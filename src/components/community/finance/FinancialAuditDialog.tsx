@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, FileText, Download, AlertTriangle, TrendingUp, TrendingDown } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -19,14 +19,32 @@ import { DownloadFormatSheet, DownloadFormat } from "@/components/common/Downloa
 interface FinancialAuditDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
 }
 
-export function FinancialAuditDialog({ open, onOpenChange }: FinancialAuditDialogProps) {
+export function FinancialAuditDialog({ open, onOpenChange, communityId }: FinancialAuditDialogProps) {
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const [reports] = useState(mockAuditReports);
+  const [reports, setReports] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const [showFormatSheet, setShowFormatSheet] = useState(false);
   const [selectedReport, setSelectedReport] = useState<{ id: string; period: string } | null>(null);
+
+  useEffect(() => {
+    if (!open || !communityId) return;
+    setLoading(true);
+    fetch(`/api/community/finance.php?action=audit_reports&community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        setReports((d.reports ?? []).map((r: any) => ({
+          id: r.id, period: r.period, startDate: new Date(r.startDate), endDate: new Date(r.endDate),
+          totalIncome: r.totalIncome, totalExpenditure: r.totalExpenditure, balance: r.balance,
+          currency: "NGN", discrepancies: r.discrepancies, status: r.status, generatedDate: new Date(r.generatedDate),
+        })));
+      })
+      .catch(() => setReports([]))
+      .finally(() => setLoading(false));
+  }, [open, communityId]);
 
   const handleDownloadClick = (reportId: string, period: string) => {
     setSelectedReport({ id: reportId, period });

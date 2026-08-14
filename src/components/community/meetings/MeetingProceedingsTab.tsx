@@ -1,16 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Download, FileText, Calendar, X, ChevronLeft, ChevronRight } from "lucide-react";
-import { mockMeetingProceedings, mockMeetings } from "@/data/meetingsData";
 import { format, isAfter, isBefore, startOfDay, endOfDay } from "date-fns";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { DownloadFormatSheet, DownloadFormat } from "@/components/common/DownloadFormatSheet";
 import { useToast } from "@/hooks/use-toast";
 
-export const MeetingProceedingsTab = () => {
+export const MeetingProceedingsTab = ({ communityId }: { communityId?: string } = {}) => {
   const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(1);
   const [showDateFilter, setShowDateFilter] = useState(false);
@@ -18,14 +17,26 @@ export const MeetingProceedingsTab = () => {
   const [dateTo, setDateTo] = useState("");
   const [downloadOpen, setDownloadOpen] = useState(false);
   const [downloadDocName, setDownloadDocName] = useState("");
+  const [downloadDocUrl, setDownloadDocUrl] = useState("");
   const [isDownloading, setIsDownloading] = useState(false);
   const itemsPerPage = 5;
 
-  // Combine proceedings with meeting data
-  const proceedingsWithMeetings = mockMeetingProceedings.map((proceeding) => {
-    const meeting = mockMeetings.find((m) => m.id === proceeding.meetingId);
-    return { ...proceeding, meeting };
-  });
+  const [proceedingsWithMeetings, setProceedingsWithMeetings] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!communityId) return;
+    fetch(`/api/community/meetings_admin.php?action=proceedings&community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const mapped = (d.proceedings ?? []).map((p: any) => ({
+          id: p.id, meetingId: p.meeting_id, content: p.content, downloadUrl: p.download_url,
+          fileType: p.file_type, fileSize: p.file_size, createdAt: new Date(p.created_at),
+          meeting: { id: p.meeting_id, name: p.meeting_title, date: new Date(p.meeting_date) },
+        }));
+        setProceedingsWithMeetings(mapped);
+      })
+      .catch(() => setProceedingsWithMeetings([]));
+  }, [communityId]);
 
   // Apply date filter
   const filteredProceedings = proceedingsWithMeetings.filter((p) => {

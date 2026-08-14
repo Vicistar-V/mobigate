@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { MobiCurrencyDisplay } from "@/components/common/MobiCurrencyDisplay";
-import { nominationFeeStructures, getNominationFee, mockNominationPeriod, calculateTotalNominationCost, mobifaceNominationConfig } from "@/data/nominationFeesData";
+import { nominationFeeStructures as mockFeeStructures, mockNominationPeriod, mobifaceNominationConfig } from "@/data/nominationFeesData";
 import { NominationFeeStructure } from "@/types/nominationProcess";
 import { formatMobiAmount, formatLocalAmount, generateTransactionReference } from "@/lib/mobiCurrencyTranslation";
 import { format } from "date-fns";
@@ -42,6 +42,7 @@ interface DeclarationOfInterestSheetProps {
   onOpenChange: (open: boolean) => void;
   memberName: string;
   walletBalance?: number;
+  communityId?: string;
   onDeclarationComplete?: (officeId: string, transactionRef: string) => void;
 }
 
@@ -75,7 +76,8 @@ export function DeclarationOfInterestSheet({
   open,
   onOpenChange,
   memberName,
-  walletBalance = 75000,
+  walletBalance: walletBalanceProp,
+  communityId,
   onDeclarationComplete,
 }: DeclarationOfInterestSheetProps) {
   const { toast } = useToast();
@@ -83,11 +85,82 @@ export function DeclarationOfInterestSheet({
   const [selectedOffice, setSelectedOffice] = useState<string | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [transactionRef, setTransactionRef] = useState<string>("");
+  const [electionId, setElectionId] = useState<string | null>(null);
+
+  // Real wallet balance — the walletBalance prop is only used as a fallback
+  // before this loads, so the actual eligibility/cost checks always reflect
+  // real money.
+  const [realWalletBalance, setRealWalletBalance] = useState<number | null>(null);
+  useEffect(() => {
+    if (!open) return;
+    fetch(`/api/community/advertisements.php?action=wallet_balance`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => setRealWalletBalance(parseFloat(d.main_balance) || 0))
+      .catch(() => setRealWalletBalance(0));
+  }, [open]);
+  const walletBalance = realWalletBalance ?? walletBalanceProp ?? 0;
+
+  // Real offices for this community's current EoI-stage election, mapped onto
+  // the same shape the existing fee-breakdown UI expects. Fee amounts are
+  // matched from the standard fee catalog by office name (falling back to the
+  // catalog's first entry) since real offices are admin-named per election.
+  const [realOffices, setRealOffices] = useState<{ id: string; name: string }[]>([]);
+  const [loadingOffices, setLoadingOffices] = useState(false);
+
+  useEffect(() => {
+    if (!open || !communityId) return;
+    setLoadingOffices(true);
+    fetch(`/api/community/elections.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const currentElection = (d.elections ?? []).find((e: any) => ['upcoming', 'eoi', 'nomination'].includes(e.status));
+        setElectionId(currentElection?.id ?? null);
+        const offices = (d.offices ?? []).filter((o: any) => o.election_id === currentElection?.id);
+        setRealOffices(offices.map((o: any) => ({ id: o.id, name: o.name })));
+      })
+      .catch(() => setRealOffices([]))
+      .finally(() => setLoadingOffices(false));
+  }, [open, communityId]);
+
+  const matchMockStructure = (name: string) => {
+    const lower = name.toLowerCase();
+    return (
+      mockFeeStructures.find((f) => lower.includes(f.officeName.toLowerCase()) || f.officeName.toLowerCase().includes(lower)) ??
+      mockFeeStructures[0]
+    );
+  };
+
+  // Shadows the imported mock catalog/lookup for the rest of this component —
+  // everything below keeps working unchanged, just against real office data.
+  const nominationFeeStructures = realOffices.map((o) => {
+    const matched = matchMockStructure(o.name);
+    return { ...matched, officeId: o.id, officeName: o.name, category: "executive" as const };
+  });
+
+  const getNominationFee = (officeId: string) => nominationFeeStructures.find((f) => f.officeId === officeId);
+
+  const calculateTotalNominationCost = (officeId: string, _communityId?: string) => {
+    const structure = getNominationFee(officeId);
+    if (!structure) return null;
+    const nominationFee = structure.feeInMobi;
+    const serviceCharge = Math.round(nominationFee * (mobifaceNominationConfig.serviceChargePercent / 100));
+    return {
+      nominationFee,
+      serviceCharge,
+      processingFee: serviceCharge,
+      totalDebited: nominationFee + serviceCharge * 2,
+      candidateDebited: nominationFee + serviceCharge,
+      communityDebited: serviceCharge,
+      communityReceives: nominationFee - serviceCharge,
+      mobifaceReceives: serviceCharge * 2,
+      isCommunityOverride: false,
+      systemMinimum: nominationFee,
+    };
+  };
 
   // Use the current community's effective fee (community override → falls back to system minimum)
-  const currentCommunityId = "comm-current";
   const selectedFeeStructure = selectedOffice ? getNominationFee(selectedOffice) : null;
-  const costBreakdown = selectedOffice ? calculateTotalNominationCost(selectedOffice, currentCommunityId) : null;
+  const costBreakdown = selectedOffice ? calculateTotalNominationCost(selectedOffice, communityId) : null;
   // Candidate's wallet only pays nomination fee + service charge (the
   // community wallet is separately debited for its own service charge).
   const hasInsufficientBalance = costBreakdown
@@ -107,17 +180,37 @@ export function DeclarationOfInterestSheet({
     setShowConfirmDialog(false);
     setStep("processing");
 
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2500));
+    if (!communityId || !electionId || !selectedOffice || !costBreakdown) {
+      toast({ title: "Couldn't Submit", description: "Missing community or election context", variant: "destructive" });
+      setStep("select");
+      return;
+    }
 
-    const ref = generateTransactionReference("NOM");
-    setTransactionRef(ref);
-    setStep("success");
+    try {
+      const res = await fetch("/api/community/elections.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "declare_interest",
+          community_id: communityId,
+          election_id: electionId,
+          office_id: selectedOffice,
+          fee: costBreakdown.candidateDebited,
+        }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to submit declaration");
 
-    toast({
-      title: "Declaration Successful! 🎉",
-      description: `Your declaration for ${selectedFeeStructure?.officeName} has been registered.`,
-    });
+      setTransactionRef(d.transaction_ref || "");
+      setStep("success");
+      toast({
+        title: "Declaration Successful! 🎉",
+        description: `Your declaration for ${selectedFeeStructure?.officeName} has been registered.`,
+      });
+    } catch (e: any) {
+      toast({ title: "Couldn't Submit Declaration", description: e.message, variant: "destructive" });
+      setStep("select");
+    }
   };
 
   const handleGoToCampaign = () => {

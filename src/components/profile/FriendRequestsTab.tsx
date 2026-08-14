@@ -36,7 +36,7 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
-export const FriendRequestsTab = () => {
+export const FriendRequestsTab = ({ defaultSubTab = "received" }: { defaultSubTab?: "received" | "sent" } = {}) => {
   const { toast }    = useToast();
   const navigate     = useNavigate();
   const [received,   setReceived]   = useState<FriendRequest[]>([]);
@@ -195,7 +195,7 @@ export const FriendRequestsTab = () => {
         </Button>
       </div>
 
-      <Tabs defaultValue="received">
+      <Tabs defaultValue={defaultSubTab}>
         <TabsList className="w-full grid grid-cols-2">
           <TabsTrigger value="received">
             <UserPlus className="h-4 w-4 mr-1.5" />

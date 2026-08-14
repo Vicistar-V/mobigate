@@ -212,10 +212,10 @@ const menuItems: MenuItem[] = [{
   title: "Friendship Menu",
   icon: Users,
   items: [
-    { title: "Find Friends", url: "/find_friends.php" },
-    { title: "Invite Friends", url: "#" },
-    { title: "Sent Requests", url: "/manage_sent_friends_requests.php" },
-    { title: "View My Friends", url: "/my_friends.php" }
+    { title: "Find Friends", url: "/profile?action=find#friends" },
+    { title: "Invite Friends", url: "/profile?action=invite#friends" },
+    { title: "Sent Requests", url: "/profile?sub=sent#friend-requests" },
+    { title: "View My Friends", url: "/profile#friends" }
   ]
 }, {
   title: "My Social Communities",
@@ -233,17 +233,17 @@ const menuItems: MenuItem[] = [{
   title: "Followers/Following",
   icon: UserPlus,
   items: [
-    { title: "My Followers", url: "/my_followers.php" },
-    { title: "My Followings", url: "/my_followings.php" }
+    { title: "My Followers", url: "/profile#followers" },
+    { title: "My Followings", url: "/profile#following" }
   ]
 }, {
   title: "Messages/Chats",
   icon: MessageSquare,
   items: [
-    { title: "Chat Friends", url: "/my_friends.php" },
-    { title: "Chat Followers", url: "/my_followers.php" },
-    { title: "Chat My Followings", url: "/my_followings.php" },
-    { title: "View All Chats", url: "#" }
+    { title: "Chat Friends", url: "event:openMessagesSheet" },
+    { title: "Chat Followers", url: "/profile#followers" },
+    { title: "Chat My Followings", url: "/profile#following" },
+    { title: "View All Chats", url: "event:openMessagesSheet" }
   ]
 }, {
   title: "Advertisements",
@@ -297,7 +297,7 @@ const menuItems: MenuItem[] = [{
 }, {
   title: "Account Verification",
   icon: ShieldCheck,
-  url: "/user_kyc.php"
+  url: "/verify-account"
 }];
 export function AppSidebar() {
   const {
@@ -328,6 +328,7 @@ export function AppSidebar() {
 
   // Recursive function to render menu items with any depth
   const renderMenuItem = (subItem: MenuItem, itemKey: string): React.ReactNode => {
+    const isEventTrigger = subItem.url && subItem.url.startsWith('event:');
     const isInternalRoute = subItem.url && subItem.url.startsWith('/') && !subItem.url.includes('.php');
     const isSubExpanded = expandedItems.includes(itemKey);
     
@@ -370,7 +371,18 @@ export function AppSidebar() {
     return (
       <SidebarMenuSubItem key={subItem.title}>
         <SidebarMenuSubButton asChild className="transition-all duration-200 h-auto min-h-[1.75rem] py-1.5 hover:bg-accent/30">
-          {isInternalRoute ? (
+          {isEventTrigger ? (
+            <button
+              type="button"
+              className="w-full text-left"
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent('openChatWithUser', { detail: {} }));
+                handleLinkClick();
+              }}
+            >
+              <span className="flex-1 whitespace-normal break-words leading-tight text-left">{subItem.title}</span>
+            </button>
+          ) : isInternalRoute ? (
             <Link to={subItem.url!} onClick={handleLinkClick}>
               <span className="flex-1 whitespace-normal break-words leading-tight text-left">{subItem.title}</span>
             </Link>

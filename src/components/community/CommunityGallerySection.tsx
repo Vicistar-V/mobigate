@@ -1,5 +1,6 @@
 import React from "react";
 import { useCommunityContent } from "@/hooks/useCommunityContent";
+import { useCommunityPostInteraction, type ApiComment } from "@/hooks/useCommunityPostInteraction";
 import { useState, useEffect, useMemo } from "react";
 import {
   Heart,
@@ -59,6 +60,20 @@ interface CommunityGallerySectionProps {
   isGalleryManager?: boolean;
   isMember?: boolean;
   isExecutive?: boolean;
+}
+
+function commentTimeAgo(dateStr?: string): string {
+  if (!dateStr) return "";
+  try {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "Just now";
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    return `${days}d ago`;
+  } catch { return ""; }
 }
 
 export function CommunityGallerySection({
@@ -123,6 +138,9 @@ export function CommunityGallerySection({
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
   const [showDetailDialog,  setShowDetailDialog]  = useState(false);
   const [showUploadDialog,  setShowUploadDialog]  = useState(false);
+  const [detailComments,    setDetailComments]    = useState<ApiComment[]>([]);
+  const { fetchComments, toggleLike: apiToggleLike, submitComment, recordView } =
+    useCommunityPostInteraction(communityId);
   const [newComment, setNewComment] = useState("");
   const [visibleCount, setVisibleCount] = useState(9);
   const [viewOrientation, setViewOrientation] = useState<"horizontal" | "vertical">("horizontal");
@@ -155,6 +173,8 @@ export function CommunityGallerySection({
   });
 
   const handleLike = (itemId: string) => {
+    const item = galleryItems.find(i => i.id === itemId);
+    const wasLiked = item?.isLiked ?? false;
     setGalleryItems(prev => prev.map(item =>
       item.id === itemId
         ? { ...item, likes: item.isLiked ? item.likes - 1 : item.likes + 1, isLiked: !item.isLiked }
@@ -167,6 +187,7 @@ export function CommunityGallerySection({
         isLiked: !prev.isLiked
       } : null);
     }
+    apiToggleLike(itemId, wasLiked);
   };
 
   const handleFollow = (itemId: string) => {
@@ -191,19 +212,37 @@ export function CommunityGallerySection({
     });
   };
 
-  const handleComment = () => {
-    if (!newComment.trim()) return;
-    toast({
-      title: "Comment Added",
-      description: "Your comment has been posted.",
-    });
+  const handleComment = async () => {
+    if (!newComment.trim() || !selectedItem?.id) return;
+    const text = newComment.trim();
     setNewComment("");
+    const result = await submitComment(selectedItem.id, text);
+    const newC: ApiComment = result ?? {
+      id: `tmp-${Date.now()}`, content: text,
+      author_name: "You", profile_photo: null,
+      created_at: new Date().toISOString(), replies: [],
+    };
+    setDetailComments(prev => [...prev, newC]);
+    setGalleryItems(prev => prev.map(item =>
+      item.id === selectedItem.id ? { ...item, comments: (item.comments || 0) + 1 } : item
+    ));
+    setSelectedItem(prev => prev ? { ...prev, comments: (prev.comments || 0) + 1 } : null);
   };
 
   const openItemDetail = (item: GalleryItem) => {
     setSelectedItem(item);
     setShowDetailDialog(true);
   };
+
+  // Load real comments + record a view whenever the detail dialog opens on a new item
+  useEffect(() => {
+    if (showDetailDialog && selectedItem?.id) {
+      recordView(selectedItem.id);
+      fetchComments(selectedItem.id).then(setDetailComments);
+    } else if (!showDetailDialog) {
+      setDetailComments([]);
+    }
+  }, [showDetailDialog, selectedItem?.id]);
 
   const navigateItem = (direction: "prev" | "next") => {
     if (!selectedItem) return;
@@ -223,7 +262,7 @@ export function CommunityGallerySection({
     return mockGalleryComments.filter(c => c.itemId === itemId);
   };
 
-  const formatDate = (date: Date | string) => {
+  const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('en-NG', {
       year: 'numeric',
       month: 'short',
@@ -324,7 +363,7 @@ export function CommunityGallerySection({
 
   const ItemDetailDialog = () => {
     if (!selectedItem) return null;
-    const comments = getItemComments(selectedItem.id);
+    const comments = detailComments;
 
     return (
       <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
@@ -443,18 +482,14 @@ export function CommunityGallerySection({
                       comments.map(comment => (
                         <div key={comment.id} className="flex gap-2">
                           <Avatar className="h-8 w-8">
-                            <AvatarImage src={comment.authorPhoto} />
-                            <AvatarFallback>{comment.authorName[0]}</AvatarFallback>
+                            <AvatarImage src={comment.profile_photo || undefined} />
+                            <AvatarFallback>{(comment.author_name || "U")[0]}</AvatarFallback>
                           </Avatar>
                           <div className="flex-1 bg-muted/50 rounded-lg p-2">
-                            <p className="text-xs font-medium">{comment.authorName}</p>
+                            <p className="text-xs font-medium">{comment.author_name}</p>
                             <p className="text-sm">{comment.content}</p>
                             <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                              <span>{formatDate(comment.createdAt)}</span>
-                              <button className="hover:text-foreground">
-                                {comment.likes} likes
-                              </button>
-                              <button className="hover:text-foreground">Reply</button>
+                              <span>{commentTimeAgo(comment.created_at)}</span>
                             </div>
                           </div>
                         </div>

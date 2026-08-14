@@ -1,7 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Filter, ArrowUpRight, ArrowDownLeft } from "lucide-react";
-import { initialSubMerchantTransactions } from "@/data/subMerchantVoucherData";
 import { formatNum } from "@/data/merchantVoucherData";
 
 type FilterType = "all" | "funding" | "voucher_generation";
@@ -12,6 +11,22 @@ export default function SubMerchantVoucherTransactions() {
   const [filterType, setFilterType] = useState<FilterType>("all");
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [showFilters, setShowFilters] = useState(false);
+
+  const [initialSubMerchantTransactions, setTransactions] = useState<any[]>([]);
+  useEffect(() => {
+    fetch("/api/merchant/vouchers.php?action=sub_transactions", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const mapped = (d.transactions ?? []).map((t: any) => ({
+          id: t.id, type: t.type === "voucher_purchase" ? "voucher_generation" : t.type,
+          amount: parseFloat(t.amount), currency: "Mobi",
+          reference: t.reference, createdAt: new Date(t.created_at),
+          description: t.description, batchId: t.purchase_id,
+        }));
+        setTransactions(mapped);
+      })
+      .catch(() => setTransactions([]));
+  }, []);
 
   const filtered = useMemo(() => {
     let result = [...initialSubMerchantTransactions];

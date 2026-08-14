@@ -1,23 +1,42 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Download } from "lucide-react";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
-import { financialItems, mockMembersWithClearance } from "@/data/financialData";
+import { financialItems as staticFinancialItems } from "@/data/financialData";
 import { contentsAdSlots } from "@/data/profileAds";
 import { FinancialStatusDialog } from "./FinancialStatusDialog";
 import { CheckIndebtednessSheet } from "../elections/CheckIndebtednessSheet";
 import { DownloadFormatSheet, DownloadFormat } from "@/components/common/DownloadFormatSheet";
 import { toast } from "sonner";
 
-export const FinancialClearancesTab = () => {
+export const FinancialClearancesTab = ({ communityId }: { communityId?: string } = {}) => {
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [showIndebtednessSheet, setShowIndebtednessSheet] = useState(false);
   const [showReceiptsSheet, setShowReceiptsSheet] = useState(false);
   const [debtsChecked, setDebtsChecked] = useState(false);
   const [receiptsChecked, setReceiptsChecked] = useState(false);
+
+  const [financialItems, setFinancialItems] = useState(staticFinancialItems);
+  const [mockMembersWithClearance, setMockMembersWithClearance] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (!communityId) return;
+    fetch(`/api/community/finance.php?action=clearance_matrix&community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.items && d.items.length > 0) {
+          setFinancialItems(d.items.map((i: any) => ({ id: i.id, name: i.name, description: i.description, category: i.category })));
+        }
+        setMockMembersWithClearance((d.members ?? []).map((m: any) => ({
+          id: m.id, name: m.name, avatar: m.avatar, registration: m.registration,
+          clearances: m.clearances,
+        })));
+      })
+      .catch(() => setMockMembersWithClearance([]));
+  }, [communityId]);
 
   const handleDebtsClearing = () => {
     if (debtsChecked) {
@@ -172,6 +191,7 @@ export const FinancialClearancesTab = () => {
       <FinancialStatusDialog
         open={showStatusDialog}
         onOpenChange={setShowStatusDialog}
+        communityId={communityId}
       />
 
       {/* Check Indebtedness Sheet */}

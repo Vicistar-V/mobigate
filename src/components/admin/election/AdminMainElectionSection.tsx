@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Vote, 
   Users, 
@@ -43,11 +43,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
-import { 
-  mockMainElection, 
-  mockMainElectionOffices,
-  getMainElectionStats 
-} from "@/data/electionProcessesData";
 import { MainElection, MainElectionOffice, MainElectionPhase } from "@/types/electionProcesses";
 import { cn } from "@/lib/utils";
 import { CandidateVotersListSheet } from "./CandidateVotersListSheet";
@@ -97,7 +92,7 @@ const StatCard = ({ icon, value, label, color }: StatCardProps) => (
   </div>
 );
 
-export function AdminMainElectionSection() {
+export function AdminMainElectionSection({ communityId }: { communityId?: string } = {}) {
   const { toast } = useToast();
   const [selectedOffice, setSelectedOffice] = useState<MainElectionOffice | null>(null);
   const [showDetailSheet, setShowDetailSheet] = useState(false);
@@ -122,6 +117,59 @@ export function AdminMainElectionSection() {
   const [selectedMember, setSelectedMember] = useState<ExecutiveMember | null>(null);
   const [showMemberPreview, setShowMemberPreview] = useState(false);
 
+  const [mockMainElection, setMockMainElection] = useState<MainElection | null>(null);
+  const [mockMainElectionOffices, setMockMainElectionOffices] = useState<MainElectionOffice[]>([]);
+  const [mainElectionId, setMainElectionId] = useState<string | null>(null);
+
+  const loadData = () => {
+    if (!communityId) return;
+    fetch(`/api/community/elections.php?community_id=${communityId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const currentElection = (d.elections ?? []).find((e: any) => ['active', 'voting', 'campaign', 'completed'].includes(e.status));
+        if (!currentElection) { setMockMainElection(null); setMockMainElectionOffices([]); return; }
+        setMainElectionId(currentElection.id);
+
+        const officesForElection = (d.offices ?? []).filter((o: any) => o.election_id === currentElection.id);
+        const clearedCandidatesAll = (d.candidates ?? []).filter((c: any) => c.status === "cleared");
+        const totalVotes = clearedCandidatesAll.reduce((s: number, c: any) => s + (parseInt(c.vote_count, 10) || 0), 0);
+        const accredited = d.stats?.accredited ?? 0;
+
+        setMockMainElection({
+          id: currentElection.id, name: currentElection.title,
+          scheduledDate: new Date(currentElection.voting_start || currentElection.created_at),
+          startTime: "09:00", endTime: "18:00",
+          status: currentElection.status === "completed" ? "completed" : currentElection.status === "voting" ? "voting" : "pending",
+          phases: [], totalOffices: officesForElection.length,
+          completedOffices: currentElection.status === "completed" ? officesForElection.length : 0,
+          totalVotesCast: totalVotes, totalAccredited: accredited,
+          turnoutPercentage: accredited > 0 ? Math.round((totalVotes / accredited) * 100) : 0,
+        });
+
+        const mappedOffices: MainElectionOffice[] = officesForElection.map((o: any) => {
+          const candidates = clearedCandidatesAll.filter((c: any) => c.office_id === o.id);
+          const officeTotalVotes = candidates.reduce((s: number, c: any) => s + (parseInt(c.vote_count, 10) || 0), 0);
+          const top = [...candidates].sort((a, b) => (parseInt(b.vote_count, 10) || 0) - (parseInt(a.vote_count, 10) || 0))[0];
+          return {
+            id: o.id, officeName: o.name,
+            candidates: candidates.map((c: any) => ({
+              id: c.id, name: c.name?.trim() || "Candidate", avatar: c.profile_photo || "/placeholder.svg",
+              votes: parseInt(c.vote_count, 10) || 0,
+              percentage: officeTotalVotes > 0 ? ((parseInt(c.vote_count, 10) || 0) / officeTotalVotes) * 100 : 0,
+              isWinner: top ? c.id === top.id && officeTotalVotes > 0 : false,
+            })),
+            status: currentElection.status === "completed" ? "completed" : currentElection.status === "voting" ? "voting" : "pending",
+            totalVotes: officeTotalVotes,
+            winner: currentElection.status === "completed" && top ? top.name?.trim() : undefined,
+          };
+        });
+        setMockMainElectionOffices(mappedOffices);
+      })
+      .catch(() => { setMockMainElection(null); setMockMainElectionOffices([]); });
+  };
+
+  useEffect(() => { loadData(); }, [communityId]);
+
   const openVotersList = (candidate: typeof selectedCandidate, officeName: string) => {
     if (candidate) {
       setSelectedCandidate({ ...candidate, officeName });
@@ -142,29 +190,70 @@ export function AdminMainElectionSection() {
     setShowMemberPreview(true);
   };
 
-  const stats = getMainElectionStats();
+  const stats = {
+    totalOffices: mockMainElection?.totalOffices ?? 0,
+    completedOffices: mockMainElection?.completedOffices ?? 0,
+    turnout: mockMainElection?.turnoutPercentage ?? 0,
+  };
   const election = mockMainElection;
 
-  const handleStartVoting = (office: MainElectionOffice) => {
-    toast({
-      title: "Voting Started",
-      description: `Voting for ${office.officeName} is now open`,
-    });
+  const handleStartVoting = async (office: MainElectionOffice) => {
+    if (!communityId || !mainElectionId) return;
+    try {
+      const res = await fetch("/api/community/elections.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "update_election_status", community_id: communityId, election_id: mainElectionId, status: "voting" }),
+      });
+      if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || "Failed to start voting"); }
+      toast({
+        title: "Voting Started",
+        description: `Voting for the election is now open`,
+      });
+      loadData();
+    } catch (e: any) {
+      toast({ title: "Couldn't Start Voting", description: e.message, variant: "destructive" });
+    }
   };
 
-  const handleEndVoting = (office: MainElectionOffice) => {
-    toast({
-      title: "Voting Ended",
-      description: `Voting for ${office.officeName} has been closed`,
-    });
+  const handleEndVoting = async (office: MainElectionOffice) => {
+    if (!communityId || !mainElectionId) return;
+    try {
+      const res = await fetch("/api/community/elections.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "update_election_status", community_id: communityId, election_id: mainElectionId, status: "campaign" }),
+      });
+      if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || "Failed to close voting"); }
+      toast({
+        title: "Voting Ended",
+        description: `Voting has been closed`,
+      });
+      loadData();
+    } catch (e: any) {
+      toast({ title: "Couldn't End Voting", description: e.message, variant: "destructive" });
+    }
   };
 
-  const handleAnnounceResults = () => {
-    toast({
-      title: "Results Announced",
-      description: "Election results have been published to all members",
-    });
-    setShowAnnounceDialog(false);
+  const handleAnnounceResults = async () => {
+    if (!communityId || !mainElectionId) return;
+    try {
+      const res = await fetch("/api/community/elections.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "declare_winners", community_id: communityId, election_id: mainElectionId }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to announce results");
+      toast({
+        title: "Results Announced",
+        description: "Election results have been published to all members",
+      });
+      setShowAnnounceDialog(false);
+      loadData();
+    } catch (e: any) {
+      toast({ title: "Couldn't Announce Results", description: e.message, variant: "destructive" });
+    }
   };
 
   const handleAnnounceOfficeResult = (office: MainElectionOffice) => {
@@ -175,12 +264,24 @@ export function AdminMainElectionSection() {
     }, 150); // Slight delay for smooth transition
   };
 
-  const handleAuthComplete = () => {
-    if (officeToAnnounce) {
-      toast({
-        title: "Result Announced",
-        description: `Election result for ${officeToAnnounce.officeName} has been published`,
-      });
+  const handleAuthComplete = async () => {
+    if (officeToAnnounce && communityId && mainElectionId) {
+      try {
+        const res = await fetch("/api/community/elections.php", {
+          method: "POST", credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "declare_winners", community_id: communityId, election_id: mainElectionId }),
+        });
+        const d = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(d.error || "Failed to announce result");
+        toast({
+          title: "Result Announced",
+          description: `Election result for ${officeToAnnounce.officeName} has been published`,
+        });
+        loadData();
+      } catch (e: any) {
+        toast({ title: "Couldn't Announce Result", description: e.message, variant: "destructive" });
+      }
     }
     setOfficeToAnnounce(null);
     setShowAuthDrawer(false);

@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/card";
 import { ChevronDown, Eye, MessageSquare, Share2, Heart, Calendar, MapPin, Users, TrendingUp } from "lucide-react";
 import { EventItem } from "@/data/eventsData";
 import { useCommunityContent } from "@/hooks/useCommunityContent";
+import { useCommunityPostInteraction } from "@/hooks/useCommunityPostInteraction";
 import { formatDistanceToNow } from "date-fns";
 import { EventDetailDialog } from "./EventDetailDialog";
 import { CreateEventForm } from "./CreateEventForm";
@@ -144,7 +145,16 @@ export function CommunityEventsSection({
     isPremium:       false,
     tags:            e.tags || [],
     spotlight:       e.spotlight || false,
+    isLiked:         e.isLiked || false,
   })), [apiEvents]);
+
+  // Seed liked state from API on load — fixes likes resetting on page refresh
+  useEffect(() => {
+    const likedFromApi = apiMapped.filter(ev => (ev as any).isLiked).map(ev => ev.id);
+    if (likedFromApi.length > 0) {
+      setLikedEvents(prev => new Set([...prev, ...likedFromApi]));
+    }
+  }, [apiMapped]);
 
   // Reset visible count when filters change
   useEffect(() => {
@@ -252,8 +262,11 @@ export function CommunityEventsSection({
   };
 
   // Handler for like toggle
+  const { toggleLike: apiToggleLike } = useCommunityPostInteraction(communityId);
+
   const handleLike = (eventId: string, e?: React.MouseEvent) => {
     e?.stopPropagation(); // Prevent card click
+    const wasLiked = likedEvents.has(eventId);
     setLikedEvents(prev => {
       const newSet = new Set(prev);
       if (newSet.has(eventId)) {
@@ -265,6 +278,7 @@ export function CommunityEventsSection({
       }
       return newSet;
     });
+    apiToggleLike(eventId, wasLiked);
   };
 
   // Handler for share
@@ -681,6 +695,7 @@ export function CommunityEventsSection({
       {/* Event Detail Dialog */}
       {selectedEvent && (
         <EventDetailDialog
+          communityId={communityId}
           open={detailOpen}
           onOpenChange={setDetailOpen}
           event={selectedEvent}

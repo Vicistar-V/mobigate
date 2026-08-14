@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -55,12 +55,16 @@ interface MinutesDownloadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   minutes: MeetingMinutes;
+  communityId?: string;
+  onDownloaded?: () => void;
 }
 
 export const MinutesDownloadDialog = ({
   open,
   onOpenChange,
   minutes,
+  communityId,
+  onDownloaded,
 }: MinutesDownloadDialogProps) => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -70,86 +74,82 @@ export const MinutesDownloadDialog = ({
   const [selectedFormat, setSelectedFormat] = useState<DownloadFormat | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadComplete, setDownloadComplete] = useState(false);
+  const [markedAttendanceResult, setMarkedAttendanceResult] = useState(false);
 
-  // Check if user has already downloaded
-  const userDownload = mockMinutesDownloads.find(
-    (d) => d.minutesId === minutes.id && d.memberId === "p1" // Current user
-  );
-
-  // Calculate attendance marking eligibility
+  // Calculate attendance marking eligibility (display estimate — the real
+  // decision is made server-side and returned by the download_minutes call)
   const attendanceDeadline = minutes.attendanceDeadline;
   const canMarkAttendance = attendanceDeadline && new Date() < attendanceDeadline;
   const daysRemaining = attendanceDeadline 
     ? differenceInDays(attendanceDeadline, new Date()) 
     : 0;
 
-  // Mock wallet balance
-  const walletBalance = 500;
+  const [walletBalance, setWalletBalance] = useState(0);
+  useEffect(() => {
+    if (!open) return;
+    fetch(`/api/community/advertisements.php?action=wallet_balance`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => setWalletBalance(parseFloat(d.main_balance) || 0))
+      .catch(() => setWalletBalance(0));
+  }, [open]);
+
+  const userDownload = downloadComplete ? { downloadedAt: new Date(), markedAttendance: markedAttendanceResult } : null;
 
   const handleDownload = async () => {
+    if (!communityId) return;
     setIsDownloading(true);
-    
-    // Simulate download process and wallet deduction
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
-    setIsDownloading(false);
-    setDownloadComplete(true);
-    setShowConfirmation(false);
-    
-    // Create a mock file download
-    const content = `Meeting Minutes: ${minutes.meetingName}\nDate: ${format(minutes.meetingDate, "MMMM d, yyyy")}\n\n[Minutes content would be here]`;
-    const blob = new Blob([content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = minutes.fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
 
-    // Simulate transaction entry for community ledger
-    // In a real implementation, this would call an API to record:
-    // {
-    //   type: "credit",
-    //   category: "minutes_download",
-    //   description: `Meeting Minutes Download - ${minutes.meetingName}`,
-    //   reference: `MIN-${Date.now()}`,
-    //   amount: minutes.downloadFee,
-    //   memberName: "Current User",
-    //   status: "completed"
-    // }
-    console.log("Transaction recorded:", {
-      type: "credit",
-      category: "minutes_download",
-      description: `Meeting Minutes Download - ${minutes.meetingName}`,
-      amount: minutes.downloadFee,
-      timestamp: new Date().toISOString(),
-    });
-
-    // Show wallet debit toast first
-    toast({
-      title: "Payment Processed",
-      description: `${formatMobiAmount(minutes.downloadFee)} (≈ ${formatLocalAmount(minutes.downloadFee, "NGN")}) debited on your Mobi Wallet.`,
-    });
-
-    // Show community credit toast
-    setTimeout(() => {
-      toast({
-        title: "Community Wallet Credited",
-        description: `${formatMobiAmount(minutes.downloadFee)} credited to Community Wallet from your download.`,
+    try {
+      const res = await fetch("/api/community/meetings_admin.php", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "download_minutes", community_id: communityId, minutes_id: minutes.id }),
       });
-    }, 500);
-    
-    // Show final status toast
-    setTimeout(() => {
-      toast({
-        title: "Download Complete",
-        description: canMarkAttendance
-          ? "Minutes downloaded and your attendance has been marked!"
-          : "Minutes downloaded. Attendance was not marked (past 90-day deadline).",
-      });
-    }, 1000);
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "Failed to process download");
+
+      setIsDownloading(false);
+      setDownloadComplete(true);
+      setMarkedAttendanceResult(!!d.marked_attendance);
+      setShowConfirmation(false);
+
+      // Download the real file if one was uploaded, otherwise a text summary
+      if (d.file_url) {
+        window.open(d.file_url, "_blank");
+      } else {
+        const content = `Meeting Minutes: ${minutes.meetingName}\nDate: ${format(minutes.meetingDate, "MMMM d, yyyy")}\n\n[No file was uploaded for these minutes]`;
+        const blob = new Blob([content], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = minutes.fileName || "minutes.txt";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      if (minutes.downloadFee > 0) {
+        toast({
+          title: "Payment Processed",
+          description: `${formatMobiAmount(minutes.downloadFee)} (≈ ${formatLocalAmount(minutes.downloadFee, "NGN")}) debited from your Mobi Wallet.`,
+        });
+      }
+
+      setTimeout(() => {
+        toast({
+          title: "Download Complete",
+          description: d.marked_attendance
+            ? "Minutes downloaded and your attendance has been marked!"
+            : "Minutes downloaded. Attendance was not marked (outside the grace period).",
+        });
+      }, 500);
+
+      onDownloaded?.();
+    } catch (e: any) {
+      setIsDownloading(false);
+      toast({ title: "Couldn't Download", description: e.message, variant: "destructive" });
+    }
   };
 
   const content = (

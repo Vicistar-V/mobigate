@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Store, CheckCircle, Star, MapPin, Search, Globe, Building2, Map, Home, Package, ShoppingBag, Warehouse, Users } from "lucide-react";
 import { Header } from "@/components/Header";
@@ -109,20 +109,43 @@ export default function MerchantListingPage() {
     setSelectedCity(v === "all" ? "" : v);
   };
 
+  const [realMerchants, setRealMerchants] = useState<LocationMerchant[] | null>(null);
+  const [loadingMerchants, setLoadingMerchants] = useState(false);
+
+  useEffect(() => {
+    setLoadingMerchants(true);
+    const params = new URLSearchParams({ action: "list", type: merchantType, view: viewMode });
+    fetch(`/api/merchant/listing.php?${params.toString()}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        const mapped: LocationMerchant[] = (d.merchants ?? []).map((m: any) => ({
+          id: m.id, name: m.display_name, logo: m.logo_url || undefined,
+          isVerified: false, category: m.category || "General",
+          cityName: m.city || "", stateName: m.state || "", countryName: m.country || "",
+          countryFlag: "", cityId: (m.city || "").toLowerCase(), lgaId: (m.lga || "").toLowerCase(),
+          stateId: (m.state || "").toLowerCase(), countryId: (m.country || "").toLowerCase(),
+          isActive: true, merchantType, rating: parseFloat(m.rating) || 0, discountPercent: 0,
+        }));
+        setRealMerchants(mapped);
+      })
+      .catch(() => setRealMerchants([]))
+      .finally(() => setLoadingMerchants(false));
+  }, [merchantType, viewMode]);
+
   const filteredMerchants = useMemo(() => {
-    let list = allLocationMerchants.filter(m => m.isActive && m.merchantType === merchantType);
+    let list = (realMerchants ?? allLocationMerchants).filter(m => m.isActive && m.merchantType === merchantType);
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       list = list.filter(m => m.name.toLowerCase().includes(q) || m.category.toLowerCase().includes(q));
     }
-    if (selectedCity) list = list.filter(m => m.cityId === selectedCity);
-    else if (selectedLGA) list = list.filter(m => m.lgaId === selectedLGA);
-    else if (selectedState) list = list.filter(m => m.stateId === selectedState);
-    else if (selectedCountry) list = list.filter(m => m.countryId === selectedCountry);
+    if (selectedCity) list = list.filter(m => m.cityId === selectedCity || m.cityId === selectedCity.toLowerCase());
+    else if (selectedLGA) list = list.filter(m => m.lgaId === selectedLGA || m.lgaId === selectedLGA.toLowerCase());
+    else if (selectedState) list = list.filter(m => m.stateId === selectedState || m.stateId === selectedState.toLowerCase());
+    else if (selectedCountry) list = list.filter(m => m.countryId === selectedCountry || m.countryId === selectedCountry.toLowerCase());
 
     return list;
-  }, [selectedCountry, selectedState, selectedLGA, selectedCity, searchQuery, merchantType]);
+  }, [selectedCountry, selectedState, selectedLGA, selectedCity, searchQuery, merchantType, realMerchants]);
 
   const showState = viewMode === "state" || viewMode === "lga" || viewMode === "city";
   const showLGA = viewMode === "lga" || viewMode === "city";

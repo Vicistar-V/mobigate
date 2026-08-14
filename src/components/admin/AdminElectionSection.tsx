@@ -60,6 +60,7 @@ const StatBadge = ({ value, label, icon: Icon }: StatBadgeProps) => (
 type ElectionActionType = "announce_results" | "clear_candidate" | "disqualify_candidate" | "start_voting" | "end_voting";
 
 interface AdminElectionSectionProps {
+  communityId?: string;
   stats: AdminStats;
   electionActivities: ElectionActivity[];
   onViewCampaigns: () => void;
@@ -71,6 +72,7 @@ interface AdminElectionSectionProps {
 }
 
 export function AdminElectionSection({
+  communityId,
   stats,
   electionActivities,
   onViewCampaigns,

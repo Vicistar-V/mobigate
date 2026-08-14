@@ -40,11 +40,12 @@ import { MIN_DISCOUNT_ORDER_VALUE } from "@/data/platformSettingsData";
 interface WalletTopUpDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  communityId?: string;
 }
 
 type Step = "vouchers" | "merchants" | "payment" | "confirm";
 
-export function WalletTopUpDialog({ open, onOpenChange }: WalletTopUpDialogProps) {
+export function WalletTopUpDialog({ open, onOpenChange, communityId }: WalletTopUpDialogProps) {
   const [selectedVouchers, setSelectedVouchers] = useState<SelectedVoucher[]>([]);
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [selectedCountry, setSelectedCountry] = useState<MerchantCountry | null>(null);

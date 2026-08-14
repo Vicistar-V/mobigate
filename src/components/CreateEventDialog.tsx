@@ -571,6 +571,22 @@ export const CreateEventDialog = ({ isOpen, onClose, onCreated }: Props) => {
       createdAt: new Date().toISOString(),
     };
 
+    // ── Real persistence ───────────────────────────────────────────────────
+    fetch("/api/profile/notable_dates.php", {
+      method: "POST", credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "create_event",
+        event_type: type,
+        custom_label: type === "others" ? resolvedLabel : undefined,
+        event_date: dateISO,
+        notes: notes.trim() || "",
+        audience,
+        celebrants: finalCelebrants.map(c => ({ name: c.name, role: c.role, photo: celebrantImages(c)[0] || null })),
+        photos: allImages,
+      }),
+    }).catch(() => { /* optimistic local event still shows even if this fails */ });
+
     // ── Optimistic: prepend to window store + broadcast ──────────────────────
     if (typeof window !== "undefined") {
       const w = window as any;

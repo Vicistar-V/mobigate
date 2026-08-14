@@ -5,30 +5,44 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FundRaiserHeader } from "./FundRaiserHeader";
 import { PremiumAdRotation } from "@/components/PremiumAdRotation";
 import { PeopleYouMayKnow } from "@/components/PeopleYouMayKnow";
-import { mockCampaigns } from "@/data/fundraiserData";
-import { useState } from "react";
-import { DollarSign, Calendar } from "lucide-react";
+import { FundRaiserCampaign } from "@/data/fundraiserData";
+import { mapApiCampaign, mapApiDonor } from "@/lib/fundraiserMerge";
+import { useState, useEffect } from "react";
+import { DollarSign, Calendar, Loader2, Users } from "lucide-react";
 
-export const FundRaiserViewDonorsTab = () => {
+interface FundRaiserViewDonorsTabProps {
+  communityId?: string;
+}
+
+type DonorWithCampaign = ReturnType<typeof mapApiDonor>;
+
+export const FundRaiserViewDonorsTab = ({ communityId }: FundRaiserViewDonorsTabProps) => {
   const [filterCampaign, setFilterCampaign] = useState("all");
   const [sortBy, setSortBy] = useState("recent");
+  const [donors, setDonors] = useState<DonorWithCampaign[]>([]);
+  const [campaigns, setCampaigns] = useState<FundRaiserCampaign[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // Collect all donors from all campaigns
-  const allDonors = mockCampaigns.flatMap((campaign) =>
-    campaign.donors.map((donor) => ({
-      ...donor,
-      campaignId: campaign.id,
-      campaignTheme: campaign.theme,
-    }))
-  );
+  useEffect(() => {
+    if (!communityId) return;
+    setLoading(true);
+    Promise.all([
+      fetch(`/api/community/fundraiser.php?action=donors&community_id=${communityId}`, { credentials: "include" }).then((r) => (r.ok ? r.json() : { donors: [] })),
+      fetch(`/api/community/fundraiser.php?action=campaigns&community_id=${communityId}`, { credentials: "include" }).then((r) => (r.ok ? r.json() : { campaigns: [] })),
+    ])
+      .then(([donorsRes, campaignsRes]) => {
+        setDonors((donorsRes.donors ?? []).map(mapApiDonor));
+        setCampaigns((campaignsRes.campaigns ?? []).map(mapApiCampaign));
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [communityId]);
 
-  // Filter by campaign
   const filteredDonors =
     filterCampaign === "all"
-      ? allDonors
-      : allDonors.filter((d) => d.campaignId === filterCampaign);
+      ? donors
+      : donors.filter((d) => d.campaignId === filterCampaign);
 
-  // Sort donors
   const sortedDonors = [...filteredDonors].sort((a, b) => {
     switch (sortBy) {
       case "amount":
@@ -58,9 +72,9 @@ export const FundRaiserViewDonorsTab = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Campaigns</SelectItem>
-              {mockCampaigns.map((campaign) => (
+              {campaigns.map((campaign) => (
                 <SelectItem key={campaign.id} value={campaign.id}>
-                  {campaign.theme.substring(0, 40)}...
+                  {campaign.theme.substring(0, 40)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -88,12 +102,15 @@ export const FundRaiserViewDonorsTab = () => {
           <Card className="p-4 text-center">
             <p className="text-sm text-muted-foreground">Total Donated</p>
             <p className="text-2xl font-bold">
-              ${sortedDonors.reduce((sum, d) => sum + d.amount, 0).toLocaleString()}
+              M{sortedDonors.reduce((sum, d) => sum + d.amount, 0).toLocaleString()}
             </p>
           </Card>
         </div>
 
         {/* Donors List */}
+        {loading ? (
+          <div className="flex justify-center py-12"><Loader2 className="h-7 w-7 animate-spin text-rose-500" /></div>
+        ) : (
         <div className="space-y-3">
           {sortedDonors.map((donor) => (
             <Card key={`${donor.id}-${donor.campaignId}`} className="p-4">
@@ -127,7 +144,7 @@ export const FundRaiserViewDonorsTab = () => {
                     <span className="flex items-center gap-1">
                       <DollarSign className="h-3 w-3" />
                       <span className="font-semibold text-green-600">
-                        ${donor.amount.toLocaleString()}
+                        M{donor.amount.toLocaleString()}
                       </span>
                     </span>
                     <span className="flex items-center gap-1">
@@ -142,10 +159,12 @@ export const FundRaiserViewDonorsTab = () => {
 
           {sortedDonors.length === 0 && (
             <Card className="p-8 text-center">
+              <Users className="h-10 w-10 mx-auto mb-3 text-muted-foreground opacity-30" />
               <p className="text-muted-foreground">No donors found</p>
             </Card>
           )}
         </div>
+        )}
       </div>
 
       {/* Ads */}

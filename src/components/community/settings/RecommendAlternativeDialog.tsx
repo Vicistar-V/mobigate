@@ -11,19 +11,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { Lightbulb, ArrowRight, Info, Send, Check } from "lucide-react";
-import { mockAdminProposals } from "@/data/communityDemocraticSettingsData";
-import { DEMOCRATIC_SETTINGS_CONFIG } from "@/types/communityDemocraticSettings";
+import { AdminSettingProposal, DEMOCRATIC_SETTINGS_CONFIG } from "@/types/communityDemocraticSettings";
 
 interface RecommendAlternativeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  proposalId: string | null;
+  proposal: AdminSettingProposal | null;
+  onSubmit?: (value: string, reason?: string) => void | Promise<void>;
 }
 
 export function RecommendAlternativeDialog({
   open,
   onOpenChange,
-  proposalId,
+  proposal,
+  onSubmit,
 }: RecommendAlternativeDialogProps) {
   const isMobile = useIsMobile();
   const { toast } = useToast();
@@ -31,17 +32,13 @@ export function RecommendAlternativeDialog({
   const [reason, setReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const proposal = proposalId
-    ? mockAdminProposals.find((p) => p.proposalId === proposalId)
-    : null;
-
   // Reset form when dialog opens/closes or proposal changes
   useEffect(() => {
     if (open) {
       setRecommendedValue("");
       setReason("");
     }
-  }, [open, proposalId]);
+  }, [open, proposal?.proposalId]);
 
   // Determine if this setting has preset options (non-numeric)
   const hasPresetOptions = proposal?.valueOptions && proposal.valueOptions.length > 0 && !proposal.isNumericSetting;
@@ -64,19 +61,11 @@ export function RecommendAlternativeDialog({
     }
 
     setIsSubmitting(true);
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    toast({
-      title: "Recommendation Submitted",
-      description: `Your recommendation for "${proposal?.settingName}" has been submitted. Members can now support it.`,
-    });
+    await onSubmit?.(recommendedValue.trim(), reason || undefined);
 
     setRecommendedValue("");
     setReason("");
     setIsSubmitting(false);
-    onOpenChange(false);
   };
 
   const handleClose = (openState: boolean) => {

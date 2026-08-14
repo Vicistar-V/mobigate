@@ -29,7 +29,7 @@ import {
 import {
   Collapsible, CollapsibleContent, CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/useAuth";
 import { MetaTags } from "@/components/MetaTags";
@@ -182,6 +182,16 @@ const AccountVerificationPage = () => {
   const [errors, setErrors] = useState<Partial<Record<keyof VerificationForm, string>>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [existingVerification, setExistingVerification] = useState<{ status: string; rejection_reason?: string; submitted_at?: string } | null>(null);
+  const [checkingStatus, setCheckingStatus] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/account/verify.php?action=status`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => setExistingVerification(d.verification ?? null))
+      .catch(() => setExistingVerification(null))
+      .finally(() => setCheckingStatus(false));
+  }, []);
 
   const [openSection, setOpenSection] = useState<string>("bio");
 
@@ -292,26 +302,49 @@ const AccountVerificationPage = () => {
 
       const res = await fetch(`${API_BASE}/account/verify.php`, {
         method: "POST", body: fd, credentials: "include",
-      }).catch(() => null);
+      });
+      const j = await res.json().catch(() => null);
 
-      // Optimistic success — even if the demo endpoint is absent, the user
-      // sees their submission accepted (PHP backend will process when live).
-      let ok = true;
-      if (res) {
-        try { const j = await res.json(); ok = j?.success !== false; } catch { ok = res.ok; }
-      }
-
-      if (ok) {
+      if (res.ok && j?.success) {
         localStorage.removeItem(DRAFT_KEY);
         setSubmitted(true);
         toast({ title: "Verification submitted", description: "Your details are under review (up to 14 business days)." });
       } else {
-        toast({ title: "Submission failed", description: "Please try again shortly.", variant: "destructive" });
+        toast({ title: "Submission failed", description: j?.error || "Please try again shortly.", variant: "destructive" });
       }
+    } catch (e: any) {
+      toast({ title: "Submission failed", description: e.message || "Please check your connection and try again.", variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
   };
+
+  /* ── Already verified / pending review ── */
+  if (!checkingStatus && existingVerification && !submitted && existingVerification.status !== "rejected") {
+    const isApproved = existingVerification.status === "approved";
+    return (
+      <div className="min-h-screen bg-muted/20 px-4 py-10 flex items-start justify-center">
+        <MetaTags title="Account Verification — Mobiface" />
+        <div className="w-full max-w-md text-center bg-card rounded-2xl border p-6 mt-6">
+          <div className={cn(
+            "mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4",
+            isApproved ? "bg-emerald-100" : "bg-amber-100",
+          )}>
+            <CheckCircle2 className={cn("h-9 w-9", isApproved ? "text-emerald-600" : "text-amber-600")} />
+          </div>
+          <h1 className="text-xl font-bold mb-1">
+            {isApproved ? "Account Verified" : "Verification Under Review"}
+          </h1>
+          <p className="text-sm text-muted-foreground mb-5">
+            {isApproved
+              ? "Your account has been successfully verified."
+              : "Your verification submitted on " + (existingVerification.submitted_at ? new Date(existingVerification.submitted_at).toLocaleDateString() : "recently") + " is still under review. This usually takes up to 14 business days."}
+          </p>
+          <Button className="w-full" onClick={() => navigate("/profile")}>Back to Profile</Button>
+        </div>
+      </div>
+    );
+  }
 
   /* ── Success state ── */
   if (submitted) {
@@ -370,6 +403,16 @@ const AccountVerificationPage = () => {
             Mobiface's verification team.
           </p>
         </div>
+
+        {existingVerification?.status === "rejected" && (
+          <div className="flex gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3">
+            <XCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+            <p className="text-[11px] leading-snug text-muted-foreground">
+              <span className="font-semibold text-destructive">Your previous submission was not approved.</span>
+              {existingVerification.rejection_reason && ` Reason: ${existingVerification.rejection_reason}.`} Please review your details and submit again.
+            </p>
+          </div>
+        )}
 
         {/* 1. Bio-data */}
         <Section icon={User} title="Personal / Bio-Data" subtitle="Your legal identity details"

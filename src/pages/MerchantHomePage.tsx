@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Play, Image as ImageIcon, CalendarDays, Tv, Mail, Gamepad2, Heart, MessageCircle, Share2, UserPlus, Flag, CheckCircle, Globe, Facebook, Twitter, Instagram, Youtube, Linkedin, ChevronDown, ChevronUp, Users, Eye, Trophy, Zap, ExternalLink, Ticket, Store, Gift } from "lucide-react";
 import { Header } from "@/components/Header";
@@ -41,6 +41,22 @@ export default function MerchantHomePage() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const [realMerchant, setRealMerchant] = useState<{ id: string; name: string; logo?: string; category?: string; isVerified?: boolean } | null>(null);
+  useEffect(() => {
+    if (!merchantId) return;
+    fetch(`/api/merchant/listing.php?action=detail&id=${merchantId}`, { credentials: "include" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.merchant) {
+          setRealMerchant({
+            id: d.merchant.id, name: d.merchant.display_name,
+            logo: d.merchant.logo_url || undefined, category: d.merchant.category, isVerified: false,
+          });
+        }
+      })
+      .catch(() => {});
+  }, [merchantId]);
+
   const quizMerchant = mockMerchants.find(m => m.id === merchantId);
   const locationMerchant = allLocationMerchants.find(m => m.id === merchantId);
   
@@ -52,11 +68,13 @@ export default function MerchantHomePage() {
     : mobiMerchantMatch
       ? !mobiMerchantMatch.isSubMerchant
       : true; // fallback for quiz-only merchants
-  const merchant = quizMerchant 
-    ? quizMerchant 
-    : locationMerchant 
-      ? { id: locationMerchant.id, name: locationMerchant.name, logo: locationMerchant.logo, category: locationMerchant.category, isVerified: locationMerchant.isVerified }
-      : undefined;
+  const merchant = realMerchant
+    ? realMerchant
+    : quizMerchant 
+      ? quizMerchant 
+      : locationMerchant 
+        ? { id: locationMerchant.id, name: locationMerchant.name, logo: locationMerchant.logo, category: locationMerchant.category, isVerified: locationMerchant.isVerified }
+        : undefined;
 
   const homeData = merchantId ? getMerchantHomeData(merchantId) : null;
   const seasons = mockSeasons.filter(s => s.merchantId === merchantId);

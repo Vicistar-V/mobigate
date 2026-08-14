@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect,  useState } from "react";
 import {
   X,
   Search,
@@ -86,6 +86,7 @@ interface ManageCommunityGalleryDialogProps {
 export function ManageCommunityGalleryDialog({
   open,
   onOpenChange,
+  communityId,
   isOwner = false
 }: ManageCommunityGalleryDialogProps) {
   const { toast } = useToast();
@@ -96,6 +97,27 @@ export function ManageCommunityGalleryDialog({
   // Data state
   const [albums, setAlbums] = useState<GalleryAlbum[]>(mockGalleryAlbums);
   const [items, setItems] = useState<GalleryItem[]>(mockGalleryItems);
+
+  // Fetch real gallery items when dialog opens
+  useEffect(() => {
+    if (!open || !communityId) return;
+    fetch(`/api/community/content.php?community_id=${communityId}&type=gallery&status=all&limit=200`, { credentials: "include" })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d?.items?.length) {
+          setItems(d.items.map((g: any): GalleryItem => ({
+            id: g.id, type: g.mediaType === "video" ? "video" : "photo",
+            url: g.mediaUrl || g.thumbnail || "", thumbnail: g.thumbnail || g.mediaUrl || "",
+            thumbnailUrl: g.thumbnail || g.mediaUrl || "",
+            mediaUrl: g.mediaUrl || g.thumbnail || "", title: g.title || "",
+            description: g.description || "", uploadedBy: g.authorName || "",
+            uploadedAt: g.publishedAt || g.submittedAt || "", albumId: "all",
+            likes: g.likes || 0, comments: g.comments || 0, views: g.views || 0,
+            privacy: "public" as const, isHidden: false, tags: g.tags || [],
+          })));
+        }
+      }).catch(() => {});
+  }, [open, communityId]);
   const [managers, setManagers] = useState<GalleryManager[]>(mockGalleryManagers);
   
   // Dialog states
