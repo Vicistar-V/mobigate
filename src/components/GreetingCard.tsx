@@ -165,7 +165,6 @@ export const GreetingSection = ({
   // Full-window "see all" showcase with Filter (applies to every feed area).
   const [showcaseOpen, setShowcaseOpen] = useState(false);
   const [viewerStartIndex, setViewerStartIndex] = useState(0);
-  const [storyDetailOpen, setStoryDetailOpen] = useState(false);
   const [ownActionsOpen, setOwnActionsOpen] = useState(false);
   const [editPostOpen, setEditPostOpen] = useState(false);
   const [wallBannerManagerOpen, setWallBannerManagerOpen] = useState(false);
@@ -342,9 +341,19 @@ export const GreetingSection = ({
     };
   }, [activeFeedTab, communityVibes.length]);
 
+  const openGalleryViewer = (items: MediaItem[] | typeof allPosts, startIndex = 0) => {
+    const galleryItems = Array.isArray(items) && items.length > 0 && "url" in items[0]
+      ? (items as MediaItem[])
+      : toMediaItems(items as typeof allPosts);
+
+    const safeIndex = Math.min(Math.max(startIndex, 0), Math.max(galleryItems.length - 1, 0));
+    setViewerItems(galleryItems);
+    setViewerStartIndex(safeIndex);
+    setViewerOpen(true);
+  };
+
   const openAllVibes = (startIdx = 0) => {
-    setAllVibesStartIdx(startIdx);
-    setAllVibesViewerOpen(true);
+    openGalleryViewer(communityVibes, startIdx);
   };
 
   // Tapping the owner's own media: on your own page → Edit/Create/View menu;
@@ -353,7 +362,7 @@ export const GreetingSection = ({
     if (canEdit) {
       setOwnActionsOpen(true);
     } else if (featuredPost) {
-      setOwnPostsViewerOpen(true);
+      openGalleryViewer(myOwnPosts, 0);
     }
   };
 
@@ -801,7 +810,7 @@ export const GreetingSection = ({
                   {/* ===== Area A — the User's OWN vibes (latest on display) ===== */}
                   <button
                     type="button"
-                    onClick={() => featuredPost && setOwnPostsViewerOpen(true)}
+                    onClick={() => featuredPost && openGalleryViewer(myOwnPosts, 0)}
                     className="relative bg-muted rounded-lg overflow-hidden border-[3px] border-[hsl(212_95%_50%)] shadow-sm active:scale-[0.98] transition-transform touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(212_95%_50%)]"
                     aria-label="View your vibes"
                   >
@@ -1033,7 +1042,7 @@ export const GreetingSection = ({
                   {/* IMAGE → opens MediaGalleryViewer */}
                   <button
                     type="button"
-                    onClick={() => setViewerOpen(true)}
+                    onClick={() => openGalleryViewer(myRecentPosts, safeFeaturedIdx)}
                     className="relative bg-muted rounded-md overflow-hidden border-2 border-red-500 cursor-pointer active:opacity-95 active:scale-[0.997] transition-transform touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 min-w-0"
                     aria-label="Enlarge this post's media"
                   >
@@ -1053,7 +1062,7 @@ export const GreetingSection = ({
                   {/* STORYLINE → opens enlarged story details */}
                   <button
                     type="button"
-                    onClick={() => setStoryDetailOpen(true)}
+                    onClick={() => openGalleryViewer([featuredPublicPost], 0)}
                     className="text-foreground p-2.5 text-left select-none cursor-pointer rounded-md hover:bg-purple-300/40 active:bg-purple-300/60 active:scale-[0.997] transition-all touch-manipulation focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 min-w-0 overflow-hidden"
                     aria-label="Read full story details"
                   >
@@ -1148,37 +1157,6 @@ export const GreetingSection = ({
         }))}
         initialIndex={safeFeaturedIdx}
       />
-
-      {/* Enlarged story details — opens when the storyline TEXT is tapped */}
-      {featuredPublicPost && (
-        <PostDetailDialog
-          open={storyDetailOpen}
-          onOpenChange={setStoryDetailOpen}
-          post={{
-            id:                 featuredPublicPost.id,
-            title:              featuredPublicPost.title || "Public Post",
-            subtitle:           (featuredPublicPost as any).subtitle,
-            description:        (featuredPublicPost as any).description ||
-                                "However, the storyline may not just exceed certain word-counts or be made to be unnecessarily bulky or voluminous in any case.",
-            author:             (featuredPublicPost as any).author || "Public User",
-            authorProfileImage: (featuredPublicPost as any).authorProfileImage,
-            userId:             (featuredPublicPost as any).userId,
-            status:             ((featuredPublicPost as any).status as "Online" | "Offline") || "Online",
-            views:              String((featuredPublicPost as any).views ?? 0),
-            comments:           String((featuredPublicPost as any).comments ?? 0),
-            likes:              String((featuredPublicPost as any).likes ?? 0),
-            followers:          (featuredPublicPost as any).followers,
-            type:               (((featuredPublicPost as any).type as string)?.toLowerCase() === "video"   ? "Video"
-                               : ((featuredPublicPost as any).type as string)?.toLowerCase() === "audio"   ? "Audio"
-                               : ((featuredPublicPost as any).type as string)?.toLowerCase() === "pdf"     ? "PDF"
-                               : ((featuredPublicPost as any).type as string)?.toLowerCase() === "url"     ? "URL"
-                               : ((featuredPublicPost as any).type as string)?.toLowerCase() === "article" ? "Article"
-                               : "Photo") as "Video" | "Article" | "Photo" | "Audio" | "PDF" | "URL",
-            imageUrl:           featuredPublicPost.imageUrl,
-            fee:                (featuredPublicPost as any).fee,
-          }}
-        />
-      )}
 
       {/* ── Own Post action sheet (Edit / Create New) ── */}
       <ActionDialog open={ownActionsOpen} onOpenChange={setOwnActionsOpen}>
@@ -1312,24 +1290,6 @@ export const GreetingSection = ({
           )}
         </ActionDialogContent>
       </ActionDialog>
-
-      {/* ── Viewer: all of MY posts (Area A enlarge + "View my Posts") ── */}
-      <MediaGalleryViewer
-        open={ownPostsViewerOpen}
-        onOpenChange={setOwnPostsViewerOpen}
-        items={toMediaItems(myOwnPosts)}
-        initialIndex={0}
-        galleryType="post"
-      />
-
-      {/* ── Viewer: ALL vibes by everybody ("Flex with more exciting Vibes") ── */}
-      <MediaGalleryViewer
-        open={allVibesViewerOpen}
-        onOpenChange={setAllVibesViewerOpen}
-        items={toMediaItems(communityVibes)}
-        initialIndex={allVibesStartIdx}
-        galleryType="post"
-      />
 
       {/* ── Full-window "see all" showcase with Filter (Stories / Vibes / Breaking News) ── */}
       <FeedShowcaseDialog
