@@ -362,14 +362,32 @@ function ViewTrendingDialog({ open, onClose, headlines }: { open: boolean; onClo
     </>
   );
 }
+
+// ── Action Toolbar (Mobile-friendly) ──────────────────────────────────────────
+function ActionToolbar({ onActionClick }: { onActionClick: (action: typeof NAV_ACTIONS[number]["action"]) => void }) {
+  return (
+    <div className="border-b border-border bg-background px-4 py-3">
+      <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: "thin" }}>
+        {NAV_ACTIONS.map(action => (
+          <button
+            key={action.label}
+            onClick={() => onActionClick(action.action)}
+            className="shrink-0 px-4 py-2 rounded-full bg-muted hover:bg-muted/70 text-foreground font-semibold text-sm transition-colors active:scale-95 touch-manipulation whitespace-nowrap"
+          >
+            {action.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function HeadlineCard({
   headline,
   onDoubleClick,
-  onActionClick,
 }: {
   headline: TrendingHeadline;
   onDoubleClick: () => void;
-  onActionClick: (action: typeof NAV_ACTIONS[number]["action"]) => void;
 }) {
   const { toast } = useToast();
   const [isFollowing, setIsFollowing] = useState(!!headline.isFollowing);
@@ -393,46 +411,36 @@ function HeadlineCard({
 
   return (
     <div className="rounded-b-xl border border-t-0 border-border bg-card p-3 shadow-sm shrink-0 w-full">
-      <div className="grid grid-cols-[112px_1fr] gap-3">
-        {/* Left: portrait + action links */}
-        <div className="flex flex-col gap-2">
-          <div className="overflow-hidden rounded-lg border border-border bg-muted">
-            <img src={headline.imageUrl} alt={headline.author} className="aspect-[3/4] h-full w-full object-cover" loading="lazy" />
-          </div>
-          <nav className="mt-1 flex flex-1 flex-col justify-between gap-3">
-            {NAV_ACTIONS.map(action => (
-              <button key={action.label} type="button" onClick={() => onActionClick(action.action)}
-                className="w-full text-left text-[13px] font-semibold leading-tight text-[hsl(212_95%_50%)] underline underline-offset-2 hover:opacity-80 active:opacity-60 touch-manipulation transition-opacity">
-                {action.label}
-              </button>
-            ))}
-          </nav>
+      <div className="flex gap-3">
+        {/* Left: featured image */}
+        <div className="shrink-0 w-24 h-32 rounded-lg border border-border bg-muted overflow-hidden">
+          <img src={headline.imageUrl} alt={headline.category} className="w-full h-full object-cover" loading="lazy" />
         </div>
 
-        {/* Right: category + excerpt + author */}
-        <div className="min-w-0">
-          <div className="mb-2 inline-block rounded bg-destructive px-2 py-1">
+        {/* Right: content */}
+        <div className="flex-1 min-w-0 flex flex-col">
+          <div className="mb-2 inline-block rounded bg-destructive px-2 py-1 w-fit">
             <span className="text-[11px] font-bold uppercase tracking-wide text-destructive-foreground">{headline.category}</span>
           </div>
           <button type="button" onClick={onDoubleClick} onDoubleClick={onDoubleClick}
-            className="block w-full text-left active:opacity-90 touch-manipulation" aria-label={`Read full story: ${headline.category}`}>
-            <img src={headline.thumbnail} alt="" className="float-left mr-2 mb-1 h-16 w-16 rounded-md border border-border object-cover" loading="lazy" />
-            <p className="text-justify font-serif text-[13px] leading-snug text-foreground">
+            className="block text-left active:opacity-90 touch-manipulation flex-1" aria-label={`Read full story: ${headline.category}`}>
+            <p className="text-justify font-serif text-[13px] leading-snug text-foreground line-clamp-3">
               {headline.excerpt}{" "}<span className="font-sans font-bold text-destructive">Read more...</span>
             </p>
           </button>
-          {/* Author row */}
-          <div className="mt-3 flex items-center gap-2">
-            <img src={headline.authorAvatar} alt={headline.author} className="h-7 w-7 rounded-full border border-border object-cover" loading="lazy" />
-            <div className="min-w-0">
-              <p className="truncate font-serif text-[13px] font-semibold text-foreground">{headline.author}</p>
-              <p className="text-[10px] text-muted-foreground">{headline.timeAgo} | {headline.privacy}</p>
+          
+          {/* Author info */}
+          <div className="mt-2 flex items-center gap-2">
+            <img src={headline.authorAvatar} alt={headline.author} className="h-6 w-6 rounded-full border border-border object-cover flex-shrink-0" loading="lazy" />
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-serif text-[12px] font-semibold text-foreground">{headline.author}</p>
+              <p className="text-[10px] text-muted-foreground">{headline.timeAgo}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Follow / Like / Share */}
+      {/* Action buttons */}
       <div className="mt-3 grid grid-cols-3 gap-2">
         <button type="button" onClick={handleFollow} aria-pressed={isFollowing}
           className={`flex items-center justify-center gap-1.5 rounded-md px-2 py-2 text-[12px] font-semibold transition-colors active:scale-95 touch-manipulation ${isFollowing ? "bg-[hsl(142_71%_45%)] text-white" : "bg-foreground text-background"}`}>
@@ -579,6 +587,9 @@ export const TopTrendingHeadlines = () => {
         <div className="h-[2px] w-full bg-[hsl(142_71%_45%)]" />
       </div>
 
+      {/* Action Toolbar - Mobile Friendly */}
+      <ActionToolbar onActionClick={handleActionClick} />
+
       {/* Sliding track — each HeadlineCard is one slide */}
       <div
         ref={trackRef}
@@ -592,7 +603,7 @@ export const TopTrendingHeadlines = () => {
       >
         {HEADLINES.map(h => (
           <div key={h.id} className="shrink-0 w-full">
-            <HeadlineCard headline={h} onDoubleClick={() => handleDoubleTap(h)} onActionClick={handleActionClick} />
+            <HeadlineCard headline={h} onDoubleClick={() => handleDoubleTap(h)} />
           </div>
         ))}
       </div>
