@@ -240,17 +240,32 @@ export const PostDetailDialog = ({
           <>
             {/* Full-size image (visible when not minimized) */}
             {!isImageMinimized && post.imageUrl && (
-              <div className="shrink-0 relative">
+              <div className="shrink-0 relative overflow-hidden">
+                {/* Background image with fade effect */}
                 <div
-                  className="relative w-full cursor-pointer group transition-opacity"
-                  style={{ opacity: imageOpacity }}
+                  className="absolute inset-0 z-0"
+                  style={{
+                    backgroundImage: `url(${post.imageUrl})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    opacity: imageOpacity * 0.3,
+                    pointerEvents: 'none'
+                  }}
+                />
+                {/* Clickable image area */}
+                <div
+                  className="relative w-full cursor-pointer group"
                   onClick={() => setMediaViewerOpen(true)}
                 >
                   <AspectRatio ratio={16 / 9}>
                     <img
                       src={post.imageUrl}
                       alt={post.title}
-                      className="w-full h-full object-cover transition-opacity group-hover:opacity-90"
+                      className="w-full h-full object-cover"
+                      style={{
+                        opacity: 1,
+                        transition: 'filter 0.3s ease-out'
+                      }}
                     />
                   </AspectRatio>
                   {(post.type === "Video" || post.type === "Audio") && (
@@ -268,10 +283,10 @@ export const PostDetailDialog = ({
                   </span>
                 </div>
 
-                {/* Minimize button */}
+                {/* Minimize button - stays always visible */}
                 <button
                   onClick={toggleImageMinimized}
-                  className="absolute bottom-3 left-3 z-10 flex items-center gap-1 px-3 py-1.5 rounded-full bg-black/70 backdrop-blur-sm text-white text-xs font-semibold hover:bg-black/85 active:scale-95 transition touch-manipulation"
+                  className="absolute bottom-3 left-3 z-20 flex items-center gap-1 px-3 py-1.5 rounded-full bg-black/70 backdrop-blur-sm text-white text-xs font-semibold hover:bg-black/85 active:scale-95 transition touch-manipulation"
                   aria-label="Minimize image"
                 >
                   <ChevronUp className="h-3.5 w-3.5" /> Minimize
