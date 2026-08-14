@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Heart, MessageCircle, Share2, UserPlus, Eye, Coins, X, Gift, ChevronLeft, ChevronRight, Play } from "lucide-react";
+import { Heart, MessageCircle, Share2, UserPlus, Eye, Coins, X, Gift, ChevronLeft, ChevronRight, Play, ChevronUp } from "lucide-react";
 import { MediaViewer } from "./MediaViewer";
 import { CommentSection } from "./CommentSection";
 import { SendGiftDialog } from "@/components/chat/SendGiftDialog";
@@ -73,6 +73,8 @@ export const PostDetailDialog = ({
   );
   const [mediaViewerOpen, setMediaViewerOpen] = useState(false);
   const [showGiftDialog, setShowGiftDialog] = useState(false);
+  const [isImageMinimized, setIsImageMinimized] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   const handleLike = () => {
     if (isLiked) {
@@ -175,176 +177,307 @@ export const PostDetailDialog = ({
   const navEnabled = Boolean(onPrev || onNext);
 
   // Shared content component for both mobile and desktop
-  const PostContent = () => (
-    <div className="flex flex-col h-full">
-      {/* Close button - top right */}
-      <button
-        onClick={() => onOpenChange(false)}
-        className="absolute top-3 right-3 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors md:hidden"
-        aria-label="Close"
-      >
-        <X className="h-5 w-5" />
-      </button>
+  const PostContent = () => {
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-      {/* Prev / Next post navigation (multiple-user feed) */}
-      {navEnabled && (
-        <>
-          <button
-            onClick={() => hasPrev && onPrev?.()}
-            disabled={!hasPrev}
-            className="absolute left-2 top-1/2 -translate-y-1/2 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-background/85 backdrop-blur-sm shadow-md border border-border transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-background"
-            aria-label="Previous post"
-          >
-            <ChevronLeft className="h-6 w-6 text-destructive" />
-          </button>
-          <button
-            onClick={() => hasNext && onNext?.()}
-            disabled={!hasNext}
-            className="absolute right-2 top-1/2 -translate-y-1/2 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-background/85 backdrop-blur-sm shadow-md border border-border transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-background"
-            aria-label="Next post"
-          >
-            <ChevronRight className="h-6 w-6 text-destructive" />
-          </button>
-          {positionLabel && (
-            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 rounded-full bg-background/85 backdrop-blur-sm border border-border px-3 py-1 text-xs font-medium text-foreground shadow-sm">
-              {positionLabel}
-            </div>
-          )}
-        </>
-      )}
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+      if (!isMobile) return;
+      const target = e.currentTarget;
+      const scrollY = target.scrollTop;
+      // Auto-minimize image after scrolling 100px
+      if (scrollY > 100 && !isImageMinimized) {
+        setIsImageMinimized(true);
+      }
+      setScrollProgress(Math.min(scrollY / 150, 1));
+    };
 
-      {/* ===== STATIC TOP PANEL — media + owner name (never scrolls) ===== */}
-      <div className="shrink-0">
-        {/* Hero Image */}
-        {post.imageUrl && (
-          <div
-            className="relative w-full cursor-pointer group"
-            onClick={() => setMediaViewerOpen(true)}
-          >
-            <AspectRatio ratio={16 / 9}>
-              <img
-                src={post.imageUrl}
-                alt={post.title}
-                className="w-full h-full object-cover transition-opacity group-hover:opacity-90"
-              />
-            </AspectRatio>
-            {/* Play / View affordance — tap media to play/view */}
-            {(post.type === "Video" || post.type === "Audio") && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-black/55 backdrop-blur-sm transition-transform group-hover:scale-110 group-active:scale-95">
-                  <Play className="h-8 w-8 text-white fill-white translate-x-0.5" />
+    const toggleImageMinimized = () => {
+      setIsImageMinimized(!isImageMinimized);
+    };
+
+    const imageOpacity = 1 - scrollProgress;
+
+    return (
+      <div className="flex flex-col h-full">
+        {/* Close button - top right */}
+        <button
+          onClick={() => onOpenChange(false)}
+          className="absolute top-3 right-3 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors md:hidden"
+          aria-label="Close"
+        >
+          <X className="h-5 w-5" />
+        </button>
+
+        {/* Prev / Next post navigation (multiple-user feed) */}
+        {navEnabled && (
+          <>
+            <button
+              onClick={() => hasPrev && onPrev?.()}
+              disabled={!hasPrev}
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-background/85 backdrop-blur-sm shadow-md border border-border transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-background"
+              aria-label="Previous post"
+            >
+              <ChevronLeft className="h-6 w-6 text-destructive" />
+            </button>
+            <button
+              onClick={() => hasNext && onNext?.()}
+              disabled={!hasNext}
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-background/85 backdrop-blur-sm shadow-md border border-border transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-background"
+              aria-label="Next post"
+            >
+              <ChevronRight className="h-6 w-6 text-destructive" />
+            </button>
+            {positionLabel && (
+              <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 rounded-full bg-background/85 backdrop-blur-sm border border-border px-3 py-1 text-xs font-medium text-foreground shadow-sm">
+                {positionLabel}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ===== MOBILE: COLLAPSIBLE HEADER ===== */}
+        {isMobile && (
+          <>
+            {/* Full-size image (visible when not minimized) */}
+            {!isImageMinimized && post.imageUrl && (
+              <div className="shrink-0 relative">
+                <div
+                  className="relative w-full cursor-pointer group transition-opacity"
+                  style={{ opacity: imageOpacity }}
+                  onClick={() => setMediaViewerOpen(true)}
+                >
+                  <AspectRatio ratio={16 / 9}>
+                    <img
+                      src={post.imageUrl}
+                      alt={post.title}
+                      className="w-full h-full object-cover transition-opacity group-hover:opacity-90"
+                    />
+                  </AspectRatio>
+                  {(post.type === "Video" || post.type === "Audio") && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-black/55 backdrop-blur-sm transition-transform group-hover:scale-110 group-active:scale-95">
+                        <Play className="h-8 w-8 text-white fill-white translate-x-0.5" />
+                      </div>
+                    </div>
+                  )}
+                  <Badge className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm text-foreground border-border hover:bg-background/95" variant="outline">
+                    {post.type}
+                  </Badge>
+                  <span className="absolute bottom-3 right-3 rounded-full bg-black/55 backdrop-blur-sm px-2.5 py-1 text-[11px] font-medium text-white pointer-events-none">
+                    Tap to {post.type === "Video" || post.type === "Audio" ? "play" : "view"}
+                  </span>
+                </div>
+
+                {/* Minimize button */}
+                <button
+                  onClick={toggleImageMinimized}
+                  className="absolute bottom-3 left-3 z-10 flex items-center gap-1 px-3 py-1.5 rounded-full bg-black/70 backdrop-blur-sm text-white text-xs font-semibold hover:bg-black/85 active:scale-95 transition touch-manipulation"
+                  aria-label="Minimize image"
+                >
+                  <ChevronUp className="h-3.5 w-3.5" /> Minimize
+                </button>
+              </div>
+            )}
+
+            {/* Minimized header with small image + title (sticky) */}
+            {isImageMinimized && (
+              <div className="shrink-0 sticky top-0 z-40 bg-background border-b border-border">
+                <div className="px-3 py-2 flex items-center gap-2">
+                  {post.imageUrl && (
+                    <button
+                      onClick={toggleImageMinimized}
+                      className="shrink-0 relative w-14 h-14 rounded-lg border border-border overflow-hidden hover:opacity-80 active:scale-95 transition touch-manipulation"
+                    >
+                      <img
+                        src={post.imageUrl}
+                        alt={post.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-sm font-bold text-foreground line-clamp-2 leading-tight">
+                      {post.title}
+                    </h2>
+                  </div>
+                  <button
+                    onClick={toggleImageMinimized}
+                    className="shrink-0 flex h-7 w-7 items-center justify-center rounded-full hover:bg-muted active:scale-95 transition touch-manipulation"
+                    aria-label="Expand image"
+                  >
+                    <ChevronUp className="h-4 w-4 rotate-180" />
+                  </button>
                 </div>
               </div>
             )}
-            <Badge
-              className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm text-foreground border-border hover:bg-background/95"
-              variant="outline"
-            >
-              {post.type}
-            </Badge>
-            <span className="absolute bottom-3 right-3 rounded-full bg-black/55 backdrop-blur-sm px-2.5 py-1 text-[11px] font-medium text-white pointer-events-none">
-              Tap to {post.type === "Video" || post.type === "Audio" ? "play" : "view"}
-            </span>
+
+            {/* Author section (scrolls away) */}
+            {!isImageMinimized && (
+              <div className="shrink-0 px-5 pt-3 pb-3 border-b border-border">
+                <button
+                  onClick={handleAuthorClick}
+                  className="flex items-center gap-3 w-full hover:opacity-80 transition-opacity"
+                >
+                  <Avatar className="h-12 w-12 border-2 border-border">
+                    <AvatarImage src={post.authorProfileImage} alt={post.author} />
+                    <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                      {post.author.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 text-left">
+                    <p className="font-semibold text-foreground">{post.author}</p>
+                    <div className="flex items-center gap-1.5">
+                      <div
+                        className={`h-2 w-2 rounded-full ${
+                          post.status === "Online" ? "bg-emerald-500" : "bg-muted-foreground"
+                        }`}
+                      />
+                      <p className="text-sm text-muted-foreground">{post.status}</p>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ===== DESKTOP: FULL HEADER (always visible) ===== */}
+        {!isMobile && (
+          <div className="shrink-0">
+            {post.imageUrl && (
+              <div
+                className="relative w-full cursor-pointer group"
+                onClick={() => setMediaViewerOpen(true)}
+              >
+                <AspectRatio ratio={16 / 9}>
+                  <img
+                    src={post.imageUrl}
+                    alt={post.title}
+                    className="w-full h-full object-cover transition-opacity group-hover:opacity-90"
+                  />
+                </AspectRatio>
+                {(post.type === "Video" || post.type === "Audio") && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-black/55 backdrop-blur-sm transition-transform group-hover:scale-110 group-active:scale-95">
+                      <Play className="h-8 w-8 text-white fill-white translate-x-0.5" />
+                    </div>
+                  </div>
+                )}
+                <Badge className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm text-foreground border-border hover:bg-background/95" variant="outline">
+                  {post.type}
+                </Badge>
+                <span className="absolute bottom-3 right-3 rounded-full bg-black/55 backdrop-blur-sm px-2.5 py-1 text-[11px] font-medium text-white pointer-events-none">
+                  Tap to {post.type === "Video" || post.type === "Audio" ? "play" : "view"}
+                </span>
+              </div>
+            )}
+
+            <div className="px-6 pt-3 pb-3 border-b border-border">
+              <button
+                onClick={handleAuthorClick}
+                className="flex items-center gap-3 w-full hover:opacity-80 transition-opacity"
+              >
+                <Avatar className="h-12 w-12 border-2 border-border">
+                  <AvatarImage src={post.authorProfileImage} alt={post.author} />
+                  <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                    {post.author.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 text-left">
+                  <p className="font-semibold text-foreground">{post.author}</p>
+                  <div className="flex items-center gap-1.5">
+                    <div
+                      className={`h-2 w-2 rounded-full ${
+                        post.status === "Online" ? "bg-emerald-500" : "bg-muted-foreground"
+                      }`}
+                    />
+                    <p className="text-sm text-muted-foreground">{post.status}</p>
+                  </div>
+                </div>
+              </button>
+            </div>
           </div>
         )}
 
-        {/* Author / Owner — stays fixed with the media */}
-        <div className="px-5 sm:px-6 pt-3 pb-3 border-b border-border">
-          <button
-            onClick={handleAuthorClick}
-            className="flex items-center gap-3 w-full hover:opacity-80 transition-opacity"
-          >
-            <Avatar className="h-12 w-12 border-2 border-border">
-              <AvatarImage src={post.authorProfileImage} alt={post.author} />
-              <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                {post.author.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 text-left">
-              <p className="font-semibold text-foreground">{post.author}</p>
-              <div className="flex items-center gap-1.5">
-                <div
-                  className={`h-2 w-2 rounded-full ${
-                    post.status === "Online" ? "bg-emerald-500" : "bg-muted-foreground"
-                  }`}
-                />
-                <p className="text-sm text-muted-foreground">{post.status}</p>
-              </div>
-            </div>
-          </button>
-        </div>
-      </div>
-
-      {/* ===== SCROLLABLE BODY — title, description, stats & comments ===== */}
-      <ScrollArea className="flex-1 min-h-0">
-        <div className="px-5 sm:px-6 py-4 space-y-4 pb-24 md:pb-6">
-          {/* Title */}
-          <h2 className="text-lg font-semibold text-foreground leading-snug">
-            {post.title}
-          </h2>
-
-          {/* Description */}
-          {post.description && (
-            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-              {post.description}
-            </p>
-          )}
-
-          {/* Stats Row - Compact (interactive) */}
-          <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
-            {post.fee && (
-              <div className="flex items-center gap-1 px-1.5 py-1">
-                <Coins className="h-3.5 w-3.5" />
-                <span>{post.fee} Mobi</span>
-              </div>
+        {/* ===== SCROLLABLE BODY (with sticky title) ===== */}
+        <ScrollArea ref={scrollAreaRef} onScroll={handleScroll} className="flex-1 min-h-0">
+          <div className="px-5 sm:px-6 py-4 space-y-4 pb-24 md:pb-6">
+            {/* Sticky Title (for mobile when minimized) */}
+            {isMobile && isImageMinimized && (
+              <h2 className="text-lg font-bold text-foreground leading-snug sticky top-0 z-30 -mx-5 sm:-mx-6 px-5 sm:px-6 py-2 bg-background/95 backdrop-blur-sm border-b border-border/50">
+                {post.title}
+              </h2>
             )}
-            <div className="flex items-center gap-1 px-1.5 py-1">
-              <Eye className="h-3.5 w-3.5" />
-              <span>{post.views}</span>
+
+            {/* Title (full for desktop, hidden for mobile when minimized) */}
+            {!isMobile && (
+              <h2 className="text-lg font-semibold text-foreground leading-snug">
+                {post.title}
+              </h2>
+            )}
+
+            {/* Description */}
+            {post.description && (
+              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                {post.description}
+              </p>
+            )}
+
+            {/* Stats Row - Compact (interactive) */}
+            <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+              {post.fee && (
+                <div className="flex items-center gap-1 px-1.5 py-1">
+                  <Coins className="h-3.5 w-3.5" />
+                  <span>{post.fee} Mobi</span>
+                </div>
+              )}
+              <div className="flex items-center gap-1 px-1.5 py-1">
+                <Eye className="h-3.5 w-3.5" />
+                <span>{post.views}</span>
+              </div>
+              <button
+                type="button"
+                onClick={focusCommentInput}
+                className="flex items-center gap-1 rounded-full px-2 py-1 hover:bg-muted active:scale-95 transition touch-manipulation"
+                aria-label="Jump to comments"
+              >
+                <MessageCircle className="h-3.5 w-3.5" />
+                <span>{post.comments}</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleLike}
+                className="flex items-center gap-1 rounded-full px-2 py-1 hover:bg-muted active:scale-95 transition touch-manipulation"
+                aria-label={isLiked ? "Unlike post" : "Like post"}
+                aria-pressed={isLiked}
+              >
+                <Heart className={`h-3.5 w-3.5 transition-colors ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
+                <span className={isLiked ? "text-red-500 font-medium" : ""}>{likeCount}</span>
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={focusCommentInput}
-              className="flex items-center gap-1 rounded-full px-2 py-1 hover:bg-muted active:scale-95 transition touch-manipulation"
-              aria-label="Jump to comments"
-            >
-              <MessageCircle className="h-3.5 w-3.5" />
-              <span>{post.comments}</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleLike}
-              className="flex items-center gap-1 rounded-full px-2 py-1 hover:bg-muted active:scale-95 transition touch-manipulation"
-              aria-label={isLiked ? "Unlike post" : "Like post"}
-              aria-pressed={isLiked}
-            >
-              <Heart className={`h-3.5 w-3.5 transition-colors ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
-              <span className={isLiked ? "text-red-500 font-medium" : ""}>{likeCount}</span>
-            </button>
+
+            {/* Divider */}
+            <div className="border-t border-border" />
+
+            {/* Comments Section - Always visible */}
+            <div className="space-y-2">
+              <h3 className="font-semibold text-foreground flex items-center gap-2 text-sm sm:text-base">
+                <MessageCircle className="h-4 w-4" />
+                Comments ({post.comments})
+              </h3>
+              <CommentSection postId={post.id || "unknown"} className="border-none p-0" showHeader={false} />
+            </div>
           </div>
+        </ScrollArea>
 
-
-          {/* Divider */}
-          <div className="border-t border-border" />
-
-          {/* Comments Section - Always visible */}
-          <div className="space-y-2">
-            <h3 className="font-semibold text-foreground flex items-center gap-2 text-sm sm:text-base">
-              <MessageCircle className="h-4 w-4" />
-              Comments ({post.comments})
-            </h3>
-            <CommentSection postId={post.id || "unknown"} className="border-none p-0" showHeader={false} />
-          </div>
+        {/* Floating viewer options "..." — Rate / Hide / Report / Block */}
+        <div className="absolute right-3 bottom-[calc(env(safe-area-inset-bottom)+4.5rem)] md:bottom-20 z-50">
+          <PostViewerOptionsMenu
+            authorName={post.author}
+            onHide={() => onOpenChange(false)}
+          />
         </div>
-      </ScrollArea>
 
-      {/* Floating viewer options "..." — Rate / Hide / Report / Block */}
-      <div className="absolute right-3 bottom-[calc(env(safe-area-inset-bottom)+4.5rem)] md:bottom-20 z-50">
-        <PostViewerOptionsMenu
-          authorName={post.author}
-          onHide={() => onOpenChange(false)}
-        />
-      </div>
 
       {/* Bottom Action Bar - Mobile (in-flow so taps always register inside the Drawer) */}
       <div className="md:hidden shrink-0 bg-card border-t border-border px-3 py-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] z-50">
