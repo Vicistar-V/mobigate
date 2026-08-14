@@ -91,11 +91,12 @@ export const MediaGalleryViewer = ({
       );
       // Optimistically count this view (base count + the current viewer).
       setViewCount((currentItem.views || 0) + 1);
-      // Default to reader mode when there's substantive text; otherwise media-first
+      // Default to reader mode for richer content cards so the vibe/story reads like a premium detail view.
       const hasText = !!(currentItem.description && currentItem.description.trim().length > 40);
-      setViewMode(hasText ? "reader" : "media");
+      const prefersReader = ["post", "gallery", "video-highlights"].includes(galleryType) || hasText;
+      setViewMode(prefersReader && hasText ? "reader" : "media");
     }
-  }, [currentItem]);
+  }, [currentItem, galleryType]);
 
   const goToPrevious = () => {
     setCurrentIndex((prev) => (prev > 0 ? prev - 1 : items.length - 1));
@@ -276,12 +277,15 @@ export const MediaGalleryViewer = ({
       case "photo":
       default:
         return (
-          <img
-            src={currentItem.url}
-            alt={currentItem.title || "Media"}
-            className="w-full h-full object-contain select-none"
-            draggable={false}
-          />
+          <div className="relative h-full w-full overflow-hidden bg-[#0b0b0f]">
+            <img
+              src={currentItem.url}
+              alt={currentItem.title || "Media"}
+              className="h-full w-full object-cover select-none scale-[1.02]"
+              draggable={false}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/35" />
+          </div>
         );
     }
   };
@@ -535,7 +539,7 @@ export const MediaGalleryViewer = ({
                 <button
                   type="button"
                   onClick={() => currentItem.description && currentItem.description.trim().length > 0 && setViewMode("reader")}
-                  className="block w-full text-left"
+                  className="block w-full text-left rounded-xl bg-white/5 px-2 py-1.5 ring-1 ring-white/10 hover:bg-white/10 transition-colors"
                   aria-label={currentItem.description ? "Read full text" : undefined}
                 >
                   <h3 className="text-white text-[15px] sm:text-xl font-bold leading-snug line-clamp-2">
