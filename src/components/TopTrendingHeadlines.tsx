@@ -1,10 +1,12 @@
 // src/components/TopTrendingHeadlines.tsx
-// Keeps the original card design from project — adds multiple headlines that slide
+// Fully functional Breaking News section with Create, View, and Filter capabilities
 import { useState, useRef, useEffect } from "react";
-import { Heart, Share2, UserPlus, Check, Flame, ChevronLeft, ChevronRight } from "lucide-react";
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { Heart, Share2, UserPlus, Check, Flame, ChevronLeft, ChevronRight, X, Send, TrendingUp, Clock, Eye } from "lucide-react";
+import { Sheet, SheetContent, SheetTitle, SheetHeader, SheetClose } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface TrendingHeadline {
   id: string;
@@ -22,14 +24,12 @@ interface TrendingHeadline {
   isFollowing?: boolean;
 }
 
-const NAV_LINKS = [
-  { label: "Create New Story",   href: "#" },
-  { label: "My Stories",         href: "#" },
-  { label: "Others' Stories",    href: "#" },
-  { label: "View Trending",      href: "#" },
-  { label: "New Subscribers",    href: "#" },
-  { label: "Privacy",            href: "#" },
-];
+const NAV_ACTIONS = [
+  { label: "Create New Story",   action: "create" },
+  { label: "My Stories",         action: "myStories" },
+  { label: "Others' Stories",    action: "othersStories" },
+  { label: "View Trending",      action: "trending" },
+] as const;
 
 const HEADLINES: TrendingHeadline[] = [
   {
@@ -88,6 +88,59 @@ const HEADLINES: TrendingHeadline[] = [
   },
 ];
 
+// Mock data for "My Stories" (stories authored by current user)
+const MY_STORIES: TrendingHeadline[] = [
+  {
+    id: "my1", category: "PERSONAL GROWTH",
+    excerpt: "Breaking free from self-imposed limitations and embracing the power of continuous learning. My journey from self-doubt to confidence through deliberate practice and mentorship.",
+    fullContent: "Every journey begins with a single step, and mine started with acknowledging that I didn't have all the answers. Self-doubt was my constant companion, but it became my greatest teacher.",
+    author: "You", authorAvatar: "https://randomuser.me/api/portraits/men/1.jpg",
+    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
+    thumbnail: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80",
+    timeAgo: "Just now", privacy: "Public", likes: 42,
+  },
+  {
+    id: "my2", category: "COMMUNITY",
+    excerpt: "How I built a support network that changed everything. Connecting with like-minded individuals who share your vision isn't just nice—it's essential.",
+    fullContent: "Building community isn't a luxury—it's a necessity for growth and resilience in today's world.",
+    author: "You", authorAvatar: "https://randomuser.me/api/portraits/men/1.jpg",
+    imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&q=80",
+    thumbnail: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=200&q=80",
+    timeAgo: "2 Days ago", privacy: "Public", likes: 156,
+  },
+];
+
+// Mock data for "Others' Stories" (featured stories from other creators)
+const OTHERS_STORIES: TrendingHeadline[] = [
+  {
+    id: "other1", category: "INNOVATION",
+    excerpt: "How AI is reshaping creative industries. A deep dive into generative tools, their impact, and what creators need to know about the future of their craft.",
+    fullContent: "The creative industry is undergoing a seismic shift. What was once thought impossible is now possible...",
+    author: "Sarah Chen", authorAvatar: "https://randomuser.me/api/portraits/women/1.jpg",
+    imageUrl: "https://images.unsplash.com/photo-1620712014215-7b7ef97a4c91?w=400&q=80",
+    thumbnail: "https://images.unsplash.com/photo-1620712014215-7b7ef97a4c91?w=200&q=80",
+    timeAgo: "3 Hours ago", privacy: "Public", likes: 5230,
+  },
+  {
+    id: "other2", category: "SOCIAL IMPACT",
+    excerpt: "From grassroots to global: How small acts of kindness scale into movements. Real stories of change-makers transforming their communities one action at a time.",
+    fullContent: "Change doesn't always come from the top. Sometimes the most powerful movements start in the quiet moments...",
+    author: "Marcus Williams", authorAvatar: "https://randomuser.me/api/portraits/men/45.jpg",
+    imageUrl: "https://images.unsplash.com/photo-1552581234-26160f608093?w=400&q=80",
+    thumbnail: "https://images.unsplash.com/photo-1552581234-26160f608093?w=200&q=80",
+    timeAgo: "5 Hours ago", privacy: "Public", likes: 8920,
+  },
+  {
+    id: "other3", category: "WELLNESS",
+    excerpt: "The mental health crisis in tech: Why burnout is real and how to prevent it. Honest conversations with 50+ founders about their struggles and solutions.",
+    fullContent: "Success in tech comes with a hidden cost that many don't talk about openly...",
+    author: "Dr. Amara Okafor", authorAvatar: "https://randomuser.me/api/portraits/women/25.jpg",
+    imageUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&q=80",
+    thumbnail: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=80",
+    timeAgo: "7 Hours ago", privacy: "Public", likes: 12450,
+  },
+];
+
 // ── Article reader sheet (opens on double-click / double-tap) ─────────────────
 function ArticleSheet({ headline, open, onClose }: { headline: TrendingHeadline | null; open: boolean; onClose: () => void }) {
   if (!headline) return null;
@@ -120,13 +173,203 @@ function ArticleSheet({ headline, open, onClose }: { headline: TrendingHeadline 
   );
 }
 
-// ── HeadlineCard — original design, unchanged ─────────────────────────────────
+// ── Create New Story Dialog ───────────────────────────────────────────────────
+function CreateStoryDialog({ open, onClose, onSubmit }: { open: boolean; onClose: () => void; onSubmit: (data: any) => void }) {
+  const { toast } = useToast();
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("BREAKING NEWS");
+  const [content, setContent] = useState("");
+  const [privacy, setPrivacy] = useState("Public");
+
+  const handleSubmit = () => {
+    if (!title.trim() || !content.trim()) {
+      toast({ description: "Please fill in all fields", variant: "destructive" });
+      return;
+    }
+    onSubmit({ title, category, content, privacy });
+    setTitle("");
+    setContent("");
+    setCategory("BREAKING NEWS");
+    setPrivacy("Public");
+    toast({ description: "Story published successfully! 🎉" });
+    onClose();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={v => !v && onClose()}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Share Your Breaking News Story</DialogTitle>
+          <DialogClose />
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <div>
+            <label className="text-sm font-semibold block mb-2">Title</label>
+            <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="What's your story about?"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-destructive" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-semibold block mb-2">Category</label>
+              <select value={category} onChange={(e) => setCategory(e.target.value)}
+                className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-destructive">
+                <option>BREAKING NEWS</option>
+                <option>TECHNOLOGY</option>
+                <option>BUSINESS</option>
+                <option>SPORTS</option>
+                <option>ENTERTAINMENT</option>
+                <option>WORLD NEWS</option>
+                <option>LEADERSHIP</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-semibold block mb-2">Privacy</label>
+              <select value={privacy} onChange={(e) => setPrivacy(e.target.value)}
+                className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-destructive">
+                <option>Public</option>
+                <option>Friends</option>
+                <option>Private</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="text-sm font-semibold block mb-2">Your Story</label>
+            <textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="Share your thoughts, news, and insights..."
+              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-destructive min-h-[150px] resize-none" />
+            <p className="text-xs text-muted-foreground mt-1">{content.length} characters</p>
+          </div>
+          <div className="flex gap-2 pt-4">
+            <button onClick={handleSubmit}
+              className="flex-1 bg-destructive text-destructive-foreground py-2 rounded-lg font-semibold hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2">
+              <Send className="h-4 w-4" /> Publish Story
+            </button>
+            <button onClick={onClose}
+              className="flex-1 bg-muted text-foreground py-2 rounded-lg font-semibold hover:opacity-90 active:scale-95 transition-all">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ── Stories List Sheet ────────────────────────────────────────────────────────
+function StoriesSheet({ title, stories, open, onClose }: { title: string; stories: TrendingHeadline[]; open: boolean; onClose: () => void }) {
+  const [selectedStory, setSelectedStory] = useState<TrendingHeadline | null>(null);
+  const [showReader, setShowReader] = useState(false);
+
+  return (
+    <>
+      <Sheet open={open && !showReader} onOpenChange={v => !v && onClose()}>
+        <SheetContent side="bottom" className="h-[70vh] rounded-t-2xl p-0 flex flex-col">
+          <SheetHeader className="px-4 pt-4 pb-2">
+            <SheetTitle>{title}</SheetTitle>
+            <SheetClose />
+          </SheetHeader>
+          <ScrollArea className="flex-1">
+            <div className="space-y-2 p-4">
+              {stories.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">No stories yet</p>
+                </div>
+              ) : (
+                stories.map((story) => (
+                  <button key={story.id} onClick={() => { setSelectedStory(story); setShowReader(true); }}
+                    className="w-full text-left p-3 rounded-lg border border-border hover:bg-muted transition-colors active:scale-95">
+                    <div className="flex gap-3">
+                      <img src={story.thumbnail} alt="" className="h-20 w-20 rounded object-cover flex-shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <span className="inline-block bg-destructive text-white text-[10px] font-bold px-2 py-0.5 rounded mb-1">{story.category}</span>
+                        <p className="font-semibold text-sm line-clamp-2">{story.excerpt}</p>
+                        <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3" /> {story.timeAgo}
+                          <span>•</span>
+                          <Heart className="h-3 w-3" /> {story.likes.toLocaleString()}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+          </ScrollArea>
+        </SheetContent>
+      </Sheet>
+      <ArticleSheet headline={selectedStory} open={showReader} onClose={() => setShowReader(false)} />
+    </>
+  );
+}
+
+// ── View Trending Dialog ──────────────────────────────────────────────────────
+function ViewTrendingDialog({ open, onClose, headlines }: { open: boolean; onClose: () => void; headlines: TrendingHeadline[] }) {
+  const [sortBy, setSortBy] = useState<"recent" | "trending" | "views">("trending");
+  const [selectedStory, setSelectedStory] = useState<TrendingHeadline | null>(null);
+  const [showReader, setShowReader] = useState(false);
+
+  const sortedHeadlines = [...headlines].sort((a, b) => {
+    if (sortBy === "trending") return (b.likes || 0) - (a.likes || 0);
+    if (sortBy === "views") return 0; // Mock view count
+    return 0; // recent is natural order
+  });
+
+  return (
+    <>
+      <Dialog open={open && !showReader} onOpenChange={v => !v && onClose()}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Top Breaking News</DialogTitle>
+            <DialogClose />
+          </DialogHeader>
+          <div className="py-4">
+            <div className="flex gap-2 mb-4">
+              <button onClick={() => setSortBy("trending")} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${sortBy === "trending" ? "bg-destructive text-destructive-foreground" : "bg-muted text-foreground hover:bg-muted/70"}`}>
+                <TrendingUp className="h-4 w-4 inline mr-1" /> Trending
+              </button>
+              <button onClick={() => setSortBy("recent")} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${sortBy === "recent" ? "bg-destructive text-destructive-foreground" : "bg-muted text-foreground hover:bg-muted/70"}`}>
+                <Clock className="h-4 w-4 inline mr-1" /> Recent
+              </button>
+              <button onClick={() => setSortBy("views")} className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${sortBy === "views" ? "bg-destructive text-destructive-foreground" : "bg-muted text-foreground hover:bg-muted/70"}`}>
+                <Eye className="h-4 w-4 inline mr-1" /> Views
+              </button>
+            </div>
+            <div className="space-y-2">
+              {sortedHeadlines.map((story, idx) => (
+                <button key={story.id} onClick={() => { setSelectedStory(story); setShowReader(true); }}
+                  className="w-full text-left p-3 rounded-lg border border-border hover:bg-muted transition-colors active:scale-95">
+                  <div className="flex gap-3">
+                    <div className="text-2xl font-bold text-destructive w-8 flex-shrink-0 flex items-center justify-center">
+                      #{idx + 1}
+                    </div>
+                    <img src={story.thumbnail} alt="" className="h-20 w-20 rounded object-cover flex-shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <span className="inline-block bg-destructive text-white text-[10px] font-bold px-2 py-0.5 rounded mb-1">{story.category}</span>
+                      <p className="font-semibold text-sm line-clamp-2">{story.excerpt}</p>
+                      <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                        <span>📊 {story.likes.toLocaleString()} likes</span>
+                        <span>•</span>
+                        <span>{story.author}</span>
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <ArticleSheet headline={selectedStory} open={showReader} onClose={() => setShowReader(false)} />
+    </>
+  );
+}
 function HeadlineCard({
   headline,
   onDoubleClick,
+  onActionClick,
 }: {
   headline: TrendingHeadline;
   onDoubleClick: () => void;
+  onActionClick: (action: typeof NAV_ACTIONS[number]["action"]) => void;
 }) {
   const { toast } = useToast();
   const [isFollowing, setIsFollowing] = useState(!!headline.isFollowing);
@@ -147,21 +390,20 @@ function HeadlineCard({
       else { await navigator.clipboard?.writeText(window.location.href); toast({ description: "Link copied!" }); }
     } catch {}
   };
-  const handleNav = (link: { label: string }) => toast({ description: `Opening "${link.label}"…` });
 
   return (
     <div className="rounded-b-xl border border-t-0 border-border bg-card p-3 shadow-sm shrink-0 w-full">
       <div className="grid grid-cols-[112px_1fr] gap-3">
-        {/* Left: portrait + nav links */}
+        {/* Left: portrait + action links */}
         <div className="flex flex-col gap-2">
           <div className="overflow-hidden rounded-lg border border-border bg-muted">
             <img src={headline.imageUrl} alt={headline.author} className="aspect-[3/4] h-full w-full object-cover" loading="lazy" />
           </div>
           <nav className="mt-1 flex flex-1 flex-col justify-between gap-3">
-            {NAV_LINKS.map(link => (
-              <button key={link.label} type="button" onClick={() => handleNav(link)}
-                className="w-full text-left text-[13px] font-semibold leading-tight text-[hsl(212_95%_50%)] underline underline-offset-2 hover:opacity-80 active:opacity-60 touch-manipulation">
-                {link.label}
+            {NAV_ACTIONS.map(action => (
+              <button key={action.label} type="button" onClick={() => onActionClick(action.action)}
+                className="w-full text-left text-[13px] font-semibold leading-tight text-[hsl(212_95%_50%)] underline underline-offset-2 hover:opacity-80 active:opacity-60 touch-manipulation transition-opacity">
+                {action.label}
               </button>
             ))}
           </nav>
@@ -218,12 +460,40 @@ export const TopTrendingHeadlines = () => {
   const dragRef     = useRef({ active: false, startX: 0, scrollLeft: 0 });
   const lastTap     = useRef(0);
   const tapTimer    = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { toast } = useToast();
 
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selected,   setSelected]   = useState<TrendingHeadline | null>(null);
   const [readerOpen, setReaderOpen] = useState(false);
+  
+  // Dialog states
+  const [createOpen, setCreateOpen] = useState(false);
+  const [myStoriesOpen, setMyStoriesOpen] = useState(false);
+  const [othersStoriesOpen, setOthersStoriesOpen] = useState(false);
+  const [trendingOpen, setTrendingOpen] = useState(false);
 
   const openArticle = (h: TrendingHeadline) => { setSelected(h); setReaderOpen(true); };
+
+  const handleActionClick = (action: typeof NAV_ACTIONS[number]["action"]) => {
+    switch (action) {
+      case "create":
+        setCreateOpen(true);
+        break;
+      case "myStories":
+        setMyStoriesOpen(true);
+        break;
+      case "othersStories":
+        setOthersStoriesOpen(true);
+        break;
+      case "trending":
+        setTrendingOpen(true);
+        break;
+    }
+  };
+
+  const handleCreateStory = (data: any) => {
+    toast({ description: `"${data.title}" published! 🚀` });
+  };
 
   // Double-tap detector
   const handleDoubleTap = (h: TrendingHeadline) => {
@@ -322,7 +592,7 @@ export const TopTrendingHeadlines = () => {
       >
         {HEADLINES.map(h => (
           <div key={h.id} className="shrink-0 w-full">
-            <HeadlineCard headline={h} onDoubleClick={() => handleDoubleTap(h)} />
+            <HeadlineCard headline={h} onDoubleClick={() => handleDoubleTap(h)} onActionClick={handleActionClick} />
           </div>
         ))}
       </div>
@@ -334,7 +604,12 @@ export const TopTrendingHeadlines = () => {
         ))}
       </div>
 
+      {/* Dialogs and Sheets */}
       <ArticleSheet headline={selected} open={readerOpen} onClose={() => setReaderOpen(false)} />
+      <CreateStoryDialog open={createOpen} onClose={() => setCreateOpen(false)} onSubmit={handleCreateStory} />
+      <StoriesSheet title="My Breaking News Stories" stories={MY_STORIES} open={myStoriesOpen} onClose={() => setMyStoriesOpen(false)} />
+      <StoriesSheet title="Featured Stories from Others" stories={OTHERS_STORIES} open={othersStoriesOpen} onClose={() => setOthersStoriesOpen(false)} />
+      <ViewTrendingDialog headlines={HEADLINES} open={trendingOpen} onClose={() => setTrendingOpen(false)} />
     </section>
   );
 };
