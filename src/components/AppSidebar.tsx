@@ -114,6 +114,10 @@ interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [{
+  title: "Settings",
+  icon: Settings,
+  url: "/settings"
+}, {
   title: "Wallet Menu",
   icon: Wallet,
   items: [

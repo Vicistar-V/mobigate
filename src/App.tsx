@@ -10,6 +10,7 @@ import Landing                        from "./pages/Landing";
 import Index                          from "./pages/Index";
 import MyProfile                      from "./pages/MyProfile";
 import UserProfile                    from "./pages/UserProfile";
+import SettingsPage                   from "./pages/SettingsPage";
 import PostPage                       from "./pages/PostPage";
 import ForgotPasswordPage             from "./pages/ForgotPasswordPage";
 import LoginPage                      from "./pages/LoginPage";
@@ -110,6 +111,7 @@ const App = () => {
                         <Route path="/mobiface-admin/adverts/promotional" element={<PromotionalAdsPage />} />
                         <Route path="/profile"       element={<MyProfile />} />
                         <Route path="/profile/:id"   element={<UserProfile />} />
+                        <Route path="/settings"      element={<SettingsPage />} />
                         <Route path="/post/:id"      element={<PostPage />} />
                         <Route path="/verify-account" element={<AccountVerificationPage />} />
                         <Route path="/merchants" element={<MerchantListingPage />} />
