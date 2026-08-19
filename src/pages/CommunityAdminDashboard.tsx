@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAdminDashboard } from "@/hooks/useAdminDashboard";
 import { useCommunityProfile } from "@/hooks/useCommunity";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, RefreshCw, ShieldAlert } from "lucide-react";
+import { ArrowLeft, RefreshCw, ShieldAlert, Crown } from "lucide-react";
 import { MemberPrivacyVotingSheet } from "@/components/community/settings/MemberPrivacyVotingSheet";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -57,6 +57,12 @@ import { ExecutiveMember } from "@/data/communityExecutivesData";
 // Edit Dialogs
 import { EditCommunityProfileDialog } from "@/components/community/EditCommunityProfileDialog";
 import { EditCommunityPhotoDialog } from "@/components/community/EditCommunityPhotoDialog";
+import { EditCommunityDialog } from "@/components/community/EditCommunityDialog";
+import { PendingProfileChangeBanner } from "@/components/community/PendingProfileChangeBanner";
+import { PendingPositionAuthorizationBanner } from "@/components/community/PendingPositionAuthorizationBanner";
+import { TransferOwnershipDialog } from "@/components/community/TransferOwnershipDialog";
+import { useCommunityAuthorizations } from "@/hooks/useCommunityAuthorizations";
+import { useCurrentUserId } from "@/hooks/useWindowData";
 
 // Mock Data
 import { PendingAction } from "@/data/adminDashboardData";
@@ -89,10 +95,22 @@ const CommunityAdminDashboard = () => {
   } = useAdminDashboard(communityId);
 
   // ── Real role check — any assigned admin (not just the owner) gets access
-  const { profile: roleProfile, loading: roleLoading } = useCommunityProfile(communityId);
+  const { profile: roleProfile, loading: roleLoading, refresh: refreshRoleProfile } = useCommunityProfile(communityId);
   const isRealOwner = !!roleProfile?.isOwner;
   const isRealAdmin = isRealOwner || roleProfile?.role === "Admin" || roleProfile?.role === "admin";
   const hasAdminAccess = isRealOwner || isRealAdmin;
+
+  // Pending finance authorizations — used for the Quick Actions badge count
+  const { needsMySignatureCount, refresh: refreshAuthorizations } = useCommunityAuthorizations(communityId);
+
+  // Edit Community Profile dialog (moved here from the community profile page's header)
+  const [showEditCommunityDialog, setShowEditCommunityDialog] = useState(false);
+  const [pendingChangeRefreshKey, setPendingChangeRefreshKey] = useState(0);
+  const [positionAuthRefreshKey, setPositionAuthRefreshKey] = useState(0);
+
+  // Transfer Ownership (owner-only)
+  const currentUserId = useCurrentUserId();
+  const [showTransferOwnership, setShowTransferOwnership] = useState(false);
 
   // Dialog States
   const [showMembershipRequests, setShowMembershipRequests] = useState(false);
@@ -249,6 +267,38 @@ const CommunityAdminDashboard = () => {
             onBalanceClick={() => setShowFinancialOverview(true)}
           />
 
+          {/* Pending community profile change awaiting other admins' approval */}
+          {communityId && (
+            <PendingProfileChangeBanner
+              key={pendingChangeRefreshKey}
+              communityId={communityId}
+              isAdmin={hasAdminAccess}
+              onApplied={() => { refreshRoleProfile(); refreshDashboard(); }}
+            />
+          )}
+
+          {/* Pending executive appointments awaiting other admins' approval */}
+          {communityId && (
+            <PendingPositionAuthorizationBanner
+              key={positionAuthRefreshKey}
+              communityId={communityId}
+              isAdmin={hasAdminAccess}
+              onApplied={() => { refreshDashboard(); }}
+            />
+          )}
+
+          {/* Transfer Ownership — visible only to the current owner/creator */}
+          {isRealOwner && (
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-2 border-primary/30 text-primary hover:bg-primary/5"
+              onClick={() => setShowTransferOwnership(true)}
+            >
+              <Crown className="h-4 w-4" />
+              Transfer Ownership
+            </Button>
+          )}
+
           {/* Quick Actions */}
           <AdminQuickActions
             onManageMembers={() => setShowMembershipRequests(true)}
@@ -257,8 +307,11 @@ const CommunityAdminDashboard = () => {
             onManageContent={() => navigate(`/community/${communityId}/admin/content`)}
             onManageLeadership={() => setShowLeadershipDialog(true)}
             onCommunitySettings={() => setShowSettingsTab(true)}
+            onEditProfile={() => setShowEditCommunityDialog(true)}
+            onAuthorizations={() => navigate(`/community/${communityId}/admin/authorizations`)}
             pendingMembers={liveAdminStats.pendingRequests}
             pendingContent={liveAdminStats.pendingContent}
+            pendingAuthorizations={needsMySignatureCount}
           />
 
           {/* Pending Actions Card */}
@@ -342,6 +395,7 @@ const CommunityAdminDashboard = () => {
                   setShowExecutiveDetail(true);
                 }
               }}
+              onAssignmentSubmitted={() => { setPositionAuthRefreshKey((k) => k + 1); refreshAuthorizations(); }}
             />
 
             {/* Community Settings */}
@@ -385,11 +439,13 @@ const CommunityAdminDashboard = () => {
 
       <ManageLeadershipDialog
         open={showLeadershipDialog}
-        onOpenChange={async (v) => { setShowLeadershipDialog(v); if (!v) { await logAction("managed community leadership", "Leadership Management", "leadership"); refreshDashboard(); } }}
+        onOpenChange={async (v) => { setShowLeadershipDialog(v); if (!v) { await logAction("managed community leadership", "Leadership Management", "leadership"); refreshDashboard(); setPositionAuthRefreshKey((k) => k + 1); refreshAuthorizations(); } }}
         communityId={communityId}
         onActivityLogged={async (action, target) => {
           await logAction(action, target, "leadership");
           refreshDashboard();
+          setPositionAuthRefreshKey((k) => k + 1);
+          refreshAuthorizations();
         }}
       />
 
@@ -486,6 +542,48 @@ const CommunityAdminDashboard = () => {
         open={showAdhocCommittees}
         onOpenChange={setShowAdhocCommittees}
       />
+
+      {/* Edit Community Profile Dialog (moved here from the community page header) */}
+      {roleProfile && communityId && (
+        <EditCommunityDialog
+          open={showEditCommunityDialog}
+          onOpenChange={setShowEditCommunityDialog}
+          community={{
+            id: communityId,
+            name: roleProfile.name,
+            description: roleProfile.description,
+            motto: roleProfile.motto,
+            category: roleProfile.category,
+            classification: roleProfile.classification,
+            location: roleProfile.location,
+            telephone: roleProfile.telephone,
+            telephone2: roleProfile.telephone2,
+            emailAddress: roleProfile.emailAddress,
+            visionStatement: roleProfile.visionStatement,
+            logoImage: roleProfile.logoImage,
+            bannerImage: roleProfile.bannerImage,
+            coverImage: roleProfile.coverImage,
+          }}
+          onSaved={() => { refreshRoleProfile(); refreshDashboard(); }}
+          onPendingApproval={() => { setPendingChangeRefreshKey((k) => k + 1); }}
+        />
+      )}
+
+      {/* Transfer Ownership Dialog */}
+      {communityId && (
+        <TransferOwnershipDialog
+          open={showTransferOwnership}
+          onOpenChange={setShowTransferOwnership}
+          communityId={communityId}
+          currentUserId={currentUserId}
+          onTransferred={() => {
+            // The current user is no longer the owner — refresh role/profile
+            // and dashboard data so the UI (owner-only controls, etc.) updates.
+            refreshRoleProfile();
+            refreshDashboard();
+          }}
+        />
+      )}
 
       {/* Executive Detail Sheet */}
       <ExecutiveDetailSheet

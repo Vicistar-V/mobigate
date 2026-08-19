@@ -17,7 +17,6 @@ import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ModuleAuthorizationDrawer } from "./authorization/ModuleAuthorizationDrawer";
-import { ExecutiveAuthorizationDrawer } from "@/components/admin/ExecutiveAuthorizationDrawer";
 import { getActionConfig, renderActionDetails } from "./authorization/authorizationActionConfigs";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -48,6 +47,9 @@ interface AdminLeadershipSectionProps {
   onViewChangeHistory: () => void;
   onManageAdhoc: () => void;
   onViewExecutive: (id: string) => void;
+  /** Fired after any assign_position submission (immediate or pending-authorization),
+   * so the parent dashboard can refresh things like the pending-authorization banner. */
+  onAssignmentSubmitted?: () => void;
 }
 
 const levelColor: Record<string, string> = {
@@ -90,6 +92,7 @@ export function AdminLeadershipSection({
   communityId, executives: propExecs,
   onManageLeadership, onApplyElectionResults,
   onViewChangeHistory, onManageAdhoc, onViewExecutive,
+  onAssignmentSubmitted,
 }: AdminLeadershipSectionProps) {
   const { toast } = useToast();
 
@@ -162,8 +165,6 @@ export function AdminLeadershipSection({
 
   // ── Authorization state ──────────────────────────────────────────────────
   const [authDrawerOpen,     setAuthDrawerOpen]     = useState(false);
-  const [execAuthDrawerOpen, setExecAuthDrawerOpen] = useState(false);
-  const [pendingAssignPayload, setPendingAssignPayload] = useState<any>(null);
   const [authAction,     setAuthAction]     = useState<{ type: LeadershipActionType; details: string; payload?: any } | null>(null);
 
   // ── Form state ───────────────────────────────────────────────────────────
@@ -186,9 +187,6 @@ export function AdminLeadershipSection({
         await callAPI({ action: "apply_election_results", results: authAction.payload });
         toast({ title: "Election results applied!", description: "Leadership has been updated." });
         onApplyElectionResults();
-      } else if (authAction.type === "add_executive" && authAction.payload) {
-        await callAPI({ action: "assign_position", ...authAction.payload });
-        toast({ title: "Executive assigned!", description: authAction.details });
       } else if (authAction.type === "assign_adhoc" && authAction.payload) {
         await callAPI({ action: "create_adhoc", ...authAction.payload });
         toast({ title: "Ad-hoc committee created!", description: authAction.details });
@@ -200,22 +198,29 @@ export function AdminLeadershipSection({
     setAuthAction(null);
   };
 
-  const handleAssignSubmit = () => {
+  const handleAssignSubmit = async () => {
+    console.log("[AdminLeadershipSection] handleAssignSubmit called", JSON.stringify({ assignUserId, assignPosId, communityId }));
     if (!assignUserId || !assignPosId) { sonnerToast.error("Select a member and position"); return; }
-    const pos  = positions.find(p => p.id === assignPosId);
-    const mem  = allMembers.find(m => m.user_id === assignUserId);
-    const rank = pos?.admin_number ?? 99;
-    setPendingAssignPayload({ user_id: assignUserId, position_id: assignPosId, admin_rank: rank, notes: assignNotes });
-    setShowAssignDialog(false);
-    setExecAuthDrawerOpen(true); // open executive password auth
-  };
-
-  const executePendingAssign = async () => {
-    if (!pendingAssignPayload || !communityId) return;
-    await callAPI({ action: "assign_position", ...pendingAssignPayload });
-    toast({ title: "Executive assigned!", description: "Position assigned and activity logged." });
-    setPendingAssignPayload(null);
-    await fetchData();
+    const pos = positions.find(p => p.id === assignPosId);
+    const mem = allMembers.find(m => m.user_id === assignUserId);
+    setSubmitting(true);
+    try {
+      const d = await callAPI({ action: "assign_position", user_id: assignUserId, position_id: assignPosId, notes: assignNotes });
+      console.log("[AdminLeadershipSection] assign_position response:", JSON.stringify(d));
+      if (d.needsApproval) {
+        sonnerToast.success(
+          d.message ||
+          `Sent for authorization — ${d.approvalsRequired} admin${d.approvalsRequired === 1 ? "" : "s"} need to sign off before ${mem?.name || "this member"} becomes ${pos?.title || "an executive"}. Other admins will see this on their Admin Dashboard whenever they check in.`
+        );
+      } else {
+        sonnerToast.success(`${mem?.name || "Member"} assigned to ${pos?.title || "position"}`);
+      }
+      setShowAssignDialog(false);
+      setAssignUserId(""); setAssignPosId(""); setAssignNotes("");
+      await fetchData();
+      onAssignmentSubmitted?.();
+    } catch (e: any) { sonnerToast.error(e.message); }
+    finally { setSubmitting(false); }
   };
 
   const handleCreatePosition = async () => {
@@ -267,17 +272,6 @@ export function AdminLeadershipSection({
 
   return (
     <>
-      {/* Executive Password Authorization Drawer — for Assign Position */}
-      <ExecutiveAuthorizationDrawer
-        open={execAuthDrawerOpen}
-        onOpenChange={setExecAuthDrawerOpen}
-        communityId={communityId}
-        actionTitle={`Assign position: ${positions.find(p => p.id === pendingAssignPayload?.position_id)?.title || "Position"}`}
-        actionDescription="Top executives must authorize this leadership change with their login password"
-        requiredCount={Math.min(4, positions.filter(p => p.holder_user_id).length || 1)}
-        onAuthorized={executePendingAssign}
-      />
-
       {/* Authorization Drawer */}
       <ModuleAuthorizationDrawer
         open={authDrawerOpen}
@@ -386,8 +380,8 @@ export function AdminLeadershipSection({
           </div>
           <div className="flex gap-2 mt-4">
             <Button variant="outline" className="flex-1" onClick={() => setShowAssignDialog(false)}>Cancel</Button>
-            <Button className="flex-1" onClick={handleAssignSubmit} disabled={!assignUserId || !assignPosId || loadingMembers}>
-              <Shield className="h-4 w-4 mr-1" /> Proceed to Auth
+            <Button className="flex-1" onClick={handleAssignSubmit} disabled={!assignUserId || !assignPosId || loadingMembers || submitting}>
+              {submitting ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <UserCheck className="h-4 w-4 mr-1" />} Assign Position
             </Button>
           </div>
         </DialogContent>

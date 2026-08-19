@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, parse } from "date-fns";
 import { useServiceUnavailableDialog } from "@/hooks/useServiceUnavailableDialog";
-import { useAboutData, useCurrentUserId } from "@/hooks/useWindowData";
+import { useCurrentUserId } from "@/hooks/useWindowData";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -36,6 +36,8 @@ import { CurrencyExchangeDialog } from "./profile/CurrencyExchangeDialog";
 import { MobiExchangeRatesDialog } from "./profile/MobiExchangeRatesDialog";
 interface ProfileAboutTabProps {
   userName: string;
+  /** The profile being viewed. Omit (or pass the logged-in user's own id) for MyProfile. */
+  userId?: string;
 }
 interface Location {
   id: string;
@@ -91,6 +93,7 @@ interface ContactInfo {
 }
 interface RefererUrl {
   url: string;
+  referralCode?: string;
   refererName: string;
   refererId: string;
   privacy?: string;
@@ -104,8 +107,19 @@ interface CurrencyInfo {
   privacy?: string;
   exceptions?: string[];
 }
+
+const API_BASE = (import.meta.env.VITE_API_URL as string) || "/api";
+
+// Section keys accepted by /api/profile/about.php (must match the PHP $colMap)
+type AboutSection =
+  | "designations" | "locations" | "education" | "work" | "basicInfo"
+  | "relationship" | "contact" | "about" | "refererUrl" | "currency"
+  | "schoolMates" | "classmates" | "ageMates" | "workColleagues"
+  | "loveFriendships" | "socialCommunities" | "family";
+
 export const ProfileAboutTab = ({
-  userName
+  userName,
+  userId
 }: ProfileAboutTabProps) => {
   const navigate = useNavigate();
   const {
@@ -116,9 +130,16 @@ export const ProfileAboutTab = ({
     Dialog
   } = useServiceUnavailableDialog();
 
-  // Get PHP-injected data if available
-  const phpAbout = useAboutData();
   const currentUserId = useCurrentUserId();
+  // Whose About tab this is: the explicit userId prop when viewing someone
+  // else's profile (UserProfile.tsx), otherwise the logged-in user's own
+  // (MyProfile.tsx, or userId left unset/equal to currentUserId).
+  const viewedUserId = userId || currentUserId;
+  const isOwnProfile = !userId || userId === currentUserId;
+  // Synchronous (prop-only) signal, available before currentUserId resolves —
+  // used to keep the localStorage cache strictly to the user's own data, so
+  // viewing someone else's profile never reads or writes a shared cache key.
+  const isOtherProfile = !!userId;
 
   // Dialog states
   const [editLocationOpen, setEditLocationOpen] = useState(false);
@@ -160,8 +181,12 @@ export const ProfileAboutTab = ({
     navigate('/community');
   };
 
-  // Load data from localStorage on mount
+  // Load a cached copy from localStorage (used only as an instant, offline-friendly
+  // placeholder before the API responds — never fabricated demo data).
+  // Skipped entirely when viewing someone else's profile, since these keys
+  // are shared across the app and must never mix one user's data with another's.
   const loadFromStorage = <T,>(key: string, defaultValue: T): T => {
+    if (isOtherProfile) return defaultValue;
     try {
       const item = localStorage.getItem(key);
       return item ? JSON.parse(item) : defaultValue;
@@ -170,314 +195,151 @@ export const ProfileAboutTab = ({
     }
   };
 
-  // Data states with localStorage initialization
-  const [designations, setDesignations] = useState<string>(() => loadFromStorage("profile_designations", "2-Star User, Mobi-Celebrity"));
-  const [locations, setLocations] = useState<Location[]>(() => loadFromStorage("profile_locations", [{
-    id: "1",
-    place: "Onitsha, Anambra State, Nigeria.",
-    description: "Current City"
-  }, {
-    id: "2",
-    place: "Awka, Anambra State, Nigeria.",
-    description: "Hometown"
-  }, {
-    id: "3",
-    place: "Lived in Aba, Abia, Nigeria",
-    description: "1992 - 1998",
-    period: "1992 - 1998"
-  }, {
-    id: "4",
-    place: "Lived in Port-Harcourt, Rivers, Nigeria",
-    description: "2002 - 2009",
-    period: "2002 - 2009"
-  }]));
-  const [education, setEducation] = useState<Education[]>(() => loadFromStorage("profile_education", [{
-    id: "1",
-    school: "Nike Grammar School, Enugu, Nigeria",
-    period: "Class of 2013 - 2019."
-  }, {
-    id: "2",
-    school: "University of Nigeria, Nsukka, Nigeria",
-    faculty: "Faculty of Engineering",
-    department: "Civil Engineering Department",
-    period: "Class of 2020 - 2025.",
-    extraSkills: "AutoCAD, Project Management, Research"
-  }]));
-  const [work, setWork] = useState<Work[]>(() => loadFromStorage("profile_work", [{
-    id: "1",
-    workplaceName: "BeamColumn PCC Limited, Onitsha",
-    position: "CEO",
-    period: "January 5, 1995 - Present"
-  }, {
-    id: "2",
-    workplaceName: "Kemjik Allied Resources Ltd, Aba, Abia State",
-    position: "MD",
-    period: "July 22, 2010 - December 10, 2024."
-  }]));
-  const [basicInfo, setBasicInfo] = useState<BasicInfo>(() => 
-    phpAbout?.basicInfo || loadFromStorage("profile_basicInfo", {
-      gender: "Female",
-      birthday: "1976-09-20",
-      languages: "English, French and Igbo",
-      birthdayPrivacy: "full",
-      privacy: "public"
+  // Data states — all start empty/blank. Real values come from the API
+  // (GET /api/profile/about.php) once it loads; localStorage is only a
+  // same-device cache of the user's own previously-saved data.
+  const [designations, setDesignations] = useState<string>(() => loadFromStorage("profile_designations", ""));
+  const [locations, setLocations] = useState<Location[]>(() => loadFromStorage("profile_locations", []));
+  const [education, setEducation] = useState<Education[]>(() => loadFromStorage("profile_education", []));
+  const [work, setWork] = useState<Work[]>(() => loadFromStorage("profile_work", []));
+  const [basicInfo, setBasicInfo] = useState<BasicInfo>(() =>
+    loadFromStorage("profile_basicInfo", { gender: "", birthday: "", languages: "", birthdayPrivacy: "full", privacy: "public" })
+  );
+  const [relationship, setRelationship] = useState<RelationshipInfo>(() =>
+    loadFromStorage("profile_relationship", { status: "", privacy: "public", exceptions: [] })
+  );
+  const [family, setFamily] = useState<FamilyMember[]>(() => loadFromStorage("profile_family", []));
+  const [contact, setContact] = useState<ContactInfo>(() =>
+    loadFromStorage("profile_contact", { phone1: "", phone2: "", email: "", privacy: "public", exceptions: [] })
+  );
+  const [about, setAbout] = useState<AboutInfo>(() =>
+    loadFromStorage("profile_about", { text: "", privacy: "public", exceptions: [] })
+  );
+  const [refererUrl, setRefererUrl] = useState<RefererUrl>(() =>
+    loadFromStorage("profile_refererUrl", { url: "", referralCode: "", refererName: "", refererId: "", privacy: "public", exceptions: [] })
+  );
+  const [currency, setCurrency] = useState<CurrencyInfo>(() =>
+    loadFromStorage("profile_currency", {
+      preferredCurrency: "", currencySymbol: "",
+      accountSummaryPrivacy: "only-me", accountSummaryExceptions: [],
+      privacy: "public", exceptions: [],
     })
   );
-  const [relationship, setRelationship] = useState<RelationshipInfo>(() => {
-    if (phpAbout?.relationship) return phpAbout.relationship;
-    const stored = loadFromStorage<RelationshipInfo | string>("profile_relationship", "Married");
-    if (typeof stored === 'string') {
-      return {
-        status: stored,
-        privacy: "public",
-        exceptions: []
-      };
-    }
-    return stored;
-  });
-  const [family, setFamily] = useState<FamilyMember[]>(() => loadFromStorage("profile_family", [{
-    id: "1",
-    name: "Emeka Anigbogu",
-    relation: "Brother"
-  }, {
-    id: "2",
-    name: "Stella Anthonia Obi",
-    relation: "Wife"
-  }, {
-    id: "3",
-    name: "Michael Johnson Obi",
-    relation: "Son"
-  }]));
-  const [contact, setContact] = useState<ContactInfo>(() => 
-    phpAbout?.contact || loadFromStorage("profile_contact", {
-      phone1: "+234-806-408-9171",
-      phone2: "+234-803-477-1843",
-      email: "kemjikng@yahoo.com"
-    })
-  );
-  const [about, setAbout] = useState<AboutInfo>(() => {
-    if (phpAbout?.about) return phpAbout.about;
-    const stored = loadFromStorage<AboutInfo | string>("profile_about", "I'm a Lawyer, Media Professional and Schola, with unique passion and experince in real estates, property development and management.\n\nI work with BeamColumn PCC Limited as Legal Adviser on Property Investments and Corporate Law; and also Senior Negotiator and Evaluator, etc.");
-    if (typeof stored === 'string') {
-      return {
-        text: stored,
-        privacy: "public",
-        exceptions: []
-      };
-    }
-    return stored;
-  });
-  const [refererUrl, setRefererUrl] = useState<RefererUrl>(() => 
-    phpAbout?.refererUrl || loadFromStorage("profile_refererUrl", {
-      url: "https://mobiface.com/profile/john-doe",
-      refererName: "John Doe",
-      refererId: currentUserId,
-      privacy: "public",
-      exceptions: []
-    })
-  );
-  const [currency, setCurrency] = useState<CurrencyInfo>(() => 
-    phpAbout?.currency || loadFromStorage("profile_currency", {
-      preferredCurrency: "Nigerian Naira",
-      currencySymbol: "₦",
-      accountSummaryPrivacy: "only-me",
-      accountSummaryExceptions: [],
-      privacy: "public",
-      exceptions: []
-    })
-  );
-  const [schoolMates, setSchoolMates] = useState<SchoolMate[]>(() => 
-    phpAbout?.schoolMates || loadFromStorage<SchoolMate[]>("profile_schoolMates", [{
-    id: "1",
-    name: "Chidi Okafor",
-    nickname: "Chief",
-    institution: "Nike Grammar School, Enugu, Nigeria",
-    period: "2013-2019",
-    postsHeld: "Class Captain, Football Team Captain",
-    sportsPlayed: "Football, Basketball",
-    clubsAssociations: "Science Club, Debate Society",
-    favouriteTeacher: "Mr. James Okoli",
-    teacherNickname: "Prof James",
-    teacherHometown: "Enugu",
-    teacherSubject: "Mathematics",
-    teacherPosition: "Senior Teacher",
-    privacy: "public"
-  }, {
-    id: "2",
-    name: "Ngozi Eze",
-    nickname: "Ngo",
-    institution: "Nike Grammar School, Enugu, Nigeria",
-    period: "2013-2019",
-    postsHeld: "Library Prefect, Drama Club President",
-    sportsPlayed: "Volleyball, Athletics",
-    clubsAssociations: "Drama Club, Literary Society",
-    favouriteTeacher: "Mrs. Grace Uche",
-    teacherNickname: "Mama Grace",
-    teacherHometown: "Nsukka",
-    teacherSubject: "English Literature",
-    teacherPosition: "Head of Languages",
-    privacy: "friends"
-  }]));
-  const [classmates, setClassmates] = useState<Classmate[]>(() => 
-    phpAbout?.classmates || loadFromStorage<Classmate[]>("profile_classmates", [{
-    id: "1",
-    name: "Emeka Nnamdi",
-    nickname: "Eme",
-    institution: "University of Nigeria, Nsukka - Civil Engineering",
-    period: "2020-2025",
-    postsHeld: "Class Representative, NICE President",
-    sportsPlayed: "Tennis, Chess",
-    clubsAssociations: "Nigerian Institution of Civil Engineers (NICE), Rotaract Club",
-    favouriteTeacher: "Dr. Peter Obiora",
-    teacherNickname: "Dr. Pete",
-    teacherHometown: "Awka",
-    teacherSubject: "Structural Analysis",
-    teacherPosition: "Senior Lecturer",
-    privacy: "public"
-  }, {
-    id: "2",
-    name: "Amaka Okonkwo",
-    nickname: "Amy",
-    institution: "University of Nigeria, Nsukka - Civil Engineering",
-    period: "2020-2025",
-    postsHeld: "Course Rep, Female Engineers Forum Secretary",
-    sportsPlayed: "Badminton, Swimming",
-    clubsAssociations: "Female Engineers Forum, Environmental Club",
-    favouriteTeacher: "Prof. Chinedu Agu",
-    teacherNickname: "Prof. CA",
-    teacherHometown: "Owerri",
-    teacherSubject: "Hydraulic Engineering",
-    teacherPosition: "Professor",
-    privacy: "friends"
-  }]));
-  const [ageMates, setAgeMates] = useState<AgeMate[]>(() => 
-    phpAbout?.ageMates || loadFromStorage<AgeMate[]>("profile_ageMates", [{
-    id: "1",
-    name: "Chukwuemeka Okafor",
-    community: "Onitsha Urban Community",
-    ageGrade: "Otu Udo 1975",
-    ageBrackets: "1970-1980",
-    nickname: "The Peacemaker",
-    postsHeld: "Youth Leader (1995-1998), Financial Secretary (2005-2010)",
-    privacy: "public"
-  }, {
-    id: "2",
-    name: "Ifeanyi Nwosu",
-    community: "Awka Community Development Union",
-    ageGrade: "Ndi Oganiru 1976",
-    ageBrackets: "1971-1981",
-    nickname: "Odogwu",
-    postsHeld: "PRO (2000-2005), Vice Chairman (2012-2015)",
-    privacy: "public"
-  }]));
-  const [workColleagues, setWorkColleagues] = useState<WorkColleague[]>(() => 
-    phpAbout?.workColleagues || loadFromStorage<WorkColleague[]>("profile_workColleagues", [{
-    id: "1",
-    name: "Ifeanyi Mbah",
-    nickname: "Ify",
-    workplaceName: "BeamColumn PCC Limited",
-    workplaceLocation: "Onitsha, Anambra State",
-    position: "Senior Engineer",
-    duration: "2015-Present",
-    superiority: "Colleague",
-    specialSkills: "Project Management, Structural Design",
-    privacy: "public"
-  }, {
-    id: "2",
-    name: "Obiageli Nwankwo",
-    nickname: "Obi",
-    workplaceName: "Kemjik Allied Resources Ltd",
-    workplaceLocation: "Aba, Abia State",
-    position: "Marketing Manager",
-    duration: "2010-2024",
-    superiority: "Subordinate",
-    specialSkills: "Brand Development, Client Relations",
-    privacy: "friends"
-  }]));
-  const [loveFriendship, setLoveFriendship] = useState<LoveFriendship[]>(() => 
-    phpAbout?.loveFriendships || loadFromStorage<LoveFriendship[]>("profile_loveFriendship", [])
-  );
-  const [socialCommunities, setSocialCommunities] = useState<SocialCommunity[]>(() => 
-    phpAbout?.socialCommunities || loadFromStorage<SocialCommunity[]>("profile_socialCommunities", [{
-    id: "1",
-    name: "Onitsha Town Union",
-    type: "Town Union",
-    role: "Financial Secretary",
-    joinDate: "2015-03-10",
-    status: "Active",
-    location: "Onitsha, Anambra State",
-    privacy: "public"
-  }, {
-    id: "2",
-    name: "Rotary Club of Awka",
-    type: "Club",
-    role: "Member",
-    joinDate: "2018-06-15",
-    status: "Active",
-    location: "Awka, Anambra State",
-    privacy: "friends"
-  }, {
-    id: "3",
-    name: "Nigerian Bar Association (NBA)",
-    type: "Association",
-    role: "Member",
-    joinDate: "2010-01-20",
-    status: "Active",
-    privacy: "public"
-  }]));
+  const [schoolMates, setSchoolMates] = useState<SchoolMate[]>(() => loadFromStorage<SchoolMate[]>("profile_schoolMates", []));
+  const [classmates, setClassmates] = useState<Classmate[]>(() => loadFromStorage<Classmate[]>("profile_classmates", []));
+  const [ageMates, setAgeMates] = useState<AgeMate[]>(() => loadFromStorage<AgeMate[]>("profile_ageMates", []));
+  const [workColleagues, setWorkColleagues] = useState<WorkColleague[]>(() => loadFromStorage<WorkColleague[]>("profile_workColleagues", []));
+  const [loveFriendship, setLoveFriendship] = useState<LoveFriendship[]>(() => loadFromStorage<LoveFriendship[]>("profile_loveFriendship", []));
+  const [socialCommunities, setSocialCommunities] = useState<SocialCommunity[]>(() => loadFromStorage<SocialCommunity[]>("profile_socialCommunities", []));
 
-  // Save to localStorage whenever data changes
+  const [aboutLoading, setAboutLoading] = useState(true);
+  const [aboutLoaded, setAboutLoaded] = useState(false);
+
+  // Cache a section to localStorage too, so the tab still has something to
+  // show instantly (and offline) before the next API fetch completes.
+  const cacheLocally = (key: string, data: unknown) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch {
+      /* ignore quota/storage errors */
+    }
+  };
+
+  // Persist a single About-tab section through the API.
+  // Optimistically updates local state first, then POSTs to the backend.
+  const saveSection = async (section: AboutSection, data: unknown, localStorageKey?: string) => {
+    if (!isOwnProfile) return false; // never save on someone else's profile
+    if (localStorageKey) cacheLocally(localStorageKey, data);
+    try {
+      const res = await fetch(`${API_BASE}/profile/about.php`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ section, data }),
+      });
+      const result = await res.json().catch(() => null);
+      if (!res.ok || !result?.success) {
+        throw new Error(result?.error || "Save failed");
+      }
+      return true;
+    } catch {
+      toast({
+        title: "Couldn't save changes",
+        description: "Your change is shown here, but saving to the server failed. Please try again.",
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
+  // Wrapped setters: update UI immediately, then persist via the API.
+  const handleSaveLocations = (data: Location[]) => { setLocations(data); saveSection("locations", data, "profile_locations"); };
+  const handleSaveEducation = (data: Education[]) => { setEducation(data); saveSection("education", data, "profile_education"); };
+  const handleSaveWork = (data: Work[]) => { setWork(data); saveSection("work", data, "profile_work"); };
+  const handleSaveBasicInfo = (data: BasicInfo) => { setBasicInfo(data); saveSection("basicInfo", data, "profile_basicInfo"); };
+  const handleSaveRelationship = (data: RelationshipInfo) => { setRelationship(data); saveSection("relationship", data, "profile_relationship"); };
+  const handleSaveFamily = (data: FamilyMember[]) => { setFamily(data); saveSection("family", data, "profile_family"); };
+  const handleSaveContact = (data: ContactInfo) => { setContact(data); saveSection("contact", data, "profile_contact"); };
+  const handleSaveAbout = (data: AboutInfo) => { setAbout(data); saveSection("about", data, "profile_about"); };
+  const handleSaveSchoolMates = (data: SchoolMate[]) => { setSchoolMates(data); saveSection("schoolMates", data, "profile_schoolMates"); };
+  const handleSaveClassmates = (data: Classmate[]) => { setClassmates(data); saveSection("classmates", data, "profile_classmates"); };
+  const handleSaveAgeMates = (data: AgeMate[]) => { setAgeMates(data); saveSection("ageMates", data, "profile_ageMates"); };
+  const handleSaveWorkColleagues = (data: WorkColleague[]) => { setWorkColleagues(data); saveSection("workColleagues", data, "profile_workColleagues"); };
+  const handleSaveLoveFriendship = (data: LoveFriendship[]) => { setLoveFriendship(data); saveSection("loveFriendships", data, "profile_loveFriendship"); };
+  const handleSaveSocialCommunities = (data: SocialCommunity[]) => { setSocialCommunities(data); saveSection("socialCommunities", data, "profile_socialCommunities"); };
+  const handleSaveRefererUrl = (privacyUpdate: { privacy: string; exceptions: string[] }) => {
+    const finalData: RefererUrl = { ...refererUrl, ...privacyUpdate };
+    setRefererUrl(finalData);
+    saveSection("refererUrl", privacyUpdate, "profile_refererUrl");
+    setEditRefererUrlOpen(false);
+  };
+  const handleSaveCurrency = (data: CurrencyInfo) => { setCurrency(data); saveSection("currency", data, "profile_currency"); setEditCurrencyOpen(false); };
+
+  // Load the About tab from the API on mount (and whenever the viewed user changes).
   useEffect(() => {
-    localStorage.setItem("profile_designations", JSON.stringify(designations));
-  }, [designations]);
-  useEffect(() => {
-    localStorage.setItem("profile_locations", JSON.stringify(locations));
-  }, [locations]);
-  useEffect(() => {
-    localStorage.setItem("profile_education", JSON.stringify(education));
-  }, [education]);
-  useEffect(() => {
-    localStorage.setItem("profile_work", JSON.stringify(work));
-  }, [work]);
-  useEffect(() => {
-    localStorage.setItem("profile_basicInfo", JSON.stringify(basicInfo));
-  }, [basicInfo]);
-  useEffect(() => {
-    localStorage.setItem("profile_relationship", JSON.stringify(relationship));
-  }, [relationship]);
-  useEffect(() => {
-    localStorage.setItem("profile_family", JSON.stringify(family));
-  }, [family]);
-  useEffect(() => {
-    localStorage.setItem("profile_contact", JSON.stringify(contact));
-  }, [contact]);
-  useEffect(() => {
-    localStorage.setItem("profile_about", JSON.stringify(about));
-  }, [about]);
-  useEffect(() => {
-    localStorage.setItem("profile_schoolMates", JSON.stringify(schoolMates));
-  }, [schoolMates]);
-  useEffect(() => {
-    localStorage.setItem("profile_classmates", JSON.stringify(classmates));
-  }, [classmates]);
-  useEffect(() => {
-    localStorage.setItem("profile_ageMates", JSON.stringify(ageMates));
-  }, [ageMates]);
-  useEffect(() => {
-    localStorage.setItem("profile_workColleagues", JSON.stringify(workColleagues));
-  }, [workColleagues]);
-  useEffect(() => {
-    localStorage.setItem("profile_loveFriendship", JSON.stringify(loveFriendship));
-  }, [loveFriendship]);
-  useEffect(() => {
-    localStorage.setItem("profile_socialCommunities", JSON.stringify(socialCommunities));
-  }, [socialCommunities]);
-  useEffect(() => {
-    localStorage.setItem("profile_refererUrl", JSON.stringify(refererUrl));
-  }, [refererUrl]);
-  useEffect(() => {
-    localStorage.setItem("profile_currency", JSON.stringify(currency));
-  }, [currency]);
+    let cancelled = false;
+    const loadAbout = async () => {
+      setAboutLoading(true);
+      try {
+        const url = viewedUserId
+          ? `${API_BASE}/profile/about.php?user_id=${encodeURIComponent(viewedUserId)}`
+          : `${API_BASE}/profile/about.php`;
+        const res = await fetch(url, { credentials: "include" });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (cancelled || !data) return;
+
+        if (data.designations) setDesignations(data.designations);
+        if (data.locations) setLocations(data.locations);
+        if (data.education) setEducation(data.education);
+        if (data.work) setWork(data.work);
+        if (data.basicInfo) setBasicInfo(data.basicInfo);
+        if (data.relationship) setRelationship(data.relationship);
+        if (data.family) setFamily(data.family);
+        if (data.contact) setContact(data.contact);
+        if (data.about) setAbout(data.about);
+        if (data.refererUrl) setRefererUrl(data.refererUrl);
+        if (data.currency) setCurrency(data.currency);
+        if (data.schoolMates) setSchoolMates(data.schoolMates);
+        if (data.classmates) setClassmates(data.classmates);
+        if (data.ageMates) setAgeMates(data.ageMates);
+        if (data.workColleagues) setWorkColleagues(data.workColleagues);
+        if (data.loveFriendships) setLoveFriendship(data.loveFriendships);
+        if (data.socialCommunities) setSocialCommunities(data.socialCommunities);
+      } catch {
+        // Network/API failure: silently keep whatever was loaded from
+        // localStorage/defaults above — the tab remains usable offline.
+      } finally {
+        if (!cancelled) {
+          setAboutLoading(false);
+          setAboutLoaded(true);
+        }
+      }
+    };
+    loadAbout();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewedUserId]);
 
   // Helper function to format birthday based on privacy setting
   const formatBirthday = (birthday: string, birthdayPrivacy: "full" | "partial" | "hidden" = "full") => {
@@ -493,6 +355,11 @@ export const ProfileAboutTab = ({
     }
   };
   return <div className="space-y-6">
+      {aboutLoading && !aboutLoaded && (
+        <div className="flex items-center justify-center py-4 text-sm text-muted-foreground">
+          Loading profile details…
+        </div>
+      )}
       {/* User Category */}
       <Card className="p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
@@ -514,49 +381,65 @@ export const ProfileAboutTab = ({
           </div>
           <Badge variant="secondary" className="text-xs font-normal shrink-0 self-start sm:self-auto">Auto-Assigned</Badge>
         </div>
-        <p className="text-sm sm:text-base font-medium">{designations}</p>
+        <p className="text-sm sm:text-base font-medium">{designations || "Standard Member"}</p>
       </Card>
 
-      {/* Referer URL */}
+      {isOwnProfile && (
+      <>
+      {/* My Referral Link */}
       <Card className="p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
           <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
             <ExternalLink className="h-5 w-5 text-primary shrink-0" />
-            <h3 className="text-base sm:text-lg font-semibold flex-1 min-w-0">Referer URL</h3>
+            <h3 className="text-base sm:text-lg font-semibold flex-1 min-w-0">My Referral Link</h3>
           </div>
           <div className="flex items-center gap-2 self-start sm:self-auto">
             {refererUrl.privacy && <PrivacyBadge level={refererUrl.privacy as PrivacyLevel} exceptionsCount={refererUrl.exceptions?.length} />}
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => setEditRefererUrlOpen(true)}>
-              <Pencil className="h-4 w-4" />
-            </Button>
+            {isOwnProfile && (
+<Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => setEditRefererUrlOpen(true)}>
+                <Pencil className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </div>
-        <div className="space-y-2">
-          <p className="text-sm sm:text-base text-muted-foreground">Referred by:</p>
-          <div className="flex items-center gap-3">
-            <Avatar
-              className="h-11 w-11 shrink-0 ring-2 ring-border cursor-pointer hover:ring-primary transition-all"
-              onClick={() => navigate(`/profile/${refererUrl.refererId}`)}
-            >
-              <AvatarImage
-                src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(refererUrl.refererName)}`}
-                alt={refererUrl.refererName}
-              />
-              <AvatarFallback className="text-sm font-semibold">
-                {refererUrl.refererName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <Button variant="link" className="h-auto p-0 text-sm sm:text-base font-medium text-primary hover:underline" onClick={() => navigate(`/profile/${refererUrl.refererId}`)}>
-                {refererUrl.refererName}
+        {refererUrl.url ? (
+          <div className="space-y-2">
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Share this link — anyone who signs up through it is linked to your account:
+            </p>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 min-w-0">
+                <a
+                  href={refererUrl.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm sm:text-base font-medium text-primary hover:underline break-all"
+                >
+                  {refererUrl.url}
+                </a>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="shrink-0"
+                onClick={() => {
+                  navigator.clipboard?.writeText(refererUrl.url);
+                  toast({ title: "Referral link copied" });
+                }}
+              >
+                Copy
               </Button>
-              <p className="text-sm sm:text-base text-muted-foreground break-all">
-                {refererUrl.url}
-              </p>
             </div>
           </div>
-        </div>
+        ) : (
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Your referral link couldn't be generated. This usually only happens on very old accounts — contact support if it doesn't appear after a page reload.
+          </p>
+        )}
       </Card>
+      </>
+      )}
 
       {/* Location */}
       <Card className="p-6">
@@ -565,12 +448,14 @@ export const ProfileAboutTab = ({
             <MapPin className="h-5 w-5 text-primary shrink-0" />
             <h3 className="text-lg font-semibold min-w-0">Location</h3>
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0" onClick={() => setEditLocationOpen(true)}>
-            <Pencil className="h-4 w-4" />
-          </Button>
+          {isOwnProfile && (
+<Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0" onClick={() => setEditLocationOpen(true)}>
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
         </div>
         <div className="space-y-4">
-          {locations.map((loc, index) => {
+          {locations.length > 0 ? locations.map((loc, index) => {
             const isCurrent = /current/i.test(loc.description);
             const isHometown = /hometown/i.test(loc.description);
             const Icon = isCurrent ? MapPin : isHometown ? Home : Briefcase;
@@ -589,7 +474,7 @@ export const ProfileAboutTab = ({
                 </div>
               </div>
             );
-          })}
+          }) : <p className="text-base text-muted-foreground">No locations added yet</p>}
         </div>
       </Card>
 
@@ -600,12 +485,14 @@ export const ProfileAboutTab = ({
             <GraduationCap className="h-5 w-5 text-primary shrink-0" />
             <h3 className="text-lg font-semibold min-w-0">Education</h3>
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0" onClick={() => setEditEducationOpen(true)}>
-            <Pencil className="h-4 w-4" />
-          </Button>
+          {isOwnProfile && (
+<Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0" onClick={() => setEditEducationOpen(true)}>
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
         </div>
         <div className="space-y-4">
-          {education.map((edu, index) => {
+          {education.length > 0 ? education.map((edu, index) => {
             const isUniversity = /(university|college|polytechnic|institute)/i.test(edu.school);
             const Icon = isUniversity ? Building2 : GraduationCap;
             return (
@@ -628,7 +515,7 @@ export const ProfileAboutTab = ({
                 </div>
               </div>
             );
-          })}
+          }) : <p className="text-base text-muted-foreground">No education added yet</p>}
         </div>
       </Card>
 
@@ -643,10 +530,12 @@ export const ProfileAboutTab = ({
         <div className="mb-6">
           <div className="flex items-center justify-between mb-3">
             <h4 className="font-medium">School Mates</h4>
-            <Button variant="ghost" size="sm" className="h-8 text-muted-foreground hover:text-primary" onClick={() => setEditSchoolMatesOpen(true)}>
-              <Pencil className="h-4 w-4 mr-2" />
-              Edit
-            </Button>
+            {isOwnProfile && (
+<Button variant="ghost" size="sm" className="h-8 text-muted-foreground hover:text-primary" onClick={() => setEditSchoolMatesOpen(true)}>
+                <Pencil className="h-4 w-4 mr-2" />
+                Edit
+              </Button>
+            )}
           </div>
           {schoolMates.length > 0 ? <div className="space-y-3">
               {schoolMates.map((mate, index) => <div key={mate.id}>
@@ -681,10 +570,12 @@ export const ProfileAboutTab = ({
         <div className="mb-6">
           <div className="flex items-center justify-between mb-3">
             <h4 className="font-medium">Classmates</h4>
-            <Button variant="ghost" size="sm" className="h-8 text-muted-foreground hover:text-primary" onClick={() => setEditClassmatesOpen(true)}>
-              <Pencil className="h-4 w-4 mr-2" />
-              Edit
-            </Button>
+            {isOwnProfile && (
+<Button variant="ghost" size="sm" className="h-8 text-muted-foreground hover:text-primary" onClick={() => setEditClassmatesOpen(true)}>
+                <Pencil className="h-4 w-4 mr-2" />
+                Edit
+              </Button>
+            )}
           </div>
           {classmates.length > 0 ? <div className="space-y-3">
               {classmates.map((mate, index) => <div key={mate.id}>
@@ -719,10 +610,12 @@ export const ProfileAboutTab = ({
         <div className="mb-6">
           <div className="flex items-center justify-between mb-3">
             <h4 className="font-medium">Age Mates</h4>
-            <Button variant="ghost" size="sm" className="h-8 text-muted-foreground hover:text-primary" onClick={() => setEditAgeMatesOpen(true)}>
-              <Pencil className="h-4 w-4 mr-2" />
-              Edit
-            </Button>
+            {isOwnProfile && (
+<Button variant="ghost" size="sm" className="h-8 text-muted-foreground hover:text-primary" onClick={() => setEditAgeMatesOpen(true)}>
+                <Pencil className="h-4 w-4 mr-2" />
+                Edit
+              </Button>
+            )}
           </div>
           {ageMates.length > 0 ? <div className="space-y-3">
               {ageMates.map((mate, index) => <div key={mate.id}>
@@ -757,10 +650,12 @@ export const ProfileAboutTab = ({
         <div>
           <div className="flex items-center justify-between mb-3">
             <h4 className="font-medium">Work Colleagues</h4>
-            <Button variant="ghost" size="sm" className="h-8 text-muted-foreground hover:text-primary" onClick={() => setEditWorkColleaguesOpen(true)}>
-              <Pencil className="h-4 w-4 mr-2" />
-              Edit
-            </Button>
+            {isOwnProfile && (
+<Button variant="ghost" size="sm" className="h-8 text-muted-foreground hover:text-primary" onClick={() => setEditWorkColleaguesOpen(true)}>
+                <Pencil className="h-4 w-4 mr-2" />
+                Edit
+              </Button>
+            )}
           </div>
           {workColleagues.length > 0 ? <div className="space-y-3">
               {workColleagues.map((colleague, index) => <div key={colleague.id}>
@@ -797,12 +692,14 @@ export const ProfileAboutTab = ({
             <Briefcase className="h-5 w-5 text-primary shrink-0" />
             <h3 className="text-lg font-semibold min-w-0">Business/Career/Work</h3>
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0" onClick={() => setEditWorkOpen(true)}>
-            <Pencil className="h-4 w-4" />
-          </Button>
+          {isOwnProfile && (
+<Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0" onClick={() => setEditWorkOpen(true)}>
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
         </div>
         <div className="space-y-4">
-          {work.map((workItem, index) => (
+          {work.length > 0 ? work.map((workItem, index) => (
             <div key={workItem.id}>
               {index > 0 && <Separator className="mb-4" />}
               <div className="flex items-start gap-3">
@@ -816,10 +713,12 @@ export const ProfileAboutTab = ({
                 </div>
               </div>
             </div>
-          ))}
+          )) : <p className="text-base text-muted-foreground">No work experience added yet</p>}
         </div>
       </Card>
 
+      {isOwnProfile && (
+      <>
       {/* Extra Source */}
       <Card className="p-4 sm:p-6">
         <div className="flex items-start sm:items-center justify-between mb-2 gap-2">
@@ -899,6 +798,8 @@ export const ProfileAboutTab = ({
           </div>
         </div>
       </Card>
+      </>
+      )}
 
       {/* Basic Information */}
       <Card className="p-4 sm:p-6">
@@ -907,27 +808,27 @@ export const ProfileAboutTab = ({
             <User className="h-5 w-5 text-primary shrink-0" />
             <h3 className="text-lg font-semibold min-w-0">Basic Information</h3>
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0" onClick={() => setEditBasicInfoOpen(true)}>
-            <Pencil className="h-4 w-4" />
-          </Button>
+          {isOwnProfile && (
+<Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0" onClick={() => setEditBasicInfoOpen(true)}>
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
         </div>
         <div className="space-y-4">
           <div>
-            <p className="font-medium">{basicInfo.gender}</p>
+            <p className="font-medium">{basicInfo.gender || "Not set"}</p>
             <p className="text-base text-muted-foreground">Gender</p>
           </div>
           <Separator />
           <div>
-            <p className="font-medium">{new Date(basicInfo.birthday).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            })}</p>
+            <p className="font-medium">
+              {basicInfo.birthday ? (formatBirthday(basicInfo.birthday, basicInfo.birthdayPrivacy) ?? "Hidden") : "Not set"}
+            </p>
             <p className="text-base text-muted-foreground">Birthday</p>
           </div>
           <Separator />
           <div>
-            <p className="font-medium">{basicInfo.languages}</p>
+            <p className="font-medium">{basicInfo.languages || "Not set"}</p>
             <p className="text-base text-muted-foreground">Languages Spoken</p>
           </div>
         </div>
@@ -941,12 +842,14 @@ export const ProfileAboutTab = ({
             <h3 className="text-lg font-semibold min-w-0">Relationship</h3>
             {relationship.privacy && <PrivacyBadge level={relationship.privacy as PrivacyLevel} exceptionsCount={relationship.exceptions?.length} />}
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0" onClick={() => setEditRelationshipOpen(true)}>
-            <Pencil className="h-4 w-4" />
-          </Button>
+          {isOwnProfile && (
+<Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0" onClick={() => setEditRelationshipOpen(true)}>
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
         </div>
         <div>
-          <p className="font-medium">{relationship.status}</p>
+          <p className="font-medium">{relationship.status || "Not set"}</p>
           <p className="text-base text-muted-foreground">Status</p>
         </div>
       </Card>
@@ -958,9 +861,11 @@ export const ProfileAboutTab = ({
             <Heart className="h-5 w-5 text-primary shrink-0" />
             <h3 className="text-lg font-semibold min-w-0">Love Life & Friendship</h3>
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0" onClick={() => setEditLoveFriendshipOpen(true)}>
-            <Pencil className="h-4 w-4" />
-          </Button>
+          {isOwnProfile && (
+<Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0" onClick={() => setEditLoveFriendshipOpen(true)}>
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
         </div>
         <div className="space-y-4">
           {loveFriendship.length > 0 ? loveFriendship.map((friendship, index) => <div key={friendship.id}>
@@ -982,12 +887,14 @@ export const ProfileAboutTab = ({
             <Users className="h-5 w-5 text-primary shrink-0" />
             <h3 className="text-lg font-semibold min-w-0">Family</h3>
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0" onClick={() => setEditFamilyOpen(true)}>
-            <Pencil className="h-4 w-4" />
-          </Button>
+          {isOwnProfile && (
+<Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0" onClick={() => setEditFamilyOpen(true)}>
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
         </div>
         <div className="space-y-4">
-          {family.map((member, index) => {
+          {family.length > 0 ? family.map((member, index) => {
             const initials = member.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
             const dicebear = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(member.name)}`;
             return (
@@ -1010,7 +917,7 @@ export const ProfileAboutTab = ({
                 </div>
               </div>
             );
-          })}
+          }) : <p className="text-base text-muted-foreground">No family members added yet</p>}
         </div>
       </Card>
 
@@ -1025,9 +932,11 @@ export const ProfileAboutTab = ({
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0" onClick={() => setEditSocialCommunityOpen(true)}>
-                  <Shield className="h-4 w-4" />
-                </Button>
+                {isOwnProfile && (
+<Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0" onClick={() => setEditSocialCommunityOpen(true)}>
+                    <Shield className="h-4 w-4" />
+                  </Button>
+                )}
               </TooltipTrigger>
               <TooltipContent>
                 <p>Manage Privacy</p>
@@ -1080,15 +989,17 @@ export const ProfileAboutTab = ({
             <h3 className="text-lg font-semibold min-w-0">Contact Information</h3>
             {contact.privacy && <PrivacyBadge level={contact.privacy as PrivacyLevel} exceptionsCount={contact.exceptions?.length} />}
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0" onClick={() => setEditContactOpen(true)}>
-            <Pencil className="h-4 w-4" />
-          </Button>
+          {isOwnProfile && (
+<Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0" onClick={() => setEditContactOpen(true)}>
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
         </div>
         <div className="space-y-4">
           <div className="flex items-start gap-2">
             <Phone className="h-4 w-4 mt-1 text-muted-foreground" />
             <div>
-              <p className="font-medium">Tel: {contact.phone1}</p>
+              <p className="font-medium">Tel: {contact.phone1 || "Not set"}</p>
               {contact.phone2 && <p className="font-medium">{contact.phone2}</p>}
             </div>
           </div>
@@ -1096,7 +1007,11 @@ export const ProfileAboutTab = ({
           <div className="flex items-start gap-2">
             <Mail className="h-4 w-4 mt-1 text-muted-foreground" />
             <div>
-              <p className="font-medium">E-mail: <a href={`mailto:${contact.email}`} className="text-primary hover:underline">{contact.email}</a></p>
+              {contact.email ? (
+                <p className="font-medium">E-mail: <a href={`mailto:${contact.email}`} className="text-primary hover:underline">{contact.email}</a></p>
+              ) : (
+                <p className="font-medium">E-mail: Not set</p>
+              )}
             </div>
           </div>
         </div>
@@ -1110,22 +1025,28 @@ export const ProfileAboutTab = ({
             <h3 className="text-base sm:text-lg font-semibold min-w-0">Currency</h3>
             {currency.privacy && <PrivacyBadge level={currency.privacy as PrivacyLevel} exceptionsCount={currency.exceptions?.length} />}
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0" onClick={() => setEditCurrencyOpen(true)}>
-            <Pencil className="h-4 w-4" />
-          </Button>
+          {isOwnProfile && (
+<Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0" onClick={() => setEditCurrencyOpen(true)}>
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
         </div>
         
         <div className="space-y-4">
           {/* Current Currency Display */}
           <div>
-            <p className="font-medium text-base sm:text-lg">{currency.currencySymbol} {currency.preferredCurrency}</p>
+            <p className="font-medium text-base sm:text-lg">
+              {currency.preferredCurrency ? `${currency.currencySymbol} ${currency.preferredCurrency}` : "Not set"}
+            </p>
             <p className="text-base sm:text-lg text-muted-foreground">Preferred Currency</p>
           </div>
 
           <Separator />
 
           {/* Feature Buttons */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+          <div className={`grid grid-cols-1 ${isOwnProfile ? "sm:grid-cols-3" : "sm:grid-cols-2"} gap-2 sm:gap-3`}>
+            {isOwnProfile && (
+            <>
             {/* View Account Summary */}
             <Button variant="outline" className="h-auto py-3 px-3 sm:px-4 flex flex-col items-start gap-1 hover:bg-primary/5 hover:border-primary transition-colors" onClick={() => setAccountSummaryOpen(true)}>
               <div className="flex items-center gap-2 w-full">
@@ -1136,6 +1057,8 @@ export const ProfileAboutTab = ({
                 Balance & transactions
               </span>
             </Button>
+            </>
+            )}
 
             {/* Currency Exchange Converter */}
             <Button variant="outline" className="h-auto py-3 px-3 sm:px-4 flex flex-col items-start gap-1 hover:bg-primary/5 hover:border-primary transition-colors" onClick={() => setCurrencyExchangeOpen(true)}>
@@ -1170,87 +1093,89 @@ export const ProfileAboutTab = ({
             <h3 className="text-lg font-semibold min-w-0">About</h3>
             {about.privacy && <PrivacyBadge level={about.privacy as PrivacyLevel} exceptionsCount={about.exceptions?.length} />}
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0" onClick={() => setEditAboutOpen(true)}>
-            <Pencil className="h-4 w-4" />
-          </Button>
+          {isOwnProfile && (
+<Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0" onClick={() => setEditAboutOpen(true)}>
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
         </div>
         <div className="prose prose-sm max-w-none">
-          {about.text.split('\n\n').map((paragraph, index) => <p key={index} className="text-foreground leading-relaxed mt-3 first:mt-0">
-              {paragraph}
-            </p>)}
+          {about.text
+            ? about.text.split('\n\n').map((paragraph, index) => <p key={index} className="text-foreground leading-relaxed mt-3 first:mt-0">
+                {paragraph}
+              </p>)
+            : <p className="text-muted-foreground">Nothing added yet. Click the pencil icon to write something about yourself.</p>}
         </div>
       </Card>
 
       {/* Edit Dialogs */}
       <EditSectionDialog open={editLocationOpen} onOpenChange={setEditLocationOpen} title="Edit Locations" maxWidth="lg">
-        <EditLocationForm currentData={locations} onSave={setLocations} onClose={() => setEditLocationOpen(false)} />
+        <EditLocationForm currentData={locations} onSave={handleSaveLocations} onClose={() => setEditLocationOpen(false)} />
       </EditSectionDialog>
 
       <EditSectionDialog open={editEducationOpen} onOpenChange={setEditEducationOpen} title="Edit Education" maxWidth="lg">
-        <EditEducationForm currentData={education} onSave={setEducation} onClose={() => setEditEducationOpen(false)} />
+        <EditEducationForm currentData={education} onSave={handleSaveEducation} onClose={() => setEditEducationOpen(false)} />
       </EditSectionDialog>
 
       <EditSectionDialog open={editWorkOpen} onOpenChange={setEditWorkOpen} title="Edit Work Experience" maxWidth="lg">
-        <EditWorkForm currentData={work} onSave={setWork} onClose={() => setEditWorkOpen(false)} />
+        <EditWorkForm currentData={work} onSave={handleSaveWork} onClose={() => setEditWorkOpen(false)} />
       </EditSectionDialog>
 
 
       <EditSectionDialog open={editBasicInfoOpen} onOpenChange={setEditBasicInfoOpen} title="Edit Basic Information">
-        <EditBasicInfoForm currentData={basicInfo} onSave={setBasicInfo} onClose={() => setEditBasicInfoOpen(false)} />
+        <EditBasicInfoForm currentData={basicInfo} onSave={handleSaveBasicInfo} onClose={() => setEditBasicInfoOpen(false)} />
       </EditSectionDialog>
 
       <EditSectionDialog open={editRelationshipOpen} onOpenChange={setEditRelationshipOpen} title="Edit Relationship Status">
-        <EditRelationshipForm currentData={relationship} onSave={setRelationship} onClose={() => setEditRelationshipOpen(false)} />
+        <EditRelationshipForm currentData={relationship} onSave={handleSaveRelationship} onClose={() => setEditRelationshipOpen(false)} />
       </EditSectionDialog>
 
       <EditSectionDialog open={editLoveFriendshipOpen} onOpenChange={setEditLoveFriendshipOpen} title="Edit Love Life & Friendship" maxWidth="lg">
-        <EditLoveFriendshipForm currentData={loveFriendship} onSave={setLoveFriendship} onClose={() => setEditLoveFriendshipOpen(false)} />
+        <EditLoveFriendshipForm currentData={loveFriendship} onSave={handleSaveLoveFriendship} onClose={() => setEditLoveFriendshipOpen(false)} />
       </EditSectionDialog>
 
       <EditSectionDialog open={editFamilyOpen} onOpenChange={setEditFamilyOpen} title="Edit Family Members" maxWidth="lg">
-        <EditFamilyForm currentData={family} onSave={setFamily} onClose={() => setEditFamilyOpen(false)} />
+        <EditFamilyForm currentData={family} onSave={handleSaveFamily} onClose={() => setEditFamilyOpen(false)} />
       </EditSectionDialog>
 
       <EditSectionDialog open={editSocialCommunityOpen} onOpenChange={setEditSocialCommunityOpen} title="Manage Social Community Privacy" maxWidth="lg">
-        <EditSocialCommunityForm currentData={socialCommunities} onSave={setSocialCommunities} onClose={() => setEditSocialCommunityOpen(false)} />
+        <EditSocialCommunityForm currentData={socialCommunities} onSave={handleSaveSocialCommunities} onClose={() => setEditSocialCommunityOpen(false)} />
       </EditSectionDialog>
 
       <EditSectionDialog open={editContactOpen} onOpenChange={setEditContactOpen} title="Edit Contact Information">
-        <EditContactForm currentData={contact} onSave={setContact} onClose={() => setEditContactOpen(false)} />
+        <EditContactForm currentData={contact} onSave={handleSaveContact} onClose={() => setEditContactOpen(false)} />
       </EditSectionDialog>
 
       <EditSectionDialog open={editAboutOpen} onOpenChange={setEditAboutOpen} title="Edit About" maxWidth="2xl">
-        <EditAboutForm currentData={about} onSave={setAbout} onClose={() => setEditAboutOpen(false)} />
+        <EditAboutForm currentData={about} onSave={handleSaveAbout} onClose={() => setEditAboutOpen(false)} />
       </EditSectionDialog>
 
-      <EditSectionDialog open={editRefererUrlOpen} onOpenChange={setEditRefererUrlOpen} title="Edit Referer URL" maxWidth="lg">
-        <EditRefererUrlForm currentData={refererUrl} onSave={data => {
-        setRefererUrl(data);
-        setEditRefererUrlOpen(false);
-      }} onClose={() => setEditRefererUrlOpen(false)} />
+      <EditSectionDialog open={editRefererUrlOpen} onOpenChange={setEditRefererUrlOpen} title="Referral Link Privacy" maxWidth="lg">
+        <EditRefererUrlForm
+          currentData={{ url: refererUrl.url, privacy: refererUrl.privacy, exceptions: refererUrl.exceptions }}
+          onSave={handleSaveRefererUrl}
+          onClose={() => setEditRefererUrlOpen(false)}
+        />
       </EditSectionDialog>
 
       <EditSectionDialog open={editCurrencyOpen} onOpenChange={setEditCurrencyOpen} title="Edit Currency Settings" maxWidth="lg">
-        <EditCurrencyForm currentData={currency} onSave={data => {
-        setCurrency(data);
-        setEditCurrencyOpen(false);
-      }} onClose={() => setEditCurrencyOpen(false)} />
+        <EditCurrencyForm currentData={currency} onSave={handleSaveCurrency} onClose={() => setEditCurrencyOpen(false)} />
       </EditSectionDialog>
 
       <EditSectionDialog open={editSchoolMatesOpen} onOpenChange={setEditSchoolMatesOpen} title="Edit School Mates" maxWidth="2xl">
-        <EditSchoolMatesForm currentData={schoolMates} onSave={setSchoolMates} onClose={() => setEditSchoolMatesOpen(false)} />
+        <EditSchoolMatesForm currentData={schoolMates} onSave={handleSaveSchoolMates} onClose={() => setEditSchoolMatesOpen(false)} />
       </EditSectionDialog>
 
       <EditSectionDialog open={editClassmatesOpen} onOpenChange={setEditClassmatesOpen} title="Edit Classmates" maxWidth="2xl">
-        <EditClassmatesForm currentData={classmates} onSave={setClassmates} onClose={() => setEditClassmatesOpen(false)} />
+        <EditClassmatesForm currentData={classmates} onSave={handleSaveClassmates} onClose={() => setEditClassmatesOpen(false)} />
       </EditSectionDialog>
 
       <EditSectionDialog open={editAgeMatesOpen} onOpenChange={setEditAgeMatesOpen} title="Edit Age Mates" maxWidth="lg">
-        <EditAgeMatesForm currentData={ageMates} onSave={setAgeMates} onClose={() => setEditAgeMatesOpen(false)} />
+        <EditAgeMatesForm currentData={ageMates} onSave={handleSaveAgeMates} onClose={() => setEditAgeMatesOpen(false)} />
       </EditSectionDialog>
 
       <EditSectionDialog open={editWorkColleaguesOpen} onOpenChange={setEditWorkColleaguesOpen} title="Edit Work Colleagues" maxWidth="lg">
-        <EditWorkColleaguesForm currentData={workColleagues} onSave={setWorkColleagues} onClose={() => setEditWorkColleaguesOpen(false)} />
+        <EditWorkColleaguesForm currentData={workColleagues} onSave={handleSaveWorkColleagues} onClose={() => setEditWorkColleaguesOpen(false)} />
       </EditSectionDialog>
 
       <MateDetailDialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen} mate={selectedMate} type={mateType} />

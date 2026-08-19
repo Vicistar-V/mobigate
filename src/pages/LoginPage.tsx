@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import mobifaceLogo from "@/assets/mobiface-logo.png";
@@ -39,7 +39,9 @@ const PILLARS = [
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login, isAuthenticated } = useAuth();
-  const [screen, setScreen] = useState<Screen>("login");
+  const [searchParams] = useSearchParams();
+  const referralCode = (searchParams.get("ref") || "").trim();
+  const [screen, setScreen] = useState<Screen>(referralCode ? "register" : "login");
   const [pillarIndex, setPillarIndex] = useState(0);
 
   const [identifier, setIdentifier] = useState("");
@@ -186,6 +188,7 @@ export default function LoginPage() {
           full_name: regName.trim(), username: regUser.trim(),
           email: regEmail.trim(), phone: regPhone.trim(),
           password: regPass, otp_code: otp,
+          referral_code: referralCode || undefined,
         }),
       });
       const data = await res.json();
@@ -315,6 +318,12 @@ export default function LoginPage() {
               ? "Join your community on Mobiface."
               : "Sign in to pick up where you left off."}
           </p>
+
+          {referralCode && screen === "register" && (
+            <div className="mb-6 rounded-lg bg-primary/10 border border-primary/20 px-3 py-2 text-sm text-primary">
+              You're signing up via a friend's invite link.
+            </div>
+          )}
 
           {/* Tab switcher */}
           {screen !== "reg-otp" && (

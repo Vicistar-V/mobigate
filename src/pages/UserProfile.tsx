@@ -18,7 +18,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { MetaTags } from "@/components/MetaTags";
 import { useState, useEffect, useCallback } from "react";
-import { useParams }           from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Post, wallStatusPosts, feedPosts } from "@/data/posts";
 import { PremiumAdRotation }   from "@/components/PremiumAdRotation";
 import { PremiumAdCardProps }  from "@/components/PremiumAdCard";
@@ -29,6 +29,7 @@ import { ELibrarySection }     from "@/components/ELibrarySection";
 import { FeedPost }            from "@/components/FeedPost";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
 import { useToast }            from "@/hooks/use-toast";
+import { useCurrentUserId }    from "@/hooks/useWindowData";
 import { ShareProfileDialog }   from "@/components/ShareProfileDialog";
 import { PeopleYouMayKnow }   from "@/components/PeopleYouMayKnow";
 import { GreetingSection }     from "@/components/GreetingCard";
@@ -81,7 +82,20 @@ const normalizeFriendStatus = (raw?: string): "accepted" | "pending" | "none" =>
 
 const UserProfile = () => {
   const { id: userId } = useParams<{ id: string }>();
+  const navigate       = useNavigate();
   const { toast }      = useToast();
+  const currentUserId  = useCurrentUserId();
+  // True once we know this "other user's" profile is actually the viewer's own.
+  const isOwnProfile   = !!currentUserId && !!userId && currentUserId === userId;
+
+  // If someone reaches /profile/:id with their own id — e.g. clicking their
+  // own entry inside a friend's Friends list — send them to their real own
+  // profile experience instead of showing them a stranger's-eye view of themselves.
+  useEffect(() => {
+    if (isOwnProfile) {
+      navigate("/profile", { replace: true });
+    }
+  }, [isOwnProfile, navigate]);
 
   const [profile,        setProfile]        = useState<ProfileData | null>(null);
   const [loading,        setLoading]        = useState(true);
@@ -300,8 +314,8 @@ const UserProfile = () => {
     { slotId: "up-wall-2", ads: [premiumAds[1]] },
   ];
 
-  // ── Loading ────────────────────────────────────────────────────────────────
-  if (loading) return (
+  // ── Loading (also covers the brief moment before redirecting off your own profile) ──
+  if (loading || isOwnProfile) return (
     <div className="flex flex-col w-full min-h-screen bg-background">
       <Header />
       <main className="flex-1 flex items-center justify-center">
@@ -445,7 +459,8 @@ const UserProfile = () => {
                 </span>
               </p>
 
-              {/* Action buttons */}
+              {/* Action buttons — hidden entirely on your own profile (about to redirect) */}
+              {!isOwnProfile && (
               <div className="flex flex-wrap gap-2">
                 <Button variant="default" size="sm" className="gap-2 bg-black hover:bg-black/80"
                   onClick={() => toast({ title: "Voice Call", description: "Coming soon!" })}>
@@ -543,6 +558,7 @@ const UserProfile = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
+              )}
 
               {/* Friendship status message */}
               {friendStatus === "accepted" && !unfriendConfirm && (
@@ -643,7 +659,7 @@ const UserProfile = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="about"><ProfileAboutTab userName={profile.name} /></TabsContent>
+          <TabsContent value="about"><ProfileAboutTab userName={profile.name} userId={profile.id} /></TabsContent>
           <TabsContent value="friends"><ProfileFriendsTab userName={profile.name} userId={userId} /></TabsContent>
           <TabsContent value="albums" className="space-y-6">
             <ProfileAlbumsTab userId={userId || ""} profileImageHistory={[]} bannerImageHistory={[]} userPosts={userPosts} />

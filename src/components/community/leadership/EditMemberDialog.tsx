@@ -30,6 +30,7 @@ export function EditMemberDialog({ open, onOpenChange, member, communityId, posi
   useEffect(() => { setPositionId(member.position_id ?? ""); setNotes(""); }, [member, open]);
 
   const handleSubmit = async () => {
+    console.log("[EditMemberDialog] handleSubmit called", JSON.stringify({ member, positionId, communityId }));
     if (!positionId) { toast({ title: "Select a position", variant: "destructive" }); return; }
     if (!communityId) return;
     const pos = positions.find(p => p.id === positionId);
@@ -41,8 +42,16 @@ export function EditMemberDialog({ open, onOpenChange, member, communityId, posi
         body: JSON.stringify({ action: "assign_position", community_id: communityId, user_id: member.id, position_id: positionId, admin_rank: pos?.admin_number ?? 99, notes }),
       });
       const d = await res.json().catch(() => ({}));
+      console.log("[EditMemberDialog] leadership.php response:", JSON.stringify(d));
       if (!res.ok) throw new Error(d.error || "Failed to update");
-      toast({ title: "Member Updated", description: `${member.name} assigned to ${pos?.title}` });
+      if (d.needsApproval) {
+        toast({
+          title: "Sent for Authorization",
+          description: d.message || `This community has multiple admins, so ${d.approvalsRequired} admin authorization${d.approvalsRequired === 1 ? "" : "s"} are required before ${member.name} is assigned to ${pos?.title}. Other admins will see this on their Admin Dashboard.`,
+        });
+      } else {
+        toast({ title: "Member Updated", description: `${member.name} assigned to ${pos?.title}` });
+      }
       onSaved?.();
       onOpenChange(false);
     } catch (e: any) { toast({ title: "Error", description: e.message, variant: "destructive" }); }

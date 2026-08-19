@@ -65,6 +65,7 @@ import { Loader2 } from "lucide-react";
 const CreateCommunityPage     = lazy(() => import("./pages/CreateCommunityPage"));
 const ContentModerationPage   = lazy(() => import("./pages/ContentModerationPage"));
 const CommunityAdminDashboard = lazy(() => import("./pages/CommunityAdminDashboard"));
+const CommunityAuthorizationsPage = lazy(() => import("./pages/CommunityAuthorizationsPage"));
 const ElectionManagementPage  = lazy(() => import("./pages/admin/ElectionManagementPage"));
 const MyCommunities     = lazy(() => import("./pages/community/MyCommunities"));
 const JoinedCommunities = lazy(() => import("./pages/community/JoinedCommunities"));
@@ -159,6 +160,11 @@ const App = () => {
                         <Route path="/community/:communityId/admin/elections" element={
                           <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
                             <ElectionManagementPage />
+                          </Suspense>
+                        } />
+                        <Route path="/community/:communityId/admin/authorizations" element={
+                          <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+                            <CommunityAuthorizationsPage />
                           </Suspense>
                         } />
                         <Route path="/create-community" element={

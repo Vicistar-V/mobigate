@@ -1,4 +1,4 @@
-import { Users, Wallet, Vote, FileText, Crown, Settings } from "lucide-react";
+import { Users, Wallet, Vote, FileText, Crown, Settings, Pencil, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
@@ -34,8 +34,11 @@ interface AdminQuickActionsProps {
   onManageContent: () => void;
   onManageLeadership: () => void;
   onCommunitySettings: () => void;
+  onEditProfile: () => void;
+  onAuthorizations: () => void;
   pendingMembers?: number;
   pendingContent?: number;
+  pendingAuthorizations?: number;
 }
 
 export function AdminQuickActions({
@@ -45,8 +48,11 @@ export function AdminQuickActions({
   onManageContent,
   onManageLeadership,
   onCommunitySettings,
+  onEditProfile,
+  onAuthorizations,
   pendingMembers,
   pendingContent,
+  pendingAuthorizations,
 }: AdminQuickActionsProps) {
   const { toast } = useToast();
 
@@ -54,6 +60,11 @@ export function AdminQuickActions({
     <div className="space-y-2">
       <h2 className="text-sm font-semibold text-muted-foreground">Quick Actions</h2>
       <div className="grid grid-cols-2 gap-1.5">
+        <QuickActionButton
+          icon={Pencil}
+          label="Edit Profile"
+          onClick={onEditProfile}
+        />
         <QuickActionButton
           icon={Users}
           label="Members"
@@ -80,6 +91,12 @@ export function AdminQuickActions({
           icon={Crown}
           label="Leadership"
           onClick={onManageLeadership}
+        />
+        <QuickActionButton
+          icon={ShieldCheck}
+          label="Authorizations"
+          onClick={onAuthorizations}
+          badge={pendingAuthorizations}
         />
         <QuickActionButton
           icon={Settings}

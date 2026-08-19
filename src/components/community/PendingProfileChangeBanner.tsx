@@ -107,7 +107,7 @@ export function PendingProfileChangeBanner({ communityId, isAdmin, onApplied }: 
             Admins Action! A community profile change is awaiting approval
           </p>
           <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-            Remember, multiple admin authorisations are required to effect any changes on the community profile — four admins are required.
+            Remember, multiple admin authorisations are required to effect any changes on the community profile — {pending.approvalsRequired} admin{pending.approvalsRequired === 1 ? "" : "s"} required this time, based on how many admins this community currently has.
             A change touching <span className="font-medium text-foreground">{changedFields.join(", ")}</span> was submitted and needs your approval before it's saved.
           </p>
           <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">

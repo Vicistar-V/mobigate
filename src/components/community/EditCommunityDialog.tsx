@@ -140,7 +140,7 @@ export function EditCommunityDialog({ open, onOpenChange, community, onSaved, on
       if (d.needsApproval) {
         toast({
           title: "Submitted for Approval",
-          description: `This community has multiple admins, so 4 admin approvals are required. ${d.approvalsCollected}/${d.approvalsRequired} collected so far (your submission counts as one).`,
+          description: `This community has multiple admins, so ${d.approvalsRequired} admin approval${d.approvalsRequired === 1 ? "" : "s"} are required. ${d.approvalsCollected}/${d.approvalsRequired} collected so far (your submission counts as one).`,
         });
         onPendingApproval?.();
       } else {

@@ -15,7 +15,6 @@ import {
   DollarSign,
   ArrowLeft,
   Bell,
-  Pencil,
 } from "lucide-react";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
@@ -42,7 +41,6 @@ import { CommunityQuickLinks } from "@/components/community/CommunityQuickLinks"
 import { CommunityMainMenu } from "@/components/community/CommunityMainMenu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { CommunityStatusBanner } from "@/components/community/CommunityStatusBanner";
-import { EditCommunityDialog } from "@/components/community/EditCommunityDialog";
 import { PendingProfileChangeBanner } from "@/components/community/PendingProfileChangeBanner";
 import { OurLeadershipSection } from "@/components/community/OurLeadershipSection";
 import { MediaGalleryViewer, MediaItem } from "@/components/MediaGalleryViewer";
@@ -168,7 +166,6 @@ const CommunityProfile = () => {
   const [showArticleEditorDialog, setShowArticleEditorDialog] = useState(false);
   const [showVibeDialog, setShowVibeDialog] = useState(false);
   const [showSpecialEventDialog, setShowSpecialEventDialog] = useState(false);
-  const [showEditCommunityDialog, setShowEditCommunityDialog] = useState(false);
   const [pendingChangeRefreshKey, setPendingChangeRefreshKey] = useState(0);
   const [showMembershipApplication, setShowMembershipApplication] = useState(false);
   const [showExitCommunity, setShowExitCommunity] = useState(false);
@@ -460,17 +457,6 @@ const CommunityProfile = () => {
                   <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">
                     {community.name}
                   </h1>
-                  {(community.isOwner || community.role === "Admin") && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-7 px-2.5 gap-1.5 shrink-0"
-                      onClick={() => setShowEditCommunityDialog(true)}
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                      <span className="hidden sm:inline">Edit</span>
-                    </Button>
-                  )}
                 </div>
                 <p className="text-xs sm:text-sm md:text-base font-semibold text-muted-foreground mb-3 whitespace-nowrap">
                   {community.memberCount.toLocaleString()} Members | {(community.followers + (isFollowing && !apiProfile?.isFollowing ? 1 : 0)).toLocaleString()} Followers | {(community.likes + (isLiked && !apiProfile?.isLiked ? 1 : 0)).toLocaleString()} Likes
@@ -1135,30 +1121,6 @@ const CommunityProfile = () => {
         communityId={communityId}
         onPost={createPost}
         uploadMedia={uploadMedia}
-      />
-
-      {/* Edit Community Profile Dialog (owner/admin only) */}
-      <EditCommunityDialog
-        open={showEditCommunityDialog}
-        onOpenChange={setShowEditCommunityDialog}
-        community={{
-          id: communityId!,
-          name: community.name,
-          description: community.description,
-          motto: community.motto,
-          category: community.category,
-          classification: community.classification,
-          location: community.location,
-          telephone: community.telephone,
-          telephone2: community.telephone2,
-          emailAddress: community.emailAddress,
-          visionStatement: community.visionStatement,
-          logoImage: community.logoImage,
-          bannerImage: community.bannerImage,
-          coverImage: community.coverImage,
-        }}
-        onSaved={() => refreshProfile()}
-        onPendingApproval={() => setPendingChangeRefreshKey((k) => k + 1)}
       />
 
       {/* Article Editor Dialog */}

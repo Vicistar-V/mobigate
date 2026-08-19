@@ -126,6 +126,7 @@ export function AddMemberDialog({
   );
 
   const handleSubmit = async () => {
+    console.log("[AddMemberDialog] handleSubmit called", JSON.stringify({ selectedMember, committee, positionId, committeeId, communityId }));
     if (!selectedMember) { toast({ title: "Select a member", variant: "destructive" }); return; }
     if (committee === "executive" && !positionId) { toast({ title: "Select a position", variant: "destructive" }); return; }
     if (committee === "adhoc" && !committeeId)    { toast({ title: "Select a committee", variant: "destructive" }); return; }
@@ -146,8 +147,16 @@ export function AddMemberDialog({
         body: JSON.stringify(body),
       });
       const d = await res.json().catch(() => ({}));
+      console.log("[AddMemberDialog] leadership.php response:", JSON.stringify(d));
       if (!res.ok) throw new Error(d.error || "Failed to add member");
-      toast({ title: "Member Added", description: `${selectedMember.name} added successfully` });
+      if (committee === "executive" && d.needsApproval) {
+        toast({
+          title: "Sent for Authorization",
+          description: d.message || `This community has multiple admins, so ${d.approvalsRequired} admin authorization${d.approvalsRequired === 1 ? "" : "s"} are required before ${selectedMember.name} becomes ${positions.find(p => p.id === positionId)?.title || "an executive"}. Other admins will see this on their Admin Dashboard.`,
+        });
+      } else {
+        toast({ title: "Member Added", description: `${selectedMember.name} added successfully` });
+      }
       const posTitle = committee === "executive" ? positions.find(p => p.id === positionId)?.title : role;
       onSaved?.(selectedMember.name, posTitle);
       onOpenChange(false);
